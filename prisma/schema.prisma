@@ -7,11 +7,149 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  STUDENT
+  CLUB_ADMIN
+  MODERATOR
+}
+
+enum EventType {
+  WORKSHOP
+  CONFERENCE
+  SOCIAL
+  ACADEMIC
+  CULTURAL
+}
+
+enum PrivacyLevel {
+  PUBLIC
+  COLLEGE_ONLY
+  PRIVATE
+}
+
+model User {
+  id            String        @id @default(uuid())
+  email         String        @unique
+  username      String        @unique
+  name          String
+  profilePicUrl String?
+  collegeId     String
+  college       College       @relation(fields: [collegeId], references: [id])
+  role          UserRole      @default(STUDENT)
+  bio           String?
+  
+  clubs         ClubMember[]
+  events        EventAttendee[]
+  posts         Post[]
+  comments      Comment[]
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model College {
+  id            String        @id @default(uuid())
+  name          String        @unique
+  location      String
+  domain        String        @unique
+  
+  users         User[]
+  clubs         Club[]
+  
+  createdAt     DateTime      @default(now())
+}
+
+model Club {
+  id            String        @id @default(uuid())
+  name          String
+  description   String
+  collegeId     String
+  college       College       @relation(fields: [collegeId], references: [id])
+  
+  profilePicUrl String?
+  coverPicUrl   String?
+  
+  members       ClubMember[]
+  events        Event[]
+  posts         Post[]
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model ClubMember {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  clubId        String
+  club          Club          @relation(fields: [clubId], references: [id])
+  role          String        @default("MEMBER")
+  joinedAt      DateTime      @default(now())
+}
+
 model Event {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  date        DateTime
-  img         String
-  location    String
+  id            String        @id @default(uuid())
+  title         String
+  description   String
+  date          DateTime
+  img           String
+  location      String
+  clubId        String?
+  club          Club?         @relation(fields: [clubId], references: [id])
+  
+  type          EventType     @default(SOCIAL)
+  
+  privacyLevel  PrivacyLevel  @default(PUBLIC)
+  
+  mediaUrls     String[]      @default([])
+  
+  attendees     EventAttendee[]
+  posts         Post[]
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model EventAttendee {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  eventId       String
+  event         Event         @relation(fields: [eventId], references: [id])
+  status        String        @default("INTERESTED")
+  joinedAt      DateTime      @default(now())
+}
+
+model Post {
+  id            String        @id @default(uuid())
+  content       String
+  
+  authorId      String
+  author        User          @relation(fields: [authorId], references: [id])
+  
+  clubId        String?
+  club          Club?         @relation(fields: [clubId], references: [id])
+  
+  eventId       String?
+  event         Event?        @relation(fields: [eventId], references: [id])
+  
+  mediaUrls     String[]      @default([])
+  
+  comments      Comment[]
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model Comment {
+  id            String        @id @default(uuid())
+  content       String
+  
+  authorId      String
+  author        User          @relation(fields: [authorId], references: [id])
+  
+  postId        String
+  post          Post          @relation(fields: [postId], references: [id])
+  
+  createdAt     DateTime      @default(now())
 }
