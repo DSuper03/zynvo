@@ -4,4 +4,5 @@ export interface EventModelShow {
     description: string;
     date: string | Date;
     img: string;
+    location: string;
   }

@@ -21,7 +21,7 @@ export const events: EventModelShow[] = [
     title: 'Career Fair 2025',
     description: 'Meet potential employers and explore career opportunities.',
     date: '2025-05-15',
-    img: '/images/career_fair.jpg',
+    img: 'https://images.unsplash.com/photo-1523473125050-1c9405e8b208?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Y29sbGVnZSUyMGZhaXJ8ZW58MHx8MHx8fDA%3D',
   },
 ];
 
