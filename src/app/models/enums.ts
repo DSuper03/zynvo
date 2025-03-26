@@ -1,0 +1,19 @@
+export enum UserRole {
+  STUDENT = 'STUDENT',
+  CLUB_ADMIN = 'CLUB_ADMIN',
+  MODERATOR = 'MODERATOR'
+}
+
+export enum EventType {
+  WORKSHOP = 'WORKSHOP',
+  CONFERENCE = 'CONFERENCE',
+  SOCIAL = 'SOCIAL',
+  ACADEMIC = 'ACADEMIC',
+  CULTURAL = 'CULTURAL'
+}
+
+export enum PrivacyLevel {
+  PUBLIC = 'PUBLIC',
+  COLLEGE_ONLY = 'COLLEGE_ONLY',
+  PRIVATE = 'PRIVATE'
+}
