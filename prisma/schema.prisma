@@ -32,7 +32,8 @@ model User {
   email         String        @unique
   username      String        @unique
   name          String
-  profilePicUrl String?
+  profilePicUrl String
+
   collegeId     String
   college       College       @relation(fields: [collegeId], references: [id])
   role          UserRole      @default(STUDENT)
