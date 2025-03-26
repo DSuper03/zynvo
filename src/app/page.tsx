@@ -7,7 +7,8 @@ import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { format } from "date-fns";
 import { FiCalendar, FiUsers, FiMapPin, FiArrowRight, FiChevronRight, FiStar, FiClock } from "react-icons/fi";
 import { FaDiscord, FaTwitter, FaInstagram } from "react-icons/fa";
-
+import { RxButton } from "react-icons/rx";
+import Link from "next/link";
 // 3D Card Component
 const Card3D = ({ children, className = "" }: { children: any; className?: string }) => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -114,7 +115,7 @@ const GlowEffect = ({ color = "indigo", size = "md", className = "" }) => {
 
   return (
     <div
-      className={`absolute rounded-full bg-gradient-to-br ${colors[color]} ${sizes[size]} blur-3xl pointer-events-none ${className}`}
+      className={`absolute rounded-full bg-gradient-to-br  blur-3xl pointer-events-none ${className}`}
     />
   );
 };
@@ -525,7 +526,7 @@ export default function Home() {
                       whileTap={{ scale: 0.95 }}
                       className="relative px-8 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-lg overflow-hidden group"
                     >
-                      <span className="relative z-10">Explore Events</span>
+                      <button className="relative z-10">Explore Events</button>
                       <span className="absolute inset-0 bg-gradient-to-r from-indigo-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                     </motion.button>
                     
@@ -538,7 +539,11 @@ export default function Home() {
                       whileTap={{ scale: 0.95 }}
                       className="px-8 py-4 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white ring-1 ring-gray-200 dark:ring-gray-700 font-medium shadow-md flex items-center gap-2"
                     >
-                      <span>Join a Club</span>
+                      <RxButton>
+                        <Link href="/clubs">
+                          Join a Club
+                        </Link>
+                      </RxButton>
                       <FiArrowRight className="transition-transform group-hover:translate-x-1" />
                     </motion.button>
                   </motion.div>
