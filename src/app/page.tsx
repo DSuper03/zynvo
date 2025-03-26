@@ -9,6 +9,7 @@ import { FiCalendar, FiUsers, FiMapPin, FiArrowRight, FiChevronRight, FiStar, Fi
 import { FaDiscord, FaTwitter, FaInstagram } from "react-icons/fa";
 import { RxButton } from "react-icons/rx";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 // 3D Card Component
 const Card3D = ({ children, className = "" }: { children: any; className?: string }) => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -526,7 +527,10 @@ export default function Home() {
                       whileTap={{ scale: 0.95 }}
                       className="relative px-8 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-lg overflow-hidden group"
                     >
-                      <button className="relative z-10">Explore Events</button>
+                      <Link href="/events">
+                        <Button 
+                        className="relative z-10">Explore Events</Button>
+                      </Link>
                       <span className="absolute inset-0 bg-gradient-to-r from-indigo-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                     </motion.button>
                     
