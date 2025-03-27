@@ -15,10 +15,15 @@ Zynvo is a revolutionary social media platform designed to connect college stude
 ## 💡 Core Value Proposition
 
 Zynvo breaks traditional campus communication barriers, enabling students to:
+
 - Discover diverse club activities
+
 - Network across institutions
+
 - Share unique campus experiences
+
 - Build a collaborative student community
+
 
 ## 🛠 Technical Stack
 

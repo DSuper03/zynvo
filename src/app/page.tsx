@@ -346,20 +346,30 @@ export default function Home() {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-1 items-center">
-              {['Home', 'Events', 'Clubs', 'Discover', 'About'].map((item) => (
-                <motion.a 
-                  key={item}
-                  whileHover={{ 
-                    y: -2,
-                    color: "#6366f1"
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                  href="#"
+              {[
+              { name: 'Home', path: '/' },
+              { name: 'Event', path: '/feed' },
+              { name: 'Clubs', path: '/clubs' },
+              { name: 'Discover', path: '/discover' },
+              { name: 'About', path: '/about' }
+              ].map((item) => (
+              <Link 
+                key={item.name}
+                href={item.path}
+              >
+                <motion.span 
+                whileHover={{ 
+                  y: -2,
+                  color: "#6366f1"
+                }}
+                whileTap={{ scale: 0.95 }}
+                className="px-4 py-2 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors inline-block"
                 >
-                  {item}
-                </motion.a>
+                {item.name}
+                </motion.span>
+              </Link>
               ))}
+            
             </nav>
             
             {/* Mobile menu button */}
