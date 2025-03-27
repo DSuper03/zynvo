@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { updateSession } from './utils/supabase/middleware';
 
 // Configure which paths require authentication
 const protectedPaths = [
@@ -24,11 +25,15 @@ const publicPaths = [
 const API_RATE_LIMIT = 100; // requests per minute
 const apiRateLimitMap = new Map<string, { count: number, lastReset: number }>();
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
+  // First update the Supabase session
+  const sessionResponse = await updateSession(request);
+  
+  // Get the pathname 
   const { pathname } = request.nextUrl;
   
   // Apply security headers to all requests
-  const response = NextResponse.next();
+  const response = sessionResponse || NextResponse.next();
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -79,8 +84,8 @@ export function middleware(request: NextRequest) {
   );
   
   if (isProtectedPath) {
-    // Simple auth check - look for auth cookie
-    // Replace this with your actual auth token cookie name
+    // If Supabase session is already handling authentication, we can rely on that
+    // But we can add an additional check for the auth token as a fallback
     const authToken = request.cookies.get('auth-token')?.value;
     
     if (!authToken) {
@@ -97,9 +102,10 @@ export function middleware(request: NextRequest) {
   return response;
 }
 
-// Configure middleware to run only on specific paths
+// Configure middleware to run only on specific paths - combining both patterns
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$).*)',
+    // Match all request paths except static assets and images
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

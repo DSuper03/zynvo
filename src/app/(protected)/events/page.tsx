@@ -5,6 +5,7 @@ import { EventModelShow } from '@/app/models/EventModel';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const EventCard = ({ event }: { event: EventModelShow }) => {
   return (
@@ -40,9 +41,9 @@ const EventCard = ({ event }: { event: EventModelShow }) => {
             </div>
           )}
         </div>
-        <button className="mt-4 w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300">
+        <Button variant={'ghost'} className="mt-4 w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300">
           View Details
-        </button>
+        </Button>
       </div>
     </motion.div>
   );

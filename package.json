@@ -12,6 +12,7 @@
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.5.0",
     "@radix-ui/react-slot": "^1.1.2",
+    "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.3",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
