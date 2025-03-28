@@ -154,3 +154,35 @@ model Comment {
   
   createdAt     DateTime      @default(now())
 }
+model ReactionType {
+  id            String        @id @default(uuid())
+  name          String        @unique
+  reactions     Reaction[]
+  
+  createdAt     DateTime      @default(now())
+}
+
+model PostType {
+  id            String        @id @default(uuid())
+  name          String        @unique
+  posts         Post[]
+  
+  createdAt     DateTime      @default(now())
+}
+
+model Reaction {
+  id            String        @id @default(uuid())
+  
+  reactionTypeId String
+  reactionType  ReactionType  @relation(fields: [reactionTypeId], references: [id])
+  
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  
+  postId        String
+  post          Post          @relation(fields: [postId], references: [id])
+  
+  createdAt     DateTime      @default(now())
+  
+  @@unique([userId, postId])
+}

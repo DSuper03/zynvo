@@ -35,3 +35,16 @@ export interface CreatePostInput {
   eventId?: string;
   mediaUrls?: string[];
 }
+export interface SocialMediaFeed {
+  page?: number;
+  pageSize?: number;
+  userId?: string;
+  clubId?: string;
+  eventId?: string;
+  sortBy?: 'recent' | 'popular';
+  includeComments?: boolean;
+  includeReactions?: boolean;
+  filterType?: string[];
+  since?: Date;
+  until?: Date;
+}
