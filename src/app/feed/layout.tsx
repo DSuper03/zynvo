@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import clubs from "@/utils/constants/constants";
 import PostModal from "../Forms/postModal";// Adjust the path based on your project structure
 
+
 interface LayoutProps {
     children: React.ReactNode;
 }
@@ -13,7 +14,7 @@ export default function Layout({ children }: LayoutProps) {
     const [expandedClubs, setExpandedClubs] = useState(false);
     const [visibleClubs, setVisibleClubs] = useState<number>(5);
     const [isScrolled, setIsScrolled] = useState(false);
-    const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+    
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -34,9 +35,9 @@ export default function Layout({ children }: LayoutProps) {
         return () => window.removeEventListener("scroll", debouncedHandleScroll);
     }, []);
 
-    function debounce(func: Function, wait: number) {
+    function debounce<T extends unknown[]>(func: (...args: T) => void, wait: number) {
         let timeout: NodeJS.Timeout;
-        return (...args: any[]) => {
+        return (...args: T) => {
             clearTimeout(timeout);
             timeout = setTimeout(() => func(...args), wait);
         };
@@ -203,28 +204,28 @@ export default function Layout({ children }: LayoutProps) {
             {/* Main Content */}
             <div className="flex-1 overflow-auto relative">
                 {/* Add Post Button - Fixed position */}
-                <button
-                    className="fixed top-3 right-6 bg-indigo-600 text-white w-14 h-14 rounded-full shadow-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center z-20"
-                    onClick={() => setIsPostModalOpen(true)}
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                </button>
-                {isPostModalOpen && <PostModal onClose={() => setIsPostModalOpen(false)} />}
+                <PostModal
+  triggerButton={
+    <button className="fixed top-3 right-6 bg-indigo-600 text-white w-14 h-14 rounded-full shadow-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center z-20">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="15"
+        height="15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    </button>
+  }
+/>
                 <div
-                    className={`p-4 sticky top-0 z-10 bg-white shadow-sm transition-all duration-300 ${
+                    className={`p-4 sticky top-0 z-10 bg-black shadow-sm transition-all duration-300 ${
                         isScrolled ? "py-2" : "py-4"
                     }`}
                 >
