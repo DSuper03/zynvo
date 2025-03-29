@@ -24,19 +24,35 @@ const supabase = createClient(
 export default function PostModal() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [content, setContent] = useState("");
+  const [authorId, setAuthorId] = useState(""); // Author ID field
+  const [clubId, setClubId] = useState(""); // Club ID field
+  const [eventId, setEventId] = useState(""); // Event ID field
+  const [mediaUrls, setMediaUrls] = useState<string[]>([]); // Media URLs field
   const [loading, setLoading] = useState(false);
 
   const handlePost = async () => {
-    if (!content.trim()) return alert("Post cannot be empty!");
+    if (!content.trim()) return alert("Post content cannot be empty!");
 
     setLoading(true);
 
-    const { error } = await supabase.from("Post").insert([{ content }]);
+    const { error } = await supabase.from("Post").insert([
+      {
+        content,
+        authorId,
+        clubId: clubId || null, // Optional field
+        eventId: eventId || null, // Optional field
+        mediaUrls,
+      },
+    ]);
 
     if (error) {
       alert("Error creating post: " + error.message);
     } else {
       setContent(""); // Clear input after posting
+      setAuthorId(""); // Clear authorId
+      setClubId(""); // Clear clubId
+      setEventId(""); // Clear eventId
+      setMediaUrls([]); // Clear mediaUrls
       onOpenChange(); // Close modal
     }
 
@@ -68,6 +84,34 @@ export default function PostModal() {
               value={content}
               onChange={(e) => setContent(e.target.value)}
             ></textarea>
+            <input
+              type="text"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white mt-4"
+              placeholder="Author ID"
+              value={authorId}
+              onChange={(e) => setAuthorId(e.target.value)}
+            />
+            <input
+              type="text"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white mt-4"
+              placeholder="Club ID (optional)"
+              value={clubId}
+              onChange={(e) => setClubId(e.target.value)}
+            />
+            <input
+              type="text"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white mt-4"
+              placeholder="Event ID (optional)"
+              value={eventId}
+              onChange={(e) => setEventId(e.target.value)}
+            />
+            <textarea
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white mt-4"
+              rows={2}
+              placeholder="Media URLs (comma-separated)"
+              value={mediaUrls.join(", ")}
+              onChange={(e) => setMediaUrls(e.target.value.split(",").map((url) => url.trim()))}
+            ></textarea>
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="light" onPress={onOpenChange}>
@@ -75,7 +119,7 @@ export default function PostModal() {
             </Button>
             <Button
               className="bg-indigo-600 text-white"
-              onClick={handlePost}
+              onPress={handlePost}
               isDisabled={loading}
             >
               {loading ? "Posting..." : "Post"}
