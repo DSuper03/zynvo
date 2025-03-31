@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
@@ -28,7 +28,7 @@ enum PrivacyLevel {
 }
 
 model User {
-  id            String @id @default(uuid())
+  id            String @id @default(uuid()) @map("_id")
   email         String @unique
   username      String @unique
   name          String
@@ -38,6 +38,8 @@ model User {
   college   College  @relation(fields: [collegeId], references: [id])
   role      UserRole @default(STUDENT)
   bio       String?
+  
+  jwtSecret   String?
 
   clubs    ClubMember[]
   events   EventAttendee[]
@@ -50,7 +52,7 @@ model User {
 }
 
 model College {
-  id       String @id @default(uuid())
+  id       String @id @default(uuid()) @map("_id")
   name     String @unique
   location String
   domain   String @unique
@@ -62,7 +64,7 @@ model College {
 }
 
 model Club {
-  id          String  @id @default(uuid())
+  id          String  @id @default(uuid()) @map("_id")
   name        String
   description String
   collegeId   String
@@ -80,7 +82,7 @@ model Club {
 }
 
 model ClubMember {
-  id       String   @id @default(uuid())
+  id       String   @id @default(uuid()) @map("_id")
   userId   String
   user     User     @relation(fields: [userId], references: [id])
   clubId   String
@@ -90,7 +92,7 @@ model ClubMember {
 }
 
 model Event {
-  id          String   @id @default(uuid())
+  id          String   @id @default(uuid()) @map("_id")
   title       String
   description String
   date        DateTime
@@ -113,7 +115,7 @@ model Event {
 }
 
 model EventAttendee {
-  id       String   @id @default(uuid())
+  id       String   @id @default(uuid()) @map("_id")
   userId   String
   user     User     @relation(fields: [userId], references: [id])
   eventId  String
@@ -123,7 +125,7 @@ model EventAttendee {
 }
 
 model Post {
-  id      String @id @default(uuid())
+  id      String @id @default(uuid()) @map("_id")
   content String
 
   authorId String
@@ -145,7 +147,7 @@ model Post {
 }
 
 model Comment {
-  id      String @id @default(uuid())
+  id      String @id @default(uuid()) @map("_id")
   content String
 
   authorId String
@@ -159,7 +161,7 @@ model Comment {
 }
 
 model ReactionType {
-  id        String     @id @default(uuid())
+  id        String     @id @default(uuid()) @map("_id")
   name      String     @unique
   reactions Reaction[]
 
@@ -167,7 +169,7 @@ model ReactionType {
 }
 
 model Reaction {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @map("_id")
 
   typeId String
   type   ReactionType @relation(fields: [typeId], references: [id])
