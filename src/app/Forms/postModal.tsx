@@ -37,9 +37,6 @@ export default function PostModal() {
     const { error } = await supabase.from("posts").insert([
       {
         content,
-      
-     
-        
       },
     ]);
 

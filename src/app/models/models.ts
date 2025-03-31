@@ -126,7 +126,7 @@ export interface Comment extends BaseModel {
   author?: User;
   
   postId: string;
-  post?: Post;
+  post?: Post[];
 }
 
 // Input Interfaces for API Requests
