@@ -6,4 +6,4 @@ const getJwtToken=(userId)=>{
     })
 }
 
-module.exports=getJwtToken
+export default getJwtToken
