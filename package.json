@@ -30,6 +30,7 @@
     "lucide-react": "^0.484.0",
     "mongodb": "^6.15.0",
     "mongoose": "^8.13.1",
+    "morgan": "^1.10.0",
     "next": "15.2.3",
     "phosphor-react": "^1.4.1",
     "react": "^19.0.0",
