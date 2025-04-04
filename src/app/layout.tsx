@@ -1,12 +1,5 @@
 import type { Metadata } from 'next'
-import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from '@clerk/nextjs'
+// The imports from Clerk are completely removed
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 
@@ -31,21 +24,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
+ 
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <header className="flex justify-end items-center p-4 gap-4 h-16">
-            <SignedOut>
-              <SignInButton />
-              <SignUpButton />
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
+            {/* The header content has been removed */}
           </header>
           {children}
         </body>
       </html>
-    </ClerkProvider>
+
   )
 }
