@@ -206,15 +206,15 @@ export default function EventsPage() {
               </Button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-6 max-h-96 overflow-y-auto">
               <div>
                 <h3 className="font-medium mb-2">Location</h3>
                 <Select>
                   <SelectTrigger className="w-full transition-colors duration-300 focus:border-[#1E90FF]">
                     <SelectValue placeholder="Select state" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All States</SelectItem>
+                  <SelectContent className="w-full z-10 bg-black text-white">
+                    <SelectItem  className="z-10 bg-black " value="all">All States</SelectItem>
                     <SelectItem value="delhi">Delhi</SelectItem>
                     <SelectItem value="maharashtra">Maharashtra</SelectItem>
                     <SelectItem value="karnataka">Karnataka</SelectItem>
