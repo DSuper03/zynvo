@@ -348,7 +348,7 @@ export default function Home() {
             <nav className="hidden md:flex space-x-1 items-center">
               {[
               { name: 'Home', path: '/' },
-              { name: 'Event', path: '/feed' },
+              { name: 'Event', path: '/event' },
               { name: 'Clubs', path: '/clubs' },
               { name: 'Discover', path: '/discover' },
               { name: 'About', path: '/about' }

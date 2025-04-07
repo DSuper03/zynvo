@@ -115,7 +115,7 @@ const Page = () => {
 };
 
 // Club card component with animations
-const ClubCard = ({ club, index }) => {
+const ClubCard = ({ club, index }: { club: string; index: number }) => {
   // Generate random images for the demo - replace with actual club images
   const imageId = Math.floor(Math.random() * 1000) + 100;
   const placeholderImage = `https://source.unsplash.com/random/300x200?club,${imageId}`;
@@ -141,8 +141,7 @@ const ClubCard = ({ club, index }) => {
             className="transition-transform duration-500 hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-70" />
-          <div className="absolute bottom-0 left-0 p-4">
-            <div className="px-2 py-1 mb-2 bg-indigo-500 text-white text-xs rounded-full inline-block">
+          <div className="absolute bottom-0 left-0 p-4">            <div className="px-2 py-1 mb-2 bg-indigo-500 text-white text-xs rounded-full inline-block">
               {['Academic', 'Cultural', 'Sports', 'Technology'][Math.floor(Math.random() * 4)]}
             </div>
             <h3 className="text-xl font-bold text-white">{club}</h3>
