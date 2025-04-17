@@ -3,10 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSearch, FiMenu, FiX, FiBell, FiUser, FiMoon, FiSun } from 'react-icons/fi';
+import { FiSearch, FiMenu, FiX, FiBell,  FiMoon, FiSun } from 'react-icons/fi';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import { theme } from '@/utils/theme';
 import { cn } from '@/lib/utils';
 
 const navItems = [
