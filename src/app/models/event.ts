@@ -16,6 +16,12 @@ export interface Event extends BaseModel {
   privacyLevel: PrivacyLevel;
   
   mediaUrls?: string[];
+   
+  registrationUrl?: string;
+  tags?: string[];
+  capacity?: number;
+  price?: number;
+  isFeatured?: boolean;
   
   attendees?: EventAttendee[];
   posts?: Post[];
