@@ -60,17 +60,18 @@ export default function Home() {
   
   
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <img
-      src={'/landing page.png'}
-      width={100}
-      height={100}
-      alt="Zynvo Logo"
-      className="absolute top-0 left-0 w-full h-full z-0"
-      />
+    <div className="min-h-screen bg-gray-900 text-white relative">
+      {/* Fixed Background Image */}
+      <div className="fixed top-0 left-0 w-full h-full z-0">
+        <img
+          src={'/landing page.png'}
+          alt="Background"
+          className="object-cover w-full h-full"
+        />
+      </div>
+      
       <Head>
       <h1 className="text-4xl md:text-6xl font-bold text-yellow-400 drop-shadow-md">
-
           Zynvo - Connect Through Campus Life</h1>
         <meta name="description" content="Zynvo connects college students through club and society experiences" />
         <link rel="icon" href="/favicon.ico" />
@@ -130,13 +131,20 @@ export default function Home() {
             transform: translate(0, 0) rotate(360deg);
           }
         }
+        
+        /* Add overlay to improve content visibility over background image */
+        .content-overlay {
+          position: relative;
+          z-index: 10;
+          background-color: rgba(17, 24, 39, 0.2); /* semi-transparent bg-gray-900 */
+        }
         `}</style>
 
 {/* Background Animation Container */}
 <div className="background-animation"></div>
 
-{/* Content Container (above animations) */}
-<div className="relative z-10">
+{/* Content Container (above animations) - Made scrollable with semi-transparent overlay */}
+<div className="content-overlay relative min-h-screen">
         {/* Navigation */}
         <nav className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
