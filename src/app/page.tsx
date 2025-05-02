@@ -4,6 +4,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaUniversity, FaUsers, FaComments, FaSearch, FaCalendarAlt, FaRocket } from 'react-icons/fa';
+import { features } from '@/constants/Features';
 
 // You'll need to install these packages:
 // npm install framer-motion react-icons
@@ -56,41 +57,17 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
   
-  const features = [
-    {
-      icon: <FaUniversity />,
-      title: "Cross-Campus Connections",
-      description: "Connect with students from other colleges who share your interests and club experiences."
-    },
-    {
-      icon: <FaUsers />,
-      title: "Club Discovery",
-      description: "Find clubs and societies that match your passions across multiple institutions."
-    },
-    {
-      icon: <FaComments />,
-      title: "Community Forums",
-      description: "Engage in discussions with like-minded students about club activities and events."
-    },
-    {
-      icon: <FaSearch />,
-      title: "Intelligent Matching",
-      description: "Our algorithm suggests clubs and connections based on your interests and activity."
-    },
-    {
-      icon: <FaCalendarAlt />,
-      title: "Event Calendar",
-      description: "Never miss club events with our integrated calendar and reminder system."
-    },
-    {
-      icon: <FaRocket />,
-      title: "Collaborative Projects",
-      description: "Launch joint initiatives between clubs from different colleges easily."
-    }
-  ];
+  
   
   return (
     <div className="min-h-screen bg-gray-900 text-white">
+      <img
+      src={'/landing page.png'}
+      width={100}
+      height={100}
+      alt="Zynvo Logo"
+      className="absolute top-0 left-0 w-full h-full z-0"
+      />
       <Head>
         <title>Zynvo - Connect Through Campus Life</title>
         <meta name="description" content="Zynvo connects college students through club and society experiences" />
@@ -98,7 +75,8 @@ export default function Home() {
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
       </Head>
 
-      <style jsx global>{`
+      
+<style jsx global>{`
         :root {
           --black: #0F0F0F;
           --yellow: #FFC107;
@@ -150,13 +128,13 @@ export default function Home() {
             transform: translate(0, 0) rotate(360deg);
           }
         }
-      `}</style>
+        `}</style>
 
-      {/* Background Animation Container */}
-      <div className="background-animation"></div>
+{/* Background Animation Container */}
+<div className="background-animation"></div>
 
-      {/* Content Container (above animations) */}
-      <div className="relative z-10">
+{/* Content Container (above animations) */}
+<div className="relative z-10">
         {/* Navigation */}
         <nav className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
@@ -199,7 +177,7 @@ export default function Home() {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 className="md:hidden mt-4"
-              >
+                >
                 <div className="flex flex-col space-y-4 px-2 py-4 bg-gray-800 rounded-lg">
                   <a href="#features" className="hover:text-yellow-400 transition duration-300">Features</a>
                   <a href="#how-it-works" className="hover:text-yellow-400 transition duration-300">How It Works</a>
@@ -293,9 +271,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   className="bg-gray-800 border-l-4 border-yellow-500 rounded-lg p-6 hover:transform hover:-translate-y-2 transition duration-300"
                 >
-                  <div className="text-yellow-500 text-3xl mb-4">
-                    {feature.icon}
-                  </div>
+                 
                   <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                   <p className="text-gray-300">{feature.description}</p>
                 </motion.div>
