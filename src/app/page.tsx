@@ -69,7 +69,9 @@ export default function Home() {
       className="absolute top-0 left-0 w-full h-full z-0"
       />
       <Head>
-        <title>Zynvo - Connect Through Campus Life</title>
+      <h1 className="text-4xl md:text-6xl font-bold text-yellow-400 drop-shadow-md">
+
+          Zynvo - Connect Through Campus Life</h1>
         <meta name="description" content="Zynvo connects college students through club and society experiences" />
         <link rel="icon" href="/favicon.ico" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
