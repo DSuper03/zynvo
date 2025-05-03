@@ -98,7 +98,7 @@ export function Tablist({
               {tab.id === (controlledTab || activeTab) && variant === 'default' && (
                 <motion.div
                   layoutId="tabIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellow-400"
+                  className="absolute bottom-0 left-0 right-0 h-0.5"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}

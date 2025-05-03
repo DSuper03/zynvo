@@ -31,7 +31,7 @@ export default function EventLayout({ children, params }: EventLayoutProps) {
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+          <div className="absolute inset-0 " />
 
           <div className="absolute bottom-0 left-0 p-6 w-full">
             <div className="flex items-center">
@@ -58,6 +58,12 @@ export default function EventLayout({ children, params }: EventLayoutProps) {
         </div>
       </div>
        
+  <main className="flex-grow bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {children}
+        </div>
+  </main>
+
     </div>
   );
 }
