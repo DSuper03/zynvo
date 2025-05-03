@@ -1,21 +1,68 @@
 "use client"
-import { useEffect, useRef, useState } from 'react';
-import Head from 'next/head';
-import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaUniversity, FaUsers, FaComments, FaSearch, FaCalendarAlt, FaRocket } from 'react-icons/fa';
-import { features } from '@/constants/Features';
 
-// You'll need to install these packages:
-// npm install framer-motion react-icons
+import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { features } from '@/constants/Features';
+import { Header } from '@/components/Header';
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const heroRef = useRef(null);
   
   useEffect(() => {
+    // Add the CSS for the floating animation
+    const style = document.createElement('style');
+    style.textContent = `
+      .background-animation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+      }
+      
+      .floating-element {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle at center, rgba(250, 204, 21, 0.4), transparent);
+        pointer-events: none;
+        z-index: 0;
+      }
+      
+      @keyframes float {
+        0% {
+          transform: translate(0, 0) rotate(0deg);
+        }
+        33% {
+          transform: translate(50px, -50px) rotate(120deg);
+        }
+        66% {
+          transform: translate(-30px, 30px) rotate(240deg);
+        }
+        100% {
+          transform: translate(0, 0) rotate(360deg);
+        }
+      }
+      
+      .gradient-text {
+        background-image: linear-gradient(45deg, #facc15, #fbbf24);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+    `;
+    document.head.appendChild(style);
+
     // Animation for background floating elements
     const createFloatingElement = () => {
+      const backgroundContainer = document.querySelector('.background-animation');
+      if (!backgroundContainer) return;
+
       const element = document.createElement('div');
       element.classList.add('floating-element');
       
@@ -32,8 +79,7 @@ export default function Home() {
       element.style.opacity = `${Math.random() * 0.3 + 0.2}`;
       
       // Add to the background container
-      //@ts-ignore
-      document.querySelector('.background-animation').appendChild(element);
+      backgroundContainer.appendChild(element);
       
       // Animate
       const duration = Math.random() * 50 + 30; // 30-80 seconds
@@ -54,161 +100,30 @@ export default function Home() {
     const interval = setInterval(createFloatingElement, 5000);
     
     // Clean up
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      document.head.removeChild(style);
+    };
   }, []);
-  
-  
-  
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white relative">
-      {/* Fixed Background Image */}
-      <div className="fixed top-0 left-0 w-full h-full z-0">
-        <img
-          src={'/landing page.png'}
-          alt="Background"
-          className="object-cover w-full h-full"
-        />
-      </div>
-      
-      <Head>
-      <h1 className="text-4xl md:text-6xl font-bold text-yellow-400 drop-shadow-md">
-          Zynvo - Connect Through Campus Life</h1>
-        <meta name="description" content="Zynvo connects college students through club and society experiences" />
-        <link rel="icon" href="/favicon.ico" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-      </Head>
+    <div className="bg-gray-900 text-white min-h-screen">
+      {/* Background Animation Container */}
+      <div className="background-animation"></div>
 
-      
-<style jsx global>{`
-        :root {
-          --black: #0F0F0F;
-          --yellow: #FFC107;
-          --yellow-light: #FFDD4A;
-          --dark-gray: #1A1A1A;
-        }
-        
-        body {
-          font-family: 'Poppins', sans-serif;
-          background-color: var(--black);
-          overflow-x: hidden;
-        }
-        
-        .gradient-text {
-          background: linear-gradient(to right, var(--yellow), var(--yellow-light));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-        
-        .background-animation {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          z-index: 0;
-          overflow: hidden;
-        }
-        
-        .floating-element {
-          position: absolute;
-          border-radius: 50%;
-          background: linear-gradient(45deg, var(--yellow), var(--yellow-light));
-          filter: blur(60px);
-          z-index: 0;
-        }
-        
-        @keyframes float {
-          0% {
-            transform: translate(0, 0) rotate(0deg);
-          }
-          33% {
-            transform: translate(100px, 100px) rotate(120deg);
-          }
-          66% {
-            transform: translate(-100px, 200px) rotate(240deg);
-          }
-          100% {
-            transform: translate(0, 0) rotate(360deg);
-          }
-        }
-        
-        /* Add overlay to improve content visibility over background image */
-        .content-overlay {
-          position: relative;
-          z-index: 10;
-          background-color: rgba(17, 24, 39, 0.2); /* semi-transparent bg-gray-900 */
-        }
-        `}</style>
-
-{/* Background Animation Container */}
-<div className="background-animation"></div>
-
-{/* Content Container (above animations) - Made scrollable with semi-transparent overlay */}
-<div className="content-overlay relative min-h-screen">
+      {/* Content Container (above animations) */}
+      <div className="relative z-10">
         {/* Navigation */}
-        <nav className="container mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <span className="text-2xl font-bold gradient-text">zynvo</span>
-            </div>
-            
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="hover:text-yellow-400 transition duration-300">Features</a>
-              <a href="#how-it-works" className="hover:text-yellow-400 transition duration-300">How It Works</a>
-              <a href="#testimonials" className="hover:text-yellow-400 transition duration-300">Testimonials</a>
-              <button className="px-6 py-2 bg-yellow-500 text-black font-medium rounded-full hover:bg-yellow-400 transition duration-300 transform hover:-translate-y-1">
-                Sign Up
-              </button>
-            </div>
-            
-            {/* Mobile Menu Button */}
-            <button 
-              className="md:hidden focus:outline-none"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <svg className="w-6 h-6 text-white" fill="none" strokeLinecap="round" 
-                   strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" 
-                   stroke="currentColor">
-                {isMenuOpen ? (
-                  <path d="M6 18L18 6M6 6l12 12"></path>
-                ) : (
-                  <path d="M4 6h16M4 12h16M4 18h16"></path>
-                )}
-              </svg>
-            </button>
-          </div>
-          
-          {/* Mobile Navigation */}
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="md:hidden mt-4"
-                >
-                <div className="flex flex-col space-y-4 px-2 py-4 bg-gray-800 rounded-lg">
-                  <a href="#features" className="hover:text-yellow-400 transition duration-300">Features</a>
-                  <a href="#how-it-works" className="hover:text-yellow-400 transition duration-300">How It Works</a>
-                  <a href="#testimonials" className="hover:text-yellow-400 transition duration-300">Testimonials</a>
-                  <button className="px-6 py-2 bg-yellow-500 text-black font-medium rounded-full hover:bg-yellow-400 transition duration-300">
-                    Sign Up
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </nav>
+        <Header />
 
         {/* Hero Section */}
-        <section ref={heroRef} className="relative py-20 md:py-32">
+        <section ref={heroRef} className="relative pt-32 pb-20 md:py-32">
           <div className="container mx-auto px-6 text-center">
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-4xl md:text-6xl font-bold mb-6"
+              className="text-4xl md:text-6xl font-bold text-yellow-400 drop-shadow-md mb-6"
             >
               Connect Through <span className="gradient-text">Campus Life</span>
             </motion.h1>
@@ -216,9 +131,9 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-xl md:text-2xl mb-10 max-w-2xl mx-auto text-gray-300"
+              className="text-xl md:text-2xl text-white/80 font-medium mb-10 max-w-2xl mx-auto"
             >
-              Zynvo bridges the gap between college clubs and societies, creating a vibrant network for students across institutions.
+              Unite, Explore & Create — one campus, infinite possibilities.
             </motion.p>
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -226,10 +141,12 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
             >
-              <button className="px-8 py-3 bg-yellow-500 text-black font-medium rounded-full hover:bg-yellow-400 transition duration-300 transform hover:-translate-y-1">
-                Get Started
-              </button>
-              <button className="px-8 py-3 border-2 border-yellow-500 text-yellow-500 font-medium rounded-full hover:bg-yellow-500/10 transition duration-300 transform hover:-translate-y-1">
+              <Link href="/auth/signup">
+                <button className="px-8 py-3 bg-yellow-400 text-black font-bold rounded-full hover:bg-yellow-300 transition duration-300 transform hover:-translate-y-1 shadow-lg shadow-yellow-400/20">
+                  Get Started
+                </button>
+              </Link>
+              <button className="px-8 py-3 border-2 border-yellow-400 text-yellow-400 font-bold rounded-full hover:bg-yellow-400/10 transition duration-300 transform hover:-translate-y-1">
                 Learn More
               </button>
             </motion.div>
@@ -242,20 +159,24 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="mt-16 relative max-w-4xl mx-auto"
           >
-            <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-400/20 rounded-2xl p-2">
+            <div className="bg-gradient-to-r from-yellow-400/20 to-yellow-300/20 rounded-2xl p-2">
               <div className="bg-gray-800 rounded-xl overflow-hidden shadow-2xl">
                 <div className="relative h-96 w-full">
-                  <div className="absolute inset-0 flex items-center justify-center text-yellow-500 text-xl">
-                    Zynvo App Interface Mockup
-                  </div>
+                  <Image
+                    src="/landing.png"
+                    alt="Zynvo App Interface"
+                    fill
+                    className="object-cover"
+                    priority
+                  />
                 </div>
               </div>
             </div>
             
             {/* Decorative Elements - Enhanced brightness */}
-            <div className="absolute -top-10 -right-10 w-20 h-20 bg-yellow-500/40 rounded-full blur-xl"></div>
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-yellow-500/40 rounded-full blur-xl"></div>
-            <div className="absolute top-20 left-10 w-24 h-24 bg-yellow-400/30 rounded-full blur-xl"></div>
+            <div className="absolute -top-10 -right-10 w-20 h-20 bg-yellow-400/40 rounded-full blur-xl"></div>
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-yellow-400/40 rounded-full blur-xl"></div>
+            <div className="absolute top-20 left-10 w-24 h-24 bg-yellow-300/30 rounded-full blur-xl"></div>
           </motion.div>
         </section>
 
@@ -263,10 +184,10 @@ export default function Home() {
         <section id="features" className="py-20 bg-gray-950/50">
           <div className="container mx-auto px-6">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-400 drop-shadow-md">
                 <span className="gradient-text">Features</span> that Connect
               </h2>
-              <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              <p className="text-xl text-white/80 font-medium max-w-2xl mx-auto">
                 Discover how Zynvo transforms the campus club experience with these powerful features.
               </p>
             </div>
@@ -279,11 +200,13 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className="bg-gray-800 border-l-4 border-yellow-500 rounded-lg p-6 hover:transform hover:-translate-y-2 transition duration-300"
+                  className="bg-gray-800 border-l-4 border-yellow-400 rounded-lg p-6 hover:transform hover:-translate-y-2 transition duration-300"
                 >
-                 
-                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-gray-300">{feature.description}</p>
+                  <div className="text-yellow-400 text-3xl mb-4">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
+                  <p className="text-base text-white/70">{feature.description}</p>
                 </motion.div>
               ))}
             </div>

@@ -1,0 +1,123 @@
+ export const events =[
+    {
+      "id": 1,
+      "title": "Mood Indigo 2025",
+      "description": "Asia’s largest college cultural fest featuring music, dance, literature, and star-studded performances.",
+      "date": "December 26, 2025",
+      "time": "10:00 AM - 11:00 PM",
+      "location": "IIT Bombay, Mumbai",
+      "image": "/api/placeholder/600/300",
+      "category": "cultural",
+      "attending": 80000,
+      "isRegistered": false
+    },
+    {
+      "id": 2,
+      "title": "Saarang 2025",
+      "description": "A 5-day cultural extravaganza with music, dance, workshops, and lectures, featuring performances by Ritviz and Mysore Xpress.",
+      "date": "December 20, 2025",
+      "time": "9:00 AM - 10:00 PM",
+      "location": "IIT Madras, Chennai",
+      "image": "/api/placeholder/600/300",
+      "category": "cultural",
+      "attending": 50000,
+      "isRegistered": false
+    },
+    {
+      "id": 3,
+      "title": "Impressions 2025",
+      "description": "A 3-day cultural festival showcasing talents in dance, music, arts, dramatics, photography, and writing.",
+      "date": "December 12, 2025",
+      "time": "9:00 AM - 9:00 PM",
+      "location": "COEP Technological University, Pune",
+      "image": "/api/placeholder/600/300",
+      "category": "cultural",
+      "attending": 10000,
+      "isRegistered": false
+    },
+    {
+      "id": 4,
+      "title": "Xavotsav 2025",
+      "description": "A cultural extravaganza featuring dance, music, dramatics, fine arts, journalism, business, sports, and digital arts.",
+      "date": "December 15, 2025",
+      "time": "10:00 AM - 9:00 PM",
+      "location": "St. Xavier’s College, Kolkata",
+      "image": "/api/placeholder/600/300",
+      "category": "cultural",
+      "attending": 7000,
+      "isRegistered": false
+    },
+    {
+      "id": 5,
+      "title": "Meraki 2025",
+      "description": "An inter-collegiate festival featuring competitions in dance, sports, rangoli, mehendi, and singing.",
+      "date": "December 10, 2025",
+      "time": "9:00 AM - 6:00 PM",
+      "location": "Wilson College, Mumbai",
+      "image": "/api/placeholder/600/300",
+      "category": "cultural",
+      "attending": 500,
+      "isRegistered": false
+    },
+    {
+      "id": 6,
+      "title": "Yugam 2025",
+      "description": "South India's largest inter-college techno-cultural-sports festival with over 15000 students from 200+ colleges.",
+      "date": "November 20, 2025",
+      "time": "9:00 AM - 10:00 PM",
+      "location": "Kumaraguru Institutions, Coimbatore",
+      "image": "/api/placeholder/600/300",
+      "category": "techno-cultural",
+      "attending": 15000,
+      "isRegistered": false
+    },
+    {
+      "id": 7,
+      "title": "Odyssey 2025",
+      "description": "A celebration of joy, music, art, and creativity featuring events in photography, fashion, theatre, music, dance, and art.",
+      "date": "November 15, 2025",
+      "time": "10:00 AM - 9:00 PM",
+      "location": "IIIT Delhi, New Delhi",
+      "image": "/api/placeholder/600/300",
+      "category": "cultural",
+      "attending": 3000,
+      "isRegistered": false
+    },
+    {
+      "id": 8,
+      "title": "Waves 2025",
+      "description": "An annual cultural festival focusing on music, dance, and art, featuring events in dance, drama, literature, comedy, fashion, and music.",
+      "date": "October 31, 2025",
+      "time": "10:00 AM - 11:00 PM",
+      "location": "BITS Pilani – K K Birla Goa Campus, Goa",
+      "image": "/api/placeholder/600/300",
+      "category": "cultural",
+      "attending": 10000,
+      "isRegistered": false
+    },
+    {
+      "id": 9,
+      "title": "Oasis 2025",
+      "description": "A 96-hour continuous cultural festival featuring events in dance, drama, literature, comedy, fashion, and music.",
+      "date": "October 25, 2025",
+      "time": "10:00 AM - 10:00 PM",
+      "location": "BITS Pilani, Pilani",
+      "image": "/api/placeholder/600/300",
+      "category": "cultural",
+      "attending": 20000,
+      "isRegistered": false
+    },
+    {
+      "id": 10,
+      "title": "Karavaan 2025",
+      "description": "A 3-day socio-cultural science fest attracting students from colleges across Pune and national institutes all over India.",
+      "date": "November 5, 2025",
+      "time": "9:00 AM - 9:00 PM",
+      "location": "IISER Pune, Pune",
+      "image": "/api/placeholder/600/300",
+      "category": "socio-cultural",
+      "attending": 5000,
+      "isRegistered": false
+    }
+  ]
+  

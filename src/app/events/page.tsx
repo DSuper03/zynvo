@@ -2,87 +2,13 @@
 
 import { useState } from 'react';
 import { Home, Calendar, BarChart2, Bell, User, Menu, X, Search, MapPin, Clock, Filter, ChevronDown } from 'lucide-react';
-
+import { events } from '@/constants/events';// Import your events data
 export default function ZynvoEventsPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
   
   // Sample events data
-  const events = [
-    {
-      id: 1,
-      title: "Web3 Developer Conference",
-      description: "Join leading developers and innovators for the latest in blockchain and decentralized applications.",
-      date: "May 15, 2025",
-      time: "9:00 AM - 6:00 PM",
-      location: "San Francisco, CA",
-      image: "/api/placeholder/600/300",
-      category: "conference",
-      attending: 248,
-      isRegistered: true
-    },
-    {
-      id: 2,
-      title: "Crypto Investment Summit",
-      description: "Learn investment strategies from top crypto analysts and venture capitalists.",
-      date: "May 22, 2025",
-      time: "10:00 AM - 4:00 PM",
-      location: "New York, NY",
-      image: "/api/placeholder/600/300",
-      category: "summit",
-      attending: 175,
-      isRegistered: false
-    },
-    {
-      id: 3,
-      title: "Blockchain Technology Expo",
-      description: "Explore the latest innovations in blockchain technology across various industries.",
-      date: "June 5, 2025",
-      time: "9:30 AM - 7:00 PM",
-      location: "London, UK",
-      image: "/api/placeholder/600/300",
-      category: "expo",
-      attending: 412,
-      isRegistered: true
-    },
-    {
-      id: 4,
-      title: "NFT Art Gallery Opening",
-      description: "Exclusive showcase of digital art and collectibles from renowned NFT artists.",
-      date: "June 12, 2025",
-      time: "7:00 PM - 10:00 PM",
-      location: "Los Angeles, CA",
-      image: "/api/placeholder/600/300",
-      category: "exhibition",
-      attending: 89,
-      isRegistered: false
-    },
-    {
-      id: 5,
-      title: "DeFi Protocol Launch Party",
-      description: "Be among the first to experience the revolutionary new DeFi protocol changing the finance landscape.",
-      date: "June 18, 2025",
-      time: "6:00 PM - 9:00 PM",
-      location: "Miami, FL",
-      image: "/api/placeholder/600/300",
-      category: "launch",
-      attending: 134,
-      isRegistered: true
-    },
-    {
-      id: 6,
-      title: "Smart Contract Security Workshop",
-      description: "Hands-on workshop for developers to learn best practices in smart contract security.",
-      date: "June 25, 2025",
-      time: "1:00 PM - 5:00 PM",
-      location: "Austin, TX",
-      image: "/api/placeholder/600/300",
-      category: "workshop",
-      attending: 62,
-      isRegistered: false
-    }
-  ];
-
+ 
   // Toggle mobile menu
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -92,8 +18,8 @@ export default function ZynvoEventsPage() {
   const filteredEvents = activeFilter === 'all' 
     ? events 
     : activeFilter === 'registered' 
-      ? events.filter(event => event.isRegistered)
-      : events.filter(event => !event.isRegistered);
+      ? events.filter(events => events.isRegistered)
+      : events.filter(events => !events.isRegistered);
 
   return (
     <div className="min-h-screen bg-black">
@@ -190,7 +116,7 @@ export default function ZynvoEventsPage() {
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Upcoming Events</h1>
-          <p className="text-gray-400">Discover and register for the latest Web3 and blockchain events</p>
+          <p className="text-gray-400">Discover and register for the event you would like to go</p>
         </div>
 
         {/* Search and Filter Bar */}
