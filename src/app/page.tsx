@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaUniversity, FaUsers, FaComments, FaSearch, FaCalendarAlt, FaRocket } from 'react-icons/fa';
 import { features } from '@/constants/Features';
+import LandingHeader from '@/components/landingHeader';
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -132,60 +133,7 @@ export default function Home() {
       {/* Content Container (above animations) - Made scrollable with semi-transparent overlay */}
       <div className="content-overlay relative min-h-screen">
         {/* Navigation */}
-        <nav className="container mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <span className="text-2xl font-bold gradient-text">zynvo</span>
-            </div>
-            
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="hover:text-yellow-400 transition duration-300">Features</a>
-              <a href="#how-it-works" className="hover:text-yellow-400 transition duration-300">How It Works</a>
-              <a href="#testimonials" className="hover:text-yellow-400 transition duration-300">Testimonials</a>
-              <button className="px-6 py-2 bg-yellow-500 text-black font-medium rounded-full hover:bg-yellow-400 transition duration-300 transform hover:-translate-y-1">
-                Sign Up
-              </button>
-            </div>
-            
-            {/* Mobile Menu Button */}
-            <button 
-              className="md:hidden focus:outline-none"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <svg className="w-6 h-6 text-white" fill="none" strokeLinecap="round" 
-                   strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" 
-                   stroke="currentColor">
-                {isMenuOpen ? (
-                  <path d="M6 18L18 6M6 6l12 12"></path>
-                ) : (
-                  <path d="M4 6h16M4 12h16M4 18h16"></path>
-                )}
-              </svg>
-            </button>
-          </div>
-          
-          {/* Mobile Navigation */}
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="md:hidden mt-4"
-              >
-                <div className="flex flex-col space-y-4 px-2 py-4 bg-gray-800 rounded-lg">
-                  <a href="#features" className="hover:text-yellow-400 transition duration-300">Features</a>
-                  <a href="#how-it-works" className="hover:text-yellow-400 transition duration-300">How It Works</a>
-                  <a href="#testimonials" className="hover:text-yellow-400 transition duration-300">Testimonials</a>
-                  <button className="px-6 py-2 bg-yellow-500 text-black font-medium rounded-full hover:bg-yellow-400 transition duration-300">
-                    Sign Up
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </nav>
+           <LandingHeader/>
 
         {/* Hero Section */}
         <section ref={heroRef} className="relative py-20 md:py-32">
