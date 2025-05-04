@@ -42,9 +42,9 @@ const ClubsPage = () => {
     if (sortBy === 'new') {
       return a.isNew ? -1 : b.isNew ? 1 : 0;
     } else if (sortBy === 'trending') {
-      // For demonstration, we'll just prioritize popular clubs for trending
+
       return a.isPopular ? -1 : b.isPopular ? 1 : 0;
-    } else { // popular
+    } else { 
       return b.members - a.members;
     }
   });

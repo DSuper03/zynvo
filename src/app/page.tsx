@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaUniversity, FaUsers, FaComments, FaSearch, FaCalendarAlt, FaRocket } from 'react-icons/fa';
 import { features } from '@/constants/Features';
 import LandingHeader from '@/components/landingHeader';
+import WrapButton from '@/components/ui/wrap-button';
+import { SkiperCard } from '@/components/ui/skiper-card';
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -154,19 +156,16 @@ export default function Home() {
             >
               Zynvo bridges the gap between college clubs and societies, creating a vibrant network for students across institutions.
             </motion.p>
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
+            <div
+     className='flex justify-center gap-4 mb-10'
             >
-              <button className="px-8 py-3 bg-yellow-500 text-black font-medium rounded-full hover:bg-yellow-400 transition duration-300 transform hover:-translate-y-1">
+              <WrapButton className=" bg-transparent text-black font-medium r  transition duration-300 transform hover:-translate-y-1">
                 Get Started
-              </button>
+              </WrapButton>
               <button className="px-8 py-3 border-2 border-yellow-500 text-yellow-500 font-medium rounded-full hover:bg-yellow-500/10 transition duration-300 transform hover:-translate-y-1">
                 Learn More
               </button>
-            </motion.div>
+            </div>
             
             <motion.div
               initial={{ opacity: 0, y: 20 }}

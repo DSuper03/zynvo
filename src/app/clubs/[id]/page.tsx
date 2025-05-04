@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { clubData } from '@/constants/realclubs';
 import { CalendarDays, Users, MapPin, Globe, Instagram, Twitter, ExternalLink, Heart, MessageCircle, Share2, Clock, ChevronRight, Flag } from 'lucide-react';
+import JoinClubModal from '../joinclub';
 
 interface ClubPageProps {
   params: {
@@ -73,6 +74,7 @@ export default function ClubPage({ params }: ClubPageProps) {
   const [activeTab, setActiveTab] = useState<'about' | 'events' | 'posts'>('about');
   const [isJoined, setIsJoined] = useState(false);
   const [club, setClub] = useState<any>(null);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   
   useEffect(() => {
     // Find the club by ID from our data
@@ -107,6 +109,14 @@ export default function ClubPage({ params }: ClubPageProps) {
         return 'bg-pink-900/30 text-pink-300';
       default:
         return 'bg-gray-900/30 text-gray-300';
+    }
+  };
+
+  const handleJoinClick = () => {
+    if (!isJoined) {
+      setIsJoinModalOpen(true);
+    } else {
+      setIsJoined(false); // Just leave the club if already joined
     }
   };
 
@@ -183,7 +193,7 @@ export default function ClubPage({ params }: ClubPageProps) {
           
           <div className="flex justify-center gap-3">
             <button 
-              onClick={() => setIsJoined(!isJoined)}
+              onClick={handleJoinClick}
               className={`px-6 py-2 rounded-lg font-medium ${
                 isJoined
                   ? 'bg-gray-700 text-white hover:bg-gray-600'
@@ -547,7 +557,7 @@ export default function ClubPage({ params }: ClubPageProps) {
               <p className="text-gray-800 mb-4">Connect with like-minded peers and grow your skills.</p>
               {!isJoined && (
                 <button 
-                  onClick={() => setIsJoined(true)}
+                  onClick={() => setIsJoinModalOpen(true)}
                   className="w-full py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
                 >
                   Become a Member
@@ -560,6 +570,16 @@ export default function ClubPage({ params }: ClubPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Join Club Modal */}
+      {club && (
+        <JoinClubModal 
+          isOpen={isJoinModalOpen}
+          onClose={() => setIsJoinModalOpen(false)}
+          clubName={club.name}
+          clubImage={club.image}
+        />
+      )}
     </div>
   );
 }
