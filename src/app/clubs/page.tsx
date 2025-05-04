@@ -5,6 +5,8 @@ import { Search, Filter, Plus, Users, Star, TrendingUp, Calendar } from 'lucide-
 import Image from 'next/image';
 import Link from 'next/link';
 import { clubData } from '@/constants/realclubs';
+import CreateClubModal from './createclub';
+import JoinClubModal from './joinclub';
 
 const categories = [
   { id: 'all', name: 'All Clubs' },
@@ -21,6 +23,9 @@ const ClubsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('popular'); // 'popular', 'new', 'trending'
   const [isGridView, setIsGridView] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [selectedClub, setSelectedClub] = useState<{ name: string; image: string } | null>(null);
 
   // Filter clubs based on active category and search query
   const filteredClubs = clubData.filter(club => {
@@ -43,6 +48,14 @@ const ClubsPage = () => {
       return b.members - a.members;
     }
   });
+
+  const handleJoinClub = (club: any) => {
+    setSelectedClub({
+      name: club.name,
+      image: club.image
+    });
+    setIsJoinModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-black">
@@ -148,153 +161,154 @@ const ClubsPage = () => {
         {isGridView ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedClubs.map(club => (
-              <Link 
-                key={club.id}
-                href={`/clubs/${club.id}`} 
-                className="block transition-transform hover:scale-[1.02] duration-200"
-              >
-                <div 
-                  className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-yellow-500/50 transition-all duration-300 group"
+              <div key={club.id} className="block transition-transform hover:scale-[1.02] duration-200">
+                <Link 
+                  href={`/clubs/${club.id}`} 
+                  className="block"
                 >
-                  <div className="h-40 overflow-hidden relative">
-                    <div className="absolute inset-0 bg-black/30 z-10 group-hover:bg-black/20 transition-all"></div>
-                    <img 
-                      src={club.image} 
-                      alt={club.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    {club.isNew && (
-                      <div className="absolute top-2 right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-md z-20">
-                        NEW
-                      </div>
-                    )}
-                    {club.isPopular && !club.isNew && (
-                      <div className="absolute top-2 right-2 bg-gray-900/90 text-yellow-400 text-xs font-bold px-2 py-1 rounded-md z-20 border border-yellow-400/50">
-                        POPULAR
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-white font-bold text-lg">{club.name}</h3>
-                        <p className="text-gray-400 text-sm">{club.college}</p>
-                      </div>
-                      <div className="flex items-center text-gray-400 text-sm">
-                        <Users className="h-4 w-4 mr-1" />
-                        <span>{club.members}</span>
-                      </div>
+                  <div 
+                    className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-yellow-500/50 transition-all duration-300 group"
+                  >
+                    <div className="h-40 overflow-hidden relative">
+                      <div className="absolute inset-0 bg-black/30 z-10 group-hover:bg-black/20 transition-all"></div>
+                      <img 
+                        src={club.image} 
+                        alt={club.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      {club.isNew && (
+                        <div className="absolute top-2 right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-md z-20">
+                          NEW
+                        </div>
+                      )}
+                      {club.isPopular && !club.isNew && (
+                        <div className="absolute top-2 right-2 bg-gray-900/90 text-yellow-400 text-xs font-bold px-2 py-1 rounded-md z-20 border border-yellow-400/50">
+                          POPULAR
+                        </div>
+                      )}
                     </div>
                     
-                    <p className="text-gray-300 text-sm mt-2 line-clamp-2">
-                      {club.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between mt-4">
-                      <span 
-                        className={`text-xs px-2 py-1 rounded-md 
-                          ${club.category === 'tech' ? 'bg-blue-900/30 text-blue-300' : ''}
-                          ${club.category === 'cultural' ? 'bg-purple-900/30 text-purple-300' : ''}
-                          ${club.category === 'business' ? 'bg-green-900/30 text-green-300' : ''}
-                          ${club.category === 'social' ? 'bg-amber-900/30 text-amber-300' : ''}
-                          ${club.category === 'literary' ? 'bg-red-900/30 text-red-300' : ''}
-                          ${club.category === 'design' ? 'bg-pink-900/30 text-pink-300' : ''}
-                        `}
-                      >
-                        {club.category.charAt(0).toUpperCase() + club.category.slice(1)}
-                      </span>
+                    <div className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-white font-bold text-lg">{club.name}</h3>
+                          <p className="text-gray-400 text-sm">{club.college}</p>
+                        </div>
+                        <div className="flex items-center text-gray-400 text-sm">
+                          <Users className="h-4 w-4 mr-1" />
+                          <span>{club.members}</span>
+                        </div>
+                      </div>
                       
-                      <button 
-                        className="bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-medium py-1 px-4 rounded-lg transition-colors"
-                        onClick={(e) => {
-                          e.preventDefault(); // Prevent Link navigation
-                          // Follow functionality would go here
-                        }}
-                      >
-                        Follow
-                      </button>
+                      <p className="text-gray-300 text-sm mt-2 line-clamp-2">
+                        {club.description}
+                      </p>
+                      
+                      <div className="flex items-center justify-between mt-4">
+                        <span 
+                          className={`text-xs px-2 py-1 rounded-md 
+                            ${club.category === 'tech' ? 'bg-blue-900/30 text-blue-300' : ''}
+                            ${club.category === 'cultural' ? 'bg-purple-900/30 text-purple-300' : ''}
+                            ${club.category === 'business' ? 'bg-green-900/30 text-green-300' : ''}
+                            ${club.category === 'social' ? 'bg-amber-900/30 text-amber-300' : ''}
+                            ${club.category === 'literary' ? 'bg-red-900/30 text-red-300' : ''}
+                            ${club.category === 'design' ? 'bg-pink-900/30 text-pink-300' : ''}
+                          `}
+                        >
+                          {club.category.charAt(0).toUpperCase() + club.category.slice(1)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
+                <button 
+                  className="w-full bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-medium py-2 px-4 rounded-lg mt-2 transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleJoinClub(club);
+                  }}
+                >
+                  Join Club
+                </button>
+              </div>
             ))}
           </div>
         ) : (
           <div className="space-y-4">
             {sortedClubs.map(club => (
-              <Link 
-                key={club.id}
-                href={`/clubs/${club.id}`}
-                className="block transition-transform hover:scale-[1.01] duration-200"
-              >
-                <div 
-                  className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-yellow-500/50 transition-all duration-300 group flex"
+              <div key={club.id} className="block transition-transform hover:scale-[1.01] duration-200">
+                <Link 
+                  href={`/clubs/${club.id}`}
+                  className="block"
                 >
-                  <div className="w-32 h-32 overflow-hidden relative">
-                    <div className="absolute inset-0 bg-black/30 z-10 group-hover:bg-black/20 transition-all"></div>
-                    <img 
-                      src={club.image} 
-                      alt={club.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  
-                  <div className="p-4 flex-1">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="flex items-center">
-                          <h3 className="text-white font-bold text-lg">{club.name}</h3>
-                          {club.isNew && (
-                            <span className="ml-2 bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-md">
-                              NEW
-                            </span>
-                          )}
-                          {club.isPopular && !club.isNew && (
-                            <span className="ml-2 bg-gray-900 text-yellow-400 text-xs font-bold px-2 py-0.5 rounded-md border border-yellow-400/50">
-                              POPULAR
-                            </span>
-                          )}
+                  <div 
+                    className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-yellow-500/50 transition-all duration-300 group flex"
+                  >
+                    <div className="w-32 h-32 overflow-hidden relative">
+                      <div className="absolute inset-0 bg-black/30 z-10 group-hover:bg-black/20 transition-all"></div>
+                      <img 
+                        src={club.image} 
+                        alt={club.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    
+                    <div className="p-4 flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="flex items-center">
+                            <h3 className="text-white font-bold text-lg">{club.name}</h3>
+                            {club.isNew && (
+                              <span className="ml-2 bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-md">
+                                NEW
+                              </span>
+                            )}
+                            {club.isPopular && !club.isNew && (
+                              <span className="ml-2 bg-gray-900 text-yellow-400 text-xs font-bold px-2 py-0.5 rounded-md border border-yellow-400/50">
+                                POPULAR
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-gray-400 text-sm">{club.college}</p>
                         </div>
-                        <p className="text-gray-400 text-sm">{club.college}</p>
+                        <div className="flex items-center text-gray-400 text-sm">
+                          <Users className="h-4 w-4 mr-1" />
+                          <span>{club.members}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center text-gray-400 text-sm">
-                        <Users className="h-4 w-4 mr-1" />
-                        <span>{club.members}</span>
-                      </div>
-                    </div>
-                    
-                    <p className="text-gray-300 text-sm mt-2">
-                      {club.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between mt-4">
-                      <span 
-                        className={`text-xs px-2 py-1 rounded-md 
-                          ${club.category === 'tech' ? 'bg-blue-900/30 text-blue-300' : ''}
-                          ${club.category === 'cultural' ? 'bg-purple-900/30 text-purple-300' : ''}
-                          ${club.category === 'business' ? 'bg-green-900/30 text-green-300' : ''}
-                          ${club.category === 'social' ? 'bg-amber-900/30 text-amber-300' : ''}
-                          ${club.category === 'literary' ? 'bg-red-900/30 text-red-300' : ''}
-                          ${club.category === 'design' ? 'bg-pink-900/30 text-pink-300' : ''}
-                        `}
-                      >
-                        {club.category.charAt(0).toUpperCase() + club.category.slice(1)}
-                      </span>
                       
-                      <button 
-                        className="bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-medium py-1 px-4 rounded-lg transition-colors"
-                        onClick={(e) => {
-                          e.preventDefault(); // Prevent Link navigation
-                          // Follow functionality would go here
-                        }}
-                      >
-                        Follow
-                      </button>
+                      <p className="text-gray-300 text-sm mt-2">
+                        {club.description}
+                      </p>
+                      
+                      <div className="flex items-center justify-between mt-4">
+                        <span 
+                          className={`text-xs px-2 py-1 rounded-md 
+                            ${club.category === 'tech' ? 'bg-blue-900/30 text-blue-300' : ''}
+                            ${club.category === 'cultural' ? 'bg-purple-900/30 text-purple-300' : ''}
+                            ${club.category === 'business' ? 'bg-green-900/30 text-green-300' : ''}
+                            ${club.category === 'social' ? 'bg-amber-900/30 text-amber-300' : ''}
+                            ${club.category === 'literary' ? 'bg-red-900/30 text-red-300' : ''}
+                            ${club.category === 'design' ? 'bg-pink-900/30 text-pink-300' : ''}
+                          `}
+                        >
+                          {club.category.charAt(0).toUpperCase() + club.category.slice(1)}
+                        </span>
+                        
+                        <button 
+                          className="bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-medium py-1 px-4 rounded-lg transition-colors"
+                          onClick={(e) => {
+                            e.preventDefault(); // Prevent Link navigation
+                            handleJoinClub(club);
+                          }}
+                        >
+                          Join Club
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </div>
             ))}
           </div>
         )}
@@ -302,10 +316,29 @@ const ClubsPage = () => {
       
       {/* Floating Create Button */}
       <div className="fixed bottom-6 right-6">
-        <button className="bg-yellow-500 hover:bg-yellow-400 text-black w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-colors">
+        <button 
+          className="bg-yellow-500 hover:bg-yellow-400 text-black w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-colors"
+          onClick={() => setIsCreateModalOpen(true)}
+        >
           <Plus size={24} />
         </button>
       </div>
+
+      {/* Create Club Modal */}
+      <CreateClubModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+      />
+
+      {/* Join Club Modal */}
+      {selectedClub && (
+        <JoinClubModal 
+          isOpen={isJoinModalOpen}
+          onClose={() => setIsJoinModalOpen(false)}
+          clubName={selectedClub.name}
+          clubImage={selectedClub.image}
+        />
+      )}
     </div>
   );
 };
