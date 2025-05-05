@@ -5,47 +5,38 @@ import Head from 'next/head';
 import { motion } from 'framer-motion';
 import { FiArrowRight, FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
+import dotenv from "dotenv"
+
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+
+dotenv.config();
+const BASE_URL = process.env.BASE_URL
+
+interface signupRes {
+  msg : string,
+  token : string
+}
 
 export default function SignUp() {
+  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     password: '',
-    university: '',
-    interests: [],
-    agreeToTerms: false
+    collegeName: '',
   });
+  const [agreeToTerms , setAgree] = useState(false)
 
-  const interestOptions = [
-    'Sports', 'Arts', 'Music', 'Technology', 'Science', 'Business', 
-    'Literature', 'Politics', 'Environment', 'Community Service', 'Gaming',
-    'Dance', 'Theater', 'Photography', 'Entrepreneurship', 'Debate'
-  ];
 
   const handleChange = (e :  any) => {
     const { name, value, type, checked } = e.target;
     
     if (name === 'interests') {
       // Handle interest checkboxes
-      const updatedInterests = [...formData.interests];
-      if (checked) {
-        //@ts-ignore
-        updatedInterests.push(value);
-      } else {
-                //@ts-ignore
-
-        const index = updatedInterests.indexOf(value);
-        if (index > -1) {
-          updatedInterests.splice(index, 1);
-        }
-      }
-      
-      setFormData(prev => ({
-        ...prev,
-        interests: updatedInterests
-      }));
+      // interests deleted
     } else {
       setFormData(prev => ({
         ...prev,
@@ -59,11 +50,23 @@ export default function SignUp() {
     setCurrentStep(2);
   };
 
-  const handleSubmit = (e : any) => {
+  const handleSubmit = async (e : any) => {
     e.preventDefault();
     // Add sign-up logic here
+    const msg = await axios.post<signupRes>((BASE_URL ? `${BASE_URL}/api/v1/user/signup` : `http://localhost:8000/api/v1/user/signup`), formData)
+    if(!msg) {
+      alert(
+      "failed"
+      )
+    } else {
+      alert ("pass")
+    }
+    console.log(msg)
     console.log('Sign up data:', formData);
-    // Example: router.push('/onboarding');
+    if(msg.data.msg == "account created") {
+      localStorage.setItem("token", msg.data.token)
+      router.push('/dashboard'); 
+    } 
   };
 
   return (
@@ -232,14 +235,14 @@ export default function SignUp() {
                 {/* Sign-Up Form Step 1 */}
                 <form onSubmit={handleNextStep}>
                   <div className="mb-4">
-                    <label htmlFor="fullName" className="block text-gray-300 text-sm font-medium mb-2">Full Name</label>
+                    <label htmlFor="name" className="block text-gray-300 text-sm font-medium mb-2">Full Name</label>
                     <div className="relative">
                       <FiUser className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
                       <input
                         type="text"
-                        id="fullName"
-                        name="fullName"
-                        value={formData.fullName}
+                        id="name"
+                        name="name"
+                        value={formData.name}
                         onChange={handleChange}
                         className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
                         placeholder="John Doe"
@@ -306,66 +309,31 @@ export default function SignUp() {
             {/* Step 2: Profile Information */}
             {currentStep === 2 && (
               <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label htmlFor="university" className="block text-gray-300 text-sm font-medium mb-2">University/College</label>
-                  <select
-                    id="university"
-                    name="university"
-                    value={formData.university}
-                    onChange={handleChange}
-                    className="bg-gray-800 text-white w-full py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                    required
-                  >
-                    <option value="" disabled>Select your institution</option>
-                    <option value="nyu">New York University</option>
-                    <option value="harvard">Harvard University</option>
-                    <option value="mit">MIT</option>
-                    <option value="stanford">Stanford University</option>
-                    <option value="ucla">UCLA</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                
-                <div className="mb-6">
-                  <label className="block text-gray-300 text-sm font-medium mb-3">Your Interests</label>
-                  <p className="text-gray-400 text-xs mb-3">Select at least 3 interests to help us connect you with relevant clubs and students.</p>
-                  
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {interestOptions.map((interest) => (
-                      <div key={interest} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={`interest-${interest}`}
-                          name="interests"
-                          value={interest}
-                          //@ts-ignore
-                          checked={formData.interests.includes(interest)}
-                          onChange={handleChange}
-                          className="hidden"
-                        />
-                        <label
-                          htmlFor={`interest-${interest}`}
-                          className={`interest-chip cursor-pointer text-sm px-3 py-2 rounded-lg w-full text-center transition ${
-                            //@ts-ignore
-                            formData.interests.includes(interest) 
-                              ? 'selected' 
-                              : 'border border-gray-700 text-gray-300'
-                          }`}
-                        >
-                          {interest}
-                        </label>
-                      </div>
-                    ))}
+                 <div className="mb-4">
+                    <label htmlFor="collegeName" className="block text-gray-300 text-sm font-medium mb-2">College/University Name</label>
+                    <div className="relative">
+                      <FiUser className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                      <input
+                        type="text"
+                        id="collegeName"
+                        name="collegeName"
+                        value={formData.collegeName}
+                        onChange={handleChange}
+                        className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                        placeholder="John Doe"
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
+                
                 
                 <div className="flex items-center mb-6">
                   <input
                     type="checkbox"
                     id="agreeToTerms"
                     name="agreeToTerms"
-                    checked={formData.agreeToTerms}
-                    onChange={handleChange}
+                    checked={agreeToTerms}
+                    onChange={() => {setAgree(true)}}
                     className="h-4 w-4 rounded border-gray-700 bg-gray-800 text-yellow-500 focus:ring-yellow-500"
                     required
                   />
@@ -387,7 +355,7 @@ export default function SignUp() {
                     type="submit"
                     className="flex-1 flex items-center justify-center py-3 px-4 rounded-lg bg-yellow-500 text-black font-medium hover:bg-yellow-400 transition duration-300 transform hover:-translate-y-1"
                     whileTap={{ scale: 0.98 }}
-                    disabled={formData.interests.length < 3 || !formData.agreeToTerms}
+                    disabled={!agreeToTerms}
                   >
                     <span>Create Account</span>
                     <FiArrowRight className="ml-2" />
