@@ -6,14 +6,28 @@ import Head from 'next/head';
 import { motion } from 'framer-motion';
 import { FiArrowRight, FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
+import dotenv from "dotenv";
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+
+dotenv.config();
+const BASE_URL = process.env.BASE_URL
+
+interface signinRes {
+  msg : string 
+ token : string
+}
 
 export default function SignIn() {
+  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
+    name : 'zynvo',
+    collegeName : 'zynvo college',
     email: '',
-    password: '',
-    rememberMe: false
+    password: ''
   });
+  const [rememberMe , setRem] = useState(false)
 
   const handleChange = (e : any) => {
     const { name, value, type, checked } = e.target;
@@ -23,11 +37,23 @@ export default function SignIn() {
     }));
   };
 
-  const handleSubmit = (e :  any) => {
+  const handleSubmit = async (e :  any) => {
+    //
     e.preventDefault();
-    // Add sign-in logic here
+    const msg = await axios.post<signinRes>((BASE_URL ? `${BASE_URL}/api/v1/user/signup` : `http://localhost:8000/api/v1/user/signup`), formData)
+    if(!msg) {
+      alert(
+      "failed"
+      )
+    } else {
+      alert ("pass")
+    }
+    console.log(msg)
     console.log('Sign in data:', formData);
-    // Example: router.push('/dashboard');
+    if(msg.data.msg == "login success") {
+      localStorage.setItem("token", msg.data.token)
+      router.push('/dashboard'); 
+    } 
   };
 
   return (
@@ -219,8 +245,10 @@ export default function SignIn() {
                   type="checkbox"
                   id="rememberMe"
                   name="rememberMe"
-                  checked={formData.rememberMe}
-                  onChange={handleChange}
+                  checked={rememberMe}
+                  onChange={()=> {
+                    setRem(true)
+                  }}
                   className="h-4 w-4 rounded border-gray-700 bg-gray-800 text-yellow-500 focus:ring-yellow-500"
                 />
                 <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-300">
