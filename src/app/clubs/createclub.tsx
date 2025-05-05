@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { X, Upload, Camera } from 'lucide-react';
 
@@ -11,16 +11,16 @@ interface CreateClubModalProps {
 
 const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) => {
   const [clubData, setClubData] = useState({
-    clubName: '',
+    name: '',
     description: '',
-    category: '',
-    founderName: '',
-    facultyAdvisor: '',
-    membershipCriteria: '',
-    contactInfo: '',
-    logo: null as File | null
+    type: '',
+    FounderEmail: '',
+    facultyEmail: '',
+    requirements: '',
+    clubContact: '',
   });
   
+
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -48,9 +48,19 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Here you would typically send the data to your API
+    const upload = await axios.post("http://localhost:8000/api/v1/clubs/club", clubData);
+    //@ts-ignore
+    const msg = upload?.data?.msg 
+    if(upload.status == 200) {
+      alert({
+        msg : msg, 
+        //@ts-ignore
+        clubId : upload?.data?.clubId
+      })
+    }
     console.log('Club data to submit:', clubData);
     // After successful submission, close modal
     onClose();
@@ -103,16 +113,16 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
 
           {/* Club Name */}
           <div className="space-y-2">
-            <label htmlFor="clubName" className="block text-sm font-medium text-yellow-400">
+            <label htmlFor="name" className="block text-sm font-medium text-yellow-400">
               Club Name*
             </label>
             <input
-              id="clubName"
-              name="clubName"
+              id="name"
+              name="name"
               type="text"
               required
               placeholder="Enter your club name"
-              value={clubData.clubName}
+              value={clubData.name}
               onChange={handleChange}
               className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
             />
@@ -135,42 +145,42 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
             />
           </div>
 
-          {/* Category/Type */}
+          {/* type/Type */}
           <div className="space-y-2">
-            <label htmlFor="category" className="block text-sm font-medium text-yellow-400">
+            <label htmlFor="type" className="block text-sm font-medium text-yellow-400">
               Category/Type*
             </label>
             <select
-              id="category"
-              name="category"
+              id="type"
+              name="type"
               required
-              value={clubData.category}
+              value={clubData.type}
               onChange={handleChange}
               className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
             >
-              <option value="" disabled>Select a category</option>
-              <option value="tech">Tech & Engineering</option>
-              <option value="cultural">Cultural & Arts</option>
-              <option value="business">Business & Consulting</option>
-              <option value="social">Social Impact</option>
-              <option value="literary">Literary & Debate</option>
-              <option value="design">Design & Media</option>
+              <option value="" disabled>Select a type</option>
+              <option value="tech">Technology</option>
+              <option value="cultural">Cultural</option>
+              <option value="business">Business </option>
+              <option value="social">Social</option>
+              <option value="literary">Literature</option>
+              <option value="design">Design</option>
             </select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Founder/Club President Name */}
             <div className="space-y-2">
-              <label htmlFor="founderName" className="block text-sm font-medium text-yellow-400">
-                Founder/Club President Name*
+              <label htmlFor="FounderEmail" className="block text-sm font-medium text-yellow-400">
+                Founder/Club President Email*
               </label>
               <input
-                id="founderName"
-                name="founderName"
+                id="FounderEmail"
+                name="FounderEmail"
                 type="text"
                 required
                 placeholder="Enter founder's name"
-                value={clubData.founderName}
+                value={clubData.FounderEmail}
                 onChange={handleChange}
                 className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
               />
@@ -178,16 +188,16 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
 
             {/* Faculty Advisor */}
             <div className="space-y-2">
-              <label htmlFor="facultyAdvisor" className="block text-sm font-medium text-yellow-400">
+              <label htmlFor="facultyEmail" className="block text-sm font-medium text-yellow-400">
                 Club Faculty Advisor*
               </label>
               <input
-                id="facultyAdvisor"
-                name="facultyAdvisor"
+                id="facultyEmail"
+                name="facultyEmail"
                 type="text"
                 required
                 placeholder="Enter faculty advisor's name"
-                value={clubData.facultyAdvisor}
+                value={clubData.facultyEmail}
                 onChange={handleChange}
                 className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
               />
@@ -196,15 +206,15 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
 
           {/* Membership Criteria */}
           <div className="space-y-2">
-            <label htmlFor="membershipCriteria" className="block text-sm font-medium text-yellow-400">
+            <label htmlFor="requirements" className="block text-sm font-medium text-yellow-400">
               Membership Criteria
             </label>
             <textarea
-              id="membershipCriteria"
-              name="membershipCriteria"
+              id="requirements"
+              name="requirements"
               rows={3}
               placeholder="Any specific requirements to join the club (optional)"
-              value={clubData.membershipCriteria}
+              value={clubData.requirements}
               onChange={handleChange}
               className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
             />
@@ -212,16 +222,16 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
 
           {/* Contact Information */}
           <div className="space-y-2">
-            <label htmlFor="contactInfo" className="block text-sm font-medium text-yellow-400">
+            <label htmlFor="clubContact" className="block text-sm font-medium text-yellow-400">
               Club Contact Information*
             </label>
             <input
-              id="contactInfo"
-              name="contactInfo"
+              id="clubContact"
+              name="clubContact"
               type="text"
               required
               placeholder="Email or phone number"
-              value={clubData.contactInfo}
+              value={clubData.clubContact}
               onChange={handleChange}
               className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
             />
