@@ -53,7 +53,7 @@ export default function SignUp() {
   const handleSubmit = async (e : any) => {
     e.preventDefault();
     // Add sign-up logic here
-    const msg = await axios.post<signupRes>((BASE_URL ? `${BASE_URL}/api/v1/user/signup` : `http://localhost:8000/api/v1/user/signup`), formData)
+    const msg = await axios.post<signupRes>( `http://localhost:8000/api/v1/user/signup` ,formData)
     if(!msg) {
       alert(
       "failed"

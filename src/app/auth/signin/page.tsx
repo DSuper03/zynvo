@@ -40,7 +40,7 @@ export default function SignIn() {
   const handleSubmit = async (e :  any) => {
     //
     e.preventDefault();
-    const msg = await axios.post<signinRes>((BASE_URL ? `${BASE_URL}/api/v1/user/signup` : `http://localhost:8000/api/v1/user/signup`), formData)
+    const msg = await axios.post<signinRes>( `http://localhost:8000/api/v1/user/signup`, formData)
     if(!msg) {
       alert(
       "failed"

@@ -1,9 +1,113 @@
 "use client"
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar, BarChart2, Bell, User } from 'lucide-react';
+import axios from 'axios';
+import dotenv from "dotenv";
+
+dotenv.config();
+
+interface response {
+  user : {
+    isVerified: boolean | null;
+    name: string | null;
+    email: string;
+    clubName: string | null;
+    eventAttended: {
+        event: {
+            id: string;
+            EventName: string;
+        };
+    }[];
+  }
+ 
+}
+
+const fetchDetails = async() => {
+  const token = localStorage.getItem("token");
+
+  alert(token)
+
+  if(!token) {
+   console.log("no token or error")
+   return {
+    name : "ASM devs",
+    email : "devSuper03@contact.com",
+    clubName : "zynvo",
+    isVerified : true,
+    events : [{
+      EventName : "lets create zynvo",
+      id : "20072004ID" 
+    }, {
+      EventName : "Zynvo is Deployed",
+      id : "70024002ID"
+    }]
+  }
+  }
+
+
+  const details = await axios.get<response>("http://localhost:8000/api/v1/user/getUser", {
+    headers : {
+      authorization : `Bearer ${token}` 
+    }
+  })
+
+  console.log(details);
+
+  if(details.status !== 200) {
+    return {
+      name : "ASM devs",
+      email : "devSuper03@contact.com",
+      clubName : "zynvo",
+      isVerified : true,
+      events : [{
+        EventName : "lets create zynvo",
+        id : "20072004ID" 
+      }, {
+        EventName : "Zynvo is Deployed",
+        id : "70024002ID"
+      }]
+    }
+  }
+
+  // const {name, clubName, email, isVerified } = details.data
+  const name = details.data.user.name
+  const clubName = details.data.user.clubName
+  const email = details.data.user.email
+  const isVerified = details.data.user.isVerified
+  const events = (details.data.user.eventAttended)?.map((eve) => {
+    return {
+      EventName : eve.event.EventName ,
+      id : eve.event.id
+    }
+  })
+
+
+
+  return {
+    name, 
+    clubName,
+    email,
+    isVerified,
+    events
+  }
+
+}
 
 export default function ZynvoDashboard() {
   // Sample user data
+   
+
+  const [userdata, setData] = useState<any>()
+
+  useEffect(()=> {
+    async function call(){
+      setData(await fetchDetails())
+    }
+    
+    call();
+  }, [])
+
+  console.log(userdata);
   const userData = {
     name: "John Doe",
     posts: 24,
@@ -39,12 +143,13 @@ export default function ZynvoDashboard() {
           <div className="relative px-6 pb-6">
             <div className="absolute -top-12 left-6">
               <div className="w-24 h-24 rounded-full border-4 border-gray-900 bg-yellow-400 flex items-center justify-center text-gray-900 text-4xl font-bold">
-                {userData.name.charAt(0)}
+                {userdata?.name?.charAt(0)}
               </div>
             </div>
             <div className="pt-16">
-              <h2 className="text-xl font-bold text-white">{userData.name}</h2>
-              <p className="text-gray-400 mb-4">Web3 Enthusiast & Developer</p>
+              <h2 className="text-xl font-bold text-white">{userdata?.name}</h2>
+              <span className="text-yellow-400 text-sm">{userdata?.email}</span>
+              <p className="text-gray-400 mb-4">Teri Maa ka Zynvo Kardunga</p>
               <div className="flex flex-wrap gap-2 mb-4">
                 <span className="bg-gray-800 text-yellow-400 px-3 py-1 rounded-full text-sm">Blockchain</span>
                 <span className="bg-gray-800 text-yellow-400 px-3 py-1 rounded-full text-sm">NFT</span>
@@ -62,7 +167,7 @@ export default function ZynvoDashboard() {
                 </div>
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-1 text-yellow-400" />
-                  <span>{userData.events} Events</span>
+                  <span>{userdata?.events?.length} Events</span>
                 </div>
               </div>
             </div>
