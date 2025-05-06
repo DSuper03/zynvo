@@ -1,53 +1,100 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Filter, Plus, Users, Star, TrendingUp, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { clubData } from '@/constants/realclubs';
 import CreateClubModal from './createclub';
 import JoinClubModal from './joinclub';
+import axios from 'axios';
+
+
+enum clubType {
+  Technology,
+  Cultural,
+  Business,
+  Social,
+  Literature,
+  Design,
+  General
+}
+
+interface response {
+  resp : {
+    name: string;
+    id: string;
+    collegeName: string;
+    description: string;
+    founderEmail: string;
+    facultyEmail: string;
+    collegeId: string;
+    type: clubType;
+    requirements: string | null;
+    profilePicUrl: string | null;
+    clubContact: string;
+  }[]
+}
 
 const categories = [
   { id: 'all', name: 'All Clubs' },
-  { id: 'tech', name: '💻 Tech & Engineering' },
-  { id: 'cultural', name: '🎭 Cultural & Arts' },
-  { id: 'business', name: '📈 Business & Consulting' },
-  { id: 'social', name: '🌱 Social Impact' },
-  { id: 'literary', name: '🧠 Literary & Debate' },
-  { id: 'design', name: '🎨 Design & Media' }
+  { id: 'tech', name: '💻 Technology' },
+  { id: 'cultural', name: '🎭 Cultural' },
+  { id: 'business', name: '📈 Business' },
+  { id: 'social', name: '🌱 Social' },
+  { id: 'literary', name: '🧠 Literature' },
+  { id: 'design', name: '🎨 Design' }
 ];
 
 const ClubsPage = () => {
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activetype, setActivetype] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('popular'); // 'popular', 'new', 'trending'
   const [isGridView, setIsGridView] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [selectedClub, setSelectedClub] = useState<{ name: string; image: string } | null>(null);
+  const [clubData , setData] =  useState<any[]>();
 
-  // Filter clubs based on active category and search query
-  const filteredClubs = clubData.filter(club => {
-    const matchesCategory = activeCategory === 'all' || club.category === activeCategory;
-    const matchesSearch = 
-      club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      club.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      club.college.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  useEffect(()=> {
+    async function call() {
+      const token =  localStorage.getItem("token");
+      const response =  await axios.get<response>("http://localhost:8000/api/v1/clubs/getAll", {
+        headers : {
+          authorization : `Bearer ${token}` 
+        }
+      })
+      console.log(token)
+      console.log(response)
+      setData(response.data.resp)
+    }
+
+    call()
+  }, [])
+
+
+
+  // Filter clubs based on active type and search query
+  // const filteredClubs = clubData.filter((club : any) => {
+  //   const matchestype = activetype === 'all' || club.type === activetype;
+  //   const matchesSearch = 
+  //     club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     club.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     club.college.toLowerCase().includes(searchQuery.toLowerCase());
+  //   return matchestype && matchesSearch;
+  // });
 
   // Sort clubs based on sortBy state
-  const sortedClubs = [...filteredClubs].sort((a, b) => {
-    if (sortBy === 'new') {
-      return a.isNew ? -1 : b.isNew ? 1 : 0;
-    } else if (sortBy === 'trending') {
+  // const sortedClubs = [...filteredClubs].sort((a, b) => {
+  //   if (sortBy === 'new') {
+  //     return a.isNew ? -1 : b.isNew ? 1 : 0;
+  //   } else if (sortBy === 'trending') {
 
-      return a.isPopular ? -1 : b.isPopular ? 1 : 0;
-    } else { 
-      return b.members - a.members;
-    }
-  });
+  //     return a.isPopular ? -1 : b.isPopular ? 1 : 0;
+  //   } else { 
+  //     return b.members - a.members;
+  //   }
+  // });
+  console.log(clubData)
 
   const handleJoinClub = (club: any) => {
     setSelectedClub({
@@ -134,17 +181,17 @@ const ClubsPage = () => {
       <div className="bg-black py-4 overflow-x-auto">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex space-x-2">
-            {categories.map(category => (
+            {categories.map(type => (
               <button
-                key={category.id}
-                onClick={() => setActiveCategory(category.id)}
+                key={type.id}
+                onClick={() => setActivetype(type.id)}
                 className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm ${
-                  activeCategory === category.id
+                  activetype === type.id
                     ? 'bg-yellow-500 text-black'
                     : 'bg-gray-800 text-white hover:bg-gray-700'
                 }`}
               >
-                {category.name}
+                {type.name}
               </button>
             ))}
           </div>
@@ -154,13 +201,13 @@ const ClubsPage = () => {
       {/* Clubs Grid/List */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <h2 className="text-2xl font-bold text-white mb-6">
-          {activeCategory === 'all' ? 'All Clubs' : categories.find(c => c.id === activeCategory)?.name}
-          <span className="text-gray-400 text-lg ml-2">({sortedClubs.length})</span>
+          {activetype === 'all' ? 'All Clubs' : categories.find(c => c.id === activetype)?.name}
+          {/* <span className="text-gray-400 text-lg ml-2">({sortedClubs.length})</span> */}
         </h2>
         
         {isGridView ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedClubs.map(club => (
+            {clubData && (clubData.map((club : any) => (
               <div key={club.id} className="block transition-transform hover:scale-[1.02] duration-200">
                 <Link 
                   href={`/clubs/${club.id}`} 
@@ -207,15 +254,15 @@ const ClubsPage = () => {
                       <div className="flex items-center justify-between mt-4">
                         <span 
                           className={`text-xs px-2 py-1 rounded-md 
-                            ${club.category === 'tech' ? 'bg-blue-900/30 text-blue-300' : ''}
-                            ${club.category === 'cultural' ? 'bg-purple-900/30 text-purple-300' : ''}
-                            ${club.category === 'business' ? 'bg-green-900/30 text-green-300' : ''}
-                            ${club.category === 'social' ? 'bg-amber-900/30 text-amber-300' : ''}
-                            ${club.category === 'literary' ? 'bg-red-900/30 text-red-300' : ''}
-                            ${club.category === 'design' ? 'bg-pink-900/30 text-pink-300' : ''}
+                            ${club.type === 'tech' ? 'bg-blue-900/30 text-blue-300' : ''}
+                            ${club.type === 'cultural' ? 'bg-purple-900/30 text-purple-300' : ''}
+                            ${club.type === 'business' ? 'bg-green-900/30 text-green-300' : ''}
+                            ${club.type === 'social' ? 'bg-amber-900/30 text-amber-300' : ''}
+                            ${club.type === 'literary' ? 'bg-red-900/30 text-red-300' : ''}
+                            ${club.type === 'design' ? 'bg-pink-900/30 text-pink-300' : ''}
                           `}
                         >
-                          {club.category.charAt(0).toUpperCase() + club.category.slice(1)}
+                          {club.type.charAt(0).toUpperCase() + club.type.slice(1)}
                         </span>
                       </div>
                     </div>
@@ -231,11 +278,11 @@ const ClubsPage = () => {
                   Join Club
                 </button>
               </div>
-            ))}
+            )))}
           </div>
         ) : (
           <div className="space-y-4">
-            {sortedClubs.map(club => (
+            {clubData && clubData.map((club : any) => (
               <div key={club.id} className="block transition-transform hover:scale-[1.01] duration-200">
                 <Link 
                   href={`/clubs/${club.id}`}
@@ -258,7 +305,7 @@ const ClubsPage = () => {
                         <div>
                           <div className="flex items-center">
                             <h3 className="text-white font-bold text-lg">{club.name}</h3>
-                            {club.isNew && (
+                            {/* {club.isNew && (
                               <span className="ml-2 bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-md">
                                 NEW
                               </span>
@@ -267,13 +314,13 @@ const ClubsPage = () => {
                               <span className="ml-2 bg-gray-900 text-yellow-400 text-xs font-bold px-2 py-0.5 rounded-md border border-yellow-400/50">
                                 POPULAR
                               </span>
-                            )}
+                            )} */}
                           </div>
-                          <p className="text-gray-400 text-sm">{club.college}</p>
+                          <p className="text-gray-400 text-sm">{club.collegeName}</p>
                         </div>
                         <div className="flex items-center text-gray-400 text-sm">
                           <Users className="h-4 w-4 mr-1" />
-                          <span>{club.members}</span>
+                          <span>{100}</span>
                         </div>
                       </div>
                       
@@ -284,15 +331,15 @@ const ClubsPage = () => {
                       <div className="flex items-center justify-between mt-4">
                         <span 
                           className={`text-xs px-2 py-1 rounded-md 
-                            ${club.category === 'tech' ? 'bg-blue-900/30 text-blue-300' : ''}
-                            ${club.category === 'cultural' ? 'bg-purple-900/30 text-purple-300' : ''}
-                            ${club.category === 'business' ? 'bg-green-900/30 text-green-300' : ''}
-                            ${club.category === 'social' ? 'bg-amber-900/30 text-amber-300' : ''}
-                            ${club.category === 'literary' ? 'bg-red-900/30 text-red-300' : ''}
-                            ${club.category === 'design' ? 'bg-pink-900/30 text-pink-300' : ''}
+                            ${club.type === 'Technology' ? 'bg-blue-900/30 text-blue-300' : ''}
+                            ${club.type === 'Cultural' ? 'bg-purple-900/30 text-purple-300' : ''}
+                            ${club.type === 'Business' ? 'bg-green-900/30 text-green-300' : ''}
+                            ${club.type === 'Social' ? 'bg-amber-900/30 text-amber-300' : ''}
+                            ${club.type === 'Literature' ? 'bg-red-900/30 text-red-300' : ''}
+                            ${club.type === 'Design' ? 'bg-pink-900/30 text-pink-300' : ''}
                           `}
                         >
-                          {club.category.charAt(0).toUpperCase() + club.category.slice(1)}
+                          {club.type.charAt(0).toUpperCase() + club.type.slice(1)}
                         </span>
                         
                         <button 
