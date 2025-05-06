@@ -236,10 +236,16 @@ const LandingHeader = () => {
             />
             
             <Link 
-              href="/register"
+              href="/auth/signup"
               className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
             >
               Sign Up
+            </Link>
+            <Link 
+              href="/auth/signin"
+              className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
+            >
+              Sign In
             </Link>
           </nav>
 

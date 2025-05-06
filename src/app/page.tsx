@@ -1,6 +1,5 @@
 'use client'
 import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaUniversity, FaUsers, FaComments, FaSearch, FaCalendarAlt, FaRocket } from 'react-icons/fa';
 import { features } from '@/constants/Features';
@@ -10,7 +9,6 @@ import { SkiperCard } from '@/components/ui/skiper-card';
 import ASCIIText from '@/components/ASCIIText/ASCIIText';
 
 export default function Home() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const heroRef = useRef(null);
 
   useEffect(() => {
