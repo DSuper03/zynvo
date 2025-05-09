@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { clubData } from '@/constants/realclubs';
 import { CalendarDays, Users, MapPin, Globe, Instagram, Twitter, ExternalLink, Heart, MessageCircle, Share2, Clock, ChevronRight, Flag } from 'lucide-react';
 import JoinClubModal from '../joinclub';
+import { useParams } from 'next/navigation';
+import axios from 'axios';
 
 interface ClubPageProps {
   params: {
@@ -70,19 +72,62 @@ const clubPosts = [
   }
 ];
 
+interface response {
+  msg : string 
+  response: {
+    id: string;
+    name: string;
+    collegeName: string;
+    description: string;
+}
+}
+
 export default function ClubPage({ params }: ClubPageProps) {
+
+  const param = useParams()
+  const id = param.id
+
   const [activeTab, setActiveTab] = useState<'about' | 'events' | 'posts'>('about');
   const [isJoined, setIsJoined] = useState(false);
-  const [club, setClub] = useState<any>(null);
+  const [club, setClub] = useState<any>({
+    response: {
+      id: "",
+      name: "",
+      collegeName: "",
+      description: ""
+  }
+  });
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
-  
-  useEffect(() => {
-    // Find the club by ID from our data
-    const foundClub = clubData.find(c => c.id === parseInt(params.id));
-    if (foundClub) {
-      setClub(foundClub);
+
+
+  useEffect(()=> {
+    async function call() {
+      const token = localStorage.getItem("token")
+      const response = await axios.get<response>(`http://localhost:8000/api/v1/clubs/getClub?id=${id}`, {
+        headers : {
+          "authorization" : `Bearer ${token}`
+        }
+      })
+
+      setClub({
+        id : response.data.response.id,
+        name : response.data.response.name,
+        collegeName : response.data.response.collegeName,
+        description : response.data.response.description
+      })
     }
-  }, [params.id]);
+
+
+    call
+  }, [])
+  
+  // useEffect(() => {
+  //   // Find the club by ID from our data
+  //   const foundClub = clubData.find((c : any) => c.id === parseInt(params.id));
+  //   if (foundClub) {
+  //     setClub(foundClub);
+  //   }
+  // }, [params.id]);
   
   if (!club) {
     return (
