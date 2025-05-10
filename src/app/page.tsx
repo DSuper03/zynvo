@@ -67,66 +67,7 @@ export default function Home() {
       <title>Zynvo </title>
       <meta name="description" content="Zynvo connects college students through club and society experiences" />
       
-      <style jsx global>{`
-        :root {
-          --black: #0F0F0F;
-          --yellow: #FFC107;
-          --yellow-light: #FFDD4A;
-          --dark-gray: #1A1A1A;
-        }
-        
-        body {
-          font-family: 'Poppins', sans-serif;
-          background-color: var(--black);
-          overflow-x: hidden;
-        }
-        
-        .gradient-text {
-          background: linear-gradient(to right, var(--yellow), var(--yellow-light));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-        
-        .background-animation {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          z-index: 0;
-          overflow: hidden;
-        }
-        
-        .floating-element {
-          position: absolute;
-          border-radius: 50%;
-          background: linear-gradient(45deg, var(--yellow), var(--yellow-light));
-          filter: blur(60px);
-          z-index: 0;
-        }
-        
-        @keyframes float {
-          0% {
-            transform: translate(0, 0) rotate(0deg);
-          }
-          33% {
-            transform: translate(100px, 100px) rotate(120deg);
-          }
-          66% {
-            transform: translate(-100px, 200px) rotate(240deg);
-          }
-          100% {
-            transform: translate(0, 0) rotate(360deg);
-          }
-        }
-        
-        /* Add overlay to improve content visibility over background image */
-        .content-overlay {
-          position: relative;
-          z-index: 10;
-          background-color: rgba(17, 24, 39, 0.2); /* semi-transparent bg-gray-900 */
-        }
-      `}</style>
+      
 
       {/* Background Animation Container */}
       <div className="background-animation"></div>

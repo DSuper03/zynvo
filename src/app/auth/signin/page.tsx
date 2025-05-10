@@ -64,47 +64,6 @@ export default function SignIn() {
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
       </Head>
 
-      <style jsx global>{`
-        :root {
-          --black: #0F0F0F;
-          --yellow: #FFC107;
-          --yellow-light: #FFDD4A;
-          --dark-gray: #1A1A1A;
-        }
-        
-        body {
-          font-family: 'Poppins', sans-serif;
-          background-color: var(--black);
-          overflow-x: hidden;
-          margin: 0;
-          padding: 0;
-        }
-        
-        .auth-gradient-text {
-          background: linear-gradient(to right, var(--yellow), var(--yellow-light));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-        
-        .auth-image-overlay {
-          background: linear-gradient(to right, rgba(0, 0, 0, 0.7), transparent);
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          z-index: 1;
-        }
-        
-        .floating-element {
-          position: absolute;
-          border-radius: 50%;
-          background: linear-gradient(45deg, var(--yellow), var(--yellow-light));
-          filter: blur(60px);
-          z-index: 0;
-          opacity: 0.4;
-        }
-      `}</style>
 
       <div className="min-h-screen flex flex-col md:flex-row">
         {/* Left Side - Image Section */}
