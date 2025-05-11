@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, {  useState } from 'react';
 import Image from 'next/image';
 import { X, Upload, Camera } from 'lucide-react';
 
@@ -52,13 +52,13 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
     e.preventDefault();
     // Here you would typically send the data to your API
     const upload = await axios.post("http://localhost:8000/api/v1/clubs/club", clubData);
-    //@ts-ignore
-    const msg = upload?.data?.msg 
+    
+    const msg = upload?.data  
     if(upload.status == 200) {
       alert({
         msg : msg, 
-        //@ts-ignore
-        clubId : upload?.data?.clubId
+        
+        clubId : upload?.data
       })
     }
     console.log('Club data to submit:', clubData);

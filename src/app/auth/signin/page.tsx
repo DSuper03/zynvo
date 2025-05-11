@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, ChangeEvent,  } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
@@ -11,7 +11,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
 dotenv.config();
-const BASE_URL = process.env.BASE_URL
+// const BASE_URL = process.env.BASE_URL
 
 interface signinRes {
   msg : string 
@@ -29,7 +29,7 @@ export default function SignIn() {
   });
   const [rememberMe , setRem] = useState(false)
 
-  const handleChange = (e : any) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -37,7 +37,8 @@ export default function SignIn() {
     }));
   };
 
-  const handleSubmit = async (e :  any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    
     //
     e.preventDefault();
     const msg = await axios.post<signinRes>( `http://localhost:8000/api/v1/user/signup`, formData)
@@ -61,7 +62,7 @@ export default function SignIn() {
       <Head>
         <title>Sign In | Zynvo</title>
         <meta name="description" content="Sign in to your Zynvo account" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+        {/* <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" /> */}
       </Head>
 
 
@@ -93,7 +94,7 @@ export default function SignIn() {
             
             <div>
               <div className="bg-black/30 backdrop-blur-md rounded-xl p-6 max-w-md">
-                <p className="text-white text-lg font-medium mb-2">"Zynvo completely transformed how our drama club collaborates with other universities."</p>
+                <p className="text-white text-lg font-medium mb-2">&#34;Zynvo completely transformed how our drama club collaborates with other universities.&#34;</p>
                 <div className="flex items-center">
                   <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-black font-bold mr-3">
                     A
@@ -226,7 +227,7 @@ export default function SignIn() {
             </form>
             
             <p className="text-gray-400 text-xs text-center mt-8">
-              By continuing, you agree to Zynvo's <Link href="/terms" className="text-yellow-500 hover:text-yellow-400">Terms of Service</Link> and acknowledge you've read our <Link href="/privacy" className="text-yellow-500 hover:text-yellow-400">Privacy Policy</Link>
+              By continuing, you agree to Zynvo&lsquo;s <Link href="/terms" className="text-yellow-500 hover:text-yellow-400">Terms of Service</Link> and acknowledge you&lsquo;ve read our <Link href="/privacy" className="text-yellow-500 hover:text-yellow-400">Privacy Policy</Link>
             </p>
           </div>
         </div>

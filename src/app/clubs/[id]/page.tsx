@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { CalendarDays, Users, MapPin, Globe, Instagram, Twitter, ExternalLink, Heart, MessageCircle, Share2, Clock, ChevronRight, Flag } from 'lucide-react';
+import { CalendarDays, Users, MapPin, Globe, Instagram, Twitter, Heart, MessageCircle, Share2, Clock, ChevronRight, Flag } from 'lucide-react';
 import JoinClubModal from '../joinclub';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
+import { Club } from '../../../../models/event';
 
 interface ClubPageProps {
   params: {
@@ -15,35 +16,7 @@ interface ClubPageProps {
 }
 
 // Mock upcoming events
-const upcomingEvents = [
-  {
-    id: 1,
-    title: "Annual Hackathon 2025",
-    date: "May 15, 2025",
-    time: "9:00 AM - 9:00 PM",
-    location: "Engineering Building Block A",
-    image: "/pic1.jpg",
-    attendees: 45
-  },
-  {
-    id: 2,
-    title: "Tech Talk: Future of AI",
-    date: "May 22, 2025",
-    time: "4:00 PM - 6:00 PM",
-    location: "Central Auditorium",
-    image: "/pic2.jpg",
-    attendees: 78
-  },
-  {
-    id: 3,
-    title: "Workshop: Web Development",
-    date: "June 5, 2025",
-    time: "2:00 PM - 5:00 PM",
-    location: "Computer Lab 3",
-    image: "/pic3.jpg",
-    attendees: 32
-  }
-];
+
 
 // Mock announcements/posts
 const clubPosts = [
@@ -95,14 +68,14 @@ interface EventResponse {
 }[]
 }
 
-export default function ClubPage({ params }: ClubPageProps) {
+export default function ClubPage({  }: ClubPageProps) {
 
   const param = useParams()
   const id = param.id
 
   const [activeTab, setActiveTab] = useState<'about' | 'events' | 'posts'>('about');
   const [isJoined, setIsJoined] = useState(false);
-  const [club, setClub] = useState<any>({
+  const [club, setClub] = useState<Club[]>({
     response: {
       id: "",
       name: "",

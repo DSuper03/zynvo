@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
@@ -11,7 +11,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
 dotenv.config();
-const BASE_URL = process.env.BASE_URL
+//const BASE_URL = process.env.BASE_URL
 
 interface signupRes {
   msg : string,
@@ -31,7 +31,7 @@ export default function SignUp() {
   const [agreeToTerms , setAgree] = useState(false)
 
 
-  const handleChange = (e : any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     
     if (name === 'interests') {
@@ -45,12 +45,12 @@ export default function SignUp() {
     }
   };
 
-  const handleNextStep = (e : any) => {
+  const handleNextStep = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setCurrentStep(2);
   };
 
-  const handleSubmit = async (e : any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Add sign-up logic here
     const msg = await axios.post<signupRes>( `http://localhost:8000/api/v1/user/signup` ,formData)
@@ -74,7 +74,7 @@ export default function SignUp() {
       <Head>
         <title>Sign Up | Zynvo</title>
         <meta name="description" content="Create your Zynvo account" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+        {/* <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" /> */}
       </Head>
 
 

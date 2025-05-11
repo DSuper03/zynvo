@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Search, Filter, Plus, Users, Star, TrendingUp, Calendar } from 'lucide-react';
-import Image from 'next/image';
+import { Search, Plus, Users, Star, TrendingUp, Calendar } from 'lucide-react';
+
 import Link from 'next/link';
 import CreateClubModal from './createclub';
 import JoinClubModal from './joinclub';
@@ -53,7 +54,7 @@ const ClubsPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [selectedClub, setSelectedClub] = useState<{ name: string; image: string } | null>(null);
-  const [clubData , setData] =  useState<any[]>();
+  const [clubData , setData] =  useState<response['resp']>();
 
   useEffect(()=> {
     async function call() {
@@ -96,10 +97,10 @@ const ClubsPage = () => {
   // });
   console.log(clubData)
 
-  const handleJoinClub = (club: any) => {
+  const handleJoinClub = (club: response['resp'][0]) => {
     setSelectedClub({
       name: club.name,
-      image: club.image
+      image: club.profilePicUrl || 'https://via.placeholder.com/150' // Fallback image if profilePicUrl is null
     });
     setIsJoinModalOpen(true);
   };
