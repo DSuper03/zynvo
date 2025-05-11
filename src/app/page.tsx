@@ -1,11 +1,11 @@
 'use client'
-import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaUniversity, FaUsers, FaComments, FaSearch, FaCalendarAlt, FaRocket } from 'react-icons/fa';
+import { useEffect, useRef, } from 'react';
+import { motion, } from 'framer-motion';
+import { FaUniversity, FaUsers, FaSearch, FaCalendarAlt, FaRocket } from 'react-icons/fa';
 import { features } from '@/constants/Features';
 import LandingHeader from '@/components/landingHeader';
 import WrapButton from '@/components/ui/wrap-button';
-import { SkiperCard } from '@/components/ui/skiper-card';
+
 import ASCIIText from '@/components/ASCIIText/ASCIIText';
 
 export default function Home() {
@@ -379,7 +379,7 @@ export default function Home() {
                       <path d="M10 8v10c0 2.2-1.8 4-4 4s-4-1.8-4-4v-2h2v2c0 1.1.9 2 2 2s2-.9 2-2v-10h-6v10h2v-8h2zm14 0v10c0 2.2-1.8 4-4 4s-4-1.8-4-4v-2h2v2c0 1.1.9 2 2 2s2-.9 2-2v-10h-6v10h2v-8h2z"></path>
                     </svg>
                   </div>
-                  <p className="text-gray-300 mb-6">"{testimonial.quote}"</p>
+                  <p className="text-gray-300 mb-6">&rdquo;{testimonial.quote}&#34;</p>
                   <div className="flex items-center">
                     <div className="w-12 h-12 rounded-full bg-gray-600 mr-4 flex items-center justify-center text-lg font-bold">
                       {testimonial.name.charAt(0)}
@@ -404,7 +404,7 @@ export default function Home() {
                 <span className="gradient-text">Upcoming Events</span>
               </h2>
               <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-                Don't miss out on these exciting campus activities
+                Don&rsquo;t miss out on these exciting campus activities
               </p>
             </div>
             

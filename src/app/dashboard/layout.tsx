@@ -2,8 +2,7 @@ import Header from "@/components/Header";
 import "@/app/globals.css";
 export default function DashboardLayout({
   children,     
-  params,         
-  searchParams,    // Optional: if you want to use search params
+// Optional: if you want to use search params
 }: {
   children: React.ReactNode;
   params: { id: string };

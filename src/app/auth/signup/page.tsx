@@ -31,7 +31,7 @@ export default function SignUp() {
   const [agreeToTerms , setAgree] = useState(false)
 
 
-  const handleChange = (e :  any) => {
+  const handleChange = (e : any) => {
     const { name, value, type, checked } = e.target;
     
     if (name === 'interests') {
@@ -338,7 +338,7 @@ export default function SignUp() {
                     required
                   />
                   <label htmlFor="agreeToTerms" className="ml-2 block text-sm text-gray-300">
-                    I agree to Zynvo's <Link href="/terms" className="text-yellow-500 hover:text-yellow-400">Terms of Service</Link> and <Link href="/privacy" className="text-yellow-500 hover:text-yellow-400">Privacy Policy</Link>
+                    I agree to Zynvo&#39;s <Link href="/terms" className="text-yellow-500 hover:text-yellow-400">Terms of Service</Link> and <Link href="/privacy" className="text-yellow-500 hover:text-yellow-400">Privacy Policy</Link>
                   </label>
                 </div>
                 
@@ -365,7 +365,7 @@ export default function SignUp() {
             )}
             
             <p className="text-gray-400 text-xs text-center mt-8">
-              By continuing, you agree to Zynvo's <Link href="/terms" className="text-yellow-500 hover:text-yellow-400">Terms of Service</Link> and acknowledge you've read our <Link href="/privacy" className="text-yellow-500 hover:text-yellow-400">Privacy Policy</Link>
+              By continuing, you agree to Zynvo&#39;s <Link href="/terms" className="text-yellow-500 hover:text-yellow-400">Terms of Service</Link> and acknowledge you&lsquo;ve read our <Link href="/privacy" className="text-yellow-500 hover:text-yellow-400">Privacy Policy</Link>
             </p>
           </div>
         </div>

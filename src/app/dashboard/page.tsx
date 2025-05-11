@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from 'react';
-import { Calendar, BarChart2, Bell, User } from 'lucide-react';
+import { Calendar, BarChart2, User } from 'lucide-react';
 import axios from 'axios';
 import dotenv from "dotenv";
 

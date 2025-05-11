@@ -51,10 +51,10 @@ export function Header({
 
   return (
     <header 
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+      className={`absolute  left-1/2 transform -translate-x-1/2 mt-3 rounded-full ${
         scrolled 
-          ? "bg-gray-900/90 backdrop-blur-md py-3" 
-          : "bg-transparent py-5"
+          ? "bg-black/90 backdrop-blur-md py-3" 
+          : "bg-black py-4"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,40 +62,60 @@ export function Header({
           {/* Logo */}
           <Link href="/" className="flex-shrink-0 flex items-center">
             <motion.div 
-              whileHover={{ scale: 1.05, rotate: 5 }}
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="flex items-center"
             >
-              <div className="h-10 w-10 rounded-full bg-yellow-400 flex items-center justify-center shadow-lg shadow-yellow-400/20">
-                <span className="text-black font-bold text-xl">{logoText.charAt(0)}</span>
-              </div>
-              <span className="ml-2 text-xl font-bold text-yellow-400">
-                {logoText}
-              </span>
+              <span className="text-2xl font-bold text-yellow-400">{logoText}</span>
             </motion.div>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => {
-              const isActive = pathname === item.path;
-              
-              return (
-                <Link key={item.name} href={item.path}>
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`flex items-center px-3 py-2 mx-1 ${
-                      isActive 
-                        ? "bg-yellow-400 text-black" 
-                        : "bg-transparent text-white hover:bg-yellow-400/20"
-                    } rounded-full transition-all duration-300 font-medium`}
-                  >
-                    {item.name}
-                  </motion.div>
-                </Link>
-              );
-            })}
+          <div className="hidden md:flex items-center space-x-2">
+            {/* Pages dropdown (like in the reference) */}
+       
+
+            {/* Main Navigation */}
+            <nav className="flex items-center space-x-1">
+              {navItems.map((item) => {
+                const isActive = pathname === item.path;
+                
+                return (
+                  <Link key={item.name} href={item.path}>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`flex items-center px-3 py-2 ${
+                        isActive 
+                          ? "bg-yellow-500 text-black" 
+                          : "text-white hover:bg-yellow-500/10 hover:text-yellow-400"
+                      } rounded-md transition-all duration-300 font-medium`}
+                    >
+                      {item.name}
+                    </motion.div>
+                  </Link>
+                );
+              })}
+            </nav>
+            
+            {/* Docs Button */}
+            <button className="text-white hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Docs
+            </button>
+            
+            {/* User Avatar (as in the reference) */}
+            <div className="ml-2">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center text-black font-bold shadow-md overflow-hidden"
+              >
+                A
+              </motion.div>
+            </div>
             
             {/* Get Started Button - Only shows if showCta is true */}
             {showCta && (
@@ -103,20 +123,20 @@ export function Header({
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-yellow-400 text-black font-medium px-6 py-2 rounded-full hover:bg-yellow-300 transition-colors shadow-md shadow-yellow-400/20"
+                  className="bg-yellow-500 text-black font-medium px-5 py-2 rounded-md hover:bg-yellow-400 transition-colors shadow-md"
                 >
                   {ctaText}
                 </motion.button>
               </Link>
             )}
-          </nav>
+          </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`p-2 rounded-full ${
-                mobileMenuOpen ? "bg-yellow-400 text-black" : "bg-yellow-400/20 text-yellow-400"
+              className={`p-2 rounded-md ${
+                mobileMenuOpen ? "bg-yellow-500 text-black" : "bg-yellow-500/20 text-yellow-400"
               }`}
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
             >
@@ -138,18 +158,27 @@ export function Header({
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="md:hidden bg-gray-900/95 backdrop-blur-md py-4 px-4"
+          className="md:hidden bg-black/95 backdrop-blur-md py-4 px-4"
         >
           <div className="flex flex-col space-y-2">
+            {/* Pages dropdown for mobile */}
+            <div className="py-3 px-4 bg-yellow-500/10 text-yellow-400 rounded-md flex justify-between items-center">
+              <span>Pages</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            {/* Main Navigation */}
             {navItems.map((item) => {
               const isActive = pathname === item.path;
               
               return (
                 <Link key={item.name} href={item.path}>
-                  <div className={`py-3 px-4 rounded-full text-center font-medium ${
+                  <div className={`py-3 px-4 rounded-md text-center font-medium ${
                     isActive 
-                      ? "bg-yellow-400 text-black" 
-                      : "bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/20"
+                      ? "bg-yellow-500 text-black" 
+                      : "bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20"
                   }`}>
                     {item.name}
                   </div>
@@ -157,10 +186,26 @@ export function Header({
               );
             })}
             
+            {/* Docs for mobile */}
+            <div className="py-3 px-4 rounded-md text-center font-medium bg-yellow-500/10 text-yellow-400 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Docs
+            </div>
+            
+            {/* Avatar for mobile */}
+            <div className="flex items-center space-x-3 py-3 px-4 bg-yellow-500/10 rounded-md">
+              <div className="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center text-black font-bold">A</div>
+              <div>
+                <p className="text-sm font-medium text-white">Account</p>
+              </div>
+            </div>
+            
             {/* Get Started Button - Only shows if showCta is true */}
             {showCta && (
               <Link href={ctaLink} className="mt-2">
-                <div className="bg-yellow-400 text-black font-medium py-3 px-4 rounded-full text-center shadow-lg shadow-yellow-400/10">
+                <div className="bg-yellow-500 text-black font-medium py-3 px-4 rounded-md text-center shadow-md">
                   {ctaText}
                 </div>
               </Link>
