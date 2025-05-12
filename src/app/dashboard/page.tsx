@@ -96,7 +96,22 @@ const fetchDetails = async() => {
 export default function ZynvoDashboard() {
   // Sample user data
    
-
+const userData = {
+    name: "John Doe",
+    posts: 24,
+    events: 12,
+    recentPosts: [
+      { id: 1, title: "Blockchain Basics", date: "Apr 28, 2025", likes: 42 },
+      { id: 2, title: "Future of Web3", date: "Apr 22, 2025", likes: 38 },
+      { id: 3, title: "Understanding DeFi", date: "Apr 15, 2025", likes: 29 },
+      { id: 4, title: "NFT Marketplace Analysis", date: "Apr 8, 2025", likes: 56 }
+    ],
+    recentEvents: [
+      { id: 1, title: "Web3 Developer Conference", date: "Apr 30, 2025", location: "San Francisco" },
+      { id: 2, title: "Crypto Investment Summit", date: "Apr 18, 2025", location: "New York" },
+      { id: 3, title: "Blockchain Technology Expo", date: "Mar 25, 2025", location: "London" }
+    ]
+  };
   const [userdata, setData] = useState<any>()
 
   useEffect(()=> {
@@ -131,8 +146,8 @@ export default function ZynvoDashboard() {
               </div>
             </div>
             <div className="pt-16">
-              <h2 className="text-xl font-bold text-white">{userdata?.name}</h2>
-              <span className="text-yellow-400 text-sm">{userdata?.email}</span>
+              <h2 className="text-xl font-bold text-white">{userData?.name}</h2>
+           
               <p className="text-gray-400 mb-4">Teri Maa ka Zynvo Kardunga</p>
               <div className="flex flex-wrap gap-2 mb-4">
                 <span className="bg-gray-800 text-yellow-400 px-3 py-1 rounded-full text-sm">Blockchain</span>
