@@ -75,7 +75,8 @@ export default function ClubPage({  }: ClubPageProps) {
 
   const [activeTab, setActiveTab] = useState<'about' | 'events' | 'posts'>('about');
   const [isJoined, setIsJoined] = useState(false);
-  const [club, setClub] = useState<Club[]>({
+  // we'll use better types lets just deploy it first, writing it in todo 
+  const [club, setClub] = useState<any>({
     response: {
       id: "",
       name: "",
@@ -129,7 +130,7 @@ export default function ClubPage({  }: ClubPageProps) {
     }
 
 
-    call
+    call()
   }, [])
   
   // useEffect(() => {

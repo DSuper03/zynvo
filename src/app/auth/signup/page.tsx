@@ -71,14 +71,13 @@ export default function SignUp() {
 
   return (
     <>
-      <Head>
-        <title>Sign Up | Zynvo</title>
-        <meta name="description" content="Create your Zynvo account" />
-        {/* <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" /> */}
-      </Head>
+     <Head>
+  <title>Sign Up | Zynvo</title>
+  <meta name="description" content="Create your Zynvo account" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" /> 
+</Head>
 
-
-      <div className="min-h-screen flex flex-col md:flex-row">
+      <div className="min-h-screen flex flex-col md:flex-row bg-[#0F0F0F] overflow-x-hidden m-0 p-0">
         {/* Left Side - Image Section */}
         <div className="hidden md:block md:w-1/2 relative overflow-hidden">
           {/* This would be your actual image, using a placeholder for now */}
@@ -91,14 +90,14 @@ export default function SignUp() {
                 backgroundPosition: 'center'
               }}
             ></div>
-            <div className="auth-image-overlay"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent z-1"></div>
           </div>
           
           {/* Content over image */}
           <div className="relative z-10 flex flex-col justify-between h-full p-12">
             <div>
               <h2 className="text-3xl font-bold text-white">Join</h2>
-              <h1 className="text-5xl font-bold auth-gradient-text mb-4">zynvo</h1>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-[#FFC107] to-[#FFDD4A] bg-clip-text text-transparent mb-4">zynvo</h1>
               <p className="text-white text-lg max-w-md opacity-90">
                 Create an account to start connecting with student clubs and societies across campus boundaries.
               </p>
@@ -132,20 +131,20 @@ export default function SignUp() {
           </div>
           
           {/* Floating elements for visual interest */}
-          <div className="floating-element w-64 h-64 bottom-0 right-0"></div>
-          <div className="floating-element w-32 h-32 top-1/4 left-1/3"></div>
+          <div className="absolute w-64 h-64 bottom-0 right-0 rounded-full bg-gradient-to-r from-[#FFC107] to-[#FFDD4A] blur-3xl z-0 opacity-40"></div>
+          <div className="absolute w-32 h-32 top-1/4 left-1/3 rounded-full bg-gradient-to-r from-[#FFC107] to-[#FFDD4A] blur-3xl z-0 opacity-40"></div>
         </div>
         
         {/* Right Side - Form Section */}
         <div className="w-full md:w-1/2 flex items-center justify-center p-8 relative">
           {/* Background elements */}
-          <div className="floating-element w-96 h-96 -top-10 -right-48 opacity-20"></div>
-          <div className="floating-element w-64 h-64 bottom-20 -left-32 opacity-20"></div>
+          <div className="absolute w-96 h-96 -top-10 -right-48 rounded-full bg-gradient-to-r from-[#FFC107] to-[#FFDD4A] blur-3xl z-0 opacity-20"></div>
+          <div className="absolute w-64 h-64 bottom-20 -left-32 rounded-full bg-gradient-to-r from-[#FFC107] to-[#FFDD4A] blur-3xl z-0 opacity-20"></div>
           
           <div className="relative z-10 w-full max-w-md">
             <div className="text-center mb-8">
               <Link href="/">
-                <span className="text-2xl font-bold auth-gradient-text inline-block cursor-pointer">zynvo</span>
+                <span className="text-2xl font-bold bg-gradient-to-r from-[#FFC107] to-[#FFDD4A] bg-clip-text text-transparent inline-block cursor-pointer">zynvo</span>
               </Link>
               <h1 className="text-3xl font-bold text-white mt-6 mb-2">Create an Account</h1>
               <p className="text-gray-400">

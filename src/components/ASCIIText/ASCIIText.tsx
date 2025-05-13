@@ -196,7 +196,7 @@ class AsciiFilter {
                         continue;
                     }
 
-                    let gray = (0.3 * r + 0.6 * g + 0.1 * b) / 255;
+                    const gray = (0.3 * r + 0.6 * g + 0.1 * b) / 255;
                     let idx = Math.floor((1 - gray) * (this.charset.length - 1));
                     if (this.invert) idx = this.charset.length - idx - 1;
                     str += this.charset[idx];
