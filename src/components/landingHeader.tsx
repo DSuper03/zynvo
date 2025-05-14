@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import TextPressure from './TextPressure/TextPressure';
+
 
 // Animation transition settings
 const transition = {
@@ -118,20 +118,7 @@ const LandingHeader = () => {
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
                 </svg>
               </div>
-              <motion.h1 className="text-white text-lg"> <TextPressure
-    text="Zynvo!"
-    flex={true}
-    alpha={false}
-    stroke={false}
-    width={true}
-    weight={true}
-    italic={true}
-    textColor="#ffffff"
-    strokeColor="#ff0000"
-    
-    
-    minFontSize={36}
-  /></motion.h1>
+            
             </Link>
           </div>
 
