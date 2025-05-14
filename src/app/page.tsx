@@ -504,27 +504,8 @@ export default function Home() {
                 </ul>
               </div>
               
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Company</h3>
-                <ul className="space-y-2">
-                  <li><a href="#" className="hover:text-yellow-500 transition-colors">About Us</a></li>
-                  <li><a href="#" className="hover:text-yellow-500 transition-colors">Careers</a></li>
-                  <li><a href="#" className="hover:text-yellow-500 transition-colors">Blog</a></li>
-                  <li><a href="#" className="hover:text-yellow-500 transition-colors">Press</a></li>
-                  <li><a href="#" className="hover:text-yellow-500 transition-colors">Contact</a></li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Resources</h3>
-                <ul className="space-y-2">
-                  <li><a href="#" className="hover:text-yellow-500 transition-colors">Support Center</a></li>
-                  <li><a href="#" className="hover:text-yellow-500 transition-colors">Documentation</a></li>
-                  <li><a href="#" className="hover:text-yellow-500 transition-colors">Community Forum</a></li>
-                  <li><a href="#" className="hover:text-yellow-500 transition-colors">Privacy Policy</a></li>
-                  <li><a href="#" className="hover:text-yellow-500 transition-colors">Terms of Service</a></li>
-                </ul>
-              </div>
+            
+            
             </div>
             
             <div className="border-t border-gray-800 mt-12 pt-8">
