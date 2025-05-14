@@ -6,7 +6,7 @@ import { features } from '@/constants/Features';
 import LandingHeader from '@/components/landingHeader';
 import WrapButton from '@/components/ui/wrap-button';
 
-import ASCIIText from '@/components/ASCIIText/ASCIIText';
+
 
 export default function Home() {
   const heroRef = useRef(null);
@@ -54,7 +54,7 @@ export default function Home() {
   }, []);
   
   return (
-    <div className="min-h-screen bg-gray-900 text-white relative">
+    <div className=" bg-gray-900 text-white relative">
       {/* Fixed Background Image */}
       <div className="fixed top-0 left-0 w-full h-full z-0">
         <img
@@ -80,15 +80,7 @@ export default function Home() {
         {/* Hero Section */}
         <section ref={heroRef} className="relative py-20 md:py-32">
           <div className="container mx-auto px-6 text-center">
-           <motion.div>
-
-             <ASCIIText
-  text='Zynvo Zynvo'
-  enableWaves={true}
-  asciiFontSize={8}
-/>
-  </motion.div>
-            
+          
            
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
