@@ -1,13 +1,15 @@
 import Header from "@/components/Header";
 import "@/app/globals.css";
-export default function DashboardLayout({
-  children,     
-// Optional: if you want to use search params
-}: {
-  children: React.ReactNode;
+import { ReactNode } from "react";
+
+interface DashboardLayoutProps {
+  children: ReactNode;
   params: { id: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
-}) {
+}
+
+export default function DashboardLayout({
+  children,
+}: DashboardLayoutProps) {
   // Custom navigation items for dashboard
   const dashboardNavItems = [
     { name: 'Home', path: '/' },

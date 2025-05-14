@@ -26,7 +26,7 @@ export default function FeedbackForm() {
   ];
 
   // Handle form input changes
-  const handleInputChange = (e) => {
+  const handleInputChange = (e : any) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -35,7 +35,7 @@ export default function FeedbackForm() {
   };
   
   // Handle category selection
-  const handleCategorySelect = (category) => {
+  const handleCategorySelect = (category : any) => {
     setFormData({
       ...formData,
       category
@@ -56,7 +56,7 @@ export default function FeedbackForm() {
   };
   
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = (e :  any) => {
     e.preventDefault();
     setSubmitting(true);
     
