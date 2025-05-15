@@ -2,9 +2,12 @@
 import { useEffect, useRef, } from 'react';
 import { motion, } from 'framer-motion';
 import { FaUniversity, FaUsers, FaSearch, FaCalendarAlt, FaRocket } from 'react-icons/fa';
-import { features } from '@/constants/Features';
+
 import LandingHeader from '@/components/landingHeader';
 import WrapButton from '@/components/ui/wrap-button';
+import HeroVideoDialog from '@/components/magicui/hero-video-dialog';
+
+import FeatureGrid from '@/components/ui/FeatureCard';
 
 
 
@@ -56,7 +59,7 @@ export default function Home() {
   return (
     <div className=" bg-gray-900 text-white relative">
       {/* Fixed Background Image */}
-      <div className="fixed top-0 left-0 w-full h-full z-0">
+      <div className="fixed top-0 left-0 w-full z-0">
         <img
           src="/landing page.png"
           alt="Background"
@@ -69,8 +72,6 @@ export default function Home() {
       
       
 
-      {/* Background Animation Container */}
-      <div className="background-animation"></div>
 
       {/* Content Container (above animations) - Made scrollable with semi-transparent overlay */}
       <div className="content-overlay relative min-h-screen">
@@ -78,7 +79,7 @@ export default function Home() {
            <LandingHeader/>
 
         {/* Hero Section */}
-        <section ref={heroRef} className="relative py-20 md:py-32">
+        <section ref={heroRef} className="relative  md:py-32">
           <div className="container mx-auto px-6 text-center">
           
            
@@ -106,13 +107,13 @@ export default function Home() {
               className="mt-16 relative max-w-4xl mx-auto"
             >
               <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-400/20 rounded-2xl p-2">
-                <div className="bg-gray-800 rounded-xl overflow-hidden shadow-2xl">
-                  <div className="relative h-96 w-full">
-                    <div className="absolute inset-0 flex items-center justify-center text-yellow-500 text-xl">
-                      Zynvo App Interface Mockup
-                    </div>
-                  </div>
-                </div>
+             <HeroVideoDialog
+  className="block dark:hidden"
+  animationStyle="from-center"
+  videoSrc="https://www.example.com/dummy-video"
+  thumbnailSrc="https://www.example.com/dummy-thumbnail.png"
+  thumbnailAlt="Dummy Video Thumbnail"
+/>
               </div>
 
               {/* Decorative Elements - Enhanced brightness */}
@@ -134,22 +135,8 @@ export default function Home() {
                 Discover how Zynvo transforms the campus club experience with these powerful features.
               </p>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="bg-gray-800 border-l-4 border-yellow-500 rounded-lg p-6 hover:transform hover:-translate-y-2 transition duration-300"
-                >
-                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-gray-300">{feature.description}</p>
-                </motion.div>
-              ))}
-            </div>
+
+         <FeatureGrid />
           </div>
         </section>
 
