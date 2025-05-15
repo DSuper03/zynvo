@@ -2,6 +2,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { FaLinkedin, FaTwitter, FaGithub, FaMicrophone, FaGavel } from 'react-icons/fa'
+import Image from 'next/image';
 
 const Speakers = () => {
   // Animation variants
@@ -130,7 +131,7 @@ const Speakers = () => {
               >
                 <div className="h-56 relative overflow-hidden">
                   <div className="absolute inset-0 bg-yellow-400/20 group-hover:bg-yellow-400/10 transition-all duration-500"></div>
-                  <img 
+                  <Image 
                     src={speaker.image} 
                     alt={speaker.name}
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-all duration-700"
@@ -194,7 +195,7 @@ const Speakers = () => {
               >
                 <div className="md:w-1/3 h-56 md:h-auto relative">
                   <div className="absolute inset-0 bg-yellow-400/20 group-hover:bg-yellow-400/10 transition-all duration-500"></div>
-                  <img 
+                  <Image 
                     src={judge.image} 
                     alt={judge.name}
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-all duration-700"

@@ -1,4 +1,4 @@
-import { MagicCard } from '@/components/magicui/magic-card'
+
 import React from 'react'
 
 const Eventid = () => {

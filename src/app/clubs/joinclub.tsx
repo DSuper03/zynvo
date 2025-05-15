@@ -2,13 +2,9 @@
 
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import Image from 'next/image';
+import { JoinClubModalProps } from '@/types/global-Interface';
 
-interface JoinClubModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  clubName: string;
-  clubImage: string;
-}
 
 const JoinClubModal: React.FC<JoinClubModalProps> = ({ isOpen, onClose, clubName, clubImage }) => {
   const [formData, setFormData] = useState({
@@ -52,7 +48,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({ isOpen, onClose, clubName
 
         <div className="flex justify-center pt-6">
           <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-yellow-500">
-            <img 
+            <Image 
               src={clubImage} 
               alt={clubName} 
               className="w-full h-full object-cover" 

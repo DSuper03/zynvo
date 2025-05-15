@@ -3,11 +3,8 @@
 import React, {  useState } from 'react';
 import Image from 'next/image';
 import { X, Upload, Camera } from 'lucide-react';
+import { CreateClubModalProps } from '@/types/global-Interface';
 
-interface CreateClubModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) => {
   const [clubData, setClubData] = useState({

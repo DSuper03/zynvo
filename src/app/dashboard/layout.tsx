@@ -1,11 +1,9 @@
 import Header from "@/components/Header";
 import "@/app/globals.css";
 import { ReactNode } from "react";
+import { DashboardLayoutProps } from "@/types/global-Interface";
 
-interface DashboardLayoutProps {
-  children: ReactNode;
-  params: { id: string };
-}
+
 
 export default function DashboardLayout({
   children,

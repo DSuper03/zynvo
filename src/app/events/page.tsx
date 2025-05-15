@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import {  Search, MapPin, Clock, Filter, ChevronDown,Calendar } from 'lucide-react';
-import { events } from '@/constants/events';// Import your events data
+import { events } from '@/constants/events';
+import Image from 'next/image';
 export default function ZynvoEventsPage() {
  // const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
@@ -84,7 +85,7 @@ export default function ZynvoEventsPage() {
           {filteredEvents.map((event) => (
             <div key={event.id} className="bg-gray-900 rounded-lg overflow-hidden shadow-md">
               <div className="relative">
-                <img src={event.image} alt={event.title} className="w-full h-40 object-cover" />
+                <Image src={event.image} alt={event.title} className="w-full h-40 object-cover" />
                 {event.isRegistered && (
                   <div className="absolute top-2 right-2 bg-yellow-400 text-gray-900 px-2 py-1 text-xs font-bold rounded">
                     Registered

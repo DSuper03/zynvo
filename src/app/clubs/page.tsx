@@ -8,33 +8,9 @@ import Link from 'next/link';
 import CreateClubModal from './createclub';
 import JoinClubModal from './joinclub';
 import axios from 'axios';
+import Image from 'next/image';
+import { response } from '@/types/global-Interface';
 
-
-enum clubType {
-  Technology,
-  Cultural,
-  Business,
-  Social,
-  Literature,
-  Design,
-  General
-}
-
-interface response {
-  resp : {
-    name: string;
-    id: string;
-    collegeName: string;
-    description: string;
-    founderEmail: string;
-    facultyEmail: string;
-    collegeId: string;
-    type: clubType;
-    requirements: string | null;
-    profilePicUrl: string | null;
-    clubContact: string;
-  }[]
-}
 
 const categories = [
   { id: 'all', name: 'All Clubs' },
@@ -219,7 +195,7 @@ const ClubsPage = () => {
                   >
                     <div className="h-40 overflow-hidden relative">
                       <div className="absolute inset-0 bg-black/30 z-10 group-hover:bg-black/20 transition-all"></div>
-                      <img 
+                      <Image 
                         src={club.image} 
                         alt={club.name} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -294,7 +270,7 @@ const ClubsPage = () => {
                   >
                     <div className="w-32 h-32 overflow-hidden relative">
                       <div className="absolute inset-0 bg-black/30 z-10 group-hover:bg-black/20 transition-all"></div>
-                      <img 
+                      <Image 
                         src={club.image} 
                         alt={club.name} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

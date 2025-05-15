@@ -8,7 +8,7 @@ import WrapButton from '@/components/ui/wrap-button';
 import HeroVideoDialog from '@/components/magicui/hero-video-dialog';
 
 import FeatureGrid from '@/components/ui/FeatureCard';
-
+import Image from 'next/image';
 
 
 export default function Home() {
@@ -60,7 +60,7 @@ export default function Home() {
     <div className=" bg-gray-900 text-white relative">
       {/* Fixed Background Image */}
       <div className="fixed top-0 left-0 w-full z-0">
-        <img
+        <Image
           src="/landing page.png"
           alt="Background"
           className="object-cover w-full h-full"

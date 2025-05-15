@@ -1,12 +1,8 @@
 import Image from 'next/image';
 import { Tablist } from '@/components/Tablist';
+import { EventLayoutProps } from '@/types/global-Interface';
 
-interface EventLayoutProps {
-  children: React.ReactNode;
-  params: {
-    id: string;
-  };
-}
+
 
 const eventTabItems = [
   { id: 'overview', label: 'OVERVIEW', href: '/' },

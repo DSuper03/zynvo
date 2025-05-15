@@ -7,13 +7,8 @@ import { CalendarDays, Users, MapPin, Globe, Instagram, Twitter, Heart, MessageC
 import JoinClubModal from '../joinclub';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
-import { Club } from '../../../../models/event';
+import { ClubPageProps, ClubTypeProps, EventResponse, EventType, Response } from '@/types/global-Interface';
 
-interface ClubPageProps {
-  params: {
-    id: string;
-  };
-}
 
 // Mock upcoming events
 
@@ -44,102 +39,68 @@ const clubPosts = [
   }
 ];
 
-interface response {
-  msg : string 
-  response: {
-    id: string;
-    name: string;
-    collegeName: string;
-    description: string;
-}
-}
 
-interface EventResponse {
-  event: {
-    id: string;
-    EventName: string;
-    clubName: string;
-    description: string;
-    eventHeaderImage: string | null;
-    prizes: string;
-    clubId: string;
-    createdAt: Date;
-    endDate: Date | null;
-}[]
-}
 
-export default function ClubPage({  }: ClubPageProps) {
-
-  const param = useParams()
-  const id = param.id
+export default function ClubPage({}: ClubPageProps) {
+  const param = useParams();
+  const id = param.id as string;
 
   const [activeTab, setActiveTab] = useState<'about' | 'events' | 'posts'>('about');
   const [isJoined, setIsJoined] = useState(false);
-  // we'll use better types lets just deploy it first, writing it in todo 
-  const [club, setClub] = useState<any>({
-    response: {
-      id: "",
-      name: "",
-      collegeName: "",
-      description: ""
-  }
+  const [club, setClub] = useState<ClubTypeProps>({
+    id: "",
+    name: "",
+    collegeName: "",
+    description: "",
+    members: 0,
+    image: "/default-club-image.jpg",
+    category: "tech"
   });
-  const [event , setEvent] = useState<[{}] | void[]>([{
-    id: "abc", 
-    EventName: "abs", 
-    clubName: "abc",
-    description: "acx",
-    createdAt : Date
-  }])
+  const [event, setEvent] = useState<EventType[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
-
-  useEffect(()=> {
+  useEffect(() => {
     async function call() {
-      const token = localStorage.getItem("token")
-      const response = await axios.get<response>(`http://localhost:8000/api/v1/clubs/getClub?id=${id}`, {
-        headers : {
-          "authorization" : `Bearer ${token}`
+      const token = localStorage.getItem("token");
+      const response = await axios.get<Response>(`http://localhost:8000/api/v1/clubs/getClub?id=${id}`, {
+        headers: {
+          "authorization": `Bearer ${token}`
         }
-      })
+      });
 
       const response2 = await axios.get<EventResponse>(`http://localhost:8000/api/v1/events/eventByClub/${id}`, {
-        headers : {
-          "authorization" : `Bearer ${token}`
+        headers: {
+          "authorization": `Bearer ${token}`
         }
-      })
+      });
 
-      const events = response2.data.event
+      const events = response2.data.event;
 
-      const filteredEvents = events.map((e : any) => {
-        id : e.id
-        EventName : e.EventName
-        description : e.description
-        clubName : e.clubName 
-        createdAt : e.createdAt
-      })
+      const filteredEvents = events.map((e) => ({
+        id: e.id,
+        EventName: e.EventName,
+        description: e.description,
+        clubName: e.clubName,
+        createdAt: e.createdAt,
+        image: e.eventHeaderImage || "/default-event-image.jpg",
+        title: e.EventName
+      }));
 
-      setEvent(filteredEvents)
+      setEvent(filteredEvents);
 
       setClub({
-        id : response.data.response.id,
-        name : response.data.response.name,
-        collegeName : response.data.response.collegeName,
-        description : response.data.response.description
-      })
+        id: response.data.response.id,
+        name: response.data.response.name,
+        collegeName: response.data.response.collegeName,
+        description: response.data.response.description,
+        members: 100,
+        image: "/default-club-image.jpg",
+        category: "tech"
+      });
     }
 
-
-    call()
-  }, [])
-  
-  // useEffect(() => {
-  //   // Find the club by ID from our data
-  //   const foundClub = clubData.find((c : any) => c.id === parseInt(params.id));
-  //   if (foundClub) {
-  //     setClub(foundClub);
-  //   }
-  // }, [params.id]);
+    call();
+  }, [id]); // Added id as dependency
   
   if (!club) {
     return (
@@ -149,25 +110,6 @@ export default function ClubPage({  }: ClubPageProps) {
     );
   }
   
-  // Get club category styling
-  const getCategoryStyle = (category: string) => {
-    switch(category) {
-      case 'tech':
-        return 'bg-blue-900/30 text-blue-300';
-      case 'cultural':
-        return 'bg-purple-900/30 text-purple-300';
-      case 'business':
-        return 'bg-green-900/30 text-green-300';
-      case 'social':
-        return 'bg-amber-900/30 text-amber-300';
-      case 'literary':
-        return 'bg-red-900/30 text-red-300';
-      case 'design':
-        return 'bg-pink-900/30 text-pink-300';
-      default:
-        return 'bg-gray-900/30 text-gray-300';
-    }
-  };
 
   const handleJoinClick = () => {
     if (!isJoined) {
@@ -185,7 +127,7 @@ export default function ClubPage({  }: ClubPageProps) {
         <div className="absolute inset-0 z-0">
           <div className="relative w-full h-full">
             <Image
-              src={club.image}
+              src={club.image || "/default-club-image.jpg"}
               alt={club.name}
               fill
               className="object-cover"
@@ -199,7 +141,7 @@ export default function ClubPage({  }: ClubPageProps) {
         <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-10">
           <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-yellow-500 shadow-lg shadow-black/50">
             <Image
-              src={club.image}
+              src={club.image || "default-club-image.jpg"}
               alt={club.name}
               fill
               className="object-cover"
@@ -315,7 +257,7 @@ export default function ClubPage({  }: ClubPageProps) {
                 <div>
                   <h2 className="text-xl font-bold text-white mb-3">About {club.name}</h2>
                   <p className="text-gray-300">
-                    {club.name} is a dynamic student club at {club.college} focused on {club.category === 'tech' ? 'technology and innovation' : 
+                    {club.name} is a dynamic student club at {club.collegeName} focused on {club.category === 'tech' ? 'technology and innovation' : 
                     club.category === 'cultural' ? 'arts and cultural activities' : 
                     club.category === 'business' ? 'entrepreneurship and business skills' : 
                     club.category === 'social' ? 'community service and social impact' : 
@@ -373,12 +315,12 @@ export default function ClubPage({  }: ClubPageProps) {
               <div className="space-y-6">
                 <h2 className="text-xl font-bold text-white">Upcoming Events</h2>
                 
-                {event.map((event : any) => (
+                {event.map((event : EventType) => (
                   <div key={event.id} className="bg-gray-800 rounded-lg overflow-hidden hover:border hover:border-yellow-500/30 transition-all duration-300 shadow-md">
                     <div className="relative h-48 w-full">
                       <Image
-                        src={event.image}
-                        alt={event.title}
+                        src={event.image || "/default-event-image.jpg"}
+                        alt={event.title || "Event Image"}
                         fill
                         className="object-cover"
                       />
@@ -388,7 +330,7 @@ export default function ClubPage({  }: ClubPageProps) {
                         <h3 className="text-xl font-bold text-white">{event.EventName}</h3>
                         <div className="flex items-center text-yellow-400 mt-1">
                           <CalendarDays size={16} className="mr-1" />
-                          <span className="text-sm">{event.createdAt}</span>
+                          <span className="text-sm">{event.createdAt.toLocaleDateString()}</span>
                         </div>
                       </div>
                     </div>
@@ -435,7 +377,7 @@ export default function ClubPage({  }: ClubPageProps) {
                     <div className="flex items-center mb-3">
                       <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
                         <Image
-                          src={club.image}
+                          src={club.image || ""}
                           alt={club.name}
                           width={40}
                           height={40}
@@ -522,9 +464,11 @@ export default function ClubPage({  }: ClubPageProps) {
               <div className="space-y-3">
                 <div className="flex items-center">
                   <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                    <img
+                    <Image
                       src="https://i.pravatar.cc/150?img=11"
                       alt="President"
+                      width={40}
+                      height={40}
                       className="object-cover"
                     />
                   </div>
@@ -536,9 +480,11 @@ export default function ClubPage({  }: ClubPageProps) {
                 
                 <div className="flex items-center">
                   <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                    <img
+                    <Image
                       src="https://i.pravatar.cc/150?img=20"
                       alt="Vice President"
+                      width={40}
+                      height={40}
                       className="object-cover"
                     />
                   </div>
@@ -550,9 +496,11 @@ export default function ClubPage({  }: ClubPageProps) {
                 
                 <div className="flex items-center">
                   <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                    <img
+                    <Image
                       src="https://i.pravatar.cc/150?img=21"
                       alt="Secretary"
+                      width={40}
+                      height={40}
                       className="object-cover"
                     />
                   </div>
@@ -564,9 +512,11 @@ export default function ClubPage({  }: ClubPageProps) {
                 
                 <div className="flex items-center">
                   <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                    <img
+                    <Image
                       src="https://i.pravatar.cc/150?img=32"
                       alt="Treasurer"
+                      width={40}
+                      height={40}
                       className="object-cover"
                     />
                   </div>
@@ -634,7 +584,7 @@ export default function ClubPage({  }: ClubPageProps) {
           isOpen={isJoinModalOpen}
           onClose={() => setIsJoinModalOpen(false)}
           clubName={club.name}
-          clubImage={club.image}
+          clubImage={club.image || "/default-club-image.jpg"}
         />
       )}
     </div>

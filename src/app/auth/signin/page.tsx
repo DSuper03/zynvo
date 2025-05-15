@@ -9,14 +9,10 @@ import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
 import dotenv from "dotenv";
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { signinRes } from '@/types/global-Interface';
 
 dotenv.config();
 // const BASE_URL = process.env.BASE_URL
-
-interface signinRes {
-  msg : string 
- token : string
-}
 
 export default function SignIn() {
   const router = useRouter()
@@ -60,7 +56,7 @@ export default function SignIn() {
       <Head>
         <title>Sign In | Zynvo</title>
         <meta name="description" content="Sign in to your Zynvo account" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" /> 
+        <Link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" /> 
       </Head>
 
       <div className="min-h-screen flex flex-col md:flex-row bg-[#0F0F0F] overflow-x-hidden m-0 p-0">

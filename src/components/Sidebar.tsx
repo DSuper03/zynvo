@@ -218,7 +218,7 @@ export function Sidebar() {
         <div className="mt-auto border-t border-yellow-900/30">
           <div className={`p-4 ${collapsed ? 'justify-center' : ''} flex items-center gap-3`}>
             <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-yellow-500/50">
-              <img 
+              <Image 
                 src="https://i.pravatar.cc/150?img=32" 
                 alt="Profile" 
                 className="object-cover"
@@ -279,7 +279,7 @@ export function Sidebar() {
 
         <div className="absolute bottom-5 left-0 w-full flex justify-center">
           <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-yellow-500/50">
-            <img 
+            <Image 
               src="https://i.pravatar.cc/150?img=32" 
               alt="Profile" 
               className="object-cover"

@@ -9,14 +9,11 @@ import dotenv from "dotenv"
 
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { signupRes } from '@/types/global-Interface';
 
 dotenv.config();
 //const BASE_URL = process.env.BASE_URL
 
-interface signupRes {
-  msg : string,
-  token : string
-}
 
 export default function SignUp() {
   const router = useRouter()
@@ -74,7 +71,7 @@ export default function SignUp() {
      <Head>
   <title>Sign Up | Zynvo</title>
   <meta name="description" content="Create your Zynvo account" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" /> 
+  <Link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" /> 
 </Head>
 
       <div className="min-h-screen flex flex-col md:flex-row bg-[#0F0F0F] overflow-x-hidden m-0 p-0">

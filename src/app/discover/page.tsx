@@ -59,11 +59,11 @@ export default function Feed() {
                 <div className="p-4 flex justify-between items-center">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-yellow-500/50">
-                      <img 
+                      <Image 
                         src={user.avatar} 
                         alt={user.name} 
                         className="w-full h-full object-cover"
-                      />
+                      ></Image>
                     </div>
                     <div>
                       <h3 className="font-medium text-yellow-400">{user.name}</h3>
@@ -96,7 +96,7 @@ export default function Feed() {
                             : ''
                         } aspect-video overflow-hidden border border-yellow-900/30`}
                       >
-                        <img 
+                        <Image 
                           src={img} 
                           alt={`Post image ${idx + 1}`} 
                           className="w-full h-full object-cover"
@@ -171,7 +171,7 @@ export default function Feed() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="relative rounded-lg overflow-hidden aspect-[4/5] border border-yellow-900/30">
-              <img 
+              <Image 
                 src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800" 
                 alt="Story" 
                 className="w-full h-full object-cover"
@@ -179,14 +179,14 @@ export default function Feed() {
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-2">
                 <div className="flex items-center">
                   <div className="w-6 h-6 rounded-full overflow-hidden border-2 border-yellow-500">
-                    <img src={users[0].avatar} alt={users[0].name} className="w-full h-full object-cover" />
+                    <Image src={users[0].avatar} alt={users[0].name} className="w-full h-full object-cover" />
                   </div>
                   <span className="text-yellow-400 text-xs ml-1 font-medium truncate">{users[0].name}</span>
                 </div>
               </div>
             </div>
             <div className="relative rounded-lg overflow-hidden aspect-[4/5] border border-yellow-900/30">
-              <img 
+              <Image 
                 src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=800" 
                 alt="Story" 
                 className="w-full h-full object-cover"
@@ -194,7 +194,7 @@ export default function Feed() {
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-2">
                 <div className="flex items-center">
                   <div className="w-6 h-6 rounded-full overflow-hidden border-2 border-yellow-500">
-                    <img src={users[1].avatar} alt={users[1].name} className="w-full h-full object-cover" />
+                    <Image src={users[1].avatar} alt={users[1].name} className="w-full h-full object-cover" />
                   </div>
                   <span className="text-yellow-400 text-xs ml-1 font-medium truncate">{users[1].name}</span>
                 </div>
@@ -214,7 +214,7 @@ export default function Feed() {
               <div key={user.id} className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-yellow-500/50">
-                    <img 
+                    <Image 
                       src={user.avatar} 
                       alt={user.name} 
                       className="w-full h-full object-cover"

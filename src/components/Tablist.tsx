@@ -4,20 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { TablistProps } from '@/types/global-Interface';
+import { TabItem } from '@/types/global-Interface';
 
-interface TabItem {
-  id: string;
-  label: string;
-  href: string;
-}
 
-interface TablistProps {
-  tabs?: TabItem[];
-  baseUrl?: string;
-  currentTab?: string;
-  onTabChange?: (tabId: string) => void;
-  variant?: 'default' | 'secondary';
-}
 
 // Default tabs based on the image
 const defaultTabs: TabItem[] = [

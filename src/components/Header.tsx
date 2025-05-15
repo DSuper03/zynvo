@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import { HeaderProps } from '@/types/global-Interface';
 
 // Default navigation items if none are provided
 const defaultNavItems = [
@@ -13,18 +14,7 @@ const defaultNavItems = [
   { name: 'Contact', path: '/contact' },
 ];
 
-export type NavItem = {
-  name: string;
-  path: string;
-};
 
-interface HeaderProps {
-  navItems?: NavItem[];
-  logoText?: string;
-  ctaText?: string;
-  ctaLink?: string;
-  showCta?: boolean;
-}
 
 export function Header({
   navItems = defaultNavItems,
