@@ -1,7 +1,3 @@
 export default function CreatePost() {
-    return (
-        <div>
-           init 
-        </div>
-    );
+  return <div>init</div>;
 }

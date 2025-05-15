@@ -24,7 +24,6 @@ Zynvo breaks traditional campus communication barriers, enabling students to:
 
 - Build a collaborative student community
 
-
 ## 🛠 Technical Stack
 
 - **Frontend**: React Native
@@ -56,6 +55,7 @@ Zynvo breaks traditional campus communication barriers, enabling students to:
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js (v16+)
 - npm or Yarn
 - React Native CLI

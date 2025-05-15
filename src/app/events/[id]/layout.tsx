@@ -2,8 +2,6 @@ import Image from 'next/image';
 import { Tablist } from '@/components/Tablist';
 import { EventLayoutProps } from '@/types/global-Interface';
 
-
-
 const eventTabItems = [
   { id: 'overview', label: 'OVERVIEW', href: '/' },
   { id: 'prizes', label: 'PRIZES', href: 'prizes' },
@@ -35,7 +33,9 @@ export default function EventLayout({ children, params }: EventLayoutProps) {
                 <span className="text-black font-bold text-xl">E</span>
               </div>
               <div>
-                <h1 className="text-white text-3xl font-bold">Event #{eventId}</h1>
+                <h1 className="text-white text-3xl font-bold">
+                  Event #{eventId}
+                </h1>
                 <p className="text-gray-300 text-sm">
                   May 10-12, 2025 • Virtual & San Francisco, CA
                 </p>
@@ -53,13 +53,12 @@ export default function EventLayout({ children, params }: EventLayoutProps) {
           />
         </div>
       </div>
-       
-  <main className="flex-grow bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {children}
-        </div>
-  </main>
 
+      <main className="flex-grow bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }

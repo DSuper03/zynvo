@@ -28,16 +28,11 @@
 // }
 
 //  const club =  async() => {
- 
+
 //   return response.data.resp;
 // }
 
-// export const clubData = 
-
-
-
-
- 
+// export const clubData =
 
 //[
 //     {
@@ -173,4 +168,3 @@
 //       isNew: false
 //     }
 //   ];
-  

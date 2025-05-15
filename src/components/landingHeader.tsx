@@ -4,10 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
-
 // Animation transition settings
 const transition = {
-  type: "spring",
+  type: 'spring',
   mass: 0.5,
   damping: 11.5,
   stiffness: 100,
@@ -52,10 +51,7 @@ const MenuItem = ({
                 layoutId="active"
                 className="bg-black/90 backdrop-blur-sm rounded-2xl overflow-hidden border border-yellow-500/20 shadow-xl"
               >
-                <motion.div
-                  layout
-                  className="w-max h-full p-4"
-                >
+                <motion.div layout className="w-max h-full p-4">
                   {children}
                 </motion.div>
               </motion.div>
@@ -68,7 +64,15 @@ const MenuItem = ({
 };
 
 // HoveredLink component
-const HoveredLink = ({ children, href, onClick }: { children: React.ReactNode; href: string; onClick?: () => void }) => {
+const HoveredLink = ({
+  children,
+  href,
+  onClick,
+}: {
+  children: React.ReactNode;
+  href: string;
+  onClick?: () => void;
+}) => {
   return (
     <Link
       href={href}
@@ -98,7 +102,7 @@ const LandingHeader = () => {
   return (
     <header
       className={`fixed w-full space-x-10 px-10 top-0 left-0 z-50 transition-all duration-300 ${
-        isScrolled 
+        isScrolled
           ? 'bg-black/90 backdrop-blur-md py-2 shadow-lg'
           : 'bg-black/50 backdrop-blur-sm py-4'
       }`}
@@ -109,21 +113,20 @@ const LandingHeader = () => {
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
               <div className="text-yellow-500 mr-2">
-                <svg 
-                  viewBox="0 0 24 24" 
-                  width="36" 
-                  height="36" 
+                <svg
+                  viewBox="0 0 24 24"
+                  width="36"
+                  height="36"
                   className="fill-current"
                 >
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
                 </svg>
               </div>
-            
             </Link>
           </div>
 
           {/* Desktop menu */}
-          <nav 
+          <nav
             className="hidden md:flex items-center space-x-8"
             onMouseLeave={() => setActiveItem(null)}
           >
@@ -139,7 +142,9 @@ const LandingHeader = () => {
                     <span className="text-yellow-400 text-lg">⚡</span>
                     <div>
                       <p className="font-medium text-white">Campus Events</p>
-                      <p className="text-xs text-gray-400">Find exciting events near you</p>
+                      <p className="text-xs text-gray-400">
+                        Find exciting events near you
+                      </p>
                     </div>
                   </div>
                 </HoveredLink>
@@ -148,7 +153,9 @@ const LandingHeader = () => {
                     <span className="text-yellow-400 text-lg">👥</span>
                     <div>
                       <p className="font-medium text-white">College Clubs</p>
-                      <p className="text-xs text-gray-400">Join groups that match your interests</p>
+                      <p className="text-xs text-gray-400">
+                        Join groups that match your interests
+                      </p>
                     </div>
                   </div>
                 </HoveredLink>
@@ -157,7 +164,9 @@ const LandingHeader = () => {
                     <span className="text-yellow-400 text-lg">🏆</span>
                     <div>
                       <p className="font-medium text-white">Competitions</p>
-                      <p className="text-xs text-gray-400">Showcase your skills and win prizes</p>
+                      <p className="text-xs text-gray-400">
+                        Showcase your skills and win prizes
+                      </p>
                     </div>
                   </div>
                 </HoveredLink>
@@ -166,20 +175,22 @@ const LandingHeader = () => {
                     <span className="text-yellow-400 text-lg">💡</span>
                     <div>
                       <p className="font-medium text-white">Workshops</p>
-                      <p className="text-xs text-gray-400">Learn new skills and technologies</p>
+                      <p className="text-xs text-gray-400">
+                        Learn new skills and technologies
+                      </p>
                     </div>
                   </div>
                 </HoveredLink>
               </div>
             </MenuItem>
-            
+
             <MenuItem
               setActive={setActiveItem}
               active={activeItem}
               item="Testimonials"
               href="#testimonials"
             />
-            
+
             <MenuItem
               setActive={setActiveItem}
               active={activeItem}
@@ -192,7 +203,9 @@ const LandingHeader = () => {
                     <span className="text-yellow-400 text-lg">👨‍💻</span>
                     <div>
                       <p className="font-medium text-white">Our Team</p>
-                      <p className="text-xs text-gray-400">Meet the developers behind Zynvo</p>
+                      <p className="text-xs text-gray-400">
+                        Meet the developers behind Zynvo
+                      </p>
                     </div>
                   </div>
                 </HoveredLink>
@@ -201,34 +214,36 @@ const LandingHeader = () => {
                     <span className="text-yellow-400 text-lg">📖</span>
                     <div>
                       <p className="font-medium text-white">Our Story</p>
-                      <p className="text-xs text-gray-400">The journey of building Zynvo</p>
+                      <p className="text-xs text-gray-400">
+                        The journey of building Zynvo
+                      </p>
                     </div>
                   </div>
                 </HoveredLink>
               </div>
             </MenuItem>
-            
+
             <MenuItem
               setActive={setActiveItem}
               active={activeItem}
               item="FAQ"
               href="#faq"
             />
-            
+
             <MenuItem
               setActive={setActiveItem}
               active={activeItem}
               item="Contact"
               href="#contact"
             />
-            
-            <Link 
+
+            <Link
               href="/auth/signup"
               className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
             >
               Sign Up
             </Link>
-            <Link 
+            <Link
               href="/auth/signin"
               className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
             >
@@ -270,9 +285,9 @@ const LandingHeader = () => {
 
       {/* Mobile menu dropdown */}
       {isMobileMenuOpen && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
+          animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.3 }}
           className="md:hidden bg-black/90 backdrop-blur-md"
