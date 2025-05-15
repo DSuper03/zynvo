@@ -2,28 +2,32 @@
 
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import Image from 'next/image';
+import { JoinClubModalProps } from '@/types/global-Interface';
 
-interface JoinClubModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  clubName: string;
-  clubImage: string;
-}
-
-const JoinClubModal: React.FC<JoinClubModalProps> = ({ isOpen, onClose, clubName, clubImage }) => {
+const JoinClubModal: React.FC<JoinClubModalProps> = ({
+  isOpen,
+  onClose,
+  clubName,
+  clubImage,
+}) => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     stream: '',
     year: '',
-    motivation: ''
+    motivation: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -41,21 +45,20 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({ isOpen, onClose, clubName
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-70 flex items-center justify-center">
       <div className="relative bg-gray-900 border border-yellow-500/30 rounded-lg w-full max-w-xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 z-10 bg-gray-900 border-b border-yellow-500/30 p-4 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-white">Join <span className="text-yellow-400">{clubName}</span></h2>
-          <button 
-            onClick={onClose}
-            className="text-gray-300 hover:text-white"
-          >
+          <h2 className="text-xl font-bold text-white">
+            Join <span className="text-yellow-400">{clubName}</span>
+          </h2>
+          <button onClick={onClose} className="text-gray-300 hover:text-white">
             <X size={24} />
           </button>
         </div>
 
         <div className="flex justify-center pt-6">
           <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-yellow-500">
-            <img 
-              src={clubImage} 
-              alt={clubName} 
-              className="w-full h-full object-cover" 
+            <Image
+              src={clubImage}
+              alt={clubName}
+              className="w-full h-full object-cover"
             />
           </div>
         </div>
@@ -63,7 +66,10 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({ isOpen, onClose, clubName
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Full Name */}
           <div className="space-y-2">
-            <label htmlFor="fullName" className="block text-sm font-medium text-yellow-400">
+            <label
+              htmlFor="fullName"
+              className="block text-sm font-medium text-yellow-400"
+            >
               Full Name*
             </label>
             <input
@@ -80,7 +86,10 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({ isOpen, onClose, clubName
 
           {/* Email */}
           <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-yellow-400">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-yellow-400"
+            >
               Email Address*
             </label>
             <input
@@ -98,7 +107,10 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({ isOpen, onClose, clubName
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Stream/Major */}
             <div className="space-y-2">
-              <label htmlFor="stream" className="block text-sm font-medium text-yellow-400">
+              <label
+                htmlFor="stream"
+                className="block text-sm font-medium text-yellow-400"
+              >
                 Stream/Major*
               </label>
               <input
@@ -115,7 +127,10 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({ isOpen, onClose, clubName
 
             {/* Year */}
             <div className="space-y-2">
-              <label htmlFor="year" className="block text-sm font-medium text-yellow-400">
+              <label
+                htmlFor="year"
+                className="block text-sm font-medium text-yellow-400"
+              >
                 Year of Study*
               </label>
               <select
@@ -126,7 +141,9 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({ isOpen, onClose, clubName
                 onChange={handleChange}
                 className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
               >
-                <option value="" disabled>Select your year</option>
+                <option value="" disabled>
+                  Select your year
+                </option>
                 <option value="1">First Year</option>
                 <option value="2">Second Year</option>
                 <option value="3">Third Year</option>
@@ -138,7 +155,10 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({ isOpen, onClose, clubName
 
           {/* Motivation */}
           <div className="space-y-2">
-            <label htmlFor="motivation" className="block text-sm font-medium text-yellow-400">
+            <label
+              htmlFor="motivation"
+              className="block text-sm font-medium text-yellow-400"
+            >
               Why do you want to join this club?
             </label>
             <textarea

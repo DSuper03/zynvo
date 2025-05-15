@@ -1,27 +1,19 @@
-import React, { useEffect, useRef } from "react";
-
-interface FuzzyTextProps {
-  children: React.ReactNode;
-  fontSize?: number | string;
-  fontWeight?: string | number;
-  fontFamily?: string;
-  color?: string;
-  enableHover?: boolean;
-  baseIntensity?: number;
-  hoverIntensity?: number;
-}
+import { FuzzyTextProps } from '@/types/global-Interface';
+import React, { useEffect, useRef } from 'react';
 
 const FuzzyText: React.FC<FuzzyTextProps> = ({
   children,
-  fontSize = "clamp(2rem, 8vw, 8rem)",
+  fontSize = 'clamp(2rem, 8vw, 8rem)',
   fontWeight = 900,
-  fontFamily = "inherit",
-  color = "#fff",
+  fontFamily = 'inherit',
+  color = '#fff',
   enableHover = true,
   baseIntensity = 0.18,
   hoverIntensity = 0.5,
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement & { cleanupFuzzyText?: () => void}>(null);
+  const canvasRef = useRef<
+    HTMLCanvasElement & { cleanupFuzzyText?: () => void }
+  >(null);
 
   useEffect(() => {
     let animationFrameId: number;
@@ -35,21 +27,21 @@ const FuzzyText: React.FC<FuzzyTextProps> = ({
       }
       if (isCancelled) return;
 
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
       const computedFontFamily =
-        fontFamily === "inherit"
-          ? window.getComputedStyle(canvas).fontFamily || "sans-serif"
+        fontFamily === 'inherit'
+          ? window.getComputedStyle(canvas).fontFamily || 'sans-serif'
           : fontFamily;
 
       const fontSizeStr =
-        typeof fontSize === "number" ? `${fontSize}px` : fontSize;
+        typeof fontSize === 'number' ? `${fontSize}px` : fontSize;
       let numericFontSize: number;
-      if (typeof fontSize === "number") {
+      if (typeof fontSize === 'number') {
         numericFontSize = fontSize;
       } else {
-        const temp = document.createElement("span");
+        const temp = document.createElement('span');
         temp.style.fontSize = fontSize;
         document.body.appendChild(temp);
         const computedSize = window.getComputedStyle(temp).fontSize;
@@ -57,14 +49,14 @@ const FuzzyText: React.FC<FuzzyTextProps> = ({
         document.body.removeChild(temp);
       }
 
-      const text = React.Children.toArray(children).join("");
+      const text = React.Children.toArray(children).join('');
 
-      const offscreen = document.createElement("canvas");
-      const offCtx = offscreen.getContext("2d");
+      const offscreen = document.createElement('canvas');
+      const offCtx = offscreen.getContext('2d');
       if (!offCtx) return;
 
       offCtx.font = `${fontWeight} ${fontSizeStr} ${computedFontFamily}`;
-      offCtx.textBaseline = "alphabetic";
+      offCtx.textBaseline = 'alphabetic';
       const metrics = offCtx.measureText(text);
 
       const actualLeft = metrics.actualBoundingBoxLeft ?? 0;
@@ -84,7 +76,7 @@ const FuzzyText: React.FC<FuzzyTextProps> = ({
 
       const xOffset = extraWidthBuffer / 2;
       offCtx.font = `${fontWeight} ${fontSizeStr} ${computedFontFamily}`;
-      offCtx.textBaseline = "alphabetic";
+      offCtx.textBaseline = 'alphabetic';
       offCtx.fillStyle = color;
       offCtx.fillText(text, xOffset - actualLeft, actualAscent);
 
@@ -163,21 +155,21 @@ const FuzzyText: React.FC<FuzzyTextProps> = ({
       };
 
       if (enableHover) {
-        canvas.addEventListener("mousemove", handleMouseMove);
-        canvas.addEventListener("mouseleave", handleMouseLeave);
-        canvas.addEventListener("touchmove", handleTouchMove, {
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mouseleave', handleMouseLeave);
+        canvas.addEventListener('touchmove', handleTouchMove, {
           passive: false,
         });
-        canvas.addEventListener("touchend", handleTouchEnd);
+        canvas.addEventListener('touchend', handleTouchEnd);
       }
 
       const cleanup = () => {
         window.cancelAnimationFrame(animationFrameId);
         if (enableHover) {
-          canvas.removeEventListener("mousemove", handleMouseMove);
-          canvas.removeEventListener("mouseleave", handleMouseLeave);
-          canvas.removeEventListener("touchmove", handleTouchMove);
-          canvas.removeEventListener("touchend", handleTouchEnd);
+          canvas.removeEventListener('mousemove', handleMouseMove);
+          canvas.removeEventListener('mouseleave', handleMouseLeave);
+          canvas.removeEventListener('touchmove', handleTouchMove);
+          canvas.removeEventListener('touchend', handleTouchEnd);
         }
       };
 

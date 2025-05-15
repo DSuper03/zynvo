@@ -1,15 +1,14 @@
 'use client';
 
-import React, {  useState } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { X, Upload, Camera } from 'lucide-react';
+import { CreateClubModalProps } from '@/types/global-Interface';
 
-interface CreateClubModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) => {
+const CreateClubModal: React.FC<CreateClubModalProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const [clubData, setClubData] = useState({
     name: '',
     description: '',
@@ -19,26 +18,29 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
     requirements: '',
     clubContact: '',
   });
-  
 
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setClubData(prev => ({
+    setClubData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setClubData(prev => ({
+      setClubData((prev) => ({
         ...prev,
-        logo: file
+        logo: file,
       }));
-      
+
       // Create preview URL for the image
       const reader = new FileReader();
       reader.onload = () => {
@@ -51,15 +53,18 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Here you would typically send the data to your API
-    const upload = await axios.post("http://localhost:8000/api/v1/clubs/club", clubData);
-    
-    const msg = upload?.data  
-    if(upload.status == 200) {
+    const upload = await axios.post(
+      'http://localhost:8000/api/v1/clubs/club',
+      clubData
+    );
+
+    const msg = upload?.data;
+    if (upload.status == 200) {
       alert({
-        msg : msg, 
-        
-        clubId : upload?.data
-      })
+        msg: msg,
+
+        clubId: upload?.data,
+      });
     }
     console.log('Club data to submit:', clubData);
     // After successful submission, close modal
@@ -73,10 +78,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
       <div className="relative bg-gray-900 border border-yellow-500/30 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 z-10 bg-gray-900 border-b border-yellow-500/30 p-4 flex justify-between items-center">
           <h2 className="text-xl font-bold text-white">Create a New Club</h2>
-          <button 
-            onClick={onClose}
-            className="text-gray-300 hover:text-white"
-          >
+          <button onClick={onClose} className="text-gray-300 hover:text-white">
             <X size={24} />
           </button>
         </div>
@@ -86,17 +88,20 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
           <div className="flex flex-col items-center mb-6">
             <div className="w-32 h-32 rounded-full bg-gray-800 border-2 border-dashed border-yellow-500/50 flex items-center justify-center overflow-hidden relative">
               {previewImage ? (
-                <Image 
-                  src={previewImage} 
-                  alt="Club logo preview" 
-                  fill 
+                <Image
+                  src={previewImage}
+                  alt="Club logo preview"
+                  fill
                   className="object-cover"
                 />
               ) : (
                 <Camera size={40} className="text-yellow-500/70" />
               )}
             </div>
-            <label htmlFor="logo-upload" className="mt-3 cursor-pointer bg-yellow-500 hover:bg-yellow-400 text-black font-medium px-4 py-2 rounded-lg flex items-center transition-colors">
+            <label
+              htmlFor="logo-upload"
+              className="mt-3 cursor-pointer bg-yellow-500 hover:bg-yellow-400 text-black font-medium px-4 py-2 rounded-lg flex items-center transition-colors"
+            >
               <Upload size={16} className="mr-2" />
               Upload Logo
               <input
@@ -108,12 +113,17 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
                 className="hidden"
               />
             </label>
-            <p className="text-gray-400 text-xs mt-2">Recommended: Square image, 300x300px or larger</p>
+            <p className="text-gray-400 text-xs mt-2">
+              Recommended: Square image, 300x300px or larger
+            </p>
           </div>
 
           {/* Club Name */}
           <div className="space-y-2">
-            <label htmlFor="name" className="block text-sm font-medium text-yellow-400">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-yellow-400"
+            >
               Club Name*
             </label>
             <input
@@ -130,7 +140,10 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
 
           {/* Club Description */}
           <div className="space-y-2">
-            <label htmlFor="description" className="block text-sm font-medium text-yellow-400">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-yellow-400"
+            >
               Club Description*
             </label>
             <textarea
@@ -147,7 +160,10 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
 
           {/* type/Type */}
           <div className="space-y-2">
-            <label htmlFor="type" className="block text-sm font-medium text-yellow-400">
+            <label
+              htmlFor="type"
+              className="block text-sm font-medium text-yellow-400"
+            >
               Category/Type*
             </label>
             <select
@@ -158,7 +174,9 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
               onChange={handleChange}
               className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
             >
-              <option value="" disabled>Select a type</option>
+              <option value="" disabled>
+                Select a type
+              </option>
               <option value="tech">Technology</option>
               <option value="cultural">Cultural</option>
               <option value="business">Business </option>
@@ -171,7 +189,10 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Founder/Club President Name */}
             <div className="space-y-2">
-              <label htmlFor="FounderEmail" className="block text-sm font-medium text-yellow-400">
+              <label
+                htmlFor="FounderEmail"
+                className="block text-sm font-medium text-yellow-400"
+              >
                 Founder/Club President Email*
               </label>
               <input
@@ -188,7 +209,10 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
 
             {/* Faculty Advisor */}
             <div className="space-y-2">
-              <label htmlFor="facultyEmail" className="block text-sm font-medium text-yellow-400">
+              <label
+                htmlFor="facultyEmail"
+                className="block text-sm font-medium text-yellow-400"
+              >
                 Club Faculty Advisor*
               </label>
               <input
@@ -206,7 +230,10 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
 
           {/* Membership Criteria */}
           <div className="space-y-2">
-            <label htmlFor="requirements" className="block text-sm font-medium text-yellow-400">
+            <label
+              htmlFor="requirements"
+              className="block text-sm font-medium text-yellow-400"
+            >
               Membership Criteria
             </label>
             <textarea
@@ -222,7 +249,10 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({ isOpen, onClose }) =>
 
           {/* Contact Information */}
           <div className="space-y-2">
-            <label htmlFor="clubContact" className="block text-sm font-medium text-yellow-400">
+            <label
+              htmlFor="clubContact"
+              className="block text-sm font-medium text-yellow-400"
+            >
               Club Contact Information*
             </label>
             <input

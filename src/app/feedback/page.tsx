@@ -1,4 +1,4 @@
-"use client"
+'use client';
 // have to fix types
 import { useState } from 'react';
 
@@ -8,149 +8,179 @@ export default function FeedbackForm() {
     title: '',
     category: 'enhancement',
     description: '',
-    improvements: ''
+    improvements: '',
   });
-  
-  
-  const backgroundImage = 'https://i.pinimg.com/736x/0a/8a/54/0a8a54b3aa265248460da6a0e9eb7179.jpg';
+
+  const backgroundImage =
+    'https://i.pinimg.com/736x/0a/8a/54/0a8a54b3aa265248460da6a0e9eb7179.jpg';
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [currentStep, setCurrentStep] = useState(1); // For multi-step form
-  
+
   // Categories for selection
   const categories = [
-    { id: 'enhancement', label: 'Enhancement', description: 'Improve an existing feature', icon: '⚡' },
-    { id: 'bug-fix', label: 'Bug Fix', description: 'Report a bug or issue', icon: '🐞' },
-    { id: 'new-feature', label: 'New Feature', description: 'Suggest a new feature', icon: '✨' },
-    { id: 'other', label: 'Other', description: 'Other type of request', icon: '📝' }
+    {
+      id: 'enhancement',
+      label: 'Enhancement',
+      description: 'Improve an existing feature',
+      icon: '⚡',
+    },
+    {
+      id: 'bug-fix',
+      label: 'Bug Fix',
+      description: 'Report a bug or issue',
+      icon: '🐞',
+    },
+    {
+      id: 'new-feature',
+      label: 'New Feature',
+      description: 'Suggest a new feature',
+      icon: '✨',
+    },
+    {
+      id: 'other',
+      label: 'Other',
+      description: 'Other type of request',
+      icon: '📝',
+    },
   ];
 
   // Handle form input changes
-  const handleInputChange = (e : any) => {
+  const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
-  
+
   // Handle category selection
-  const handleCategorySelect = (category : any) => {
+  const handleCategorySelect = (category: any) => {
     setFormData({
       ...formData,
-      category
+      category,
     });
   };
-  
+
   // Navigate between steps
   const nextStep = () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     }
   };
-  
+
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
-  
+
   // Handle form submission
-  const handleSubmit = (e :  any) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     setSubmitting(true);
-    
+
     // Format email data
     const emailData = {
       subject: `Feedback: ${formData.title}`,
       category: formData.category,
       description: formData.description,
-      improvements: formData.improvements
+      improvements: formData.improvements,
     };
-    
-    console.log("Sending email with data:", emailData);
-    
+
+    console.log('Sending email with data:', emailData);
+
     // Simulate sending email
     setTimeout(() => {
       setSubmitting(false);
       setSubmitted(true);
-      
+
       // Reset form after delay
       setTimeout(() => {
         setFormData({
           title: '',
           category: 'enhancement',
           description: '',
-          improvements: ''
+          improvements: '',
         });
         setCurrentStep(1);
         setSubmitted(false);
       }, 4000);
     }, 1500);
   };
-  
+
   // Progress indicator
   const ProgressBar = () => (
     <div className="flex items-center justify-between mb-8 relative">
       <div className="absolute h-1 bg-gray-700 w-full top-1/2 -translate-y-1/2"></div>
       {[1, 2, 3].map((step) => (
         <div key={step} className="relative z-10">
-          <div 
+          <div
             className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              step < currentStep 
+              step < currentStep
                 ? 'bg-yellow-500 text-gray-900'
                 : step === currentStep
-                ? 'bg-yellow-500 ring-4 ring-yellow-300/30 text-gray-900'
-                : 'bg-gray-800 text-gray-400'
+                  ? 'bg-yellow-500 ring-4 ring-yellow-300/30 text-gray-900'
+                  : 'bg-gray-800 text-gray-400'
             }`}
           >
             {step < currentStep ? (
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
               </svg>
             ) : (
               step
             )}
           </div>
-          <div className={`text-xs mt-2 absolute -left-8 w-24 text-center ${
-            step === currentStep ? 'text-yellow-500 font-medium' : 'text-gray-500'
-          }`}>
+          <div
+            className={`text-xs mt-2 absolute -left-8 w-24 text-center ${
+              step === currentStep
+                ? 'text-yellow-500 font-medium'
+                : 'text-gray-500'
+            }`}
+          >
             {step === 1 ? 'Basics' : step === 2 ? 'Details' : 'Review'}
           </div>
         </div>
       ))}
     </div>
   );
-  
+
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       {/* Background with overlay */}
-      <div 
+      <div
         className="fixed inset-0 bg-center bg-cover z-0"
         style={{ backgroundImage: `url(${backgroundImage})` }}
       />
       <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm z-0"></div>
-      
+
       {/* Main Container */}
       <div className="w-full max-w-2xl bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl overflow-hidden relative z-10">
         {/* Yellow accent bar */}
         <div className="h-2 w-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600"></div>
-        
+
         {/* Header */}
         <div className="px-8 pt-8 pb-6">
           <h1 className="text-3xl font-bold text-white">
             <span className="text-yellow-500">Feed</span>back
           </h1>
-          <p className="text-gray-400 mt-2">We value your input to make our product better</p>
+          <p className="text-gray-400 mt-2">
+            We value your input to make our product better
+          </p>
         </div>
-        
+
         {/* Form content based on step */}
         <div className="px-8 pb-8">
           {!submitted ? (
             <form onSubmit={handleSubmit}>
               {/* Progress tracker */}
               <ProgressBar />
-              
+
               {/* Step 1: Basic Info */}
               {currentStep === 1 && (
                 <div className="space-y-6">
@@ -165,19 +195,23 @@ export default function FeedbackForm() {
                       className="peer w-full p-4 pt-6 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-white placeholder-transparent transition-all"
                       required
                     />
-                    <label 
-                      htmlFor="title" 
+                    <label
+                      htmlFor="title"
                       className="absolute left-4 top-2 text-xs text-gray-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-500 peer-focus:top-2 peer-focus:text-xs peer-focus:text-yellow-500"
                     >
                       Title
                     </label>
-                    <p className="text-gray-500 text-xs mt-2 ml-1">Briefly describe your feedback</p>
+                    <p className="text-gray-500 text-xs mt-2 ml-1">
+                      Briefly describe your feedback
+                    </p>
                   </div>
-                  
+
                   <div className="space-y-3">
-                    <label className="block text-sm text-gray-300">Category</label>
+                    <label className="block text-sm text-gray-300">
+                      Category
+                    </label>
                     <div className="grid grid-cols-2 gap-3">
-                      {categories.map(category => (
+                      {categories.map((category) => (
                         <div
                           key={category.id}
                           onClick={() => handleCategorySelect(category.id)}
@@ -188,19 +222,25 @@ export default function FeedbackForm() {
                           }`}
                         >
                           <div className="flex items-center">
-                            <span className="text-xl mr-3">{category.icon}</span>
+                            <span className="text-xl mr-3">
+                              {category.icon}
+                            </span>
                             <div>
-                              <h3 className={`font-medium ${formData.category === category.id ? 'text-yellow-500' : 'text-white'}`}>
+                              <h3
+                                className={`font-medium ${formData.category === category.id ? 'text-yellow-500' : 'text-white'}`}
+                              >
                                 {category.label}
                               </h3>
-                              <p className="text-gray-400 text-xs mt-1">{category.description}</p>
+                              <p className="text-gray-400 text-xs mt-1">
+                                {category.description}
+                              </p>
                             </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                  
+
                   {/* Navigation */}
                   <div className="mt-8 flex justify-end">
                     <button
@@ -209,14 +249,24 @@ export default function FeedbackForm() {
                       className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-medium px-6 py-3 rounded-lg transition-colors flex items-center"
                     >
                       Continue
-                      <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      <svg
+                        className="w-4 h-4 ml-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
                       </svg>
                     </button>
                   </div>
                 </div>
               )}
-              
+
               {/* Step 2: Details */}
               {currentStep === 2 && (
                 <div className="space-y-6">
@@ -231,15 +281,17 @@ export default function FeedbackForm() {
                       className="peer w-full p-4 pt-6 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-white placeholder-transparent transition-all resize-none"
                       required
                     ></textarea>
-                    <label 
-                      htmlFor="description" 
+                    <label
+                      htmlFor="description"
                       className="absolute left-4 top-2 text-xs text-gray-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-500 peer-focus:top-2 peer-focus:text-xs peer-focus:text-yellow-500"
                     >
                       Description
                     </label>
-                    <p className="text-gray-500 text-xs mt-2 ml-1">Please provide a detailed explanation</p>
+                    <p className="text-gray-500 text-xs mt-2 ml-1">
+                      Please provide a detailed explanation
+                    </p>
                   </div>
-                  
+
                   <div className="relative">
                     <textarea
                       id="improvements"
@@ -250,15 +302,17 @@ export default function FeedbackForm() {
                       placeholder=" "
                       className="peer w-full p-4 pt-6 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-white placeholder-transparent transition-all resize-none"
                     ></textarea>
-                    <label 
-                      htmlFor="improvements" 
+                    <label
+                      htmlFor="improvements"
                       className="absolute left-4 top-2 text-xs text-gray-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-500 peer-focus:top-2 peer-focus:text-xs peer-focus:text-yellow-500"
                     >
                       Suggested Improvements
                     </label>
-                    <p className="text-gray-500 text-xs mt-2 ml-1">How can we make this better?</p>
+                    <p className="text-gray-500 text-xs mt-2 ml-1">
+                      How can we make this better?
+                    </p>
                   </div>
-                  
+
                   {/* Navigation */}
                   <div className="mt-8 flex justify-between">
                     <button
@@ -266,8 +320,18 @@ export default function FeedbackForm() {
                       onClick={prevStep}
                       className="text-gray-400 hover:text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center"
                     >
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      <svg
+                        className="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
                       </svg>
                       Back
                     </button>
@@ -277,46 +341,76 @@ export default function FeedbackForm() {
                       className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-medium px-6 py-3 rounded-lg transition-colors flex items-center"
                     >
                       Review
-                      <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      <svg
+                        className="w-4 h-4 ml-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
                       </svg>
                     </button>
                   </div>
                 </div>
               )}
-              
+
               {/* Step 3: Review and Submit */}
               {currentStep === 3 && (
                 <div className="space-y-6">
                   <div className="bg-gray-800 rounded-xl p-6 space-y-4">
                     <div>
-                      <h3 className="text-sm font-medium text-gray-400">Title</h3>
-                      <p className="text-white mt-1">{formData.title || '(Not provided)'}</p>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-400">Category</h3>
-                      <p className="text-white mt-1 flex items-center">
-                        <span className="mr-2">
-                          {categories.find(c => c.id === formData.category)?.icon}
-                        </span>
-                        {categories.find(c => c.id === formData.category)?.label}
+                      <h3 className="text-sm font-medium text-gray-400">
+                        Title
+                      </h3>
+                      <p className="text-white mt-1">
+                        {formData.title || '(Not provided)'}
                       </p>
                     </div>
-                    
+
                     <div>
-                      <h3 className="text-sm font-medium text-gray-400">Description</h3>
-                      <p className="text-white mt-1 whitespace-pre-line">{formData.description || '(Not provided)'}</p>
+                      <h3 className="text-sm font-medium text-gray-400">
+                        Category
+                      </h3>
+                      <p className="text-white mt-1 flex items-center">
+                        <span className="mr-2">
+                          {
+                            categories.find((c) => c.id === formData.category)
+                              ?.icon
+                          }
+                        </span>
+                        {
+                          categories.find((c) => c.id === formData.category)
+                            ?.label
+                        }
+                      </p>
                     </div>
-                    
+
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-400">
+                        Description
+                      </h3>
+                      <p className="text-white mt-1 whitespace-pre-line">
+                        {formData.description || '(Not provided)'}
+                      </p>
+                    </div>
+
                     {formData.improvements && (
                       <div>
-                        <h3 className="text-sm font-medium text-gray-400">Suggested Improvements</h3>
-                        <p className="text-white mt-1 whitespace-pre-line">{formData.improvements}</p>
+                        <h3 className="text-sm font-medium text-gray-400">
+                          Suggested Improvements
+                        </h3>
+                        <p className="text-white mt-1 whitespace-pre-line">
+                          {formData.improvements}
+                        </p>
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Navigation */}
                   <div className="mt-8 flex justify-between items-center">
                     <button
@@ -324,8 +418,18 @@ export default function FeedbackForm() {
                       onClick={prevStep}
                       className="text-gray-400 hover:text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center"
                     >
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      <svg
+                        className="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
                       </svg>
                       Edit
                     </button>
@@ -340,13 +444,30 @@ export default function FeedbackForm() {
                     >
                       {submitting ? (
                         <>
-                          <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          <svg
+                            className="animate-spin -ml-1 mr-3 h-4 w-4 text-gray-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
                           </svg>
                           Processing
                         </>
-                      ) : 'Submit Feedback'}
+                      ) : (
+                        'Submit Feedback'
+                      )}
                     </button>
                   </div>
                 </div>
@@ -355,18 +476,29 @@ export default function FeedbackForm() {
           ) : (
             <div className="text-center py-16 space-y-6">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-900 bg-opacity-20 border-2 border-green-500 mb-4">
-                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-8 h-8 text-green-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-white">Thank You!</h2>
               <p className="text-gray-400 max-w-md mx-auto">
-                Your feedback has been submitted successfully. We appreciate your input and will review it shortly.
+                Your feedback has been submitted successfully. We appreciate
+                your input and will review it shortly.
               </p>
             </div>
           )}
         </div>
-        
+
         {/* Footer */}
         <div className="border-t border-gray-800 px-8 py-4 text-center text-gray-500 text-xs">
           Your feedback helps us build better products

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect } from 'react';
 
 interface NoiseProps {
   patternSize?: number;
@@ -21,15 +21,15 @@ const Noise: React.FC<NoiseProps> = ({
     const canvas = grainRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     let frame = 0;
 
-    const patternCanvas = document.createElement("canvas");
+    const patternCanvas = document.createElement('canvas');
     patternCanvas.width = patternSize;
     patternCanvas.height = patternSize;
-    const patternCtx = patternCanvas.getContext("2d");
+    const patternCtx = patternCanvas.getContext('2d');
     if (!patternCtx) return;
 
     const patternData = patternCtx.createImageData(patternSize, patternSize);
@@ -56,7 +56,7 @@ const Noise: React.FC<NoiseProps> = ({
 
     const drawGrain = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const pattern = ctx.createPattern(patternCanvas, "repeat");
+      const pattern = ctx.createPattern(patternCanvas, 'repeat');
       if (pattern) {
         ctx.fillStyle = pattern;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -72,16 +72,27 @@ const Noise: React.FC<NoiseProps> = ({
       window.requestAnimationFrame(loop);
     };
 
-    window.addEventListener("resize", resize);
+    window.addEventListener('resize', resize);
     resize();
     loop();
 
     return () => {
-      window.removeEventListener("resize", resize);
+      window.removeEventListener('resize', resize);
     };
-  }, [patternSize, patternScaleX, patternScaleY, patternRefreshInterval, patternAlpha]);
+  }, [
+    patternSize,
+    patternScaleX,
+    patternScaleY,
+    patternRefreshInterval,
+    patternAlpha,
+  ]);
 
-  return <canvas className="absolute left-0 top-0 w-screen h-screen" ref={grainRef} />;
+  return (
+    <canvas
+      className="absolute left-0 top-0 w-screen h-screen"
+      ref={grainRef}
+    />
+  );
 };
 
 export default Noise;
