@@ -69,6 +69,8 @@ export default function Home() {
           src="/landing page.png"
           alt="Background"
           className="object-cover w-full h-full"
+          width={1000}
+          height={1000}
         />
       </div>
 
@@ -302,7 +304,7 @@ export default function Home() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        d="M3.055 11H5a2 2 0 002 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
                   ),
@@ -409,26 +411,23 @@ export default function Home() {
                   name: 'Alex Johnson',
                   role: 'President, Tech Club',
                   university: 'Stanford University',
-                  quote:
-                    "Zynvo helped us increase our membership by 300% in just one semester. The platform's event management tools saved us countless hours of work.",
-                  image: '/placeholder-avatar-1.png',
+                  quote: "Zynvo helped us increase our membership by 300% in just one semester. The platform's event management tools saved us countless hours of work.",
+                  image: '/placeholder-avatar-1.png'
                 },
                 {
                   name: 'Mira Patel',
                   role: 'Member, Dance Society',
                   university: 'UCLA',
-                  quote:
-                    'I found my passion for dance through Zynvo. The platform made it easy to discover events and connect with other dance enthusiasts.',
-                  image: '/placeholder-avatar-2.png',
+                  quote: 'I found my passion for dance through Zynvo. The platform made it easy to discover events and connect with other dance enthusiasts.',
+                  image: '/placeholder-avatar-2.png'
                 },
                 {
                   name: 'James Wilson',
                   role: 'Organizer, Debate Club',
                   university: 'MIT',
-                  quote:
-                    'Coordinating with other universities for debate competitions was a nightmare before Zynvo. Now we can seamlessly organize inter-college events.',
-                  image: '/placeholder-avatar-3.png',
-                },
+                  quote: 'Coordinating with other universities for debate competitions was a nightmare before Zynvo. Now we can seamlessly organize inter-college events.',
+                  image: '/placeholder-avatar-3.png'
+                }
               ].map((testimonial, index) => (
                 <motion.div
                   key={index}
@@ -452,9 +451,13 @@ export default function Home() {
                     &rdquo;{testimonial.quote}&#34;
                   </p>
                   <div className="flex items-center">
-                    <div className="w-12 h-12 rounded-full bg-gray-600 mr-4 flex items-center justify-center text-lg font-bold">
-                      {testimonial.name.charAt(0)}
-                    </div>
+                    <Image
+                      src={testimonial.image}
+                      alt={testimonial.name}
+                      width={48}
+                      height={48}
+                      className="rounded-full border-2 border-yellow-500/20 mr-4"
+                    />
                     <div>
                       <h4 className="font-semibold">{testimonial.name}</h4>
                       <p className="text-sm text-gray-400">
