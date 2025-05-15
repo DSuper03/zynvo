@@ -411,23 +411,26 @@ export default function Home() {
                   name: 'Alex Johnson',
                   role: 'President, Tech Club',
                   university: 'Stanford University',
-                  quote: "Zynvo helped us increase our membership by 300% in just one semester. The platform's event management tools saved us countless hours of work.",
-                  image: '/placeholder-avatar-1.png'
+                  quote:
+                    "Zynvo helped us increase our membership by 300% in just one semester. The platform's event management tools saved us countless hours of work.",
+                  image: '/placeholder-avatar-1.png',
                 },
                 {
                   name: 'Mira Patel',
                   role: 'Member, Dance Society',
                   university: 'UCLA',
-                  quote: 'I found my passion for dance through Zynvo. The platform made it easy to discover events and connect with other dance enthusiasts.',
-                  image: '/placeholder-avatar-2.png'
+                  quote:
+                    'I found my passion for dance through Zynvo. The platform made it easy to discover events and connect with other dance enthusiasts.',
+                  image: '/placeholder-avatar-2.png',
                 },
                 {
                   name: 'James Wilson',
                   role: 'Organizer, Debate Club',
                   university: 'MIT',
-                  quote: 'Coordinating with other universities for debate competitions was a nightmare before Zynvo. Now we can seamlessly organize inter-college events.',
-                  image: '/placeholder-avatar-3.png'
-                }
+                  quote:
+                    'Coordinating with other universities for debate competitions was a nightmare before Zynvo. Now we can seamlessly organize inter-college events.',
+                  image: '/placeholder-avatar-3.png',
+                },
               ].map((testimonial, index) => (
                 <motion.div
                   key={index}
