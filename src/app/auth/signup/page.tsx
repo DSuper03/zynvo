@@ -1,3 +1,4 @@
+// Modified SignUp.js component with DiceBear Avatar integration
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -13,6 +14,7 @@ import {
 } from 'react-icons/fi';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
 import dotenv from 'dotenv';
+import DiceBearAvatar from "@/components/DicebearAvatars" // Import the DiceBearAvatar component
 
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -30,6 +32,7 @@ export default function SignUp() {
     email: '',
     password: '',
     collegeName: '',
+    avatarUrl: '', // Added avatarUrl to store the avatar URL
   });
   const [agreeToTerms, setAgree] = useState(false);
 
@@ -45,6 +48,14 @@ export default function SignUp() {
         [name]: type === 'checkbox' ? checked : value,
       }));
     }
+  };
+
+  // Handle avatar URL change
+  const handleAvatarChange = (url: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      avatarUrl: url,
+    }));
   };
 
   const handleNextStep = (e: React.FormEvent<HTMLFormElement>) => {
@@ -229,6 +240,12 @@ export default function SignUp() {
                       />
                     </div>
                   </div>
+
+                  {/* DiceBear Avatar Component */}
+                  <DiceBearAvatar 
+                    name={formData.name} 
+                    onAvatarChange={handleAvatarChange} 
+                  />
 
                   <div className="mb-4">
                     <label
