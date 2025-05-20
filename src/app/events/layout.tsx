@@ -1,4 +1,15 @@
 import { Sidebar } from '@/components/Sidebar';
+import { Metadata } from 'next';
+
+
+export const metadata: Metadata = {
+  title: 'Campus Events | Zynvo',
+  description: 'Stay updated with the latest campus events, workshops, and activities. Never miss an opportunity to engage with your college community.',
+  openGraph: {
+    title: 'Campus Events | Zynvo',
+    description: 'Stay updated with the latest campus events and activities',
+  }
+};
 
 export default function RootLayout({
   children,

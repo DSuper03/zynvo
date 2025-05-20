@@ -1,4 +1,14 @@
 import { Sidebar } from '@/components/Sidebar';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Clubs & Societies | Zynvo',
+  description: 'Discover and join exciting college clubs and societies. Find the perfect community that matches your interests and passions.',
+  openGraph: {
+    title: 'Clubs & Societies | Zynvo',
+    description: 'Discover and join exciting college clubs and societies',
+  }
+};
 
 export default function RootLayout({
   children,
