@@ -53,6 +53,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily' as ChangeFreq,
       priority: 0.9,
     },
+    {
+      url: `${baseUrl}/createPost`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly' as ChangeFreq,
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/clubs/createclub`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly' as ChangeFreq,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/clubs/joinclub`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as ChangeFreq,
+      priority: 0.7,
+    },
   ];
 
   // Dynamic routes
