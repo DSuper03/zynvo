@@ -144,6 +144,8 @@ const Speakers = () => {
                     <div className="absolute inset-0 bg-yellow-400/20 group-hover:bg-yellow-400/10 transition-all duration-500"></div>
                     <Image
                       src={speaker.image}
+                      width={40}
+                      height={30}
                       alt={speaker.name}
                       className="w-full h-full object-cover object-center group-hover:scale-105 transition-all duration-700"
                     />
@@ -224,6 +226,8 @@ const Speakers = () => {
                     <Image
                       src={judge.image}
                       alt={judge.name}
+                      width={40}
+                      height={30}
                       className="w-full h-full object-cover object-center group-hover:scale-105 transition-all duration-700"
                     />
                   </div>

@@ -413,7 +413,7 @@ export default function Home() {
                   university: 'Stanford University',
                   quote:
                     "Zynvo helped us increase our membership by 300% in just one semester. The platform's event management tools saved us countless hours of work.",
-                  image: '/placeholder-avatar-1.png',
+                  image: '/student1.png',
                 },
                 {
                   name: 'Mira Patel',
@@ -421,7 +421,7 @@ export default function Home() {
                   university: 'UCLA',
                   quote:
                     'I found my passion for dance through Zynvo. The platform made it easy to discover events and connect with other dance enthusiasts.',
-                  image: '/placeholder-avatar-2.png',
+                  image: '/student2.png',
                 },
                 {
                   name: 'James Wilson',
@@ -429,7 +429,7 @@ export default function Home() {
                   university: 'MIT',
                   quote:
                     'Coordinating with other universities for debate competitions was a nightmare before Zynvo. Now we can seamlessly organize inter-college events.',
-                  image: '/placeholder-avatar-3.png',
+                  image: '/student3.png',
                 },
               ].map((testimonial, index) => (
                 <motion.div

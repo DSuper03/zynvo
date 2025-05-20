@@ -320,6 +320,9 @@ export function Sidebar() {
                 src="https://i.pravatar.cc/150?img=32"
                 alt="Profile"
                 className="object-cover"
+                width={32}
+                height={32}
+
               />
             </div>
 
@@ -410,6 +413,8 @@ export function Sidebar() {
               src="https://i.pravatar.cc/150?img=32"
               alt="Profile"
               className="object-cover"
+              width={32}
+              height={32}
             />
           </div>
         </div>

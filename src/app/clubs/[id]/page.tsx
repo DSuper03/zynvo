@@ -155,6 +155,8 @@ export default function ClubPage({}: ClubPageProps) {
               src={club.image || '/default-club-image.jpg'}
               alt={club.name}
               fill
+              width={1000}
+              height={500}
               className="object-cover"
               priority
             />
@@ -169,6 +171,8 @@ export default function ClubPage({}: ClubPageProps) {
               src={club.image || 'default-club-image.jpg'}
               alt={club.name}
               fill
+              width={128}
+              height={128}
               className="object-cover"
               priority
             />
@@ -392,6 +396,8 @@ export default function ClubPage({}: ClubPageProps) {
                         src={event.image || '/default-event-image.jpg'}
                         alt={event.title || 'Event Image'}
                         fill
+                        width={100}
+                        height={100}
                         className="object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -483,7 +489,9 @@ export default function ClubPage({}: ClubPageProps) {
                           <Image
                             src={post.image}
                             alt="Post image"
-                            fill
+                            width={100}
+                            height={100}
+
                             className="object-cover"
                           />
                         </div>

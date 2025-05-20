@@ -80,6 +80,8 @@ export default function Feed() {
                       <Image
                         src={user.avatar}
                         alt={user.name}
+                        width={40}
+                        height={40}
                         className="w-full h-full object-cover"
                       ></Image>
                     </div>
@@ -125,6 +127,8 @@ export default function Feed() {
                         <Image
                           src={img}
                           alt={`Post image ${idx + 1}`}
+                          width={500}
+                          height={500}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -200,6 +204,8 @@ export default function Feed() {
               <Image
                 src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800"
                 alt="Story"
+                width={500}
+                height={500}
                 className="w-full h-full object-cover"
               />
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-2">
@@ -209,6 +215,8 @@ export default function Feed() {
                       src={users[0].avatar}
                       alt={users[0].name}
                       className="w-full h-full object-cover"
+                      width={100}
+                      height={100}
                     />
                   </div>
                   <span className="text-yellow-400 text-xs ml-1 font-medium truncate">
@@ -221,6 +229,8 @@ export default function Feed() {
               <Image
                 src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=800"
                 alt="Story"
+                width={500}
+                height={500}
                 className="w-full h-full object-cover"
               />
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-2">
@@ -229,6 +239,8 @@ export default function Feed() {
                     <Image
                       src={users[1].avatar}
                       alt={users[1].name}
+                      width={100}
+                      height={100}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -257,6 +269,8 @@ export default function Feed() {
                     <Image
                       src={user.avatar}
                       alt={user.name}
+                      width={40}
+                      height={40}
                       className="w-full h-full object-cover"
                     />
                   </div>
