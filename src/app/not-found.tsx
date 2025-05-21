@@ -30,15 +30,38 @@ export default function NotFound() {
   const [planeSpeed, setPlaneSpeed] = useState(4);
   const [planeCount, setPlaneCount] = useState(2);
   const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
   
-  // Handle mouse movement to aim cannon
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+  // Add touch event handling
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Update mouse/touch handling
+  const handlePointerMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (!gameAreaRef.current || isGameOver) return;
     
     const rect = gameAreaRef.current.getBoundingClientRect();
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+    
+    let clientX, clientY;
+    
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = (e as React.MouseEvent).clientX;
+      clientY = (e as React.MouseEvent).clientY;
+    }
+    
+    const angle = Math.atan2(clientY - centerY, clientX - centerX);
     setCannonAngle(angle * (180 / Math.PI));
   }, [isGameOver]);
 
@@ -221,19 +244,21 @@ export default function NotFound() {
     <div 
       ref={gameAreaRef}
       className="relative w-screen h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black overflow-hidden cursor-crosshair"
-      onMouseMove={handleMouseMove}
+      onMouseMove={handlePointerMove}
+      onTouchMove={handlePointerMove}
       onClick={handleClick}
+      onTouchEnd={handleClick}
     >
-      {/* Enhanced 404 Message */}
+      {/* Enhanced 404 Message - Mobile Responsive */}
       <motion.div 
-        className="absolute top-0 left-0 right-0 pt-8 pb-6 bg-gradient-to-b from-black/80 to-transparent  z-20"
+        className="absolute top-0 left-0 right-0 pt-4 md:pt-8 pb-4 md:pb-6 bg-gradient-to-b from-black/80 to-transparent z-20"
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
       >
         <div className="text-center">
           <motion.h1 
-            className="text-[120px] font-bold leading-none bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600"
+            className="text-[80px] md:text-[120px] font-bold leading-none bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600"
             animate={{ 
               textShadow: [
                 "0 0 20px rgba(59, 130, 246, 0.5)",
@@ -251,15 +276,15 @@ export default function NotFound() {
             transition={{ delay: 0.4 }}
             className="space-y-2"
           >
-            <p className="text-3xl font-light text-white/90">Page Not Found</p>
-            <div className="flex items-center justify-center gap-2">
+            <p className="text-2xl md:text-3xl font-light text-white/90">Page Not Found</p>
+            <div className="flex items-center justify-center gap-2 px-4">
               <motion.p 
-                className="text-lg text-gray-300 bg-gray-800/30 px-6 py-2 rounded-full backdrop-blur-sm inline-flex items-center gap-2"
+                className="text-sm md:text-lg text-gray-300 bg-gray-800/30 px-3 md:px-6 py-2 rounded-full backdrop-blur-sm inline-flex items-center gap-2"
                 animate={{ scale: [1, 1.02, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
                 <span className="text-blue-400">🎮</span>
-                Defend against the planes while you're here!
+                {isMobile ? "Tap to shoot planes!" : "Defend against the planes!"}
               </motion.p>
             </div>
           </motion.div>
@@ -274,59 +299,55 @@ export default function NotFound() {
         transition={{ delay: 0.6 }}
       />
 
-      {/* Update the Score Panel position */}
+      {/* Update the Score Panel position - Mobile Responsive */}
       <motion.div 
-        className="absolute top-48 left-4 bg-black/50 backdrop-blur-sm rounded-2xl p-6 text-white border border-gray-700/50 shadow-xl"
+        className="absolute top-32 md:top-48 left-2 md:left-4 bg-black/50 backdrop-blur-sm rounded-2xl p-3 md:p-6 text-white border border-gray-700/50 shadow-xl"
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-2xl font-bold bg-gray-800/50 p-2 rounded">
+        <div className="grid grid-cols-2 gap-2 md:gap-4">
+          <div className="text-lg md:text-2xl font-bold bg-gray-800/50 p-2 rounded">
             Score: {score}
           </div>
-          <div className="text-xl text-red-500 bg-gray-800/50 p-2 rounded">
+          <div className="text-base md:text-xl text-red-500 bg-gray-800/50 p-2 rounded">
             Missed: {missed}
           </div>
-          <div className="text-xl text-yellow-500 bg-gray-800/50 p-2 rounded">
+          <div className="text-base md:text-xl text-yellow-500 bg-gray-800/50 p-2 rounded">
             Wave: {difficulty}
           </div>
-          <div className="text-xl text-blue-400 bg-gray-800/50 p-2 rounded">
+          <div className="text-base md:text-xl text-blue-400 bg-gray-800/50 p-2 rounded">
             {Math.floor(gameTime)}s
-          </div>
-          <div className="text-xl text-green-400 bg-gray-800/50 p-2 rounded">
-            Speed: {planeSpeed.toFixed(1)}x
-          </div>
-          <div className="text-xl text-purple-400 bg-gray-800/50 p-2 rounded">
-            Planes: {planeCount}
           </div>
         </div>
       </motion.div>
 
-      {/* Update the Navigation Controls position */}
+      {/* Update the Navigation Controls position - Mobile Responsive */}
       <motion.div 
-        className="absolute top-48 right-4 flex gap-4"
+        className="absolute top-32 md:top-48 right-2 md:right-4 flex gap-2 md:gap-4"
         initial={{ x: 100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
         <button
           onClick={handleGoBack}
-          className="px-4 py-2 bg-gray-700/50 hover:bg-gray-600/50 text-white rounded-lg backdrop-blur-sm border border-gray-600/30 transition-all hover:scale-105"
+          className="px-3 md:px-4 py-2 text-sm md:text-base bg-gray-700/50 hover:bg-gray-600/50 text-white rounded-lg backdrop-blur-sm border border-gray-600/30 transition-all hover:scale-105"
         >
-          ← Go Back
+          ← Back
         </button>
         <Link 
           href="/"
-          className="px-4 py-2 bg-blue-600/50 hover:bg-blue-500/50 text-white rounded-lg backdrop-blur-sm border border-blue-500/30 transition-all hover:scale-105"
+          className="px-3 md:px-4 py-2 text-sm md:text-base bg-blue-600/50 hover:bg-blue-500/50 text-white rounded-lg backdrop-blur-sm border border-blue-500/30 transition-all hover:scale-105"
         >
           Home
         </Link>
       </motion.div>
 
-      {/* Game Instructions */}
-      <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded-lg p-4 text-white border border-gray-700/50">
-        <p className="text-sm text-gray-300">Mouse to aim • Click to shoot • Destroy planes • Survive</p>
+      {/* Game Instructions - Mobile Responsive */}
+      <div className="absolute bottom-4 left-2 md:left-4 bg-black/50 backdrop-blur-sm rounded-lg p-2 md:p-4 text-white border border-gray-700/50">
+        <p className="text-xs md:text-sm text-gray-300">
+          {isMobile ? "Touch & drag to aim • Tap to shoot" : "Mouse to aim • Click to shoot"}
+        </p>
       </div>
 
       {/* Planes */}
@@ -465,39 +486,39 @@ export default function NotFound() {
         </div>
       )}
 
-      {/* Enhanced Game Over Screen */}
+      {/* Enhanced Game Over Screen - Mobile Responsive */}
       {isGameOver && (
-        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center">
-          <div className="text-center bg-gray-900/80 p-8 rounded-xl border border-red-500/30 shadow-2xl">
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center px-4">
+          <div className="text-center bg-gray-900/80 p-4 md:p-8 rounded-xl border border-red-500/30 shadow-2xl">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="text-6xl text-red-500 font-bold mb-8"
+              className="text-4xl md:text-6xl text-red-500 font-bold mb-4 md:mb-8"
             >
               CANNON DESTROYED!
             </motion.div>
-            <div className="text-3xl text-white mb-2">Final Score: {score}</div>
-            <div className="text-xl text-gray-400 mb-8">Survived for {Math.floor(gameTime)} seconds</div>
+            <div className="text-2xl md:text-3xl text-white mb-2">Final Score: {score}</div>
+            <div className="text-lg md:text-xl text-gray-400 mb-4 md:mb-8">Survived for {Math.floor(gameTime)} seconds</div>
             
-            <div className="flex gap-4 justify-center">
+            <div className="flex flex-col md:flex-row gap-2 md:gap-4 justify-center">
               <button
                 onClick={handleReset}
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xl transition-colors"
+                className="px-6 md:px-8 py-3 md:py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-lg md:text-xl transition-colors"
               >
                 Play Again
               </button>
               <button
                 onClick={handleGoBack}
-                className="px-8 py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-xl transition-colors"
+                className="px-6 md:px-8 py-3 md:py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-lg md:text-xl transition-colors"
               >
                 Go Back
               </button>
               <Link 
                 href="/"
-                className="px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-xl transition-colors"
+                className="px-6 md:px-8 py-3 md:py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-lg md:text-xl transition-colors"
               >
                 Home
-            </Link>
+              </Link>
             </div>
           </div>
         </div>
