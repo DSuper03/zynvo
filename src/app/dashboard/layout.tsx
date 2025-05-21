@@ -2,6 +2,18 @@ import Header from '@/components/Header';
 import '@/app/globals.css';
 import { ReactNode } from 'react';
 import { DashboardLayoutProps } from '@/types/global-Interface';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Student Dashboard | Zynvo',
+  description: 'Manage your club memberships, events, and campus activities all in one place. Stay connected with your university community.',
+  keywords: 'student dashboard, club management, campus activities',
+  openGraph: {
+    title: 'Student Dashboard | Zynvo',
+    description: 'Manage your university activities and connections',
+    type: 'website',
+  }
+};
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // Custom navigation items for dashboard
