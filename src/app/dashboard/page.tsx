@@ -16,7 +16,7 @@ interface UserData {
   clubName: string | null;
   isVerified: boolean | null;
   events: Event[];
-  profileAvatar : string
+  profileAvatar: string;
 }
 
 interface ApiResponse {
@@ -25,7 +25,7 @@ interface ApiResponse {
     name: string | null;
     email: string;
     clubName: string | null;
-    profileAvatar : string;
+    profileAvatar: string;
     eventAttended: {
       event: {
         id: string;
@@ -38,7 +38,7 @@ interface ApiResponse {
 // Mock data to use as fallback
 const mockUserData = {
   name: 'ASM devs',
-  profileAvatar : 'aaaa',
+  profileAvatar: 'aaaa',
   email: 'devSuper03@contact.com',
   clubName: 'zynvo',
   isVerified: true,
@@ -126,8 +126,14 @@ export default function ZynvoDashboard() {
           );
 
           if (response.status === 200 && response.data.user) {
-            const { name, clubName, email, isVerified, eventAttended, profileAvatar } =
-              response.data.user;
+            const {
+              name,
+              clubName,
+              email,
+              isVerified,
+              eventAttended,
+              profileAvatar,
+            } = response.data.user;
 
             const events =
               eventAttended?.map((eve) => ({
@@ -141,7 +147,7 @@ export default function ZynvoDashboard() {
               email,
               isVerified,
               events,
-              profileAvatar
+              profileAvatar,
             });
           } else {
             setUserData(mockUserData);
@@ -193,16 +199,16 @@ export default function ZynvoDashboard() {
         <div className="bg-gray-900 rounded-lg shadow-lg mb-8 overflow-hidden">
           <div className="h-32 bg-gradient-to-r from-yellow-400 to-yellow-600"></div>
           <div className="relative px-6 pb-6">
-            <div className="absolute -top-12 left-6">   
+            <div className="absolute -top-12 left-6">
               {userData.profileAvatar ? (
                 <img
-                className='w-24 h-24 rounded-full border-4 border-gray-900 bg-yellow-400'
-                src={userData.profileAvatar}
+                  className="w-24 h-24 rounded-full border-4 border-gray-900 bg-yellow-400"
+                  src={userData.profileAvatar}
                 ></img>
               ) : (
                 <div className="w-24 h-24 rounded-full border-4 border-gray-900 bg-yellow-400 flex items-center justify-center text-gray-900 text-4xl font-bold">
-                {userData.name ? userData.name.charAt(0) : 'Z'}
-              </div>
+                  {userData.name ? userData.name.charAt(0) : 'Z'}
+                </div>
               )}
             </div>
             <div className="pt-16">

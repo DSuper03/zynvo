@@ -31,7 +31,6 @@ export const users: User[] = [
     id: '1',
     name: 'Anirban Ghosh',
     avatar: 'https://i.pravatar.cc/150?img=12',
-
   },
   {
     id: '2',

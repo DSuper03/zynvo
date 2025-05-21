@@ -2,17 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { FiRefreshCw } from 'react-icons/fi';
 
-const DiceBearAvatar = ({ 
-  name, 
-  onAvatarChange 
-} : {
-    name : any,
-    onAvatarChange : any
+const DiceBearAvatar = ({
+  name,
+  onAvatarChange,
+}: {
+  name: any;
+  onAvatarChange: any;
 }) => {
   const [avatarStyle, setAvatarStyle] = useState('lorelei');
   const [randomSeed, setRandomSeed] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
-  
+
   // Available DiceBear styles that work well with your theme
   const avatarStyles = [
     'lorelei',
@@ -20,7 +20,7 @@ const DiceBearAvatar = ({
     'bottts',
     'pixel-art',
     'micah',
-    'notionists'
+    'notionists',
   ];
 
   // Generate a random seed for avatar regeneration
@@ -33,7 +33,7 @@ const DiceBearAvatar = ({
     const seed = name.trim() ? name : randomSeed || generateRandomSeed();
     const url = `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${encodeURIComponent(seed)}`;
     setAvatarUrl(url);
-    
+
     // Pass the avatar URL back to the parent component
     if (onAvatarChange) {
       onAvatarChange(url);
@@ -46,7 +46,7 @@ const DiceBearAvatar = ({
   };
 
   // Handle style change
-  const handleStyleChange = (e : any) => {
+  const handleStyleChange = (e: any) => {
     setAvatarStyle(e.target.value);
   };
 
@@ -83,12 +83,14 @@ const DiceBearAvatar = ({
           >
             {avatarStyles.map((style) => (
               <option key={style} value={style}>
-                {style.charAt(0).toUpperCase() + style.slice(1).replace('-', ' ')}
+                {style.charAt(0).toUpperCase() +
+                  style.slice(1).replace('-', ' ')}
               </option>
             ))}
           </select>
           <p className="text-gray-400 text-xs mt-2">
-            Your avatar is generated based on your name. Click the refresh button to get a different one.
+            Your avatar is generated based on your name. Click the refresh
+            button to get a different one.
           </p>
         </div>
       </div>

@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import { useState, useEffect } from 'react';
 
@@ -7,11 +7,17 @@ const AvatarGenerator = () => {
   const [seed, setSeed] = useState('');
   const [style, setStyle] = useState('lorelei');
   const [avatarUrl, setAvatarUrl] = useState('');
-  
+
   // Available DiceBear styles
   const avatarStyles = [
-    'lorelei', 'notionists', 'avataaars', 'bottts', 
-    'pixel-art', 'identicon', 'initials', 'micah'
+    'lorelei',
+    'notionists',
+    'avataaars',
+    'bottts',
+    'pixel-art',
+    'identicon',
+    'initials',
+    'micah',
   ];
 
   // Generate a random seed for regeneration
@@ -33,14 +39,14 @@ const AvatarGenerator = () => {
   };
 
   // Handle style change
-  const handleStyleChange = (e : any) => {
+  const handleStyleChange = (e: any) => {
     setStyle(e.target.value);
   };
 
   return (
     <div className="flex flex-col items-center space-y-6 p-6 max-w-md mx-auto bg-white rounded-xl shadow-md">
       <h2 className="text-2xl font-bold text-gray-800">Create Your Avatar</h2>
-      
+
       {/* Name input */}
       <div className="w-full">
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -54,7 +60,7 @@ const AvatarGenerator = () => {
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
-      
+
       {/* Style selector */}
       <div className="w-full">
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -72,14 +78,14 @@ const AvatarGenerator = () => {
           ))}
         </select>
       </div>
-      
+
       {/* Avatar preview */}
       <div className="flex flex-col items-center space-y-4">
         <div className="w-32 h-32 relative">
           {avatarUrl && (
-            <img 
-              src={avatarUrl} 
-              alt="User Avatar" 
+            <img
+              src={avatarUrl}
+              alt="User Avatar"
               className="w-full h-full rounded-full border-4 border-gray-200"
             />
           )}
@@ -87,23 +93,34 @@ const AvatarGenerator = () => {
             onClick={handleRegenerate}
             className="absolute -bottom-2 -right-2 bg-blue-600 text-white rounded-full p-2 shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
             </svg>
           </button>
         </div>
-        <p className="text-sm text-gray-600">Click the button to regenerate your avatar</p>
+        <p className="text-sm text-gray-600">
+          Click the button to regenerate your avatar
+        </p>
       </div>
-      
+
       {/* Avatar URL (for developers) */}
       <div className="w-full text-xs text-gray-500 bg-gray-100 p-2 rounded overflow-x-auto">
         <p className="font-mono">{avatarUrl}</p>
       </div>
-      
+
       {/* Save button for signup form */}
-      <button
-        className="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
+      <button className="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
         Continue with Signup
       </button>
     </div>
