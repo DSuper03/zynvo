@@ -322,7 +322,6 @@ export function Sidebar() {
                 className="object-cover"
                 width={32}
                 height={32}
-
               />
             </div>
 

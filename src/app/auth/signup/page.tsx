@@ -14,7 +14,7 @@ import {
 } from 'react-icons/fi';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
 import dotenv from 'dotenv';
-import DiceBearAvatar from "@/components/DicebearAvatars" // Import the DiceBearAvatar component
+import DiceBearAvatar from '@/components/DicebearAvatars'; // Import the DiceBearAvatar component
 
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -242,9 +242,9 @@ export default function SignUp() {
                   </div>
 
                   {/* DiceBear Avatar Component */}
-                  <DiceBearAvatar 
-                    name={formData.name} 
-                    onAvatarChange={handleAvatarChange} 
+                  <DiceBearAvatar
+                    name={formData.name}
+                    onAvatarChange={handleAvatarChange}
                   />
 
                   <div className="mb-4">
