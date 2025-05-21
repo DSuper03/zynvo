@@ -260,3 +260,16 @@ export interface TablistProps {
   onTabChange?: (tabId: string) => void;
   variant?: 'default' | 'secondary';
 }
+export interface Plane {
+  id: number;
+  x: number;
+  y: number;
+}
+
+export interface Bullet {
+  id: number;
+  x: number;
+  y: number;
+  angle: number;
+  type: 'cannonball' | 'bomb';
+}

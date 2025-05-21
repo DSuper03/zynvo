@@ -3,20 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface Plane {
-  id: number;
-  x: number;
-  y: number;
-}
-
-interface Bullet {
-  id: number;
-  x: number;
-  y: number;
-  angle: number;
-  type: 'cannonball' | 'bomb';
-}
+import { Bullet, Plane } from '@/types/global-Interface';
 
 export default function NotFound() {
   const [planes, setPlanes] = useState<Plane[]>([]);
@@ -30,30 +17,59 @@ export default function NotFound() {
   const [planeSpeed, setPlaneSpeed] = useState(4);
   const [planeCount, setPlaneCount] = useState(2);
   const gameAreaRef = useRef<HTMLDivElement>(null);
-  
-  // Handle mouse movement to aim cannon
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!gameAreaRef.current || isGameOver) return;
-    
-    const rect = gameAreaRef.current.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-    setCannonAngle(angle * (180 / Math.PI));
-  }, [isGameOver]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Add touch event handling
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Update mouse/touch handling
+  const handlePointerMove = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      if (!gameAreaRef.current || isGameOver) return;
+
+      const rect = gameAreaRef.current.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      let clientX, clientY;
+
+      if ('touches' in e) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = (e as React.MouseEvent).clientX;
+        clientY = (e as React.MouseEvent).clientY;
+      }
+
+      const angle = Math.atan2(clientY - centerY, clientX - centerX);
+      setCannonAngle(angle * (180 / Math.PI));
+    },
+    [isGameOver]
+  );
 
   // Shoot bullets
   const handleClick = useCallback(() => {
     if (!gameAreaRef.current || isGameOver) return;
-    
+
     const radians = cannonAngle * (Math.PI / 180);
-    setBullets(prev => [...prev, {
-      id: Date.now(),
-      x: window.innerWidth / 2,
-      y: window.innerHeight / 2,
-      angle: cannonAngle,
-      type: Math.random() > 0.5 ? 'cannonball' : 'bomb'
-    }]);
+    setBullets((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+        angle: cannonAngle,
+        type: Math.random() > 0.5 ? 'cannonball' : 'bomb',
+      },
+    ]);
   }, [cannonAngle, isGameOver]);
 
   // Reset game
@@ -75,21 +91,21 @@ export default function NotFound() {
 
     // Increase game time, speed, and plane count
     const timeInterval = setInterval(() => {
-      setGameTime(prev => prev + 1);
-      
+      setGameTime((prev) => prev + 1);
+
       // Increase speed every 2 seconds
       if (gameTime > 0 && gameTime % 2 === 0) {
-        setPlaneSpeed(prev => Math.min(prev + 0.5, 20));
+        setPlaneSpeed((prev) => Math.min(prev + 0.5, 20));
       }
-      
+
       // Increase plane count every 1.5 seconds
       if (gameTime > 0 && gameTime % 1.5 === 0) {
-        setPlaneCount(prev => Math.min(prev + 1, 15)); // Cap at 15 planes at once
+        setPlaneCount((prev) => Math.min(prev + 1, 15)); // Cap at 15 planes at once
       }
-      
+
       // Increase difficulty every 30 seconds
       if (gameTime > 0 && gameTime % 30 === 0) {
-        setDifficulty(prev => Math.min(prev + 1, 5));
+        setDifficulty((prev) => Math.min(prev + 1, 5));
       }
     }, 1000);
 
@@ -101,28 +117,31 @@ export default function NotFound() {
     if (isGameOver) return;
 
     // Calculate spawn interval based on difficulty
-    const spawnInterval = Math.max(1500 - (difficulty * 200), 500);
-    
+    const spawnInterval = Math.max(1500 - difficulty * 200, 500);
+
     const planeInterval = setInterval(() => {
       // Use planeCount for base number of planes
       const variableCount = Math.floor(Math.random() * 3); // 0-2 additional planes
       const totalPlanes = planeCount + variableCount;
-      
+
       // Create planes in formation patterns
       const newPlanes = Array.from({ length: totalPlanes }, (_, index) => {
         // Create formation patterns based on index
-        const formationSpacing = window.innerHeight * 0.6 / totalPlanes;
+        const formationSpacing = (window.innerHeight * 0.6) / totalPlanes;
         const baseY = formationSpacing * (index + 1);
         const yVariation = (Math.random() - 0.5) * 50; // Add some randomness
-        
+
         return {
           id: Date.now() + Math.random(),
           x: -50,
-          y: Math.max(50, Math.min(window.innerHeight * 0.7, baseY + yVariation)),
+          y: Math.max(
+            50,
+            Math.min(window.innerHeight * 0.7, baseY + yVariation)
+          ),
         };
       });
 
-      setPlanes(prev => [...prev, ...newPlanes]);
+      setPlanes((prev) => [...prev, ...newPlanes]);
     }, spawnInterval);
 
     return () => clearInterval(planeInterval);
@@ -134,35 +153,35 @@ export default function NotFound() {
 
     let animationFrameId: number;
     let lastTime = performance.now();
-    
+
     const gameLoop = (currentTime: number) => {
       const deltaTime = currentTime - lastTime;
       if (deltaTime >= 16) {
         lastTime = currentTime;
-        
+
         // Move planes with updated speed
-        setPlanes(prev => {
+        setPlanes((prev) => {
           return prev
-            .map(plane => ({
+            .map((plane) => ({
               ...plane,
               x: plane.x + planeSpeed, // Use the dynamic planeSpeed
             }))
-            .filter(plane => {
+            .filter((plane) => {
               const cannonCenterX = window.innerWidth / 2;
               const cannonCenterY = window.innerHeight / 2;
-              
+
               const distanceToCannon = Math.sqrt(
-                Math.pow(plane.x - cannonCenterX, 2) + 
-                Math.pow(plane.y - cannonCenterY, 2)
+                Math.pow(plane.x - cannonCenterX, 2) +
+                  Math.pow(plane.y - cannonCenterY, 2)
               );
-              
+
               if (distanceToCannon < 45) {
                 setIsGameOver(true);
                 return false;
               }
-              
+
               if (plane.x > window.innerWidth) {
-                setMissed(m => m + 1);
+                setMissed((m) => m + 1);
                 return false;
               }
               return true;
@@ -170,9 +189,9 @@ export default function NotFound() {
         });
 
         // Move bullets
-        setBullets(prev => {
+        setBullets((prev) => {
           return prev
-            .map(bullet => {
+            .map((bullet) => {
               const radians = bullet.angle * (Math.PI / 180);
               return {
                 ...bullet,
@@ -180,31 +199,33 @@ export default function NotFound() {
                 y: bullet.y + Math.sin(radians) * 12,
               };
             })
-            .filter(bullet => 
-              bullet.y > 0 && 
-              bullet.y < window.innerHeight && 
-              bullet.x > 0 && 
-              bullet.x < window.innerWidth
+            .filter(
+              (bullet) =>
+                bullet.y > 0 &&
+                bullet.y < window.innerHeight &&
+                bullet.x > 0 &&
+                bullet.x < window.innerWidth
             );
         });
 
         // Check bullet-plane collisions
-        setPlanes(prev => {
-          return prev.filter(plane => {
-            const hit = bullets.some(bullet => {
+        setPlanes((prev) => {
+          return prev.filter((plane) => {
+            const hit = bullets.some((bullet) => {
               const distance = Math.sqrt(
-                Math.pow(plane.x - bullet.x, 2) + Math.pow(plane.y - bullet.y, 2)
+                Math.pow(plane.x - bullet.x, 2) +
+                  Math.pow(plane.y - bullet.y, 2)
               );
               return distance < 25;
             });
             if (hit) {
-              setScore(s => s + 1);
+              setScore((s) => s + 1);
             }
             return !hit;
           });
         });
       }
-      
+
       animationFrameId = requestAnimationFrame(gameLoop);
     };
 
@@ -218,28 +239,30 @@ export default function NotFound() {
   };
 
   return (
-    <div 
+    <div
       ref={gameAreaRef}
       className="relative w-screen h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black overflow-hidden cursor-crosshair"
-      onMouseMove={handleMouseMove}
+      onMouseMove={handlePointerMove}
+      onTouchMove={handlePointerMove}
       onClick={handleClick}
+      onTouchEnd={handleClick}
     >
-      {/* Enhanced 404 Message */}
-      <motion.div 
-        className="absolute top-0 left-0 right-0 pt-8 pb-6 bg-gradient-to-b from-black/80 to-transparent  z-20"
+      {/* Enhanced 404 Message - Mobile Responsive */}
+      <motion.div
+        className="absolute top-0 left-0 right-0 pt-4 md:pt-8 pb-4 md:pb-6 bg-gradient-to-b from-black/80 to-transparent z-20"
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+        transition={{ delay: 0.2, type: 'spring', stiffness: 100 }}
       >
         <div className="text-center">
-          <motion.h1 
-            className="text-[120px] font-bold leading-none bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600"
-            animate={{ 
+          <motion.h1
+            className="text-[80px] md:text-[120px] font-bold leading-none bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600"
+            animate={{
               textShadow: [
-                "0 0 20px rgba(59, 130, 246, 0.5)",
-                "0 0 40px rgba(59, 130, 246, 0.3)",
-                "0 0 20px rgba(59, 130, 246, 0.5)"
-              ]
+                '0 0 20px rgba(59, 130, 246, 0.5)',
+                '0 0 40px rgba(59, 130, 246, 0.3)',
+                '0 0 20px rgba(59, 130, 246, 0.5)',
+              ],
             }}
             transition={{ duration: 2, repeat: Infinity }}
           >
@@ -251,15 +274,19 @@ export default function NotFound() {
             transition={{ delay: 0.4 }}
             className="space-y-2"
           >
-            <p className="text-3xl font-light text-white/90">Page Not Found</p>
-            <div className="flex items-center justify-center gap-2">
-              <motion.p 
-                className="text-lg text-gray-300 bg-gray-800/30 px-6 py-2 rounded-full backdrop-blur-sm inline-flex items-center gap-2"
+            <p className="text-2xl md:text-3xl font-light text-white/90">
+              Page Not Found
+            </p>
+            <div className="flex items-center justify-center gap-2 px-4">
+              <motion.p
+                className="text-sm md:text-lg text-gray-300 bg-gray-800/30 px-3 md:px-6 py-2 rounded-full backdrop-blur-sm inline-flex items-center gap-2"
                 animate={{ scale: [1, 1.02, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
                 <span className="text-blue-400">🎮</span>
-                Defend against the planes while you're here!
+                {isMobile
+                  ? 'Tap to shoot planes!'
+                  : 'Defend against the planes!'}
               </motion.p>
             </div>
           </motion.div>
@@ -270,68 +297,66 @@ export default function NotFound() {
       <motion.div
         className="absolute top-44 left-1/2 -translate-x-1/2 w-1/3 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent z-10"
         initial={{ width: 0, opacity: 0 }}
-        animate={{ width: "33%", opacity: 1 }}
+        animate={{ width: '33%', opacity: 1 }}
         transition={{ delay: 0.6 }}
       />
 
-      {/* Update the Score Panel position */}
-      <motion.div 
-        className="absolute top-48 left-4 bg-black/50 backdrop-blur-sm rounded-2xl p-6 text-white border border-gray-700/50 shadow-xl"
+      {/* Update the Score Panel position - Mobile Responsive */}
+      <motion.div
+        className="absolute top-32 md:top-48 left-2 md:left-4 bg-black/50 backdrop-blur-sm rounded-2xl p-3 md:p-6 text-white border border-gray-700/50 shadow-xl"
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-2xl font-bold bg-gray-800/50 p-2 rounded">
+        <div className="grid grid-cols-2 gap-2 md:gap-4">
+          <div className="text-lg md:text-2xl font-bold bg-gray-800/50 p-2 rounded">
             Score: {score}
           </div>
-          <div className="text-xl text-red-500 bg-gray-800/50 p-2 rounded">
+          <div className="text-base md:text-xl text-red-500 bg-gray-800/50 p-2 rounded">
             Missed: {missed}
           </div>
-          <div className="text-xl text-yellow-500 bg-gray-800/50 p-2 rounded">
+          <div className="text-base md:text-xl text-yellow-500 bg-gray-800/50 p-2 rounded">
             Wave: {difficulty}
           </div>
-          <div className="text-xl text-blue-400 bg-gray-800/50 p-2 rounded">
+          <div className="text-base md:text-xl text-blue-400 bg-gray-800/50 p-2 rounded">
             {Math.floor(gameTime)}s
-          </div>
-          <div className="text-xl text-green-400 bg-gray-800/50 p-2 rounded">
-            Speed: {planeSpeed.toFixed(1)}x
-          </div>
-          <div className="text-xl text-purple-400 bg-gray-800/50 p-2 rounded">
-            Planes: {planeCount}
           </div>
         </div>
       </motion.div>
 
-      {/* Update the Navigation Controls position */}
-      <motion.div 
-        className="absolute top-48 right-4 flex gap-4"
+      {/* Update the Navigation Controls position - Mobile Responsive */}
+      <motion.div
+        className="absolute top-32 md:top-48 right-2 md:right-4 flex gap-2 md:gap-4"
         initial={{ x: 100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
         <button
           onClick={handleGoBack}
-          className="px-4 py-2 bg-gray-700/50 hover:bg-gray-600/50 text-white rounded-lg backdrop-blur-sm border border-gray-600/30 transition-all hover:scale-105"
+          className="px-3 md:px-4 py-2 text-sm md:text-base bg-gray-700/50 hover:bg-gray-600/50 text-white rounded-lg backdrop-blur-sm border border-gray-600/30 transition-all hover:scale-105"
         >
-          ← Go Back
+          ← Back
         </button>
-        <Link 
+        <Link
           href="/"
-          className="px-4 py-2 bg-blue-600/50 hover:bg-blue-500/50 text-white rounded-lg backdrop-blur-sm border border-blue-500/30 transition-all hover:scale-105"
+          className="px-3 md:px-4 py-2 text-sm md:text-base bg-blue-600/50 hover:bg-blue-500/50 text-white rounded-lg backdrop-blur-sm border border-blue-500/30 transition-all hover:scale-105"
         >
           Home
         </Link>
       </motion.div>
 
-      {/* Game Instructions */}
-      <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded-lg p-4 text-white border border-gray-700/50">
-        <p className="text-sm text-gray-300">Mouse to aim • Click to shoot • Destroy planes • Survive</p>
+      {/* Game Instructions - Mobile Responsive */}
+      <div className="absolute bottom-4 left-2 md:left-4 bg-black/50 backdrop-blur-sm rounded-lg p-2 md:p-4 text-white border border-gray-700/50">
+        <p className="text-xs md:text-sm text-gray-300">
+          {isMobile
+            ? 'Touch & drag to aim • Tap to shoot'
+            : 'Mouse to aim • Click to shoot'}
+        </p>
       </div>
 
       {/* Planes */}
       <AnimatePresence>
-        {planes.map(plane => (
+        {planes.map((plane) => (
           <motion.div
             key={plane.id}
             className="absolute text-4xl"
@@ -351,7 +376,7 @@ export default function NotFound() {
 
       {/* Bullets */}
       <AnimatePresence>
-        {bullets.map(bullet => (
+        {bullets.map((bullet) => (
           <motion.div
             key={bullet.id}
             className="absolute"
@@ -403,7 +428,7 @@ export default function NotFound() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
           <motion.div
             className="relative"
-          style={{
+            style={{
               transform: `rotate(${cannonAngle}deg)`,
             }}
           >
@@ -411,7 +436,7 @@ export default function NotFound() {
             <div className="relative">
               <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-28 h-28 bg-gradient-to-b from-gray-700 to-gray-900 rounded-full border-8 border-gray-800 shadow-2xl" />
               <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-20 h-20 bg-gradient-radial from-gray-600 to-gray-800 rounded-full" />
-              
+
               {/* Base Details */}
               <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-24 h-4 bg-gray-700 rounded-full transform -rotate-45" />
               <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-24 h-4 bg-gray-700 rounded-full transform rotate-45" />
@@ -438,7 +463,10 @@ export default function NotFound() {
                   {/* Muzzle details */}
                   <div className="absolute inset-0 flex flex-col justify-between py-1">
                     {[0, 1, 2].map((i) => (
-                      <div key={i} className="h-2 w-full bg-gray-900/50 rounded-full" />
+                      <div
+                        key={i}
+                        className="h-2 w-full bg-gray-900/50 rounded-full"
+                      />
                     ))}
                   </div>
                 </div>
@@ -446,7 +474,10 @@ export default function NotFound() {
                 <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-5 h-14 bg-gray-800 rounded-r-lg">
                   <div className="absolute inset-0 flex flex-col justify-between py-1">
                     {[0, 1, 2, 3].map((i) => (
-                      <div key={i} className="h-2 w-full bg-gray-900 rounded-full" />
+                      <div
+                        key={i}
+                        className="h-2 w-full bg-gray-900 rounded-full"
+                      />
                     ))}
                   </div>
                 </div>
@@ -465,39 +496,43 @@ export default function NotFound() {
         </div>
       )}
 
-      {/* Enhanced Game Over Screen */}
+      {/* Enhanced Game Over Screen - Mobile Responsive */}
       {isGameOver && (
-        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center">
-          <div className="text-center bg-gray-900/80 p-8 rounded-xl border border-red-500/30 shadow-2xl">
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center px-4">
+          <div className="text-center bg-gray-900/80 p-4 md:p-8 rounded-xl border border-red-500/30 shadow-2xl">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="text-6xl text-red-500 font-bold mb-8"
+              className="text-4xl md:text-6xl text-red-500 font-bold mb-4 md:mb-8"
             >
               CANNON DESTROYED!
             </motion.div>
-            <div className="text-3xl text-white mb-2">Final Score: {score}</div>
-            <div className="text-xl text-gray-400 mb-8">Survived for {Math.floor(gameTime)} seconds</div>
-            
-            <div className="flex gap-4 justify-center">
+            <div className="text-2xl md:text-3xl text-white mb-2">
+              Final Score: {score}
+            </div>
+            <div className="text-lg md:text-xl text-gray-400 mb-4 md:mb-8">
+              Survived for {Math.floor(gameTime)} seconds
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-2 md:gap-4 justify-center">
               <button
                 onClick={handleReset}
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xl transition-colors"
+                className="px-6 md:px-8 py-3 md:py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-lg md:text-xl transition-colors"
               >
                 Play Again
               </button>
               <button
                 onClick={handleGoBack}
-                className="px-8 py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-xl transition-colors"
+                className="px-6 md:px-8 py-3 md:py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-lg md:text-xl transition-colors"
               >
                 Go Back
               </button>
-              <Link 
+              <Link
                 href="/"
-                className="px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-xl transition-colors"
+                className="px-6 md:px-8 py-3 md:py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-lg md:text-xl transition-colors"
               >
                 Home
-            </Link>
+              </Link>
             </div>
           </div>
         </div>
