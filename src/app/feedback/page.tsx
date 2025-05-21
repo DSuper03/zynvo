@@ -2,8 +2,6 @@
 // have to fix types
 import { useState } from 'react';
 
-
-
 export default function FeedbackForm() {
   // Form state
   const [formData, setFormData] = useState({

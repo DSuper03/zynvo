@@ -8,14 +8,11 @@ const nextConfig = {
         hostname: '**',
       },
     ],
-    formats: ['image/avif', 'image/webp'],
   },
-  reactStrictMode: true,
+  reactStrictMode: false,
   eslint: {
     ignoreDuringBuilds: false,
   },
-  compress: true,
-  poweredByHeader: false,
 };
 
 export default nextConfig;
