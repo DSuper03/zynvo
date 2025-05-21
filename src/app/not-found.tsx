@@ -224,15 +224,63 @@ export default function NotFound() {
       onMouseMove={handleMouseMove}
       onClick={handleClick}
     >
-      {/* 404 Message */}
-      <div className="absolute top-12 left-1/2 -translate-x-1/2 text-center z-10">
-        <h1 className="text-6xl font-bold text-white mb-2 animate-pulse">404</h1>
-        <p className="text-xl text-gray-300 mb-4">Page Not Found</p>
-        <p className="text-md text-gray-400">But while you're here, defend against the planes!</p>
-      </div>
+      {/* Enhanced 404 Message */}
+      <motion.div 
+        className="absolute top-0 left-0 right-0 pt-8 pb-6 bg-gradient-to-b from-black/80 to-transparent  z-20"
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+      >
+        <div className="text-center">
+          <motion.h1 
+            className="text-[120px] font-bold leading-none bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600"
+            animate={{ 
+              textShadow: [
+                "0 0 20px rgba(59, 130, 246, 0.5)",
+                "0 0 40px rgba(59, 130, 246, 0.3)",
+                "0 0 20px rgba(59, 130, 246, 0.5)"
+              ]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            404
+          </motion.h1>
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="space-y-2"
+          >
+            <p className="text-3xl font-light text-white/90">Page Not Found</p>
+            <div className="flex items-center justify-center gap-2">
+              <motion.p 
+                className="text-lg text-gray-300 bg-gray-800/30 px-6 py-2 rounded-full backdrop-blur-sm inline-flex items-center gap-2"
+                animate={{ scale: [1, 1.02, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <span className="text-blue-400">🎮</span>
+                Defend against the planes while you're here!
+              </motion.p>
+            </div>
+          </motion.div>
+        </div>
+      </motion.div>
 
-      {/* Enhanced Score Panel */}
-      <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm rounded-lg p-4 text-white border border-gray-700/50 shadow-xl">
+      {/* Add a subtle divider */}
+      <motion.div
+        className="absolute top-44 left-1/2 -translate-x-1/2 w-1/3 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent z-10"
+        initial={{ width: 0, opacity: 0 }}
+        animate={{ width: "33%", opacity: 1 }}
+        transition={{ delay: 0.6 }}
+      />
+
+      {/* Update the Score Panel position */}
+      <motion.div 
+        className="absolute top-48 left-4 bg-black/50 backdrop-blur-sm rounded-2xl p-6 text-white border border-gray-700/50 shadow-xl"
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
         <div className="grid grid-cols-2 gap-4">
           <div className="text-2xl font-bold bg-gray-800/50 p-2 rounded">
             Score: {score}
@@ -253,10 +301,15 @@ export default function NotFound() {
             Planes: {planeCount}
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Navigation Controls */}
-      <div className="absolute top-4 right-4 flex gap-4">
+      {/* Update the Navigation Controls position */}
+      <motion.div 
+        className="absolute top-48 right-4 flex gap-4"
+        initial={{ x: 100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
         <button
           onClick={handleGoBack}
           className="px-4 py-2 bg-gray-700/50 hover:bg-gray-600/50 text-white rounded-lg backdrop-blur-sm border border-gray-600/30 transition-all hover:scale-105"
@@ -269,7 +322,7 @@ export default function NotFound() {
         >
           Home
         </Link>
-      </div>
+      </motion.div>
 
       {/* Game Instructions */}
       <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded-lg p-4 text-white border border-gray-700/50">
