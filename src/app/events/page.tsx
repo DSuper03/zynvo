@@ -102,6 +102,8 @@ export default function ZynvoEventsPage() {
                 <Image
                   src={event.image}
                   alt={event.title}
+                  width={600}
+                  height={300}
                   className="w-full h-40 object-cover"
                 />
                 {event.isRegistered && (

@@ -15,6 +15,7 @@ import HeroVideoDialog from '@/components/magicui/hero-video-dialog';
 
 import FeatureGrid from '@/components/ui/FeatureCard';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Home() {
   const heroRef = useRef(null);
@@ -97,11 +98,11 @@ export default function Home() {
               Zynvo bridges the gap between college clubs and societies,
               creating a vibrant network for students across institutions.
             </motion.p>
-            <div className="flex justify-center gap-4 mb-10">
+            <Link href="/auth/signup" className="flex justify-center gap-4 mb-10">
               <WrapButton className=" bg-transparent text-black font-medium r  transition duration-300 transform hover:-translate-y-1">
                 Get Started
               </WrapButton>
-            </div>
+            </Link>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -580,11 +581,11 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="mt-12 text-center">
+            <Link href="/events" className="mt-12 text-center">
               <WrapButton className="bg-transparent text-black font-medium transition duration-300 transform hover:-translate-y-1">
                 View All Events
               </WrapButton>
-            </div>
+            </Link>
           </div>
         </section>
 
@@ -614,9 +615,11 @@ export default function Home() {
                 journey.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <WrapButton className="bg-transparent text-black font-medium px-8 py-4 text-lg transition duration-300 transform hover:-translate-y-1">
-                  Get Started Now
-                </WrapButton>
+                <Link href="/auth/signup">
+                  <WrapButton className="bg-transparent text-black font-medium px-8 py-4 text-lg transition duration-300 transform hover:-translate-y-1 border border-yellow-500  hover:text-black">
+                    Get Started Now
+                  </WrapButton>
+                </Link>
                 <button className="bg-gray-800 text-white hover:bg-gray-700 font-medium px-8 py-4 rounded-full transition duration-300">
                   <div className="flex items-center justify-center">
                     <svg
