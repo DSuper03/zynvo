@@ -98,7 +98,10 @@ export default function Home() {
               Zynvo bridges the gap between college clubs and societies,
               creating a vibrant network for students across institutions.
             </motion.p>
-            <Link href="/auth/signup" className="flex justify-center gap-4 mb-10">
+            <Link
+              href="/auth/signup"
+              className="flex justify-center gap-4 mb-10"
+            >
               <WrapButton className=" bg-transparent text-black font-medium r  transition duration-300 transform hover:-translate-y-1">
                 Get Started
               </WrapButton>
