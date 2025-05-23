@@ -1,17 +1,36 @@
 import React from 'react';
 import { Users, Calendar, BookOpen, Sparkles, ArrowRight, Star } from 'lucide-react';
+import Image from 'next/image';
 
 const ZynvoDashboard = () => {
+  const heroref = React.useRef(null);
   return (
-    <div className="min-h-screen  to-slate-900 p-6">
-      <div className="max-w-7xl mx-auto">
+   <section 
+         ref={heroref} 
+         className="relative min-h-screen flex items-center justify-center py-20 md:py-32 overflow-hidden"
+       >
+         {/* Background Image - Fixed Correctly */}
+         <div className="absolute inset-0 z-0">
+           <Image
+             src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/photo_2025-05-23_20-16-14.jpg?updatedAt=1748011606544"
+             alt="Hero Background"
+             fill
+             priority
+             className="object-cover"
+             sizes="100vw"
+           />
+           {/* Overlay to improve text readability */}
+           <div className="absolute inset-0 bg-black/50"></div>
+         </div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           
           {/* Main Hero Card */}
-          <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-gradient-to-br from-purple-600 to-blue-700 rounded-3xl p-8 text-white relative overflow-hidden">
+          <div className="col-span-1 md:col-span-2 lg:col-span-2  rounded-3xl p-8 text-white relative overflow-hidden">
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8  rounded-lg flex items-center justify-center">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <span className="text-sm font-medium opacity-90">Zynvo</span>
@@ -149,7 +168,7 @@ const ZynvoDashboard = () => {
 
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

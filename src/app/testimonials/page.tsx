@@ -1,3 +1,4 @@
+'use client'
 import TestimonialsSection from '@/components/TestimonialsSection';
 
 export const metadata = {
