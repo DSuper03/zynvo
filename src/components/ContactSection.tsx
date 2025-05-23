@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Icons } from './Icons';
+import { BackgroundElements } from './TeamSection';
+import LandingHeader from './landingHeader';
 
 const ContactSection = () => {
   const [formState, setFormState] = useState({
@@ -42,7 +44,9 @@ const ContactSection = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 pt-24">
+    <div className="min-h-screen  pt-24">
+      <LandingHeader />
+      <BackgroundElements />
       <div className="container mx-auto px-4 lg:px-8 py-12">
         {/* Header Section */}
         <motion.div
