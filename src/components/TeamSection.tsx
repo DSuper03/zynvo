@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import LandingHeader from './landingHeader';
 
 const founders = [
   {
@@ -68,7 +69,7 @@ const SocialIcons = {
   ),
 };
 
-const BackgroundElements = () => (
+export const BackgroundElements = () => (
   <>
     {/* Animated gradient background */}
     <div className="fixed inset-0 bg-black -z-10">
@@ -109,8 +110,10 @@ const TeamSection = () => {
   const [activeFounder, setActiveFounder] = useState(0);
 
   return (
+    
     <div className="min-h-screen relative">
       <BackgroundElements />
+      <LandingHeader />
 
       {/* Hero Section with enhanced styling */}
       <div className="relative h-[60vh] overflow-hidden flex items-center justify-center">

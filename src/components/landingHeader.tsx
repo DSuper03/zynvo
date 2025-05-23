@@ -193,7 +193,7 @@ const LandingHeader = () => {
               setActive={setActiveItem}
               active={activeItem}
               item="Testimonials"
-              href="#testimonials"
+              href="/testimonials"
             />
 
             <MenuItem
