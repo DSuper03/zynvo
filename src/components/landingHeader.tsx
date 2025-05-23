@@ -193,7 +193,7 @@ const LandingHeader = () => {
               setActive={setActiveItem}
               active={activeItem}
               item="Testimonials"
-              href="#testimonials"
+              href="/testimonials"
             />
 
             <MenuItem
@@ -306,7 +306,7 @@ const LandingHeader = () => {
               Discover
             </Link>
             <Link
-              href="#testimonials"
+              href="/testimonials"
               className="text-gray-300 hover:text-white transition-colors py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >

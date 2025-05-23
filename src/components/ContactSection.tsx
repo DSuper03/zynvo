@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Icons } from './Icons';
+import { BackgroundElements } from './TeamSection';
+import LandingHeader from './landingHeader';
 
 const ContactSection = () => {
   const [formState, setFormState] = useState({
@@ -12,14 +14,16 @@ const ContactSection = () => {
     message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [submitStatus, setSubmitStatus] = useState<
+    'idle' | 'success' | 'error'
+  >('idle');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       setSubmitStatus('success');
       setFormState({ name: '', email: '', subject: '', message: '' });
     } catch (error) {
@@ -30,15 +34,19 @@ const ContactSection = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormState(prev => ({
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormState((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 pt-24">
+    <div className="min-h-screen  pt-24">
+      <LandingHeader />
+      <BackgroundElements />
       <div className="container mx-auto px-4 lg:px-8 py-12">
         {/* Header Section */}
         <motion.div
@@ -51,7 +59,8 @@ const ContactSection = () => {
             Get in Touch
           </h1>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Have questions or feedback? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+            Have questions or feedback? We'd love to hear from you. Send us a
+            message and we'll respond as soon as possible.
           </p>
         </motion.div>
 
@@ -67,7 +76,7 @@ const ContactSection = () => {
               <h2 className="text-2xl font-semibold text-white mb-6">
                 Contact Information
               </h2>
-              
+
               <div className="space-y-6">
                 <div className="flex items-center space-x-4 text-gray-300">
                   <Icons.Email />
@@ -87,9 +96,7 @@ const ContactSection = () => {
                 <h3 className="text-xl font-semibold text-white mb-4">
                   Office Hours
                 </h3>
-                <p className="text-gray-300">
-                  We are always open to help you.
-                </p>
+                <p className="text-gray-300">We are always open to help you.</p>
               </div>
             </div>
           </motion.div>
