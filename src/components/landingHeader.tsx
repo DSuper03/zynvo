@@ -22,7 +22,7 @@ const MenuItem = ({
   href,
   children,
 }: {
-  setActive: (item: string) => void;
+  setActive: (item: string | null) => void;
   active: string | null;
   item: string;
   href: string;
@@ -45,17 +45,22 @@ const MenuItem = ({
           transition={transition}
         >
           {active === item && children && (
-            <div className="absolute top-[calc(100%_+_1.2rem)] left-1/2 transform -translate-x-1/2 pt-4 z-50">
-              <motion.div
-                transition={transition}
-                layoutId="active"
-                className="bg-black/90 backdrop-blur-sm rounded-2xl overflow-hidden border border-yellow-500/20 shadow-xl"
-              >
-                <motion.div layout className="w-max h-full p-4">
-                  {children}
+            <>
+              {/* Invisible gap-filling element */}
+              <div className="absolute top-full left-0 h-5 w-full" />
+
+              <div className="absolute top-[calc(100%_+_1.2rem)] left-1/2 transform -translate-x-1/2 z-50">
+                <motion.div
+                  transition={transition}
+                  layoutId="active"
+                  className="bg-black/90 backdrop-blur-sm rounded-2xl overflow-hidden border border-yellow-500/20 shadow-xl"
+                >
+                  <motion.div layout className="w-max h-full p-4">
+                    {children}
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-            </div>
+              </div>
+            </>
           )}
         </motion.div>
       )}
@@ -188,7 +193,7 @@ const LandingHeader = () => {
               setActive={setActiveItem}
               active={activeItem}
               item="Testimonials"
-              href="#testimonials"
+              href="/testimonials"
             />
 
             <MenuItem
@@ -227,14 +232,14 @@ const LandingHeader = () => {
               setActive={setActiveItem}
               active={activeItem}
               item="FAQ"
-              href="#faq"
+              href="/faq"
             />
 
             <MenuItem
               setActive={setActiveItem}
               active={activeItem}
               item="Contact"
-              href="#contact"
+              href="/contact"
             />
 
             <Link
@@ -301,7 +306,7 @@ const LandingHeader = () => {
               Discover
             </Link>
             <Link
-              href="#testimonials"
+              href="/testimonials"
               className="text-gray-300 hover:text-white transition-colors py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -315,14 +320,14 @@ const LandingHeader = () => {
               Devs
             </Link>
             <Link
-              href="#faq"
+              href="/faq"
               className="text-gray-300 hover:text-white transition-colors py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               FAQ
             </Link>
             <Link
-              href="#contact"
+              href="/contact"
               className="text-gray-300 hover:text-white transition-colors py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
