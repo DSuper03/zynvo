@@ -278,3 +278,24 @@ export interface FAQItem {
   answer: string;
   category: string;
 }
+
+export interface UserEvents {
+  name : string | null
+}
+
+export interface Attendee {
+  user : UserEvents | null
+}
+
+export interface eventData {
+  attendees : Attendee[], 
+  description: string;
+  id: string;
+  clubName: string;
+  clubId: string;
+  createdAt: Date;
+  eventHeaderImage: string | null;
+  EventName: string;
+  prizes: string;
+  endDate: Date | null;
+}

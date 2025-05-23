@@ -11,31 +11,12 @@ import {
   Calendar,
 } from 'lucide-react';
 //import { events } from '@/constants/events';
+import { UserEvents, Attendee, eventData } from '@/types/global-Interface';
 import Image from 'next/image';
 import axios from 'axios';
 
-interface User {
-  name : string | null
-}
 
-interface Attendee {
-  user : User | null
-}
-
-interface eventData {
-  attendees : Attendee[], 
-  description: string;
-  id: string;
-  clubName: string;
-  clubId: string;
-  createdAt: Date;
-  eventHeaderImage: string | null;
-  EventName: string;
-  prizes: string;
-  endDate: Date | null;
-}
-
-interface apiResp {
+interface apiRespEvents {
   msg : string,
   response : eventData[]
 } 
@@ -54,7 +35,7 @@ export default function ZynvoEventsPage() {
 
   useEffect(()=> {
     async function call() {
-      const response = await axios.get<apiResp>("http://localhost:8000/api/v1/events/all")
+      const response = await axios.get<apiRespEvents>("http://localhost:8000/api/v1/events/all")
       // if(!response) alert("fail")
       //   else alert(response.data.msg)
 
@@ -160,7 +141,7 @@ export default function ZynvoEventsPage() {
 
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-gray-300">
-                    <Calendar className="w-4 h-4 mr-2 text-yellow-400" />
+                    <Calendar className="size-4 mr-2 text-yellow-400" />
                     <span>deadline : {event.endDate?.toDateString()}</span>
                   </div>
                   {/* <div className="flex items-center text-gray-300">
