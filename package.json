@@ -10,6 +10,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@imagekit/next": "^2.1.2",
     "@radix-ui/react-icons": "^1.3.2",
     "@radix-ui/react-slot": "^1.2.2",
     "@types/axios": "^0.9.36",
