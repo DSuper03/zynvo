@@ -273,3 +273,8 @@ export interface Bullet {
   angle: number;
   type: 'cannonball' | 'bomb';
 }
+export interface FAQItem {
+  question: string;
+  answer: string;
+  category: string;
+}
