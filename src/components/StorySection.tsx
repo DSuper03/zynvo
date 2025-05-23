@@ -7,30 +7,33 @@ const timeline = [
   {
     year: '2024',
     title: 'The Beginning',
-    description: 'Born from a shared frustration with fragmented campus communication, three college students came together with a vision to revolutionize how campus communities connect.',
+    description:
+      'Born from a shared frustration with fragmented campus communication, three college students came together with a vision to revolutionize how campus communities connect.',
     // image: '/story/inception.webp',
-    milestone: 'First line of code written for Zynvo'
+    milestone: 'First line of code written for Zynvo',
   },
   {
     year: '2025',
     title: 'Launch & Growth',
-    description: 'Zynvo launches with its core features - event discovery, club management, and campus-wide networking. The platform quickly gains traction across multiple colleges.',
+    description:
+      'Zynvo launches with its core features - event discovery, club management, and campus-wide networking. The platform quickly gains traction across multiple colleges.',
     // image: '/story/launch.webp',
-    milestone: 'Successfully connected 1000+ students'
+    milestone: 'Successfully connected 1000+ students',
   },
   {
     year: 'Vision',
     title: 'The Road Ahead',
-    description: 'We\'re building the future of campus engagement, where every student can easily discover opportunities, connect with peers, and make their college experience truly memorable.',
+    description:
+      "We're building the future of campus engagement, where every student can easily discover opportunities, connect with peers, and make their college experience truly memorable.",
     // image: '/story/future.webp',
-    milestone: 'Expanding to colleges nationwide'
-  }
+    milestone: 'Expanding to colleges nationwide',
+  },
 ];
 
 const StorySection = () => {
   return (
     <div className="min-h-screen bg-black">
-        <LandingHeader />
+      <LandingHeader />
       <BackgroundElements />
       {/* Hero Section */}
       <div className="relative h-[60vh] overflow-hidden flex items-center justify-center">
@@ -38,13 +41,13 @@ const StorySection = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.15),transparent)]" />
         </div>
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="relative z-10 text-center px-4 max-w-4xl mx-auto"
         >
-          <motion.h1 
+          <motion.h1
             className="text-6xl md:text-8xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 via-yellow-200 to-yellow-500 mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -52,7 +55,7 @@ const StorySection = () => {
           >
             Our Story
           </motion.h1>
-          <motion.p 
+          <motion.p
             className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -86,15 +89,25 @@ const StorySection = () => {
                 </div>
               </div>
 
-              <div className={`grid grid-cols-1 lg:grid-cols-2 gap-12 ${
-                index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'
-              }`}>
+              <div
+                className={`grid grid-cols-1 lg:grid-cols-2 gap-12 ${
+                  index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'
+                }`}
+              >
                 {/* Content */}
-                <div className={`flex flex-col justify-center ${
-                  index % 2 === 0 ? 'lg:text-right lg:items-end' : 'lg:text-left lg:items-start'
-                }`}>
-                  <h2 className="text-3xl font-bold text-white mb-4">{item.title}</h2>
-                  <p className="text-gray-300 mb-6 max-w-lg">{item.description}</p>
+                <div
+                  className={`flex flex-col justify-center ${
+                    index % 2 === 0
+                      ? 'lg:text-right lg:items-end'
+                      : 'lg:text-left lg:items-start'
+                  }`}
+                >
+                  <h2 className="text-3xl font-bold text-white mb-4">
+                    {item.title}
+                  </h2>
+                  <p className="text-gray-300 mb-6 max-w-lg">
+                    {item.description}
+                  </p>
                   <div className="inline-block px-4 py-2 rounded-full bg-yellow-500/10 text-yellow-500 text-sm border border-yellow-500/20">
                     {item.milestone}
                   </div>
@@ -127,9 +140,10 @@ const StorySection = () => {
         >
           <h2 className="text-4xl font-bold text-white mb-6">Our Mission</h2>
           <p className="text-xl text-gray-300 leading-relaxed">
-            We're on a mission to transform how college communities connect, share, and grow together. 
-            By breaking down communication barriers and creating seamless digital experiences, 
-            we're making campus life more engaging, inclusive, and memorable for every student.
+            We're on a mission to transform how college communities connect,
+            share, and grow together. By breaking down communication barriers
+            and creating seamless digital experiences, we're making campus life
+            more engaging, inclusive, and memorable for every student.
           </p>
         </motion.div>
 
@@ -138,7 +152,7 @@ const StorySection = () => {
           {[
             { number: '1000+', label: 'Students Connected' },
             { number: '50+', label: 'Campus Events' },
-            { number: '20+', label: 'Active Clubs' }
+            { number: '20+', label: 'Active Clubs' },
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
@@ -148,7 +162,9 @@ const StorySection = () => {
               transition={{ delay: index * 0.2 }}
               className="text-center p-8 rounded-2xl bg-black/50 backdrop-blur-sm border border-yellow-500/20"
             >
-              <h3 className="text-4xl font-bold text-yellow-500 mb-2">{stat.number}</h3>
+              <h3 className="text-4xl font-bold text-yellow-500 mb-2">
+                {stat.number}
+              </h3>
               <p className="text-gray-300">{stat.label}</p>
             </motion.div>
           ))}
@@ -158,4 +174,4 @@ const StorySection = () => {
   );
 };
 
-export default StorySection; 
+export default StorySection;
