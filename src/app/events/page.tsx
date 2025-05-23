@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+
+import { useEffect, useState } from 'react';
 import {
   Search,
   MapPin,
@@ -9,26 +10,63 @@ import {
   ChevronDown,
   Calendar,
 } from 'lucide-react';
-import { events } from '@/constants/events';
+//import { events } from '@/constants/events';
 import Image from 'next/image';
-export default function ZynvoEventsPage() {
-  // const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('all');
+import axios from 'axios';
 
+interface User {
+  name : string | null
+}
+
+interface Attendee {
+  user : User | null
+}
+
+interface eventData {
+  attendees : Attendee[], 
+  description: string;
+  id: string;
+  clubName: string;
+  clubId: string;
+  createdAt: Date;
+  eventHeaderImage: string | null;
+  EventName: string;
+  prizes: string;
+  endDate: Date | null;
+}
+
+interface apiResp {
+  msg : string,
+  response : eventData[]
+} 
+
+
+export default function ZynvoEventsPage() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [Events, setEvents] = useState<eventData[]>([])
   // Sample events data
 
   // Toggle mobile menu
-  // const toggleMenu = () => {
-  //   setIsMenuOpen(!isMenuOpen);
-  // };
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  useEffect(()=> {
+    async function call() {
+      const response = await axios.get<apiResp>("http://localhost:8000/api/v1/events/all")
+      // if(!response) alert("fail")
+      //   else alert(response.data.msg)
+
+      setEvents(response.data.response);
+    }
+
+    call()
+  }, [])
 
   // Filter events based on active filter
-  const filteredEvents =
-    activeFilter === 'all'
-      ? events
-      : activeFilter === 'registered'
-        ? events.filter((events) => events.isRegistered)
-        : events.filter((events) => !events.isRegistered);
+ // data = [{[]}, { }]
+        
 
   return (
     <div className="min-h-screen bg-black">
@@ -93,28 +131,28 @@ export default function ZynvoEventsPage() {
 
         {/* Events Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEvents.map((event) => (
+          {Events.map((event) => (
             <div
               key={event.id}
               className="bg-gray-900 rounded-lg overflow-hidden shadow-md"
             >
               <div className="relative">
                 <Image
-                  src={event.image}
-                  alt={event.title}
+                  src={"/consultclub.png"}
+                  alt={event.description}
                   width={600}
                   height={300}
                   className="w-full h-40 object-cover"
                 />
-                {event.isRegistered && (
+                {/* {event.isRegistered && (
                   <div className="absolute top-2 right-2 bg-yellow-400 text-gray-900 px-2 py-1 text-xs font-bold rounded">
                     Registered
                   </div>
-                )}
+                )} */}
               </div>
               <div className="p-5">
                 <h3 className="text-white font-bold text-xl mb-2">
-                  {event.title}
+                  {event.EventName}
                 </h3>
                 <p className="text-gray-400 text-sm mb-4">
                   {event.description}
@@ -123,30 +161,26 @@ export default function ZynvoEventsPage() {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-gray-300">
                     <Calendar className="w-4 h-4 mr-2 text-yellow-400" />
-                    <span>{event.date}</span>
+                    <span>deadline : {event.endDate?.toDateString()}</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  {/* <div className="flex items-center text-gray-300">
                     <Clock className="w-4 h-4 mr-2 text-yellow-400" />
                     <span>{event.time}</span>
-                  </div>
+                  </div> */}
                   <div className="flex items-center text-gray-300">
                     <MapPin className="w-4 h-4 mr-2 text-yellow-400" />
-                    <span>{event.location}</span>
+                    <span>{event.clubName}'s College</span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400 text-sm">
-                    {event.attending} attending
+                    {event.attendees.length} attending
                   </span>
                   <button
-                    className={`px-4 py-2 rounded-md font-medium ${
-                      event.isRegistered
-                        ? 'bg-gray-800 text-gray-300'
-                        : 'bg-yellow-400 text-gray-900 hover:bg-yellow-500'
-                    }`}
+                    className='px-4 py-2 rounded-md font-medium bg-yellow-400 text-gray-900 hover:bg-yellow-500'
                   >
-                    {event.isRegistered ? 'Registered' : 'Register'}
+                  Register
                   </button>
                 </div>
               </div>
