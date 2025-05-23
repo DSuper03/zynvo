@@ -232,14 +232,14 @@ const LandingHeader = () => {
               setActive={setActiveItem}
               active={activeItem}
               item="FAQ"
-              href="#faq"
+              href="/faq"
             />
 
             <MenuItem
               setActive={setActiveItem}
               active={activeItem}
               item="Contact"
-              href="#contact"
+              href="/contact"
             />
 
             <Link
@@ -320,14 +320,14 @@ const LandingHeader = () => {
               Devs
             </Link>
             <Link
-              href="#faq"
+              href="/faq"
               className="text-gray-300 hover:text-white transition-colors py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               FAQ
             </Link>
             <Link
-              href="#contact"
+              href="/contact"
               className="text-gray-300 hover:text-white transition-colors py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
