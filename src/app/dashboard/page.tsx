@@ -111,10 +111,10 @@ export default function ZynvoDashboard() {
       try {
         const token = localStorage.getItem('token');
 
-        // if (!token) {
-        //   navigate.push('/auth/signup');
-        //   return;
-        // }
+        if (!token) {
+          navigate.push('/auth/signup');
+          return;
+        }
 
         try {
           const response = await axios.get<ApiResponse>(
