@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 
 const GRID_SIZE = 20;
 const INITIAL_SNAKE = [{ x: 10, y: 10 }];
@@ -15,6 +16,8 @@ export default function SmoothSnake404Game() {
   const [score, setScore] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [highScore, setHighScore] = useState(0);
+
+  const router = useRouter();
 
   const generateFood = useCallback(() => {
     let newFood : any;
@@ -272,12 +275,12 @@ export default function SmoothSnake404Game() {
 
             {/* Navigation */}
             <div className="pt-6">
-              <a 
-                href="/" 
-                className="inline-flex items-center px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-yellow-400/25"
-              >
+              <button className="inline-flex items-center px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-yellow-400/25"
+              onClick={()=>{
+                router.push('/')
+              }}>
                 🏠 Go Back Home
-              </a>
+              </button>
             </div>
           </div>
         </div>
