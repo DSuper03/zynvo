@@ -1,14 +1,14 @@
 'use client';
 
 import { BackgroundElements } from "./TeamSection";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import axios from "axios";
 
 type VerificationStatus = 'pending' | 'success' | 'error' | 'expired';
 
-export default function VerificationPage() {
+function VerificationContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [status, setStatus] = useState<VerificationStatus>('pending');
@@ -176,5 +176,32 @@ export default function VerificationPage() {
                 </button>
             </p>
         </div>
+    );
+}
+
+export default function VerificationPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex flex-col items-center justify-center relative">
+                <BackgroundElements />
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="max-w-md w-full mx-4 p-8 rounded-2xl bg-black/50 backdrop-blur-sm border border-yellow-500/20"
+                >
+                    <div className="text-center">
+                        <span className="text-6xl mb-6 block">⏳</span>
+                        <h1 className="text-2xl font-bold text-white mb-2">
+                            Loading...
+                        </h1>
+                        <p className="text-gray-300 mb-6">
+                            Please wait while we load the verification page.
+                        </p>
+                    </div>
+                </motion.div>
+            </div>
+        }>
+            <VerificationContent />
+        </Suspense>
     );
 }
