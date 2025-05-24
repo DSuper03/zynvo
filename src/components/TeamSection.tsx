@@ -32,7 +32,7 @@ const founders = [
     github: 'https://github.com/mohakchakraborty2004',
     twitter: 'I_Mohak19',
     linkedin: 'mohak-chakraborty',
-    website: 'mochak.vercel.app',
+    website: 'https://mochak.vercel.app',
 
     bio: "A driven builder and innovator who lives by the philosophy of Kaizen - continuous improvement. With impressive projects like CodexAI and Tasuku under his belt, Mohak brings his expertise in blockchain and AI to optimize Zynvo's operations and growth strategies.",
     quote: 'Kaizen. I BUILD, bitch.',

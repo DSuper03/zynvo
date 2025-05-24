@@ -1,548 +1,295 @@
-'use client';
+"use client"
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Bullet, Plane } from '@/types/global-Interface';
+import React, { useState, useEffect, useCallback } from 'react';
 
-export default function NotFound() {
-  const [planes, setPlanes] = useState<Plane[]>([]);
-  const [bullets, setBullets] = useState<Bullet[]>([]);
+const GRID_SIZE = 20;
+const INITIAL_SNAKE = [{ x: 10, y: 10 }];
+const INITIAL_FOOD = { x: 15, y: 15 };
+const INITIAL_DIRECTION = { x: 0, y: -1 };
+
+export default function SmoothSnake404Game() {
+  const [snake, setSnake] = useState(INITIAL_SNAKE);
+  const [food, setFood] = useState(INITIAL_FOOD);
+  const [direction, setDirection] = useState(INITIAL_DIRECTION);
+  const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
-  const [missed, setMissed] = useState(0);
-  const [cannonAngle, setCannonAngle] = useState(0);
-  const [isGameOver, setIsGameOver] = useState(false);
-  const [gameTime, setGameTime] = useState(0);
-  const [difficulty, setDifficulty] = useState(1);
-  const [planeSpeed, setPlaneSpeed] = useState(4);
-  const [planeCount, setPlaneCount] = useState(2);
-  const gameAreaRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [highScore, setHighScore] = useState(0);
 
-  // Add touch event handling
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+  const generateFood = useCallback(() => {
+    let newFood : any;
+    do {
+      newFood = {
+        x: Math.floor(Math.random() * GRID_SIZE),
+        y: Math.floor(Math.random() * GRID_SIZE)
+      };
+    } while (snake.some(segment => segment.x === newFood.x && segment.y === newFood.y));
+    return newFood;
+  }, [snake]);
 
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Update mouse/touch handling
-  const handlePointerMove = useCallback(
-    (e: React.MouseEvent | React.TouchEvent) => {
-      if (!gameAreaRef.current || isGameOver) return;
-
-      const rect = gameAreaRef.current.getBoundingClientRect();
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-
-      let clientX, clientY;
-
-      if ('touches' in e) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-      } else {
-        clientX = (e as React.MouseEvent).clientX;
-        clientY = (e as React.MouseEvent).clientY;
-      }
-
-      const angle = Math.atan2(clientY - centerY, clientX - centerX);
-      setCannonAngle(angle * (180 / Math.PI));
-    },
-    [isGameOver]
-  );
-
-  // Shoot bullets
-  const handleClick = useCallback(() => {
-    if (!gameAreaRef.current || isGameOver) return;
-
-    const radians = cannonAngle * (Math.PI / 180);
-    setBullets((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        x: window.innerWidth / 2,
-        y: window.innerHeight / 2,
-        angle: cannonAngle,
-        type: Math.random() > 0.5 ? 'cannonball' : 'bomb',
-      },
-    ]);
-  }, [cannonAngle, isGameOver]);
-
-  // Reset game
-  const handleReset = () => {
-    setPlanes([]);
-    setBullets([]);
+  const resetGame = () => {
+    setSnake(INITIAL_SNAKE);
+    setFood(INITIAL_FOOD);
+    setDirection(INITIAL_DIRECTION);
+    setGameOver(false);
     setScore(0);
-    setMissed(0);
-    setGameTime(0);
-    setDifficulty(1);
-    setPlaneSpeed(4);
-    setPlaneCount(2);
-    setIsGameOver(false);
+    setGameStarted(true);
   };
 
-  // Update the time and speed tracking effect
+  const moveSnake = useCallback(() => {
+    if (!gameStarted || gameOver) return;
+
+    setSnake(currentSnake => {
+      const newSnake = [...currentSnake];
+      const head = { ...newSnake[0] };
+      
+      head.x += direction.x;
+      head.y += direction.y;
+
+      // Check wall collision
+      if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
+        setGameOver(true);
+        if (score > highScore) setHighScore(score);
+        return currentSnake;
+      }
+
+      // Check self collision
+      if (newSnake.some(segment => segment.x === head.x && segment.y === head.y)) {
+        setGameOver(true);
+        if (score > highScore) setHighScore(score);
+        return currentSnake;
+      }
+
+      newSnake.unshift(head);
+
+      // Check food collision
+      if (head.x === food.x && head.y === food.y) {
+        setScore(prev => prev + 10);
+        setFood(generateFood());
+      } else {
+        newSnake.pop();
+      }
+
+      return newSnake;
+    });
+  }, [direction, food, gameOver, gameStarted, generateFood, score, highScore]);
+
   useEffect(() => {
-    if (isGameOver) return;
+    const speed = Math.max(80, 120 - Math.floor(score / 50) * 10); // Dynamic speed
+    const gameInterval = setInterval(moveSnake, speed);
+    return () => clearInterval(gameInterval);
+  }, [moveSnake, score]);
 
-    // Increase game time, speed, and plane count
-    const timeInterval = setInterval(() => {
-      setGameTime((prev) => prev + 1);
-
-      // Increase speed every 2 seconds
-      if (gameTime > 0 && gameTime % 2 === 0) {
-        setPlaneSpeed((prev) => Math.min(prev + 0.5, 20));
-      }
-
-      // Increase plane count every 1.5 seconds
-      if (gameTime > 0 && gameTime % 1.5 === 0) {
-        setPlaneCount((prev) => Math.min(prev + 1, 15)); // Cap at 15 planes at once
-      }
-
-      // Increase difficulty every 30 seconds
-      if (gameTime > 0 && gameTime % 30 === 0) {
-        setDifficulty((prev) => Math.min(prev + 1, 5));
-      }
-    }, 1000);
-
-    return () => clearInterval(timeInterval);
-  }, [isGameOver, gameTime]);
-
-  // Update the plane generation effect
   useEffect(() => {
-    if (isGameOver) return;
-
-    // Calculate spawn interval based on difficulty
-    const spawnInterval = Math.max(1500 - difficulty * 200, 500);
-
-    const planeInterval = setInterval(() => {
-      // Use planeCount for base number of planes
-      const variableCount = Math.floor(Math.random() * 3); // 0-2 additional planes
-      const totalPlanes = planeCount + variableCount;
-
-      // Create planes in formation patterns
-      const newPlanes = Array.from({ length: totalPlanes }, (_, index) => {
-        // Create formation patterns based on index
-        const formationSpacing = (window.innerHeight * 0.6) / totalPlanes;
-        const baseY = formationSpacing * (index + 1);
-        const yVariation = (Math.random() - 0.5) * 50; // Add some randomness
-
-        return {
-          id: Date.now() + Math.random(),
-          x: -50,
-          y: Math.max(
-            50,
-            Math.min(window.innerHeight * 0.7, baseY + yVariation)
-          ),
-        };
-      });
-
-      setPlanes((prev) => [...prev, ...newPlanes]);
-    }, spawnInterval);
-
-    return () => clearInterval(planeInterval);
-  }, [isGameOver, difficulty, planeCount]);
-
-  // Update the game loop to use planeSpeed
-  useEffect(() => {
-    if (isGameOver) return;
-
-    let animationFrameId: number;
-    let lastTime = performance.now();
-
-    const gameLoop = (currentTime: number) => {
-      const deltaTime = currentTime - lastTime;
-      if (deltaTime >= 16) {
-        lastTime = currentTime;
-
-        // Move planes with updated speed
-        setPlanes((prev) => {
-          return prev
-            .map((plane) => ({
-              ...plane,
-              x: plane.x + planeSpeed, // Use the dynamic planeSpeed
-            }))
-            .filter((plane) => {
-              const cannonCenterX = window.innerWidth / 2;
-              const cannonCenterY = window.innerHeight / 2;
-
-              const distanceToCannon = Math.sqrt(
-                Math.pow(plane.x - cannonCenterX, 2) +
-                  Math.pow(plane.y - cannonCenterY, 2)
-              );
-
-              if (distanceToCannon < 45) {
-                setIsGameOver(true);
-                return false;
-              }
-
-              if (plane.x > window.innerWidth) {
-                setMissed((m) => m + 1);
-                return false;
-              }
-              return true;
-            });
-        });
-
-        // Move bullets
-        setBullets((prev) => {
-          return prev
-            .map((bullet) => {
-              const radians = bullet.angle * (Math.PI / 180);
-              return {
-                ...bullet,
-                x: bullet.x + Math.cos(radians) * 12,
-                y: bullet.y + Math.sin(radians) * 12,
-              };
-            })
-            .filter(
-              (bullet) =>
-                bullet.y > 0 &&
-                bullet.y < window.innerHeight &&
-                bullet.x > 0 &&
-                bullet.x < window.innerWidth
-            );
-        });
-
-        // Check bullet-plane collisions
-        setPlanes((prev) => {
-          return prev.filter((plane) => {
-            const hit = bullets.some((bullet) => {
-              const distance = Math.sqrt(
-                Math.pow(plane.x - bullet.x, 2) +
-                  Math.pow(plane.y - bullet.y, 2)
-              );
-              return distance < 25;
-            });
-            if (hit) {
-              setScore((s) => s + 1);
-            }
-            return !hit;
-          });
-        });
+    const handleKeyPress = (e : any) => {
+      e.preventDefault();
+      
+      if (!gameStarted && e.code === 'Space') {
+        setGameStarted(true);
+        return;
       }
 
-      animationFrameId = requestAnimationFrame(gameLoop);
+      if (gameOver && e.code === 'Space') {
+        resetGame();
+        return;
+      }
+
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+          if (direction.y === 0) setDirection({ x: 0, y: -1 });
+          break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          if (direction.y === 0) setDirection({ x: 0, y: 1 });
+          break;
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          if (direction.x === 0) setDirection({ x: -1, y: 0 });
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          if (direction.x === 0) setDirection({ x: 1, y: 0 });
+          break;
+      }
     };
 
-    animationFrameId = requestAnimationFrame(gameLoop);
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [bullets, isGameOver, difficulty, planeSpeed]);
-
-  // Add this at the top of the component
-  const handleGoBack = () => {
-    window.history.back();
-  };
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [direction, gameStarted, gameOver]);
 
   return (
-    <div
-      ref={gameAreaRef}
-      className="relative w-screen h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black overflow-hidden cursor-crosshair"
-      onMouseMove={handlePointerMove}
-      onTouchMove={handlePointerMove}
-      onClick={handleClick}
-      onTouchEnd={handleClick}
-    >
-      {/* Enhanced 404 Message - Mobile Responsive */}
-      <motion.div
-        className="absolute top-0 left-0 right-0 pt-4 md:pt-8 pb-4 md:pb-6 bg-gradient-to-b from-black/80 to-transparent z-20"
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2, type: 'spring', stiffness: 100 }}
-      >
-        <div className="text-center">
-          <motion.h1
-            className="text-[80px] md:text-[120px] font-bold leading-none bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600"
-            animate={{
-              textShadow: [
-                '0 0 20px rgba(59, 130, 246, 0.5)',
-                '0 0 40px rgba(59, 130, 246, 0.3)',
-                '0 0 20px rgba(59, 130, 246, 0.5)',
-              ],
-            }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            404
-          </motion.h1>
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="space-y-2"
-          >
-            <p className="text-2xl md:text-3xl font-light text-white/90">
-              Page Not Found
-            </p>
-            <div className="flex items-center justify-center gap-2 px-4">
-              <motion.p
-                className="text-sm md:text-lg text-gray-300 bg-gray-800/30 px-3 md:px-6 py-2 rounded-full backdrop-blur-sm inline-flex items-center gap-2"
-                animate={{ scale: [1, 1.02, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <span className="text-blue-400">🎮</span>
-                {isMobile
-                  ? 'Tap to shoot planes!'
-                  : 'Defend against the planes!'}
-              </motion.p>
-            </div>
-          </motion.div>
+    <div className="h-screen w-screen bg-black text-yellow-400 flex overflow-hidden">
+      {/* Left Side - Game */}
+      <div className="w-1/2 h-full flex flex-col items-center justify-center p-8 bg-gradient-to-br from-gray-900 to-black relative">
+        {/* Animated background particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(30)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-yellow-400 opacity-10 animate-pulse"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 2}s`
+              }}
+            />
+          ))}
         </div>
-      </motion.div>
 
-      {/* Add a subtle divider */}
-      <motion.div
-        className="absolute top-44 left-1/2 -translate-x-1/2 w-1/3 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent z-10"
-        initial={{ width: 0, opacity: 0 }}
-        animate={{ width: '33%', opacity: 1 }}
-        transition={{ delay: 0.6 }}
-      />
-
-      {/* Update the Score Panel position - Mobile Responsive */}
-      <motion.div
-        className="absolute top-32 md:top-48 left-2 md:left-4 bg-black/50 backdrop-blur-sm rounded-2xl p-3 md:p-6 text-white border border-gray-700/50 shadow-xl"
-        initial={{ x: -100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <div className="grid grid-cols-2 gap-2 md:gap-4">
-          <div className="text-lg md:text-2xl font-bold bg-gray-800/50 p-2 rounded">
-            Score: {score}
+        {/* Game Container */}
+        <div className="bg-black border-4 border-yellow-400 rounded-xl p-6 shadow-2xl z-10 transform hover:scale-105 transition-transform duration-300">
+          <div className="flex justify-between items-center mb-4">
+            <div className="text-lg font-mono">Score: <span className="text-yellow-300">{score}</span></div>
+            <div className="text-lg font-mono">High: <span className="text-yellow-300">{highScore}</span></div>
           </div>
-          <div className="text-base md:text-xl text-red-500 bg-gray-800/50 p-2 rounded">
-            Missed: {missed}
-          </div>
-          <div className="text-base md:text-xl text-yellow-500 bg-gray-800/50 p-2 rounded">
-            Wave: {difficulty}
-          </div>
-          <div className="text-base md:text-xl text-blue-400 bg-gray-800/50 p-2 rounded">
-            {Math.floor(gameTime)}s
-          </div>
-        </div>
-      </motion.div>
 
-      {/* Update the Navigation Controls position - Mobile Responsive */}
-      <motion.div
-        className="absolute top-32 md:top-48 right-2 md:right-4 flex gap-2 md:gap-4"
-        initial={{ x: 100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <button
-          onClick={handleGoBack}
-          className="px-3 md:px-4 py-2 text-sm md:text-base bg-gray-700/50 hover:bg-gray-600/50 text-white rounded-lg backdrop-blur-sm border border-gray-600/30 transition-all hover:scale-105"
-        >
-          ← Back
-        </button>
-        <Link
-          href="/"
-          className="px-3 md:px-4 py-2 text-sm md:text-base bg-blue-600/50 hover:bg-blue-500/50 text-white rounded-lg backdrop-blur-sm border border-blue-500/30 transition-all hover:scale-105"
-        >
-          Home
-        </Link>
-      </motion.div>
-
-      {/* Game Instructions - Mobile Responsive */}
-      <div className="absolute bottom-4 left-2 md:left-4 bg-black/50 backdrop-blur-sm rounded-lg p-2 md:p-4 text-white border border-gray-700/50">
-        <p className="text-xs md:text-sm text-gray-300">
-          {isMobile
-            ? 'Touch & drag to aim • Tap to shoot'
-            : 'Mouse to aim • Click to shoot'}
-        </p>
-      </div>
-
-      {/* Planes */}
-      <AnimatePresence>
-        {planes.map((plane) => (
-          <motion.div
-            key={plane.id}
-            className="absolute text-4xl"
+          {/* Game Grid */}
+          <div 
+            className="grid bg-gray-900 border-2 border-yellow-600 mx-auto rounded-lg overflow-hidden shadow-inner"
             style={{
-              left: plane.x,
-              top: plane.y,
+              gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
+              width: '400px',
+              height: '400px'
             }}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0, rotate: 360 }}
-            transition={{ duration: 0.3 }}
           >
-            ✈️
-          </motion.div>
-        ))}
-      </AnimatePresence>
+            {[...Array(GRID_SIZE * GRID_SIZE)].map((_, index) => {
+              const x = index % GRID_SIZE;
+              const y = Math.floor(index / GRID_SIZE);
+              
+              const isSnake = snake.some(segment => segment.x === x && segment.y === y);
+              const isHead = snake[0] && snake[0].x === x && snake[0].y === y;
+              const isFood = food.x === x && food.y === y;
+              
+              return (
+                <div
+                  key={index}
+                  className={`border border-gray-800 transition-all duration-75 ${
+                    isSnake 
+                      ? isHead 
+                        ? 'bg-yellow-300 shadow-lg' 
+                        : 'bg-yellow-400 shadow-md'
+                      : isFood 
+                        ? 'bg-red-500 shadow-red-500/50 shadow-lg' 
+                        : 'bg-gray-900 hover:bg-gray-800'
+                  }`}
+                />
+              );
+            })}
+          </div>
 
-      {/* Bullets */}
-      <AnimatePresence>
-        {bullets.map((bullet) => (
-          <motion.div
-            key={bullet.id}
-            className="absolute"
-            style={{
-              left: bullet.x,
-              top: bullet.y,
-              transform: `rotate(${bullet.angle}deg)`,
-            }}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0 }}
-          >
-            {bullet.type === 'cannonball' ? (
-              // Cannonball design
-              <div className="relative">
-                <div className="w-6 h-6 bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 rounded-full shadow-lg">
-                  <div className="absolute inset-0 bg-gradient-to-t from-transparent to-gray-600/30 rounded-full" />
-                  <div className="absolute inset-1 bg-gradient-to-br from-gray-500/20 to-transparent rounded-full" />
-                </div>
-                {/* Smoke trail */}
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-4 h-12 bg-gradient-to-t from-gray-500/0 via-gray-400/30 to-gray-300/50" />
-              </div>
-            ) : (
-              // Bomb design
-              <div className="relative">
-                <div className="w-8 h-10 bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 rounded-lg">
-                  {/* Bomb body */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-transparent to-gray-600/30 rounded-lg" />
-                  <div className="absolute inset-1 bg-gradient-to-br from-gray-500/20 to-transparent rounded-lg" />
-                  {/* Bomb fuse */}
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-2 h-3 bg-gradient-to-t from-orange-500 to-red-600 rounded-t-full" />
-                  {/* Bomb fins */}
-                  <div className="absolute bottom-0 -left-1 w-2 h-4 bg-gray-800 rounded-l-sm transform -rotate-45" />
-                  <div className="absolute bottom-0 -right-1 w-2 h-4 bg-gray-800 rounded-r-sm transform rotate-45" />
-                </div>
-                {/* Fire trail */}
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2">
-                  <div className="w-3 h-8 bg-gradient-to-t from-orange-500 via-yellow-500 to-transparent opacity-75" />
-                  <div className="w-2 h-6 bg-gradient-to-t from-red-500 via-orange-400 to-transparent absolute -top-2 left-1/2 -translate-x-1/2" />
-                </div>
+          {/* Game Status */}
+          <div className="mt-4 text-center">
+            {!gameStarted && (
+              <div className="space-y-2">
+                <p className="text-yellow-300 text-lg">Press SPACE to start!</p>
+                <div className="animate-bounce text-3xl">🐍</div>
+                <p className="text-xs opacity-75">Arrow keys or WASD to move</p>
               </div>
             )}
-          </motion.div>
-        ))}
-      </AnimatePresence>
-
-      {/* Realistic Cannon */}
-      {!isGameOver && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <motion.div
-            className="relative"
-            style={{
-              transform: `rotate(${cannonAngle}deg)`,
-            }}
-          >
-            {/* Enhanced Cannon Base */}
-            <div className="relative">
-              <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-28 h-28 bg-gradient-to-b from-gray-700 to-gray-900 rounded-full border-8 border-gray-800 shadow-2xl" />
-              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-20 h-20 bg-gradient-radial from-gray-600 to-gray-800 rounded-full" />
-
-              {/* Base Details */}
-              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-24 h-4 bg-gray-700 rounded-full transform -rotate-45" />
-              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-24 h-4 bg-gray-700 rounded-full transform rotate-45" />
-            </div>
-
-            {/* Enhanced Cannon Barrel */}
-            <div className="relative w-40 h-16 origin-left">
-              {/* Main Barrel Structure */}
-              <div className="absolute top-1/2 -translate-y-1/2 w-full h-10 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 rounded-lg shadow-inner">
-                {/* Barrel Texture */}
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-600/20 to-transparent" />
-                <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent,transparent,gray-700/20_1px,transparent_2px)]" />
+            
+            {gameOver && (
+              <div className="space-y-2">
+                <p className="text-red-400 text-xl animate-pulse">Game Over!</p>
+                <p className="text-yellow-300">Final Score: <span className="font-bold">{score}</span></p>
+                {score === highScore && score > 0 && (
+                  <p className="text-green-400 animate-bounce">🎉 New High Score! 🎉</p>
+                )}
+                <p className="text-sm opacity-75">Press SPACE to play again</p>
               </div>
-
-              {/* Single Reinforcement Ring near muzzle */}
-              <div className="absolute top-1/2 -translate-y-1/2 right-8">
-                <div className="w-6 h-12 bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 rounded-full shadow-lg" />
-                <div className="absolute inset-0 bg-gradient-to-b from-gray-500/20 to-transparent rounded-full" />
+            )}
+            
+            {gameStarted && !gameOver && (
+              <div className="text-center">
+                <p className="text-xs opacity-60">Speed increases with score!</p>
               </div>
-
-              {/* Barrel End with Enhanced Muzzle Break */}
-              <div className="absolute right-0 top-1/2 -translate-y-1/2">
-                <div className="w-10 h-11 bg-gradient-to-r from-gray-800 to-gray-900 rounded-r-lg">
-                  {/* Muzzle details */}
-                  <div className="absolute inset-0 flex flex-col justify-between py-1">
-                    {[0, 1, 2].map((i) => (
-                      <div
-                        key={i}
-                        className="h-2 w-full bg-gray-900/50 rounded-full"
-                      />
-                    ))}
-                  </div>
-                </div>
-                {/* Enhanced muzzle brake */}
-                <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-5 h-14 bg-gray-800 rounded-r-lg">
-                  <div className="absolute inset-0 flex flex-col justify-between py-1">
-                    {[0, 1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="h-2 w-full bg-gray-900 rounded-full"
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Cannon Sight */}
-              <div className="absolute -top-4 left-12 w-8 h-8">
-                <div className="w-2 h-8 bg-gray-700 rounded-full mx-auto" />
-                <div className="w-4 h-4 bg-gray-600 rounded-full mt-1 mx-auto ring-2 ring-gray-500" />
-              </div>
-            </div>
-
-            {/* Firing Mechanism */}
-            <div className="absolute -top-2 left-8 w-6 h-10 bg-gradient-to-b from-gray-700 to-gray-800 rounded-t-lg" />
-          </motion.div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
 
-      {/* Enhanced Game Over Screen - Mobile Responsive */}
-      {isGameOver && (
-        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center px-4">
-          <div className="text-center bg-gray-900/80 p-4 md:p-8 rounded-xl border border-red-500/30 shadow-2xl">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="text-4xl md:text-6xl text-red-500 font-bold mb-4 md:mb-8"
-            >
-              CANNON DESTROYED!
-            </motion.div>
-            <div className="text-2xl md:text-3xl text-white mb-2">
-              Final Score: {score}
+      {/* Right Side - 404 Display */}
+      <div className="w-1/2 h-full flex flex-col items-center justify-center p-8 bg-gradient-to-bl from-black to-gray-900 relative">
+        {/* Large floating elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full border border-yellow-400 opacity-5"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                width: `${20 + Math.random() * 60}px`,
+                height: `${20 + Math.random() * 60}px`,
+                animation: `float ${3 + Math.random() * 4}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 2}s`
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="text-center z-10 space-8">
+          {/* Main 404 */}
+          <div className="relative">
+            <h1 className="text-9xl md:text-[12rem] font-black leading-none">
+              <span className="text-yellow-400 animate-pulse drop-shadow-[0_0_30px_rgba(255,215,0,0.5)]">4</span>
+              <span className="text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(255,215,0,0.3)]" style={{ animationDelay: '0.5s' }}>0</span>
+              <span className="text-yellow-400 animate-pulse drop-shadow-[0_0_30px_rgba(255,215,0,0.5)]" style={{ animationDelay: '1s' }}>4</span>
+            </h1>
+            <div className="absolute inset-0 text-9xl md:text-[12rem] font-black leading-none opacity-20 blur-sm">
+              <span className="text-yellow-500">404</span>
             </div>
-            <div className="text-lg md:text-xl text-gray-400 mb-4 md:mb-8">
-              Survived for {Math.floor(gameTime)} seconds
+          </div>
+          
+          {/* Error Message */}
+          <div className="space-y-4">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-widest text-yellow-300">
+              PAGE NOT FOUND
+            </h2>
+            <div className="w-32 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent mx-auto animate-pulse"></div>
+          </div>
+
+          {/* Fun Messages */}
+          <div className="space-y-6 max-w-md">
+            <p className="text-xl text-yellow-200 leading-relaxed">
+              Oops! The page you're looking for has slithered away...
+            </p>
+            
+            <div className="flex items-center justify-center space-x-4 text-4xl">
+              <span className="animate-bounce" style={{ animationDelay: '0s' }}>🐍</span>
+              <span className="animate-bounce" style={{ animationDelay: '0.2s' }}>💨</span>
+              <span className="animate-bounce" style={{ animationDelay: '0.4s' }}>🍎</span>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-2 md:gap-4 justify-center">
-              <button
-                onClick={handleReset}
-                className="px-6 md:px-8 py-3 md:py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-lg md:text-xl transition-colors"
+            <p className="text-lg text-yellow-300 opacity-80">
+              But hey, enjoy the Snake game while you're here!
+            </p>
+
+            {/* Navigation */}
+            <div className="pt-6">
+              <a 
+                href="/" 
+                className="inline-flex items-center px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-yellow-400/25"
               >
-                Play Again
-              </button>
-              <button
-                onClick={handleGoBack}
-                className="px-6 md:px-8 py-3 md:py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-lg md:text-xl transition-colors"
-              >
-                Go Back
-              </button>
-              <Link
-                href="/"
-                className="px-6 md:px-8 py-3 md:py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-lg md:text-xl transition-colors"
-              >
-                Home
-              </Link>
+                🏠 Go Back Home
+              </a>
             </div>
           </div>
         </div>
-      )}
-
-      {/* Visual Effects Layer */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.3)_100%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(0,0,0,0.2)_0%,transparent_100%)]" />
       </div>
+      
+{/* let it be like this */}
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(180deg); }
+        }
+      `}</style>
     </div>
   );
 }
