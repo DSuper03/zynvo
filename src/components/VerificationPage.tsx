@@ -4,6 +4,8 @@ import { BackgroundElements } from "./TeamSection";
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import axios from "axios";
+import { error } from "console";
 
 type VerificationStatus = 'pending' | 'success' | 'error' | 'expired';
 
@@ -15,6 +17,10 @@ export default function VerificationPage() {
     const token = searchParams.get('token');
     const email = searchParams.get('email');
 
+    interface apiResponse {
+        msg : string,
+        token : string 
+    }
     useEffect(() => {
         if (!token || !email) {
             setStatus('error');
@@ -24,16 +30,11 @@ export default function VerificationPage() {
         const verifyEmail = async () => {
             try {
                 // Replace with your actual API endpoint
-                const response = await fetch('/api/verify-email', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ token, email }),
-                });
+                const response = await axios.post<apiResponse>(`http://localhost:8000/api/v1/user/verify?vToken=${token}`)
 
-                if (response.ok) {
+                if (response.status == 200) {
                     setStatus('success');
+                    localStorage.setItem('token', response.data.token)
                     // Start countdown for redirect
                     const timer = setInterval(() => {
                         setCountdown((prev) => {
@@ -47,8 +48,9 @@ export default function VerificationPage() {
 
                     return () => clearInterval(timer);
                 } else {
-                    const data = await response.json();
-                    if (data.error === 'expired') {
+                    const data = response.data.msg
+                    if (data === 'expired') {
+                        alert("expired")
                         setStatus('expired');
                     } else {
                         setStatus('error');
@@ -56,6 +58,7 @@ export default function VerificationPage() {
                 }
             } catch (error) {
                 setStatus('error');
+                alert(error)
             }
         };
 
