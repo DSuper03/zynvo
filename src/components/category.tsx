@@ -189,17 +189,17 @@ const Category = () => {
                   whileInView={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className=" rounded-lg p-6 cursor-pointer  transition duration-300"
+                  className="rounded-lg p-6 cursor-pointer transition duration-300 bg-black/70 backdrop-blur-sm border border-yellow-500/20 hover:bg-black/80 hover:border-yellow-500/40"
                 >
                   <div className="flex justify-between items-center mb-4">
-                    <div className="p-3  rounded-lg">
+                    <div className="p-3 bg-yellow-500/20 rounded-lg text-yellow-400">
                       {category.icon}
                     </div>
-                    <span className="text-sm bg-yellow-500/30 rounded-full px-2 py-1">
+                    <span className="text-sm bg-yellow-500/30 rounded-full px-2 py-1 text-yellow-100">
                       {category.count}
                     </span>
                   </div>
-                  <h3 className="text-lg font-medium">{category.name}</h3>
+                  <h3 className="text-lg font-medium text-white">{category.name}</h3>
                 </motion.div>
               ))}
             </div>
