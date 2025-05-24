@@ -1,4 +1,3 @@
-// Modified SignUp.js component with DiceBear Avatar integration
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -14,7 +13,7 @@ import {
 } from 'react-icons/fi';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
 import dotenv from 'dotenv';
-import DiceBearAvatar from '@/components/DicebearAvatars'; // Import the DiceBearAvatar component
+import DiceBearAvatar from '@/components/DicebearAvatars';
 
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -78,8 +77,8 @@ export default function SignUp() {
     console.log(msg);
     console.log('Sign up data:', formData);
     if (msg.data.msg == 'account created') {
-      localStorage.setItem('token', msg.data.token);
-      router.push('/dashboard');
+      // localStorage.setItem('token', msg.data.token);
+      router.push('/Verify');
     }
   };
 
