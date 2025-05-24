@@ -14,9 +14,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950">
-      <Sidebar/>
-      <main className="flex-1 w-full">{children}</main>
+     <div className="flex h-screen bg-black">
+      {/* Sidebar - fixed on the left */}
+      <Sidebar />
+
+      {/* Main content area - takes remaining width */}
+      <main className="flex-1 overflow-auto p-6   bg-gradient-to-br from-black to-gray-900">
+        {children}
+      </main>
     </div>
   );
 }

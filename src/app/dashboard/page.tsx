@@ -42,6 +42,7 @@ const mockUserData = {
   email: 'devSuper03@contact.com',
   clubName: 'zynvo',
   isVerified: true,
+  image: '/ASM.jpg',
   events: [
     {
       EventName: 'lets create zynvo',
@@ -110,10 +111,10 @@ export default function ZynvoDashboard() {
       try {
         const token = localStorage.getItem('token');
 
-        if (!token) {
-          navigate.push('/auth/signup');
-          return;
-        }
+        // if (!token) {
+        //   navigate.push('/auth/signup');
+        //   return;
+        // }
 
         try {
           const response = await axios.get<ApiResponse>(
@@ -203,7 +204,7 @@ export default function ZynvoDashboard() {
               {userData.profileAvatar ? (
                 <img
                   className="w-24 h-24 rounded-full border-4 border-gray-900 bg-yellow-400"
-                  src={userData.profileAvatar}
+                  src={ userData.profileAvatar}
                 ></img>
               ) : (
                 <div className="w-24 h-24 rounded-full border-4 border-gray-900 bg-yellow-400 flex items-center justify-center text-gray-900 text-4xl font-bold">
