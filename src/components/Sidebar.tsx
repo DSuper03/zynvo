@@ -209,107 +209,7 @@ export function Sidebar() {
         </div>
 
         {/* Insight Section */}
-        <div className="px-4 pb-4 mt-4">
-          {!collapsed && (
-            <p className="text-xs font-semibold text-yellow-500/80 mb-3 px-2">
-              INSIGHT
-            </p>
-          )}
-          <nav className="space-y-1">
-            <Link
-              href="/inbox"
-              className={`flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors ${
-                isActive('/inbox')
-                  ? 'bg-yellow-500 text-black'
-                  : 'hover:bg-yellow-500/10'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Inbox
-                  className={`h-5 w-5 ${isActive('/inbox') ? 'text-black' : 'text-yellow-400'}`}
-                />
-                {!collapsed && (
-                  <span
-                    className={`font-medium ${isActive('/inbox') ? 'text-black' : 'text-yellow-400'}`}
-                  >
-                    Inbox
-                  </span>
-                )}
-              </div>
-              <span
-                className={`text-xs px-2 py-0.5 ${
-                  isActive('/inbox')
-                    ? 'bg-black/80 text-yellow-400'
-                    : 'bg-yellow-900/30 text-yellow-400'
-                } rounded-full font-medium`}
-              >
-                {collapsed ? '•' : '84'}
-              </span>
-            </Link>
-
-            <Link
-              href="/notifications"
-              className={`flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors ${
-                isActive('/notifications')
-                  ? 'bg-yellow-500 text-black'
-                  : 'hover:bg-yellow-500/10'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Bell
-                  className={`h-5 w-5 ${isActive('/notifications') ? 'text-black' : 'text-yellow-400'}`}
-                />
-                {!collapsed && (
-                  <span
-                    className={`font-medium ${isActive('/notifications') ? 'text-black' : 'text-yellow-400'}`}
-                  >
-                    Notifications
-                  </span>
-                )}
-              </div>
-              <span
-                className={`text-xs px-2 py-0.5 ${
-                  isActive('/notifications')
-                    ? 'bg-black/80 text-yellow-400'
-                    : 'bg-yellow-900/30 text-yellow-400'
-                } rounded-full font-medium`}
-              >
-                {collapsed ? '•' : '12'}
-              </span>
-            </Link>
-
-            <Link
-              href="/chat"
-              className={`flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors ${
-                isActive('/chat')
-                  ? 'bg-yellow-500 text-black'
-                  : 'hover:bg-yellow-500/10'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <MessageCircle
-                  className={`h-5 w-5 ${isActive('/chat') ? 'text-black' : 'text-yellow-400'}`}
-                />
-                {!collapsed && (
-                  <span
-                    className={`font-medium ${isActive('/chat') ? 'text-black' : 'text-yellow-400'}`}
-                  >
-                    Chat
-                  </span>
-                )}
-              </div>
-              <span
-                className={`text-xs px-2 py-0.5 ${
-                  isActive('/chat')
-                    ? 'bg-black/80 text-yellow-400'
-                    : 'bg-yellow-900/30 text-yellow-400'
-                } rounded-full font-medium`}
-              >
-                {collapsed ? '•' : '43'}
-              </span>
-            </Link>
-          </nav>
-        </div>
+       
 
         <div className="mt-auto border-t border-yellow-900/30">
           <div
@@ -377,33 +277,7 @@ export function Sidebar() {
             <Users className="h-5 w-5" />
             <span className="absolute top-0 right-0 h-2 w-2 bg-yellow-400 rounded-full"></span>
           </Link>
-          <Link
-            href="/post"
-            className={`p-2 ${isActive('/post') ? 'bg-yellow-500 text-black rounded-lg' : 'text-yellow-400 hover:text-yellow-300'}`}
-          >
-            <Globe className="h-5 w-5" />
-          </Link>
-          <Link
-            href="/inbox"
-            className={`p-2 ${isActive('/inbox') ? 'bg-yellow-500 text-black rounded-lg' : 'text-yellow-400 hover:text-yellow-300'} relative`}
-          >
-            <Inbox className="h-5 w-5" />
-            <span className="absolute top-0 right-0 h-2 w-2 bg-yellow-400 rounded-full"></span>
-          </Link>
-          <Link
-            href="/notifications"
-            className={`p-2 ${isActive('/notifications') ? 'bg-yellow-500 text-black rounded-lg' : 'text-yellow-400 hover:text-yellow-300'} relative`}
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-0 right-0 h-2 w-2 bg-yellow-400 rounded-full"></span>
-          </Link>
-          <Link
-            href="/chat"
-            className={`p-2 ${isActive('/chat') ? 'bg-yellow-500 text-black rounded-lg' : 'text-yellow-400 hover:text-yellow-300'} relative`}
-          >
-            <MessageCircle className="h-5 w-5" />
-            <span className="absolute top-0 right-0 h-2 w-2 bg-yellow-400 rounded-full"></span>
-          </Link>
+         
         </nav>
 
         <div className="absolute bottom-5 left-0 w-full flex justify-center">
