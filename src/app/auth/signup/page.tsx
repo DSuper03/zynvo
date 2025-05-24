@@ -64,20 +64,14 @@ export default function SignUp() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Add sign-up logic here
     const msg = await axios.post<signupRes>(
       `http://localhost:8000/api/v1/user/signup`,
       formData
     );
     if (!msg) {
-      alert('failed');
-    } else {
-      alert('pass');
+      alert('Internal server error please try again later');
     }
-    console.log(msg);
-    console.log('Sign up data:', formData);
     if (msg.data.msg == 'account created') {
-      // localStorage.setItem('token', msg.data.token);
       router.push('/Verify');
     }
   };

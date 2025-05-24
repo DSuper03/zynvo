@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import axios from "axios";
-import { error } from "console";
 
 type VerificationStatus = 'pending' | 'success' | 'error' | 'expired';
 
@@ -50,7 +49,6 @@ export default function VerificationPage() {
                 } else {
                     const data = response.data.msg
                     if (data === 'expired') {
-                        alert("expired")
                         setStatus('expired');
                     } else {
                         setStatus('error');
@@ -58,7 +56,6 @@ export default function VerificationPage() {
                 }
             } catch (error) {
                 setStatus('error');
-                alert(error)
             }
         };
 
