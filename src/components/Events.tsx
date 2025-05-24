@@ -4,12 +4,30 @@ import { motion } from 'framer-motion'
 import { useState } from 'react'
 import Link from 'next/link'
 import WrapButton from './ui/wrap-button'
+import Image from 'next/image'
 
 
 const Events = () => {
+  const heroRef = React.useRef(null)
   return (
     <div>
-       <section id="events" className="py-20 bg-gray-950/50">
+       <section 
+                 ref={heroRef} 
+                 className="relative min-h-screen flex items-center justify-center py-20 md:py-32 overflow-hidden"
+               >
+                 {/* Background Image - Fixed Correctly */}
+                <div className="absolute inset-0 z-0">
+        <Image
+          src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/20250524_1536_LEGO%20College%20Life_remix_01jw0w1w0jfv9am8a3bxcg8erg.png?updatedAt=1748081232078"
+          alt="Hero Background"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
+        {/* Overlay to improve text readability */}
+        <div className="absolute inset-0 bg-black/60"></div>
+      </div>
           <div className="container mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -21,44 +39,49 @@ const Events = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
+                {[
                 {
                   title: 'Annual Tech Summit',
-                  date: 'June 15, 2025',
+                  date: 'July 15, 2025',
                   organizer: 'Computer Science Club',
-                  location: 'Main Campus Auditorium',
-                  image: '/event-placeholder-1.jpg',
+                  location: 'IIT Delhi Auditorium',
+                  image: 'https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/Gemini_Generated_Image_rsa8rersa8rersa8.png?updatedAt=1748084982775',
                   attendees: 237,
                 },
                 {
                   title: 'Cultural Festival',
-                  date: 'July 3-5, 2025',
+                  date: 'August 3-5, 2025',
                   organizer: 'International Students Association',
-                  location: 'University Plaza',
-                  image: '/event-placeholder-2.jpg',
+                  location: 'BITS Pilani Plaza',
+                  image: 'https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/Gemini_Generated_Image_bl9cqrbl9cqrbl9c.png?updatedAt=1748084848689',
                   attendees: 540,
                 },
                 {
                   title: 'Entrepreneurship Workshop',
-                  date: 'June 28, 2025',
+                  date: 'July 28, 2025',
                   organizer: 'Business Club',
-                  location: 'Wilson Hall, Room 302',
-                  image: '/event-placeholder-3.jpg',
+                  location: 'IIM Bangalore, Room 302',
+                  image: 'https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/Gemini_Generated_Image_ukkdlyukkdlyukkd.png?updatedAt=1748085201113',
                   attendees: 124,
                 },
-              ].map((event, index) => (
+                ].map((event, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.15 }}
                   viewport={{ once: true }}
-                  className="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+                  className="bg-gray-900/80 backdrop-blur-sm rounded-xl overflow-hidden border border-yellow-500/20 shadow-lg hover:shadow-yellow-500/20 transition-all duration-300 hover:-translate-y-2"
                 >
-                  <div className="h-48 bg-gray-700 relative">
+                  <div className="h-48 bg-gray-800/90 relative">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <p className="text-sm text-gray-400">
-                        Event Image Placeholder
+                        <Image
+                          src={event.image}
+                          alt={event.title}
+                          layout="fill"
+                          objectFit="cover"
+                        />
                       </p>
                     </div>
                     <div className="absolute top-4 left-4 bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-full">
@@ -66,7 +89,7 @@ const Events = () => {
                     </div>
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-bold mb-2">{event.title}</h3>
+                    <h3 className="text-xl font-bold mb-2 text-white">{event.title}</h3>
                     <div className="flex items-center mb-2">
                       <FaUsers className="text-yellow-500 mr-2" />
                       <span className="text-sm text-gray-300">
@@ -99,10 +122,10 @@ const Events = () => {
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs bg-yellow-500/30 rounded-full px-2 py-1">
+                      <span className="text-xs bg-yellow-500/30 text-yellow-100 rounded-full px-2 py-1">
                         {event.attendees} attending
                       </span>
-                      <button className="text-yellow-500 text-sm font-medium hover:underline">
+                      <button className="text-yellow-400 text-sm font-medium hover:text-yellow-300 hover:underline">
                         Learn More
                       </button>
                     </div>

@@ -4,9 +4,26 @@ import { motion } from 'framer-motion'
 
 import Image from 'next/image'
 const Testimonials = () => {
+  const heroRef=React.useRef(null)
   return (
     <div>
-        <section id="testimonials" className="py-20 bg-gray-900/50">
+    <section 
+             ref={heroRef} 
+             className="relative min-h-screen flex items-center justify-center py-20 md:py-32 overflow-hidden"
+           >
+             {/* Background Image - Fixed Correctly */}
+            <div className="absolute inset-0 z-0">
+    <Image
+      src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/photo_2025-05-23_20-16-08.jpg?updatedAt=1748011607137"
+      alt="Hero Background"
+      fill
+      priority
+      className="object-cover"
+      sizes="100vw"
+    />
+    {/* Overlay to improve text readability */}
+    <div className="absolute inset-0 bg-black/60"></div>
+  </div>
           <div className="container mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">

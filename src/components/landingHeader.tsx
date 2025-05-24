@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { Lens } from './magicui/lens';
 
 // Animation transition settings
 const transition = {
@@ -117,16 +119,20 @@ const LandingHeader = () => {
           {/* Logo section */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <div className="text-yellow-500 mr-2">
-                <svg
-                  viewBox="0 0 24 24"
-                  width="36"
-                  height="36"
-                  className="fill-current"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-                </svg>
-              </div>
+              <Lens
+          zoomFactor={2}
+          lensSize={150}
+          isStatic={false}
+          ariaLabel="Zoom Area"
+        >
+          <Image
+            src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/logozynvo.jpg?updatedAt=1747920152959"
+            alt="image placeholder"
+            width={50}
+            height={50}
+           className="transition-transform duration-300 group-hover:scale-125"
+          />
+        </Lens>
             </Link>
           </div>
 
