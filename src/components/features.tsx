@@ -47,12 +47,12 @@ const ZynvoDashboard = () => {
               </p>
               
               {/* Animated orb */}
-              <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                <div className="w-32 h-32 rounded-full">
-                   <img src='/logozynvo.jpg' className='rounded-full'>
-                   </img>
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 md:block hidden">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full">
+                   <Image src='/logozynvo.jpg' alt="Zynvo Logo" width={100} height={100} className='rounded-full w-full h-full object-cover'>
+                   </Image>
                 </div>
-                <div className="absolute inset-0 w-32 h-32 rounded-full  animate-spin-slow opacity-60"></div>
+                <div className="absolute inset-0 wid w-24 h-24 md:w-32 md:h-32 rounded-full animate-spin-slow opacity-60"></div>
               </div>
             </div>
             
