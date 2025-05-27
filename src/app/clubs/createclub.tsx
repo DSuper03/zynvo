@@ -54,7 +54,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     e.preventDefault();
     // Here you would typically send the data to your API
     const upload = await axios.post(
-      'http://localhost:8000/api/v1/clubs/club',
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/club`,
       clubData
     );
 

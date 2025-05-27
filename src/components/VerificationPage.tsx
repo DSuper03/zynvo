@@ -29,7 +29,7 @@ function VerificationContent() {
         const verifyEmail = async () => {
             try {
                 // Replace with your actual API endpoint
-                const response = await axios.post<apiResponse>(`http://localhost:8000/api/v1/user/verify?vToken=${token}`)
+                const response = await axios.post<apiResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/verify?vToken=${token}`)
 
                 if (response.status == 200) {
                     setStatus('success');

@@ -37,7 +37,7 @@ export default function SignIn() {
     //
     e.preventDefault();
     const msg = await axios.post<signinRes>(
-      `http://localhost:8000/api/v1/user/signup`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
       formData
     );
     if (!msg) {

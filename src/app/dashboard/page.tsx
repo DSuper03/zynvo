@@ -118,7 +118,7 @@ export default function ZynvoDashboard() {
 
         try {
           const response = await axios.get<ApiResponse>(
-            'http://localhost:8000/api/v1/user/getUser',
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/user/getUser`,
             {
               headers: {
                 authorization: `Bearer ${token}`,

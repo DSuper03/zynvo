@@ -34,7 +34,7 @@ export default function ZynvoEventsPage() {
 
   useEffect(()=> {
     async function call() {
-      const response = await axios.get<apiRespEvents>("http://localhost:8000/api/v1/events/all")
+      const response = await axios.get<apiRespEvents>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/all`)
       // if(!response) alert("fail")
       //   else alert(response.data.msg)
 

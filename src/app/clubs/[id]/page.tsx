@@ -83,7 +83,7 @@ export default function ClubPage({}: ClubPageProps) {
     async function call() {
       const token = localStorage.getItem('token');
       const response = await axios.get<Response>(
-        `http://localhost:8000/api/v1/clubs/getClub?id=${id}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClub?id=${id}`,
         {
           headers: {
             authorization: `Bearer ${token}`,
@@ -92,7 +92,7 @@ export default function ClubPage({}: ClubPageProps) {
       );
 
       const response2 = await axios.get<EventResponse>(
-        `http://localhost:8000/api/v1/events/eventByClub/${id}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/events/eventByClub/${id}`,
         {
           headers: {
             authorization: `Bearer ${token}`,

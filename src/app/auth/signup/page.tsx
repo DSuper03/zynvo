@@ -65,7 +65,7 @@ export default function SignUp() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const msg = await axios.post<signupRes>(
-      `http://localhost:8000/api/v1/user/signup`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
       formData
     );
     if (!msg) {
