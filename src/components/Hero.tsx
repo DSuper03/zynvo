@@ -1,16 +1,16 @@
-import React, { useRef } from 'react'
-import { motion } from 'framer-motion'
-import WrapButton from './ui/wrap-button'
-import Link from 'next/link'
-import HeroVideoDialog from './magicui/hero-video-dialog'
-import Image from 'next/image'
+import React, { useRef } from 'react';
+import { motion } from 'framer-motion';
+import WrapButton from './ui/wrap-button';
+import Link from 'next/link';
+import HeroVideoDialog from './magicui/hero-video-dialog';
+import Image from 'next/image';
 
 const Hero = () => {
-  const heroRef = useRef(null)
-  
+  const heroRef = useRef(null);
+
   return (
-    <section 
-      ref={heroRef} 
+    <section
+      ref={heroRef}
       className="relative min-h-screen flex items-center justify-center py-20 md:py-32 overflow-hidden"
     >
       {/* Background Image - Fixed Correctly */}
@@ -26,7 +26,7 @@ const Hero = () => {
         {/* Overlay to improve text readability */}
         <div className="absolute inset-0 bg-black/50"></div>
       </div>
-      
+
       {/* Content */}
       <div className="container mx-auto px-6 text-center relative z-10">
         {/* Hero Title - Adding this since it seems to be missing */}
@@ -38,21 +38,18 @@ const Hero = () => {
         >
           Connect With Campus Life
         </motion.h1>
-        
+
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-xl md:text-2xl mb-10 max-w-2xl mx-auto text-gray-300"
         >
-          Zynvo bridges the gap between college clubs and societies,
-          creating a vibrant network for students across institutions.
+          Zynvo bridges the gap between college clubs and societies, creating a
+          vibrant network for students across institutions.
         </motion.p>
-        
-        <Link
-          href="/auth/signup"
-          className="flex justify-center gap-4 mb-10"
-        >
+
+        <Link href="/auth/signup" className="flex justify-center gap-4 mb-10">
           <WrapButton className="bg-yellow-500 text-black font-medium transition duration-300 transform hover:-translate-y-1">
             Get Started
           </WrapButton>
@@ -81,7 +78,7 @@ const Hero = () => {
         </motion.div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Hero
+export default Hero;

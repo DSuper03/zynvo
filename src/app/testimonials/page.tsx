@@ -1,4 +1,3 @@
-
 import TestimonialsSection from '@/components/TestimonialsSection';
 
 export const metadata = {

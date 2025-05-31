@@ -245,14 +245,17 @@ const ClubsPage = () => {
                         </p>
 
                         <div className="flex items-center justify-between mt-3 md:mt-4">
-                          <span className={`text-xs px-2 py-1 rounded-md 
+                          <span
+                            className={`text-xs px-2 py-1 rounded-md 
                             ${club.type === 'tech' ? 'bg-blue-900/30 text-blue-300' : ''}
                             ${club.type === 'cultural' ? 'bg-purple-900/30 text-purple-300' : ''}
                             ${club.type === 'business' ? 'bg-green-900/30 text-green-300' : ''}
                             ${club.type === 'social' ? 'bg-amber-900/30 text-amber-300' : ''}
                             ${club.type === 'literary' ? 'bg-red-900/30 text-red-300' : ''}
-                            ${club.type === 'design' ? 'bg-pink-900/30 text-pink-300' : ''}`}>
-                            {club.type.charAt(0).toUpperCase() + club.type.slice(1)}
+                            ${club.type === 'design' ? 'bg-pink-900/30 text-pink-300' : ''}`}
+                          >
+                            {club.type.charAt(0).toUpperCase() +
+                              club.type.slice(1)}
                           </span>
                         </div>
                       </div>
@@ -310,14 +313,17 @@ const ClubsPage = () => {
                         </p>
 
                         <div className="flex items-center justify-between mt-3 md:mt-4">
-                          <span className={`text-xs px-2 py-1 rounded-md 
+                          <span
+                            className={`text-xs px-2 py-1 rounded-md 
                             ${club.type === 'Technology' ? 'bg-blue-900/30 text-blue-300' : ''}
                             ${club.type === 'Cultural' ? 'bg-purple-900/30 text-purple-300' : ''}
                             ${club.type === 'Business' ? 'bg-green-900/30 text-green-300' : ''}
                             ${club.type === 'Social' ? 'bg-amber-900/30 text-amber-300' : ''}
                             ${club.type === 'Literature' ? 'bg-red-900/30 text-red-300' : ''}
-                            ${club.type === 'Design' ? 'bg-pink-900/30 text-pink-300' : ''}`}>
-                            {club.type.charAt(0).toUpperCase() + club.type.slice(1)}
+                            ${club.type === 'Design' ? 'bg-pink-900/30 text-pink-300' : ''}`}
+                          >
+                            {club.type.charAt(0).toUpperCase() +
+                              club.type.slice(1)}
                           </span>
 
                           <button

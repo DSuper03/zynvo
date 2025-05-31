@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -20,13 +20,17 @@ export default function SmoothSnake404Game() {
   const router = useRouter();
 
   const generateFood = useCallback(() => {
-    let newFood : any;
+    let newFood: any;
     do {
       newFood = {
         x: Math.floor(Math.random() * GRID_SIZE),
-        y: Math.floor(Math.random() * GRID_SIZE)
+        y: Math.floor(Math.random() * GRID_SIZE),
       };
-    } while (snake.some(segment => segment.x === newFood.x && segment.y === newFood.y));
+    } while (
+      snake.some(
+        (segment) => segment.x === newFood.x && segment.y === newFood.y
+      )
+    );
     return newFood;
   }, [snake]);
 
@@ -42,22 +46,29 @@ export default function SmoothSnake404Game() {
   const moveSnake = useCallback(() => {
     if (!gameStarted || gameOver) return;
 
-    setSnake(currentSnake => {
+    setSnake((currentSnake) => {
       const newSnake = [...currentSnake];
       const head = { ...newSnake[0] };
-      
+
       head.x += direction.x;
       head.y += direction.y;
 
       // Check wall collision
-      if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
+      if (
+        head.x < 0 ||
+        head.x >= GRID_SIZE ||
+        head.y < 0 ||
+        head.y >= GRID_SIZE
+      ) {
         setGameOver(true);
         if (score > highScore) setHighScore(score);
         return currentSnake;
       }
 
       // Check self collision
-      if (newSnake.some(segment => segment.x === head.x && segment.y === head.y)) {
+      if (
+        newSnake.some((segment) => segment.x === head.x && segment.y === head.y)
+      ) {
         setGameOver(true);
         if (score > highScore) setHighScore(score);
         return currentSnake;
@@ -67,7 +78,7 @@ export default function SmoothSnake404Game() {
 
       // Check food collision
       if (head.x === food.x && head.y === food.y) {
-        setScore(prev => prev + 10);
+        setScore((prev) => prev + 10);
         setFood(generateFood());
       } else {
         newSnake.pop();
@@ -84,9 +95,9 @@ export default function SmoothSnake404Game() {
   }, [moveSnake, score]);
 
   useEffect(() => {
-    const handleKeyPress = (e : any) => {
+    const handleKeyPress = (e: any) => {
       e.preventDefault();
-      
+
       if (!gameStarted && e.code === 'Space') {
         setGameStarted(true);
         return;
@@ -139,7 +150,7 @@ export default function SmoothSnake404Game() {
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 2}s`
+                animationDuration: `${2 + Math.random() * 2}s`,
               }}
             />
           ))}
@@ -148,37 +159,43 @@ export default function SmoothSnake404Game() {
         {/* Game Container */}
         <div className="bg-black border-4 border-yellow-400 rounded-xl p-6 shadow-2xl z-10 transform hover:scale-105 transition-transform duration-300">
           <div className="flex justify-between items-center mb-4">
-            <div className="text-lg font-mono">Score: <span className="text-yellow-300">{score}</span></div>
-            <div className="text-lg font-mono">High: <span className="text-yellow-300">{highScore}</span></div>
+            <div className="text-lg font-mono">
+              Score: <span className="text-yellow-300">{score}</span>
+            </div>
+            <div className="text-lg font-mono">
+              High: <span className="text-yellow-300">{highScore}</span>
+            </div>
           </div>
 
           {/* Game Grid */}
-          <div 
+          <div
             className="grid bg-gray-900 border-2 border-yellow-600 mx-auto rounded-lg overflow-hidden shadow-inner"
             style={{
               gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
               width: '400px',
-              height: '400px'
+              height: '400px',
             }}
           >
             {[...Array(GRID_SIZE * GRID_SIZE)].map((_, index) => {
               const x = index % GRID_SIZE;
               const y = Math.floor(index / GRID_SIZE);
-              
-              const isSnake = snake.some(segment => segment.x === x && segment.y === y);
+
+              const isSnake = snake.some(
+                (segment) => segment.x === x && segment.y === y
+              );
               const isHead = snake[0] && snake[0].x === x && snake[0].y === y;
               const isFood = food.x === x && food.y === y;
-              
+
               return (
                 <div
                   key={index}
                   className={`border border-gray-800 transition-all duration-75 ${
-                    isSnake 
-                      ? isHead 
-                        ? 'bg-yellow-300 shadow-lg' 
+                    isSnake
+                      ? isHead
+                        ? 'bg-yellow-300 shadow-lg'
                         : 'bg-yellow-400 shadow-md'
-                      : isFood 
-                        ? 'bg-red-500 shadow-red-500/50 shadow-lg' 
+                      : isFood
+                        ? 'bg-red-500 shadow-red-500/50 shadow-lg'
                         : 'bg-gray-900 hover:bg-gray-800'
                   }`}
                 />
@@ -195,21 +212,27 @@ export default function SmoothSnake404Game() {
                 <p className="text-xs opacity-75">Arrow keys or WASD to move</p>
               </div>
             )}
-            
+
             {gameOver && (
               <div className="space-y-2">
                 <p className="text-red-400 text-xl animate-pulse">Game Over!</p>
-                <p className="text-yellow-300">Final Score: <span className="font-bold">{score}</span></p>
+                <p className="text-yellow-300">
+                  Final Score: <span className="font-bold">{score}</span>
+                </p>
                 {score === highScore && score > 0 && (
-                  <p className="text-green-400 animate-bounce">🎉 New High Score! 🎉</p>
+                  <p className="text-green-400 animate-bounce">
+                    🎉 New High Score! 🎉
+                  </p>
                 )}
                 <p className="text-sm opacity-75">Press SPACE to play again</p>
               </div>
             )}
-            
+
             {gameStarted && !gameOver && (
               <div className="text-center">
-                <p className="text-xs opacity-60">Speed increases with score!</p>
+                <p className="text-xs opacity-60">
+                  Speed increases with score!
+                </p>
               </div>
             )}
           </div>
@@ -230,7 +253,7 @@ export default function SmoothSnake404Game() {
                 width: `${20 + Math.random() * 60}px`,
                 height: `${20 + Math.random() * 60}px`,
                 animation: `float ${3 + Math.random() * 4}s ease-in-out infinite`,
-                animationDelay: `${Math.random() * 2}s`
+                animationDelay: `${Math.random() * 2}s`,
               }}
             />
           ))}
@@ -240,15 +263,27 @@ export default function SmoothSnake404Game() {
           {/* Main 404 */}
           <div className="relative">
             <h1 className="text-9xl md:text-[12rem] font-black leading-none">
-              <span className="text-yellow-400 animate-pulse drop-shadow-[0_0_30px_rgba(255,215,0,0.5)]">4</span>
-              <span className="text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(255,215,0,0.3)]" style={{ animationDelay: '0.5s' }}>0</span>
-              <span className="text-yellow-400 animate-pulse drop-shadow-[0_0_30px_rgba(255,215,0,0.5)]" style={{ animationDelay: '1s' }}>4</span>
+              <span className="text-yellow-400 animate-pulse drop-shadow-[0_0_30px_rgba(255,215,0,0.5)]">
+                4
+              </span>
+              <span
+                className="text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(255,215,0,0.3)]"
+                style={{ animationDelay: '0.5s' }}
+              >
+                0
+              </span>
+              <span
+                className="text-yellow-400 animate-pulse drop-shadow-[0_0_30px_rgba(255,215,0,0.5)]"
+                style={{ animationDelay: '1s' }}
+              >
+                4
+              </span>
             </h1>
             <div className="absolute inset-0 text-9xl md:text-[12rem] font-black leading-none opacity-20 blur-sm">
               <span className="text-yellow-500">404</span>
             </div>
           </div>
-          
+
           {/* Error Message */}
           <div className="space-y-4">
             <h2 className="text-3xl md:text-4xl font-bold tracking-widest text-yellow-300">
@@ -262,11 +297,23 @@ export default function SmoothSnake404Game() {
             <p className="text-xl text-yellow-200 leading-relaxed">
               Oops! The page you're looking for has slithered away...
             </p>
-            
+
             <div className="flex items-center justify-center space-x-4 text-4xl">
-              <span className="animate-bounce" style={{ animationDelay: '0s' }}>🐍</span>
-              <span className="animate-bounce" style={{ animationDelay: '0.2s' }}>💨</span>
-              <span className="animate-bounce" style={{ animationDelay: '0.4s' }}>🍎</span>
+              <span className="animate-bounce" style={{ animationDelay: '0s' }}>
+                🐍
+              </span>
+              <span
+                className="animate-bounce"
+                style={{ animationDelay: '0.2s' }}
+              >
+                💨
+              </span>
+              <span
+                className="animate-bounce"
+                style={{ animationDelay: '0.4s' }}
+              >
+                🍎
+              </span>
             </div>
 
             <p className="text-lg text-yellow-300 opacity-80">
@@ -275,22 +322,29 @@ export default function SmoothSnake404Game() {
 
             {/* Navigation */}
             <div className="pt-6">
-              <button className="inline-flex items-center px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-yellow-400/25"
-              onClick={()=>{
-                router.push('/')
-              }}>
+              <button
+                className="inline-flex items-center px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-yellow-400/25"
+                onClick={() => {
+                  router.push('/');
+                }}
+              >
                 🏠 Go Back Home
               </button>
             </div>
           </div>
         </div>
       </div>
-      
-{/* let it be like this */}
+
+      {/* let it be like this */}
       <style jsx>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(180deg); }
+          0%,
+          100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-20px) rotate(180deg);
+          }
         }
       `}</style>
     </div>

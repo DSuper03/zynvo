@@ -60,11 +60,20 @@ const Eventid = () => {
                 strokeWidth={1.5}
                 viewBox="0 0 48 48"
               >
-                <rect x="8" y="8" width="32" height="32" rx="6" stroke="currentColor" />
+                <rect
+                  x="8"
+                  y="8"
+                  width="32"
+                  height="32"
+                  rx="6"
+                  stroke="currentColor"
+                />
                 <circle cx="24" cy="20" r="6" stroke="currentColor" />
                 <path d="M8 36l8-8 8 8 8-8 8 8" stroke="currentColor" />
               </svg>
-              <span className="text-lg font-semibold opacity-60">Event Poster</span>
+              <span className="text-lg font-semibold opacity-60">
+                Event Poster
+              </span>
             </span>
             {/* 
               To use a real image, replace the above <span> with:

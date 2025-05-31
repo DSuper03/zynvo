@@ -14,7 +14,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   ];
 
   return (
-     <div className="flex h-screen bg-black">
+    <div className="flex h-screen bg-black">
       {/* Sidebar - fixed on the left */}
       <Sidebar />
 

@@ -120,19 +120,19 @@ const LandingHeader = () => {
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
               <Lens
-          zoomFactor={2}
-          lensSize={150}
-          isStatic={false}
-          ariaLabel="Zoom Area"
-        >
-          <Image
-            src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/logozynvo.jpg?updatedAt=1747920152959"
-            alt="image placeholder"
-            width={50}
-            height={50}
-           className="transition-transform duration-300 group-hover:scale-125"
-          />
-        </Lens>
+                zoomFactor={2}
+                lensSize={150}
+                isStatic={false}
+                ariaLabel="Zoom Area"
+              >
+                <Image
+                  src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/logozynvo.jpg?updatedAt=1747920152959"
+                  alt="image placeholder"
+                  width={50}
+                  height={50}
+                  className="transition-transform duration-300 group-hover:scale-125"
+                />
+              </Lens>
             </Link>
           </div>
 

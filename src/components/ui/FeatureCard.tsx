@@ -7,7 +7,12 @@ import { motion } from 'framer-motion';
 import { features } from '@/constants/Features';
 import { ArrowRight } from 'lucide-react';
 
-type FeatureVariant = 'primary' | 'secondary' | 'tertiary' | 'highlight' | 'bordered';
+type FeatureVariant =
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'highlight'
+  | 'bordered';
 
 interface FeatureCardProps {
   variant: FeatureVariant;
@@ -27,7 +32,9 @@ const CardBase: React.FC<{
   className?: string;
   height?: string;
 }> = ({ children, className = '', height = 'h-full' }) => (
-  <div className={`relative overflow-hidden rounded-2xl ${height} ${className}`}>
+  <div
+    className={`relative overflow-hidden rounded-2xl ${height} ${className}`}
+  >
     {children}
   </div>
 );
@@ -78,7 +85,10 @@ const SecondaryCard: React.FC<FeatureCardProps> = ({
   Icon,
   height = 'h-[280px]',
 }) => (
-  <CardBase className="border border-yellow-500/30 bg-black/50 backdrop-blur-sm" height={height}>
+  <CardBase
+    className="border border-yellow-500/30 bg-black/50 backdrop-blur-sm"
+    height={height}
+  >
     <CardContent>
       <div className="flex justify-between items-start py-10">
         <h3 className="text-xl font-bold text-white">{name}</h3>
@@ -111,7 +121,13 @@ const TertiaryCard: React.FC<FeatureCardProps> = ({
   <CardBase className={`bg-gradient-to-br ${accentColor}`} height={height}>
     {background && (
       <div className="absolute bottom-0 right-0 w-32 h-32 opacity-20">
-        <Image src={background} alt="" width={128} height={128} className="object-contain" />
+        <Image
+          src={background}
+          alt=""
+          width={128}
+          height={128}
+          className="object-contain"
+        />
       </div>
     )}
     <CardContent>
@@ -136,10 +152,19 @@ const HighlightCard: React.FC<FeatureCardProps> = ({
   background,
   height = 'h-[240px]',
 }) => (
-  <CardBase className="border-2 border-dashed border-rose-500/50 bg-gray-900" height={height}>
+  <CardBase
+    className="border-2 border-dashed border-rose-500/50 bg-gray-900"
+    height={height}
+  >
     {background && (
       <div className="absolute -right-6 -bottom-6 w-24 h-24 opacity-30">
-        <Image src={background} alt="" width={96} height={96} className="object-contain" />
+        <Image
+          src={background}
+          alt=""
+          width={96}
+          height={96}
+          className="object-contain"
+        />
       </div>
     )}
     <CardContent>
@@ -167,7 +192,10 @@ const BorderedCard: React.FC<FeatureCardProps> = ({
   Icon,
   height = 'h-[300px]',
 }) => (
-  <CardBase className="bg-gray-900/70 backdrop-blur-sm border border-cyan-500/30" height={height}>
+  <CardBase
+    className="bg-gray-900/70 backdrop-blur-sm border border-cyan-500/30"
+    height={height}
+  >
     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-blue-600"></div>
     <CardContent>
       <Icon className="h-6 w-6 text-cyan-400 mb-4" />
@@ -184,19 +212,20 @@ const BorderedCard: React.FC<FeatureCardProps> = ({
   </CardBase>
 );
 
-const FeatureCard: React.FC<{ 
-  feature: Omit<FeatureCardProps, 'variant'> & { variant: string }; 
-  index: number 
+const FeatureCard: React.FC<{
+  feature: Omit<FeatureCardProps, 'variant'> & { variant: string };
+  index: number;
 }> = ({ feature, index }) => {
   const variant = feature.variant as FeatureVariant;
-  
-  const CardComponent = {
-    primary: PrimaryCard,
-    secondary: SecondaryCard,
-    tertiary: TertiaryCard,
-    highlight: HighlightCard,
-    bordered: BorderedCard,
-  }[variant] || PrimaryCard;
+
+  const CardComponent =
+    {
+      primary: PrimaryCard,
+      secondary: SecondaryCard,
+      tertiary: TertiaryCard,
+      highlight: HighlightCard,
+      bordered: BorderedCard,
+    }[variant] || PrimaryCard;
 
   return (
     <motion.div
@@ -205,7 +234,7 @@ const FeatureCard: React.FC<{
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className={feature.className}
     >
-      <CardComponent {...feature as unknown as FeatureCardProps} />
+      <CardComponent {...(feature as unknown as FeatureCardProps)} />
     </motion.div>
   );
 };
@@ -214,7 +243,9 @@ export default function FeatureGrid() {
   return (
     <section className="container mx-auto px-4 py-16">
       <header className="text-center mb-12">
-        <h2 className="text-3xl font-bold text-white mb-4">Discover What Zynvo Offers</h2>
+        <h2 className="text-3xl font-bold text-white mb-4">
+          Discover What Zynvo Offers
+        </h2>
         <p className="text-gray-400 max-w-2xl mx-auto">
           Explore our powerful features designed to streamline your workflow
         </p>

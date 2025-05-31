@@ -280,15 +280,15 @@ export interface FAQItem {
 }
 
 export interface UserEvents {
-  name : string | null
+  name: string | null;
 }
 
 export interface Attendee {
-  user : UserEvents | null
+  user: UserEvents | null;
 }
 
 export interface eventData {
-  attendees : Attendee[], 
+  attendees: Attendee[];
   description: string;
   id: string;
   clubName: string;

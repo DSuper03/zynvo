@@ -1,6 +1,5 @@
 'use client';
 
-
 import { useEffect, useState } from 'react';
 import {
   Search,
@@ -14,17 +13,15 @@ import { eventData } from '@/types/global-Interface';
 import Image from 'next/image';
 import axios from 'axios';
 
-
 interface apiRespEvents {
-  msg : string,
-  response : eventData[]
-} 
-
+  msg: string;
+  response: eventData[];
+}
 
 export default function ZynvoEventsPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
-  const [Events, setEvents] = useState<eventData[]>([])
+  const [Events, setEvents] = useState<eventData[]>([]);
   // Sample events data
 
   // Toggle mobile menu
@@ -32,21 +29,22 @@ export default function ZynvoEventsPage() {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  useEffect(()=> {
+  useEffect(() => {
     async function call() {
-      const response = await axios.get<apiRespEvents>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/all`)
+      const response = await axios.get<apiRespEvents>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/all`
+      );
       // if(!response) alert("fail")
       //   else alert(response.data.msg)
 
       setEvents(response.data.response);
     }
 
-    call()
-  }, [])
+    call();
+  }, []);
 
   // Filter events based on active filter
- // data = [{[]}, { }]
-        
+  // data = [{[]}, { }]
 
   return (
     <div className="min-h-screen bg-black">
@@ -118,7 +116,7 @@ export default function ZynvoEventsPage() {
             >
               <div className="relative">
                 <Image
-                  src={"/consultclub.png"}
+                  src={'/consultclub.png'}
                   alt={event.description}
                   width={600}
                   height={300}
@@ -136,7 +134,9 @@ export default function ZynvoEventsPage() {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-gray-300 text-sm">
                     <Calendar className="size-4 mr-2 text-yellow-400" />
-                    <span className="truncate">deadline : {event.endDate?.toDateString()}</span>
+                    <span className="truncate">
+                      deadline : {event.endDate?.toDateString()}
+                    </span>
                   </div>
                   <div className="flex items-center text-gray-300 text-sm">
                     <MapPin className="w-4 h-4 mr-2 text-yellow-400" />

@@ -1,11 +1,11 @@
-"use client"
+'use client';
 
-import VerificationPage from "@/components/VerificationPage";
+import VerificationPage from '@/components/VerificationPage';
 
 export default function VerificationMailPage() {
-    return (
-        <div>
-            <VerificationPage />
-        </div>
-    )
+  return (
+    <div>
+      <VerificationPage />
+    </div>
+  );
 }

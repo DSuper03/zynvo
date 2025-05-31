@@ -69,7 +69,6 @@ export default function Home() {
   return (
     <div className=" bg-gray-900 text-white relative">
       {/* Fixed Background Image */}
-      
 
       <title>Zynvo </title>
       <meta
@@ -82,22 +81,20 @@ export default function Home() {
         {/* Navigation */}
         <LandingHeader />
 
-      <Hero/>
+        <Hero />
 
-     
-      <ZynvoDashboard />
+        <ZynvoDashboard />
 
-      <HowItWorks />
+        <HowItWorks />
 
-      <Category />
+        <Category />
 
         {/* Testimonials Section */}
-       <Testimonials/>
+        <Testimonials />
 
         {/* Event Highlights Section */}
         <Events />
-               {/* CTA Section */}
-       
+        {/* CTA Section */}
 
         {/* Footer */}
         <footer className="bg-gray-950 text-gray-300 pt-16 pb-8">

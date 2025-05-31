@@ -209,7 +209,6 @@ export function Sidebar() {
         </div>
 
         {/* Insight Section */}
-       
 
         <div className="mt-auto border-t border-yellow-900/30">
           <div
@@ -277,7 +276,6 @@ export function Sidebar() {
             <Users className="h-5 w-5" />
             <span className="absolute top-0 right-0 h-2 w-2 bg-yellow-400 rounded-full"></span>
           </Link>
-         
         </nav>
 
         <div className="absolute bottom-5 left-0 w-full flex justify-center">

@@ -7,24 +7,23 @@ import Image from 'next/image';
 const HowItWorks = () => {
   const heroref = React.useRef(null);
   return (
-    <section 
-         ref={heroref} 
-         className="relative min-h-screen flex items-center justify-center py-20 md:py-32 overflow-hidden"
-       >
-         {/* Background Image - Fixed Correctly */}
-         <div className="absolute inset-0 z-0">
-           <Image
-             src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/20250520_1731_LEGO%20College%20Festivities_simple_compose_01jvps0810emxrm5zr3tre0vas%20(1).png?updatedAt=1748011509153"
-             alt="Hero Background"
-             fill
-             priority
-             className="object-cover"
-             sizes="100vw"
-           />
-           {/* Overlay to improve text readability */}
-           <div className="absolute inset-0 bg-black/50"></div>
-         </div>
-         
+    <section
+      ref={heroref}
+      className="relative min-h-screen flex items-center justify-center py-20 md:py-32 overflow-hidden"
+    >
+      {/* Background Image - Fixed Correctly */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/20250520_1731_LEGO%20College%20Festivities_simple_compose_01jvps0810emxrm5zr3tre0vas%20(1).png?updatedAt=1748011509153"
+          alt="Hero Background"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
+        {/* Overlay to improve text readability */}
+        <div className="absolute inset-0 bg-black/50"></div>
+      </div>
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-16">
@@ -57,9 +56,7 @@ const HowItWorks = () => {
               title: 'Join activities',
               description:
                 'Connect with club members and participate in events',
-              icon: (
-                <FaCalendarAlt className="text-yellow-500 text-3xl mb-4" />
-              ),
+              icon: <FaCalendarAlt className="text-yellow-500 text-3xl mb-4" />,
             },
             {
               step: 4,
