@@ -80,7 +80,7 @@ const ContactSection = () => {
               <div className="space-y-6">
                 <div className="flex items-center space-x-4 text-gray-300">
                   <Icons.Email />
-                  <span>support@zynvo.com</span>
+                  <span>dsuper03.dev@gmail.com</span>
                 </div>
                 <div className="flex items-center space-x-4 text-gray-300">
                   <Icons.Discord />
@@ -88,7 +88,7 @@ const ContactSection = () => {
                 </div>
                 <div className="flex items-center space-x-4 text-gray-300">
                   <Icons.Twitter />
-                  <span>@zynvo</span>
+                  <span>@zynvonow</span>
                 </div>
               </div>
 
