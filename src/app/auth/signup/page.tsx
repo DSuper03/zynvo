@@ -18,6 +18,7 @@ import DiceBearAvatar from '@/components/DicebearAvatars';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { signupRes } from '@/types/global-Interface';
+import { toast } from 'sonner';
 
 dotenv.config();
 //const BASE_URL = process.env.BASE_URL
@@ -69,9 +70,10 @@ export default function SignUp() {
       formData
     );
     if (!msg) {
-      alert('Internal server error please try again later');
+      toast('Internal server error please try again later');
     }
     if (msg.data.msg == 'account created') {
+      toast('Account created, lets get you verified')
       router.push('/Verify');
     }
   };

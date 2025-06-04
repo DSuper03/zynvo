@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { X, Upload, Camera } from 'lucide-react';
 import { CreateClubModalProps } from '@/types/global-Interface';
+import { toast } from 'sonner';
 
 const CreateClubModal: React.FC<CreateClubModalProps> = ({
   isOpen,
@@ -60,13 +61,8 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
 
     const msg = upload?.data;
     if (upload.status == 200) {
-      alert({
-        msg: msg,
-
-        clubId: upload?.data,
-      });
+      toast(`${msg} and your clubID : ${upload?.data}`)
     }
-    console.log('Club data to submit:', clubData);
     // After successful submission, close modal
     onClose();
   };

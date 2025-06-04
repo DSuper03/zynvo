@@ -10,6 +10,7 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { signinRes } from '@/types/global-Interface';
+import { toast } from 'sonner';
 
 dotenv.config();
 // const BASE_URL = process.env.BASE_URL
@@ -41,12 +42,14 @@ export default function SignIn() {
       formData
     );
     if (!msg) {
-      alert('failed');
+     toast("Some Internal Server Error Occured")
+    } else if(msg && msg.data.msg !== 'login success' ) {
+      toast(msg.data.msg)
     }
-    console.log(msg);
     console.log('Sign in data:', formData);
     if (msg.data.msg == 'login success') {
       localStorage.setItem('token', msg.data.token);
+      toast("login success")
       router.push('/dashboard');
     }
   };
