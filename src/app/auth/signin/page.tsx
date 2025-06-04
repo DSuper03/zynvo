@@ -46,7 +46,6 @@ export default function SignIn() {
     } else if(msg && msg.data.msg !== 'login success' ) {
       toast(msg.data.msg)
     }
-    console.log('Sign in data:', formData);
     if (msg.data.msg == 'login success') {
       localStorage.setItem('token', msg.data.token);
       toast("login success")
