@@ -9,9 +9,12 @@ import {
   ChevronDown,
   Calendar,
 } from 'lucide-react';
+import { Modal,ModalTrigger } from '@/components/ui/animated-modal';
 import { eventData } from '@/types/global-Interface';
 import Image from 'next/image';
 import axios from 'axios';
+import CreateEventButton from './components/createEventButton';
+import CreateEventModal from './components/modals';
 
 interface apiRespEvents {
   msg: string;
@@ -22,6 +25,7 @@ export default function ZynvoEventsPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
   const [Events, setEvents] = useState<eventData[]>([]);
+  const [isModalOpen , setIsModalOpen]=useState(false);
   // Sample events data
 
   // Toggle mobile menu
@@ -47,7 +51,7 @@ export default function ZynvoEventsPage() {
   // data = [{[]}, { }]
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen ">
       {/* Navbar */}
 
       {/* Main Content */}
@@ -61,7 +65,19 @@ export default function ZynvoEventsPage() {
             Discover and register for the event you would like to go
           </p>
         </div>
+   <div>
 
+    
+      {isModalOpen && <CreateEventModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
+
+      {/* Header with Create Button */}
+      <div className="flex justify-between items-center mb-8 sticky top-0 backdrop-blur-sm z-10 py-4 px-4">
+
+        <CreateEventButton onClick={() => setIsModalOpen(true)} />
+      </div>
+
+    
+   </div>
         {/* Search and Filter Bar */}
         <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:gap-4 mb-6 md:mb-8">
           <div className="relative w-full md:w-1/2">
