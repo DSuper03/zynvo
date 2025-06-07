@@ -61,7 +61,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
 
     const msg = upload?.data;
     if (upload.status == 200) {
-      toast(`${msg} and your clubID : ${upload?.data}`)
+      toast(`${msg} and your clubID : ${upload?.data}`);
     }
     // After successful submission, close modal
     onClose();

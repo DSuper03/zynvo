@@ -42,13 +42,13 @@ export default function SignIn() {
       formData
     );
     if (!msg) {
-     toast("Some Internal Server Error Occured")
-    } else if(msg && msg.data.msg !== 'login success' ) {
-      toast(msg.data.msg)
+      toast('Some Internal Server Error Occured');
+    } else if (msg && msg.data.msg !== 'login success') {
+      toast(msg.data.msg);
     }
     if (msg.data.msg == 'login success') {
       localStorage.setItem('token', msg.data.token);
-      toast("login success")
+      toast('login success');
       router.push('/dashboard');
     }
   };

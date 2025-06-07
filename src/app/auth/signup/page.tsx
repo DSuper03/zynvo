@@ -73,7 +73,7 @@ export default function SignUp() {
       toast('Internal server error please try again later');
     }
     if (msg.data.msg == 'account created') {
-      toast('Account created, lets get you verified')
+      toast('Account created, lets get you verified');
       router.push('/Verify');
     }
   };
