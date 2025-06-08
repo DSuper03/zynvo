@@ -6,13 +6,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex h-screen bg-black">
+    <div className="flex h-screen overflow-hidden bg-black">
       {/* Sidebar - fixed on the left */}
-      <Sidebar />
+      <div className="h-screen">
+        <Sidebar />
+      </div>
 
-      {/* Main content area - takes remaining width */}
-      <main className="flex-1 overflow-auto p-6   bg-gradient-to-br from-black to-gray-900">
-        {children}
+      {/* Main content area - takes remaining width with controlled overflow */}
+      <main className="flex-1 h-screen overflow-hidden bg-gradient-to-br from-black to-gray-900">
+        <div className="h-full  p-6">
+          {children}
+        </div>
       </main>
     </div>
   );

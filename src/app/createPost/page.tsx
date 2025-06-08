@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Camera, Trash2, Image, Send, Award, School } from 'lucide-react';
 
-export default function SocialMediaPostCreator() {
+export default function CreatePostModal() {
   const [postText, setPostText] = useState('');
   const [selectedClub, setSelectedClub] = useState('');
   const [selectedCollege, setSelectedCollege] = useState('');

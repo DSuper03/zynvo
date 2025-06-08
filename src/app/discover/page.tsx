@@ -18,14 +18,22 @@ import {
   interestCategories,
 } from '@/constants/mockposts';
 import { users } from '@/constants/mockposts';
+import CreatePostButton from './components/CreatePostButton';
+import CreatePostModal from './components/CreatePostModal';
 
 export default function Feed() {
   const [activeTab, setActiveTab] = useState<'recents' | 'friends' | 'popular'>(
     'recents'
   );
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-yellow-400">
+      {/* Create Post Button - Add this at the top */}
+      <div className="lg:col-span-2 mb-4">
+        <CreatePostButton onClick={() => setIsPostModalOpen(true)} />
+      </div>
+      
       {/* Main Feed Column */}
       <div className="lg:col-span-2">
         {/* Tabs */}
@@ -304,6 +312,13 @@ export default function Feed() {
           </div>
         </div>
       </div>
+
+      {/* Create Post Modal */}
+      <CreatePostModal
+        isOpen={isPostModalOpen}
+        onClose={() => setIsPostModalOpen(false)}
+      
+      />
     </div>
   );
 }
