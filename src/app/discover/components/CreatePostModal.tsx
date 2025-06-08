@@ -11,6 +11,7 @@ import { SelectGroup } from '@radix-ui/react-select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { toast, Toaster } from 'sonner';
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -44,8 +45,8 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files);
-      if (images.length + filesArray.length > 4) {
-        alert('You can only upload up to 4 images');
+      if (images.length + filesArray.length > 1) {
+        toast('You can only upload up to 1 image');
         return;
       }
 
@@ -67,7 +68,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
 
   const handleSubmit = () => {
     if (!postText.trim()) {
-      alert('Please enter some text for your post');
+      toast('Please enter some text for your post');
       return;
     }
 
