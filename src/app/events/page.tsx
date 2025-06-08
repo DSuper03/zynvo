@@ -26,7 +26,7 @@ export default function ZynvoEventsPage() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [Events, setEvents] = useState<eventData[]>([]);
   const [isModalOpen , setIsModalOpen]=useState(false);
-  // Sample events data
+
 
   // Toggle mobile menu
   const toggleMenu = () => {
@@ -38,8 +38,7 @@ export default function ZynvoEventsPage() {
       const response = await axios.get<apiRespEvents>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/all`
       );
-      // if(!response) alert("fail")
-      //   else alert(response.data.msg)
+
 
       setEvents(response.data.response);
     }

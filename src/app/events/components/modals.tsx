@@ -6,6 +6,11 @@ import Image from 'next/image';
 import { MagicCard } from '@/components/magicui/magic-card';
 import {Card} from '@/components/ui/card';
 import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -80,30 +85,33 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
   // Validate form based on current step
   const validateStep = () => {
     const newErrors: Record<string, string> = {};
-    
-    if (step === 1) {
-      if (!formData.eventMode) newErrors.eventMode = 'Event mode is required';
-      if (!formData.eventName.trim()) newErrors.eventName = 'Event name is required';
-      if (!formData.university) newErrors.university = 'University is required';
+    switch(step){
+      case 1:
+        if (!formData.eventMode) newErrors.eventMode = 'Event mode is required';
+        if (!formData.eventName.trim()) newErrors.eventName = 'Event name is required';
+        if (!formData.university) newErrors.university = 'University is required';
+        break;
+        case 2:
+          if (!formData.eventMode) newErrors.eventMode = 'Event mode is required';
+          if (!formData.eventName.trim()) newErrors.eventName = 'Event name is required';
+          if (!formData.university) newErrors.university = 'University is required';
       if (!formData.description.trim()) newErrors.description = 'Description is required';
       if (!formData.eventType) newErrors.eventType = 'Event type is required';
-    }
+      break
     
-    else if (step === 2) {
+    case 3:
       if (!formData.maxTeamSize) newErrors.maxTeamSize = 'Maximum team size is required';
       if (!formData.venue.trim()) newErrors.venue = 'Venue is required';
-    }
     
-    else if (step === 3) {
-      if (!formData.eventStartDate) newErrors.eventStartDate = 'Event start date is required';
+  case 4:  
+    if (!formData.eventStartDate) newErrors.eventStartDate = 'Event start date is required';
       if (!formData.eventEndDate) newErrors.eventEndDate = 'Event end date is required';
       if (!formData.contactEmail.trim()) newErrors.contactEmail = 'Contact email is required';
       if (!formData.contactPhone.trim()) newErrors.contactPhone = 'Contact phone is required';
-    }
-    
-    else if (step === 4) {
+  case 5:
       if (!formData.image) newErrors.image = 'Event image is required';
-    }
+    
+  }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -126,14 +134,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
     if (!validateStep()) return;
     
     setIsSubmitting(true);
-    
-    // Simulating API call
-    setTimeout(() => {
-      console.log('Form submitted:', formData);
-      setIsSubmitting(false);
-      onClose();
-      alert('Event created successfully!');
-    }, 1000);
   };
 
   if (!isOpen) return null;
@@ -294,7 +294,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                     <label htmlFor="description" className="block text-sm font-medium text-yellow-400 mb-1">
                       Description*
                     </label>
-                    <textarea
+                    <Textarea
                       id="description"
                       name="description"
                       rows={4}
@@ -312,22 +312,26 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                     <label htmlFor="eventType" className="block text-sm font-medium text-yellow-400 mb-1">
                       Event Type/Theme*
                     </label>
-                    <select
-                      id="eventType"
-                      name="eventType"
-                      value={formData.eventType}
-                      onChange={handleChange}
-                      className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
+
+
+
+
+                    <Select
                     >
-                      <option value="">Select event type</option>
-                      <option value="hackathon">Hackathon</option>
-                      <option value="workshop">Workshop</option>
-                      <option value="conference">Conference</option>
-                      <option value="competition">Competition</option>
-                      <option value="cultural">Cultural</option>
-                      <option value="sports">Sports</option>
-                      <option value="technical">Technical</option>
-                    </select>
+                      <SelectTrigger className='bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white'>
+                        <SelectValue placeholder="Select event type" />
+                      </SelectTrigger>
+                      <SelectContent className='bg-black text-white'>
+
+                      <SelectItem value="hackathon">Hackathon</SelectItem>
+                      <SelectItem value="workshop">Workshop</SelectItem>
+                      <SelectItem value="conference">Conference</SelectItem>
+                      <SelectItem value="competition">Competition</SelectItem>
+                      <SelectItem value="cultural">Cultural</SelectItem>
+                      <SelectItem value="sports">Sports</SelectItem>
+                      <SelectItem value="technical">Technical</SelectItem>
+                    </SelectContent>
+                    </Select>
                     {errors.eventType && (
                       <p className="mt-1 text-sm text-red-500">{errors.eventType}</p>
                     )}
@@ -362,10 +366,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                   </div>
                   
                   <div>
-                    <label htmlFor="venue" className="block text-sm font-medium text-yellow-400 mb-1">
+                    <Label htmlFor="venue" className="block text-sm font-medium text-yellow-400 mb-1">
                       Venue*
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       id="venue"
                       name="venue"
                       type="text"
@@ -380,7 +384,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <input
+                    <Input
                       id="collegeStudentsOnly"
                       name="collegeStudentsOnly"
                       type="checkbox"
@@ -388,13 +392,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                       onChange={handleCheckboxChange}
                       className="h-4 w-4 rounded border-gray-700 text-yellow-600 focus:ring-yellow-600 bg-gray-800"
                     />
-                    <label htmlFor="collegeStudentsOnly" className="text-sm text-gray-300">
+                    <Label htmlFor="collegeStudentsOnly" className="text-sm text-gray-300">
                       For college students only
-                    </label>
+                    </Label>
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <input
+                    <Input
                       id="noParticipationFee"
                       name="noParticipationFee"
                       type="checkbox"
@@ -402,9 +406,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                       onChange={handleCheckboxChange}
                       className="h-4 w-4 rounded border-gray-700 text-yellow-600 focus:ring-yellow-600 bg-gray-800"
                     />
-                    <label htmlFor="noParticipationFee" className="text-sm text-gray-300">
+                    <Label htmlFor="noParticipationFee" className="text-sm text-gray-300">
                       No participation fee
-                    </label>
+                    </Label>
                   </div>
                   
                   <div className="flex items-center space-x-2">
@@ -479,7 +483,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Calendar className="h-5 w-5 text-gray-400" />
+                          <Calendar className="size-5 text-gray-400" />
                         </div>
                         <input
                           id="eventEndDate"
@@ -540,7 +544,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                     <label htmlFor="prizes" className="block text-sm font-medium text-yellow-400 mb-1">
                       Event Prizes (if any)
                     </label>
-                    <textarea
+                    <Textarea
                       id="prizes"
                       name="prizes"
                       rows={3}
@@ -581,7 +585,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Phone className="h-5 w-5 text-gray-400" />
+                          <Phone className="size-5 text-gray-400" />
                         </div>
                         <input
                           id="contactPhone"
@@ -622,7 +626,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                             height={200}
                             className="mx-auto h-48 object-cover rounded-lg"
                           />
-                          <button
+                          <Button
                             onClick={() => {
                               setPreviewUrl('');
                               setFormData(prev => ({ ...prev, image: null }));
@@ -630,14 +634,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                             className="absolute top-2 right-2 bg-black/70 rounded-full p-1 text-red-400 hover:text-red-500"
                           >
                             <X size={16} />
-                          </button>
+                          </Button>
                         </div>
                       ) : (
                         <div
                           className="flex flex-col items-center justify-center py-6 cursor-pointer"
                           onClick={() => document.getElementById('event-image')?.click()}
                         >
-                          <Upload className="h-12 w-12 text-gray-400 mb-3" />
+                          <Upload className="size-10 text-gray-400 mb-3" />
                           <p className="text-gray-400 mb-1">
                             Drag and drop an image, or <span className="text-yellow-400">browse</span>
                           </p>
@@ -744,7 +748,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
             ) : (
               <button
                 type="button"
-                onClick={handleSubmit}
+                onClick={() => handleSubmit()}
                 disabled={isSubmitting}
                 className={`px-6 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 transition-colors ${
                   isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
