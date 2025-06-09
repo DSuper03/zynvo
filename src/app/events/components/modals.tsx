@@ -18,28 +18,7 @@ interface CreateEventModalProps {
 
 const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    eventMode: '', // Online, Offline, Hybrid
-    eventName: '',
-    university: '',
-    tagline: '',
-    description: '',
-    eventType: '',
-    maxTeamSize: '',
-    collegeStudentsOnly: false,
-    noParticipationFee: true,
-    eventWebsite: '',
-    coreTeamOnly: false,
-    eventStartDate: '',
-    eventEndDate: '',
-    applicationStartDate: '',
-    applicationEndDate: '',
-    venue: '',
-    prizes: '',
-    contactEmail: '',
-    contactPhone: '',
-    image: null as File | null,
-  });
+  const [formData, setFormData] = useState<EventFormData>()
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
