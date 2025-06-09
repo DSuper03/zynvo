@@ -1,11 +1,56 @@
 import { ReactNode } from 'react';
+export type EventMode = 'online' | 'offline' | 'hybrid';
 
+export type EventType = 
+  'hackathon' | 
+  'workshop' | 
+  'conference' | 
+  'competition' | 
+  'cultural' | 
+  'sports' | 
+  'technical';
+
+export interface EventFormData {
+  eventMode: EventMode | ''; 
+  eventName: string;
+  university: string;
+  tagline: string;
+  description: string;
+  eventType: EventType | '';
+  maxTeamSize: string;
+  collegeStudentsOnly: boolean;
+  noParticipationFee: boolean;
+  eventWebsite: string;
+  coreTeamOnly: boolean;
+  eventStartDate: string;
+  eventEndDate: string;
+  applicationStartDate: string;
+  applicationEndDate: string;
+  venue: string;
+  prizes: string;
+  contactEmail: string;
+  contactPhone: string;
+  image: File | null;
+}
+
+// For use in API responses
+export interface Event extends Omit<EventFormData, 'image'> {
+  id: string;
+  imageUrl: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  status: 'draft' | 'published' | 'cancelled' | 'completed';
+}
 export interface UserEvent {
   userId: string;
   eventId: string;
   joinedAt: string;
   user: User;
   event: Event;
+}
+export interface CreateEvent{
+  
 }
 export interface Event {
   id: string;
