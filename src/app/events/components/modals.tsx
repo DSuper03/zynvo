@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EventFormData } from '@/types/global-Interface';
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -18,7 +19,28 @@ interface CreateEventModalProps {
 
 const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<EventFormData>()
+  const [formData, setFormData] = useState<EventFormData>({
+    eventMode: '',
+    eventName: '',
+    university: '',
+    tagline: '',
+    description: '',
+    eventType: '',
+    maxTeamSize: 1,
+    venue: '',
+    collegeStudentsOnly: false,
+    noParticipationFee: false,
+    coreTeamOnly: false,
+    eventWebsite: '',
+    eventStartDate: '',
+    eventEndDate: '',
+    applicationStartDate: '',
+    applicationEndDate: '',
+    prizes: '',
+    contactEmail: '',
+    contactPhone: '',
+    image: null
+  })
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -26,7 +48,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
   // Handler for input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev :  any) => ({ ...prev, [name]: value }));
     
     // Clear error when field is edited
     if (errors[name]) {
@@ -41,14 +63,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
   // Handler for checkbox changes
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: checked }));
+    setFormData((prev :  any) => ({ ...prev, [name]: checked }));
   };
 
   // Handle file upload
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setFormData((prev) => ({ ...prev, image: file }));
+      setFormData((prev :  any) => ({ ...prev, image: file }));
       
       // Create preview URL
       const fileReader = new FileReader();
@@ -62,40 +84,40 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
   };
 
   // Validate form based on current step
-  const validateStep = () => {
-    const newErrors: Record<string, string> = {};
-    switch(step){
-      case 1:
-        if (!formData.eventMode) newErrors.eventMode = 'Event mode is required';
-        if (!formData.eventName.trim()) newErrors.eventName = 'Event name is required';
-        if (!formData.university) newErrors.university = 'University is required';
-        break;
-        case 2:
-          if (!formData.eventMode) newErrors.eventMode = 'Event mode is required';
-          if (!formData.eventName.trim()) newErrors.eventName = 'Event name is required';
-          if (!formData.university) newErrors.university = 'University is required';
-      if (!formData.description.trim()) newErrors.description = 'Description is required';
+ const validateStep = () => {
+  const newErrors: Record<string, string> = {};
+  if (!formData) return false; // Add this check
+  
+  switch(step) {
+    case 1:
+      if (!formData.eventMode) newErrors.eventMode = 'Event mode is required';
+      if (!formData.eventName?.trim()) newErrors.eventName = 'Event name is required';
+      if (!formData.university) newErrors.university = 'University is required';
+      if (!formData.description?.trim()) newErrors.description = 'Description is required';
       if (!formData.eventType) newErrors.eventType = 'Event type is required';
-      break
+      break;
+      
+    case 2:
+      // Don't repeat step 1 validations here - only validate step 2 fields
+      if (!formData.maxTeamSize) newErrors.maxTeamSize = 'Maximum team size is required';
+      if (!formData.venue?.trim()) newErrors.venue = 'Venue is required';
+      break;
     
     case 3:
-      if (!formData.maxTeamSize) newErrors.maxTeamSize = 'Maximum team size is required';
-      if (!formData.venue.trim()) newErrors.venue = 'Venue is required';
-    
-  case 4:  
-    if (!formData.eventStartDate) newErrors.eventStartDate = 'Event start date is required';
+      if (!formData.eventStartDate) newErrors.eventStartDate = 'Event start date is required';
       if (!formData.eventEndDate) newErrors.eventEndDate = 'Event end date is required';
-      if (!formData.contactEmail.trim()) newErrors.contactEmail = 'Contact email is required';
-      if (!formData.contactPhone.trim()) newErrors.contactPhone = 'Contact phone is required';
-  case 5:
+      if (!formData.contactEmail?.trim()) newErrors.contactEmail = 'Contact email is required';
+      if (!formData.contactPhone?.trim()) newErrors.contactPhone = 'Contact phone is required';
+      break;
+      
+    case 4:  
       if (!formData.image) newErrors.image = 'Event image is required';
-    
+      break;
   }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
+  
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
   // Navigate to next step
   const nextStep = () => {
     if (validateStep()) {
@@ -196,7 +218,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                               : 'border-gray-700 text-gray-300 hover:border-gray-600'}
                           `}
                           onClick={() => {
-                            setFormData(prev => ({...prev, eventMode: mode.toLowerCase()}));
+                            setFormData((prev : any) => ({...prev, eventMode: mode.toLowerCase()}));
                             if (errors.eventMode) {
                               setErrors(prev => {
                                 const newErrors = {...prev};
@@ -295,21 +317,31 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
 
 
 
-                    <Select
+                                        <Select
+                      value={formData.eventType}
+                      onValueChange={(value) => {
+                        setFormData((prev: any) => ({ ...prev, eventType: value }));
+                        if (errors.eventType) {
+                          setErrors(prev => {
+                            const newErrors = {...prev};
+                            delete newErrors.eventType;
+                            return newErrors;
+                          });
+                        }
+                      }}
                     >
                       <SelectTrigger className='bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white'>
                         <SelectValue placeholder="Select event type" />
                       </SelectTrigger>
                       <SelectContent className='bg-black text-white'>
-
-                      <SelectItem value="hackathon">Hackathon</SelectItem>
-                      <SelectItem value="workshop">Workshop</SelectItem>
-                      <SelectItem value="conference">Conference</SelectItem>
-                      <SelectItem value="competition">Competition</SelectItem>
-                      <SelectItem value="cultural">Cultural</SelectItem>
-                      <SelectItem value="sports">Sports</SelectItem>
-                      <SelectItem value="technical">Technical</SelectItem>
-                    </SelectContent>
+                        <SelectItem value="hackathon">Hackathon</SelectItem>
+                        <SelectItem value="workshop">Workshop</SelectItem>
+                        <SelectItem value="conference">Conference</SelectItem>
+                        <SelectItem value="competition">Competition</SelectItem>
+                        <SelectItem value="cultural">Cultural</SelectItem>
+                        <SelectItem value="sports">Sports</SelectItem>
+                        <SelectItem value="technical">Technical</SelectItem>
+                      </SelectContent>
                     </Select>
                     {errors.eventType && (
                       <p className="mt-1 text-sm text-red-500">{errors.eventType}</p>
@@ -608,7 +640,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                           <Button
                             onClick={() => {
                               setPreviewUrl('');
-                              setFormData(prev => ({ ...prev, image: null }));
+                              setFormData((prev :  any) => ({ ...prev, image: null }));
                             }}
                             className="absolute top-2 right-2 bg-black/70 rounded-full p-1 text-red-400 hover:text-red-500"
                           >
@@ -716,26 +748,26 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
             )}
             
             {step < 4 ? (
-              <button
-                type="button"
-                onClick={nextStep}
-
-              >
-                <InteractiveHoverButton>Zynvo it</InteractiveHoverButton>
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => handleSubmit()}
-                disabled={isSubmitting}
-                className={`px-6 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 transition-colors ${
-                  isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
-              >
-                {isSubmitting ? 'Creating...' : 'Create Event'}
-              </button>
-            )}
+                  <button
+                    type="button"
+                    onClick={nextStep}
+                    className="px-6 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 transition-colors flex items-center"
+                  >
+                    Zynvo It
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className={`px-6 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 transition-colors ${
+                      isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {isSubmitting ? 'Creating...' : 'Create Event'}
+                  </button>
+)}
           </div>
         </MagicCard>
       </Card>

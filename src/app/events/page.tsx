@@ -72,7 +72,8 @@ export default function ZynvoEventsPage() {
       {/* Header with Create Button */}
       <div className="flex justify-between items-center mb-8 sticky top-0 backdrop-blur-sm z-10 py-4 px-4">
 
-        <CreateEventButton onClick={() => setIsModalOpen(true)} />
+        <CreateEventButton onClick={() => { setIsModalOpen(true) }
+        } />
       </div>
 
     
