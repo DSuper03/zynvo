@@ -313,11 +313,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                     <label htmlFor="eventType" className="block text-sm font-medium text-yellow-400 mb-1">
                       Event Type/Theme*
                     </label>
-
-
-
-
-                                        <Select
+                    <Select
                       value={formData.eventType}
                       onValueChange={(value) => {
                         setFormData((prev: any) => ({ ...prev, eventType: value }));

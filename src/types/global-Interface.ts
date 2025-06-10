@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 
 export type EventMode = 'online' | 'offline' | 'hybrid';
 
-export type EventType = 
+export type Eventtype = 
   'hackathon' | 
   'workshop' | 
   'conference' | 
@@ -19,7 +19,7 @@ export interface EventFormData {
   university: string;
   tagline: string;
   description: string;
-  eventType: EventType | '';
+  eventType: Eventtype | '';
   maxTeamSize: number;
   collegeStudentsOnly: boolean;
   noParticipationFee: boolean;
@@ -37,7 +37,16 @@ export interface EventFormData {
   image: File | null;
 }
 
-
+export interface EventType {
+  id: string;
+  EventName: string;
+  clubName: string;
+  description: string;
+  createdAt: Date;
+  image?: string;
+  time?: string;
+  title?: string;
+}
 
 // axios post data interface ( register event button )
 export interface UserEvent {
