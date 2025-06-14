@@ -86,7 +86,7 @@ const ClubsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-red">
+    <div className="min-h-screen ">
       {/* Search and Filter Bar */}
       <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-800 p-3 md:p-4">
         <div className="max-w-7xl mx-auto">
