@@ -1,7 +1,10 @@
 import { ReactNode } from 'react';
+
+// event page types----------------------------------------------------------------------------------------------
+
 export type EventMode = 'online' | 'offline' | 'hybrid';
 
-export type EventType = 
+export type Eventtype = 
   'hackathon' | 
   'workshop' | 
   'conference' | 
@@ -16,14 +19,15 @@ export interface EventFormData {
   university: string;
   tagline: string;
   description: string;
-  eventType: EventType | '';
-  maxTeamSize: string;
+  eventType: Eventtype | '';
+  maxTeamSize: number;
   collegeStudentsOnly: boolean;
   noParticipationFee: boolean;
   eventWebsite: string;
-  coreTeamOnly: boolean;
+  coreTeamOnly: boolean; // kis lie hai ye ????
   eventStartDate: string;
   eventEndDate: string;
+  // application Status to be updated as open and closed , no duration required for now.
   applicationStartDate: string;
   applicationEndDate: string;
   venue: string;
@@ -33,25 +37,29 @@ export interface EventFormData {
   image: File | null;
 }
 
-// For use in API responses
-export interface Event extends Omit<EventFormData, 'image'> {
+export interface EventType {
   id: string;
-  imageUrl: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-  status: 'draft' | 'published' | 'cancelled' | 'completed';
+  EventName: string;
+  clubName: string;
+  description: string;
+  createdAt: Date;
+  image?: string;
+  time?: string;
+  title?: string;
 }
+
+// axios post data interface ( register event button )
 export interface UserEvent {
   userId: string;
-  eventId: string;
-  joinedAt: string;
-  user: User;
-  event: Event;
+  eventId: string; 
 }
-export interface CreateEvent{
-  
+
+//registered user response 
+export interface UserEvenResponse {
+  uniquePassId: string
 }
+
+//response
 export interface Event {
   id: string;
   eventHeaderImage?: string;
@@ -72,8 +80,11 @@ export interface Speaker {
   name: string;
   email: string;
   eventId: string;
-  event: Event;
+ // event: Event;
 }
+
+
+// post types---------------------------------------------------------------------------------------
 export interface CreatePost {
   id: string;
   title: string;
@@ -87,6 +98,9 @@ export interface CreatePost {
   authorId: string;
   author: User;
 }
+
+
+// club types ----------------------------------------------------------------------
 export type ClubType =
   | 'Technology'
   | 'Cultural'
@@ -113,6 +127,9 @@ export interface Club {
   members: User[];
   events: Event[];
 }
+
+
+// dashboard and user info ------------------------------------------------------------------------------------------
 export interface User {
   id: string;
   email: string;
@@ -218,16 +235,7 @@ export interface ClubTypeProps {
   category?: string;
 }
 
-export interface EventType {
-  id: string;
-  EventName: string;
-  clubName: string;
-  description: string;
-  createdAt: Date;
-  image?: string;
-  time?: string;
-  title?: string;
-}
+
 
 export interface Event {
   EventName: string;
@@ -332,6 +340,8 @@ export interface Attendee {
   user: UserEvents | null;
 }
 
+
+// all-events response ,  saare venets show krne wala page 
 export interface eventData {
   attendees: Attendee[];
   description: string;
@@ -344,3 +354,7 @@ export interface eventData {
   prizes: string;
   endDate: Date | null;
 }
+
+
+
+// will fix it later 
