@@ -1,295 +1,148 @@
 'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import {
-  LayoutDashboard,
-  ClipboardList,
-  Package,
-  CreditCard,
-  Users,
-  Globe,
-  Inbox,
-  Bell,
-  MessageCircle,
-  Menu,
-  ChevronRight,
-} from 'lucide-react';
-import Image from 'next/image';
-import { useState } from 'react';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
+import { 
+  Home, Search, Bell, Calendar, Users, BookOpen, 
+  MessageSquare, User, Settings, LogOut ,NotebookText
+} from 'lucide-react';
 
-export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ 
+  isOpen = true,
+  onClose
+}) => {
   const pathname = usePathname();
+  
+  const menuItems = [
+    { icon: <Home size={22} />, label: 'Home', href: '/' },
+    { icon: <Search size={22} />, label: 'Discover', href: '/discover' },
+    { icon: <Calendar size={22} />, label: 'Events', href: '/events' },
+    { icon: <Users size={22} />, label: 'Clubs', href: '/clubs' },
+    { icon: <NotebookText size={22} />, label: 'Resources', href: '/feedback' },
+  ];
 
-  const isActive = (path: string) => {
-    return pathname === path || pathname.startsWith(`${path}/`);
-  };
+  const accountItems = [
+    { icon: <User size={22} />, label: 'Profile', href: '/dashboard' },
+    { icon: <Settings size={22} />, label: 'Settings', href: '/dashboard' },
+    { icon: <LogOut size={22} />, label: 'Logout', href: '/logout' },
+  ];
+
+  // This will ensure text is ALWAYS visible when sidebar is open
+  // Especially important for mobile
+  const showText = isOpen;
 
   return (
-    <>
-      {/* Full Sidebar */}
-      <aside
-        className={`hidden md:flex flex-col ${collapsed ? 'w-20' : 'w-64'} bg-black text-yellow-400 border-r border-yellow-900/30 h-screen sticky top-0 transition-all duration-300 shadow-lg`}
-      >
-        <div className="p-5 flex justify-between items-center border-b border-yellow-900/30">
-          {!collapsed && (
-            <h1 className="text-lg font-bold tracking-tight text-yellow-400">
-              Zynvo
-            </h1>
-          )}
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="p-1.5 rounded-md hover:bg-yellow-500/10 text-yellow-400"
+    <div className={`
+      h-full flex flex-col bg-black border-r border-gray-800
+      transition-all duration-300 ease-in-out
+      ${isOpen ? 'w-64' : 'w-16'}
+    `}>
+      {/* Logo */}
+      <div className="p-4 flex items-center">
+        <div className="flex-shrink-0">
+          <Image 
+            src="/logozynvo.jpg" 
+            alt="Zynvo Logo" 
+            width={32} 
+            height={32}
+            className="rounded-full"
+          />
+        </div>
+        <div className='flex items-center ml-2 bg-gradient-to-r from-yellow-900 to-yellow-200  rounded-full'>
+
+        {showText && (
+          <h1 className="ml-3 text-xl font-serif bg-gradient-to-r from-black to-yellow-900 bg-clip-text text-transparent tracking-wider">ZYNVO</h1>
+        )}
+        </div>
+        
+        {/* Close button - only on mobile when sidebar is open */}
+        {isOpen && onClose && (
+          <button 
+            onClick={onClose}
+            className="ml-auto p-1 rounded-full hover:bg-gray-800 md:hidden"
+            aria-label="Close sidebar"
           >
-            {collapsed ? <ChevronRight size={20} /> : <Menu size={20} />}
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </button>
-        </div>
+        )}
+      </div>
 
-        {/* Navigation Section */}
-        <div className="px-4 pb-4">
-          {!collapsed && (
-            <p className="text-xs font-semibold text-yellow-500/80 mb-3 px-2 mt-4">
-              NAVIGATION
-            </p>
-          )}
-          <nav className="space-y-1">
+      {/* Main Navigation */}
+      <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+        {menuItems.map((item, index) => {
+          const isActive = pathname === item.href;
+          
+          return (
             <Link
-              href="/dashboard"
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                isActive('/dashboard')
-                  ? 'bg-yellow-500 text-black'
-                  : 'hover:bg-yellow-500/10'
-              }`}
+              key={index}
+              href={item.href}
+              className={`
+                flex items-center py-3 px-3 rounded-lg transition-colors
+                ${isActive 
+                  ? 'bg-yellow-600/20 text-yellow-500' 
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'}
+              `}
+              onClick={onClose} // Close sidebar on navigation for mobile
             >
-              <LayoutDashboard
-                className={`h-5 w-5 ${isActive('/dashboard') ? 'text-black' : 'text-yellow-400'}`}
-              />
-              {!collapsed && (
-                <span
-                  className={`font-medium ${isActive('/dashboard') ? 'text-black' : 'text-yellow-400'}`}
-                >
-                  Dashboard
-                </span>
+              <span className="flex-shrink-0">{item.icon}</span>
+              {showText && (
+                <span className="ml-4 text-sm font-medium">{item.label}</span>
+              )}
+              {isActive && showText && (
+                <span className="ml-auto h-2 w-2 rounded-full bg-yellow-500"></span>
               )}
             </Link>
+          );
+        })}
+      </nav>
 
-            <Link
-              href="/clubs"
-              className={`flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors ${
-                isActive('/clubs')
-                  ? 'bg-yellow-500 text-black'
-                  : 'hover:bg-yellow-500/10'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <ClipboardList
-                  className={`h-5 w-5 ${isActive('/clubs') ? 'text-black' : 'text-yellow-400'}`}
-                />
-                {!collapsed && (
-                  <span
-                    className={`font-medium ${isActive('/clubs') ? 'text-black' : 'text-yellow-400'}`}
-                  >
-                    Clubs
-                  </span>
-                )}
-              </div>
-              <span
-                className={`text-xs px-2 py-0.5 ${
-                  isActive('/clubs')
-                    ? 'bg-black/80 text-yellow-400'
-                    : 'bg-yellow-900/30 text-yellow-400'
-                } rounded-full font-medium`}
-              >
-                {collapsed ? '•' : '130'}
-              </span>
-            </Link>
-
-            <Link
-              href="/events"
-              className={`flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors ${
-                isActive('/events')
-                  ? 'bg-yellow-500 text-black'
-                  : 'hover:bg-yellow-500/10'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Package
-                  className={`h-5 w-5 ${isActive('/events') ? 'text-black' : 'text-yellow-400'}`}
-                />
-                {!collapsed && (
-                  <span
-                    className={`font-medium ${isActive('/events') ? 'text-black' : 'text-yellow-400'}`}
-                  >
-                    Upcoming Events
-                  </span>
-                )}
-              </div>
-              <span
-                className={`text-xs px-2 py-0.5 ${
-                  isActive('/events')
-                    ? 'bg-black/80 text-yellow-400'
-                    : 'bg-yellow-900/30 text-yellow-400'
-                } rounded-full font-medium`}
-              >
-                {collapsed ? '•' : '84'}
-              </span>
-            </Link>
-
-            <Link
-              href="/discover"
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                isActive('/discover')
-                  ? 'bg-yellow-500 text-black'
-                  : 'hover:bg-yellow-500/10'
-              }`}
-            >
-              <CreditCard
-                className={`h-5 w-5 ${isActive('/discover') ? 'text-black' : 'text-yellow-400'}`}
-              />
-              {!collapsed && (
-                <span
-                  className={`font-medium ${isActive('/discover') ? 'text-black' : 'text-yellow-400'}`}
-                >
-                  Discover
-                </span>
-              )}
-            </Link>
-
-            <Link
-              href="/users"
-              className={`flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors ${
-                isActive('/users')
-                  ? 'bg-yellow-500 text-black'
-                  : 'hover:bg-yellow-500/10'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Users
-                  className={`h-5 w-5 ${isActive('/users') ? 'text-black' : 'text-yellow-400'}`}
-                />
-                {!collapsed && (
-                  <span
-                    className={`font-medium ${isActive('/users') ? 'text-black' : 'text-yellow-400'}`}
-                  >
-                    Users
-                  </span>
-                )}
-              </div>
-              <span
-                className={`text-xs px-2 py-0.5 ${
-                  isActive('/users')
-                    ? 'bg-black/80 text-yellow-400'
-                    : 'bg-yellow-900/30 text-yellow-400'
-                } rounded-full font-medium`}
-              >
-                {collapsed ? '•' : '45k'}
-              </span>
-            </Link>
-
-            <Link
-              href="/post"
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                isActive('/post')
-                  ? 'bg-yellow-500 text-black'
-                  : 'hover:bg-yellow-500/10'
-              }`}
-            >
-              <Globe
-                className={`h-5 w-5 ${isActive('/post') ? 'text-black' : 'text-yellow-400'}`}
-              />
-              {!collapsed && (
-                <span
-                  className={`font-medium ${isActive('/post') ? 'text-black' : 'text-yellow-400'}`}
-                >
-                  Posts
-                </span>
-              )}
-            </Link>
-          </nav>
-        </div>
-
-        {/* Insight Section */}
-
-        <div className="mt-auto border-t border-yellow-900/30">
-          <div
-            className={`p-4 ${collapsed ? 'justify-center' : ''} flex items-center gap-3`}
+      {/* User Account Section */}
+      <div className="px-2 pb-4 pt-2 border-t border-gray-800">
+        {accountItems.map((item, index) => (
+          <Link
+            key={index}
+            href={item.href}
+            className="flex items-center py-2 px-3 mt-1 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+            onClick={onClose} // Close sidebar on navigation for mobile
           >
-            <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-yellow-500/50">
-              <Image
-                src="https://i.pravatar.cc/150?img=32"
-                alt="Profile"
-                className="object-cover"
-                width={32}
-                height={32}
+            <span className="flex-shrink-0">{item.icon}</span>
+            {showText && (
+              <span className="ml-4 text-sm font-medium">{item.label}</span>
+            )}
+          </Link>
+        ))}
+      </div>
+
+      {/* User Profile */}
+      {showText && (
+        <div className="p-4 border-t border-gray-800">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <Image 
+                src="/logozynvo.jpg" 
+                alt="User avatar" 
+                width={40} 
+                height={40} 
+                className="rounded-full border-2 border-yellow-500"
               />
             </div>
-
-            {!collapsed && (
-              <div>
-                <p className="font-medium text-sm text-yellow-400">
-                  Michael Gabson
-                </p>
-                <p className="text-xs text-yellow-500/70">michael@gmail.com</p>
-              </div>
-            )}
+            <div className="ml-3">
+              <p className="text-sm font-medium text-white">John Doe</p>
+              <p className="text-xs text-gray-400">@johndoe</p>
+            </div>
           </div>
         </div>
-      </aside>
-
-      {/* Mobile sidebar - collapsed by default */}
-      <aside className="md:hidden fixed top-0 left-0 z-40 w-16 bg-black text-yellow-400 border-r border-yellow-900/30 h-screen shadow-lg">
-        <div className="p-4 flex justify-center">
-          <span className="font-bold text-sm text-yellow-400">Zy.</span>
-        </div>
-
-        <nav className="flex flex-col items-center gap-5 py-5">
-          <Link
-            href="/dashboard"
-            className={`p-2 ${isActive('/dashboard') ? 'bg-yellow-500 text-black rounded-lg' : 'text-yellow-400 hover:text-yellow-300'}`}
-          >
-            <LayoutDashboard className="h-5 w-5" />
-          </Link>
-          <Link
-            href="/clubs"
-            className={`p-2 ${isActive('/clubs') ? 'bg-yellow-500 text-black rounded-lg' : 'text-yellow-400 hover:text-yellow-300'} relative`}
-          >
-            <ClipboardList className="h-5 w-5" />
-            <span className="absolute top-0 right-0 h-2 w-2 bg-yellow-400 rounded-full"></span>
-          </Link>
-          <Link
-            href="/events"
-            className={`p-2 ${isActive('/events') ? 'bg-yellow-500 text-black rounded-lg' : 'text-yellow-400 hover:text-yellow-300'} relative`}
-          >
-            <Package className="h-5 w-5" />
-            <span className="absolute top-0 right-0 h-2 w-2 bg-yellow-400 rounded-full"></span>
-          </Link>
-          <Link
-            href="/discover"
-            className={`p-2 ${isActive('/discover') ? 'bg-yellow-500 text-black rounded-lg' : 'text-yellow-400 hover:text-yellow-300'}`}
-          >
-            <CreditCard className="h-5 w-5" />
-          </Link>
-          <Link
-            href="/users"
-            className={`p-2 ${isActive('/users') ? 'bg-yellow-500 text-black rounded-lg' : 'text-yellow-400 hover:text-yellow-300'} relative`}
-          >
-            <Users className="h-5 w-5" />
-            <span className="absolute top-0 right-0 h-2 w-2 bg-yellow-400 rounded-full"></span>
-          </Link>
-        </nav>
-
-        <div className="absolute bottom-5 left-0 w-full flex justify-center">
-          <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-yellow-500/50">
-            <Image
-              src="https://i.pravatar.cc/150?img=32"
-              alt="Profile"
-              className="object-cover"
-              width={32}
-              height={32}
-            />
-          </div>
-        </div>
-      </aside>
-    </>
+      )}
+    </div>
   );
-}
+};
