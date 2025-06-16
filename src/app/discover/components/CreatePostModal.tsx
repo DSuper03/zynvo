@@ -5,6 +5,10 @@ import { X, Image as ImageIcon, Camera, Trash2, Send, Award, School, Search } fr
 import Image from 'next/image';
 import { MagicCard } from '@/components/magicui/magic-card';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 // Mock data - replace with actual data
 const colleges = [
@@ -154,25 +158,25 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
           {/* Modal Header */}
           <div className="sticky top-0 z-10 bg-gray-900 border-b border-yellow-500/30 p-4 flex justify-between items-center">
             <h2 className="text-xl font-bold text-white">Create Post</h2>
-            <button 
+            <Button
               onClick={onClose} 
               className="text-gray-400 hover:text-white transition-colors"
             >
               <X size={24} />
-            </button>
+            </Button>
           </div>
           
           {/* Modal Body */}
           <div className="p-4 max-h-[70vh] overflow-y-auto">
             {/* Post Content */}
             <div className="mb-4">
-              <textarea
+              <Textarea
                 className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white p-4 rounded-lg focus:outline-none resize-none"
                 placeholder="What's on your mind?"
                 rows={5}
                 value={postText}
                 onChange={(e) => setPostText(e.target.value)}
-              ></textarea>
+              ></Textarea>
             </div>
             
             {/* Image Previews */}
@@ -226,10 +230,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
             <div className="space-y-4">
               {/* Club Selection - Standard dropdown */}
               <div>
-                <label className="text-sm font-medium text-yellow-400 mb-1 flex items-center">
+                <Label className="text-sm font-medium text-yellow-400 mb-1 flex items-center">
                   <Award size={16} className="mr-1" />
                   Tag a Club
-                </label>
+                </Label>
                 <select
                   value={selectedClub}
                   onChange={(e) => setSelectedClub(e.target.value)}
@@ -263,12 +267,12 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
                   <div className="flex items-center mt-2 bg-yellow-500/20 rounded-lg p-2">
                     <School size={14} className="text-yellow-400 mr-2" />
                     <span className="text-sm text-yellow-400">{selectedCollege}</span>
-                    <button 
+                    <Button 
                       onClick={() => setSelectedCollege('')}
                       className="ml-auto text-yellow-400 hover:text-yellow-300"
                     >
                       <X size={14} />
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -297,7 +301,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
           <div className="bg-gray-900 border border-yellow-500/30 rounded-xl w-full max-w-md">
             <div className="p-4 border-b border-yellow-500/30 flex justify-between items-center">
               <h3 className="text-lg font-medium text-white">Select a College</h3>
-              <button 
+              <Button 
                 onClick={() => {
                   setIsCollegeModalOpen(false);
                   setSearchQuery('');
@@ -305,13 +309,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
                 className="text-gray-400 hover:text-white"
               >
                 <X size={20} />
-              </button>
+              </Button>
             </div>
             
             <div className="p-4">
               <div className="relative mb-4">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                <input
+                <Input
                   ref={searchInputRef}
                   type="text"
                   placeholder="Search colleges..."
@@ -326,13 +330,14 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
                   <ul className="space-y-1">
                     {filteredColleges.map((college) => (
                       <li key={college}>
-                        <button
+                        <Button
                           onClick={() => selectCollege(college)}
                           className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors flex items-center"
+                        
                         >
-                          <School size={16} className="mr-2 text-yellow-500" />
+                          
                           <span className="line-clamp-1">{college}</span>
-                        </button>
+                        </Button>
                       </li>
                     ))}
                   </ul>
