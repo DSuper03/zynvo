@@ -37,6 +37,8 @@ export interface EventFormData {
   image: File | null;
 }
 
+
+// this is used in clubs/id/page.tsx where events of colleges are listed
 export interface EventType {
   id: string;
   EventName: string;
@@ -199,6 +201,8 @@ export interface ClubPageProps {
   };
 }
 
+
+// used in clubs/id
 export interface Response {
   msg: string;
   response: {
@@ -209,6 +213,8 @@ export interface Response {
   };
 }
 
+
+// used in clubs/id
 export interface EventResponse {
   event: {
     id: string;
