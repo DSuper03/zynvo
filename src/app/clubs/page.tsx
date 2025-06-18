@@ -32,6 +32,7 @@ const ClubsPage = () => {
   const [selectedClub, setSelectedClub] = useState<{
     name: string;
     image: string;
+    id : string
   } | null>(null);
   const [clubData, setData] = useState<response['resp']>();
 
@@ -81,6 +82,7 @@ const ClubsPage = () => {
     setSelectedClub({
       name: club.name,
       image: club.profilePicUrl || 'https://via.placeholder.com/150', // Fallback image if profilePicUrl is null
+      id : club.id
     });
     setIsJoinModalOpen(true);
   };
@@ -386,6 +388,7 @@ const ClubsPage = () => {
           onClose={() => setIsJoinModalOpen(false)}
           clubName={selectedClub.name}
           clubImage={selectedClub.image}
+          clubId={selectedClub.id}
         />
       )}
     </div>

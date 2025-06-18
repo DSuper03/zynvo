@@ -53,18 +53,28 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the data to your API
-    const upload = await axios.post(
+ 
+    const token = localStorage.getItem('token')
+    const upload = await axios.post<{
+      msg :  string, 
+      clubId : string
+    }>(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/club`,
-      clubData
+      clubData , {
+        headers : {
+          authorization : `Bearer ${token}`
+        }
+      }
     );
 
     const msg = upload?.data;
     if (upload.status == 200) {
-      toast(`${msg} and your clubID : ${upload?.data}`);
-    }
-    // After successful submission, close modal
-    onClose();
+      toast(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
+      alert(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
+      onClose();
+    } else {
+      alert(msg.msg)
+    }  
   };
 
   if (!isOpen) return null;
