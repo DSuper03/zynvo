@@ -25,10 +25,10 @@ interface apiRespEvents {
 export default function ZynvoEventsPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
-  const [events, setEvents] = useState<eventData[] | null>(null); // Initialize as null for better loading state
+  const [events, setEvents] = useState<eventData[] | null>(null); 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Add explicit loading state
-  const [error, setError] = useState<string | null>(null); // Add error handling
+  const [isLoading, setIsLoading] = useState(true); 
+  const [error, setError] = useState<string | null>(null);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -53,10 +53,10 @@ export default function ZynvoEventsPage() {
     fetchEvents();
   }, []);
 
-  // Filter events based on active filter
+  
   const filteredEvents = events?.filter(event => {
     if (activeFilter === 'all') return true;
-    // Add your actual filtering logic here
+    
     return true;
   });
 
@@ -128,7 +128,7 @@ export default function ZynvoEventsPage() {
         {/* Events Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {isLoading ? (
-            // Skeleton loading state
+          
             [...Array(6)].map((_, index) => (
               <div key={index} className="bg-gray-900 rounded-lg overflow-hidden shadow-md">
                 <Skeleton className="w-full h-48 sm:h-40 rounded-none" />

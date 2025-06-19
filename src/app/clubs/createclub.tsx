@@ -42,7 +42,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
         logo: file,
       }));
 
-      // Create preview URL for the image
+   
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewImage(reader.result as string);
@@ -53,7 +53,8 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the data to your API
+   
+    
     const upload = await axios.post(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/club`,
       clubData
@@ -63,7 +64,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     if (upload.status == 200) {
       toast(`${msg} and your clubID : ${upload?.data}`);
     }
-    // After successful submission, close modal
+
     onClose();
   };
 

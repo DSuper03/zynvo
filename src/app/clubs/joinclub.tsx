@@ -33,9 +33,9 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the join request to your API
+    
     console.log('Join request data:', formData);
-    // After successful submission, close modal
+   
     onClose();
   };
 

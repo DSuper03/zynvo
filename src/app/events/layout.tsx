@@ -13,7 +13,7 @@ export default function RootLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
 
-  // Handle screen resize to determine mobile view
+ 
   useEffect(() => {
     const handleResize = () => {
       setIsMobileView(window.innerWidth < 768);
@@ -22,14 +22,14 @@ export default function RootLayout({
       }
     };
 
-    // Set initial value
+    
     handleResize();
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Close sidebar when clicking outside on mobile
+ 
   const handleMainContentClick = () => {
     if (isMobileMenuOpen) {
       setIsMobileMenuOpen(false);
