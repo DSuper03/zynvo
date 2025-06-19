@@ -164,8 +164,9 @@ export default function ZynvoEventsPage() {
                 className="bg-gray-900 rounded-lg overflow-hidden shadow-md"
               >
                 <div className="relative">
+                  
                   <Image
-                    src={'/consultclub.png'}
+                    src={'/landing page.png'}
                     alt={event.description}
                     width={600}
                     height={300}
@@ -184,8 +185,7 @@ export default function ZynvoEventsPage() {
                     <div className="flex items-center text-gray-300 text-sm">
                       <Calendar className="size-4 mr-2 text-yellow-400" />
                       <span className="truncate">
-                        deadline : {event.endDate?.toDateString()}
-                      </span>
+                                            </span>
                     </div>
                     <div className="flex items-center text-gray-300 text-sm">
                       <MapPin className="w-4 h-4 mr-2 text-yellow-400" />
