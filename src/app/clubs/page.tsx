@@ -54,33 +54,13 @@ const ClubsPage = () => {
     call();
   }, []);
 
-  // Filter clubs based on active type and search query
-  // const filteredClubs = clubData.filter((club : any) => {
-  //   const matchestype = activetype === 'all' || club.type === activetype;
-  //   const matchesSearch =
-  //     club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //     club.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //     club.college.toLowerCase().includes(searchQuery.toLowerCase());
-  //   return matchestype && matchesSearch;
-  // });
-
-  // Sort clubs based on sortBy state
-  // const sortedClubs = [...filteredClubs].sort((a, b) => {
-  //   if (sortBy === 'new') {
-  //     return a.isNew ? -1 : b.isNew ? 1 : 0;
-  //   } else if (sortBy === 'trending') {
-
-  //     return a.isPopular ? -1 : b.isPopular ? 1 : 0;
-  //   } else {
-  //     return b.members - a.members;
-  //   }
-  // });
+ 
   console.log(clubData);
 
   const handleJoinClub = (club: response['resp'][0]) => {
     setSelectedClub({
       name: club.name,
-      image: club.profilePicUrl || 'https://via.placeholder.com/150', // Fallback image if profilePicUrl is null
+      image: club.profilePicUrl || 'https://via.placeholder.com/150', 
     });
     setIsJoinModalOpen(true);
   };

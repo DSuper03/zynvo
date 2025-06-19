@@ -167,7 +167,7 @@ export default function ZynvoDashboard() {
     fetchUserData();
   }, [isClient, navigate]);
 
-  // Early return for non-client rendering or loading state
+
   if (!isClient || isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-gray-100 flex items-center justify-center">
