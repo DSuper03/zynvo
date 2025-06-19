@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import Image from 'next/image';
 import { JoinClubModalProps } from '@/types/global-Interface';
+import axios from 'axios';
 
 const JoinClubModal: React.FC<JoinClubModalProps> = ({
   isOpen,
   onClose,
   clubName,
   clubImage,
+  clubId
 }) => {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -31,12 +33,21 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the join request to your API
-    console.log('Join request data:', formData);
-    // After successful submission, close modal
-    onClose();
+    const token = localStorage.getItem('token')
+    const res = await axios.post<{msg : string}>(`http://localhost:8000/api/v1/user/joinClub/${clubId}`, {
+      headers: {
+            authorization: `Bearer ${token}`,
+          }
+        })
+      if(res.status == 200) {
+        alert(res.data.msg)
+        onClose();
+      } else {
+        alert(res.data.msg)
+      }
+    // console.log('Join request data:', formData);
   };
 
   if (!isOpen) return null;

@@ -1,6 +1,45 @@
-import React from 'react';
+"use client"
+
+import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
+import axios from 'axios';
+import { useParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+
+
 
 const Eventid = () => {
+  const params = useParams()
+  const id = params.id as string;
+
+  const token = localStorage.getItem('token');
+
+  const [data, setData] = useState<respnseUseState>({
+   EventName : '',
+   description : '',
+  })
+
+  const [forkedUpId, setForkedUpId] = useState<string | null>(null)
+
+  useEffect(() =>{
+
+    async function call() {
+      const res =  await axios.get<EventByIdResponse>(`https://localhost:8000/api/v1/events/event/${id}`, {
+        headers : {
+          authorization : `Bearer ${token}`
+        }
+      })
+
+      if(res && res.status == 200) {
+        setData({
+          EventName : res.data.response.EventName,
+          description : res.data.response.description
+        })
+      }
+    }
+
+  }, [])
+
+
   return (
     <div className="min-h-screen bg-black text-white py-8 px-2 md:px-6">
       <div className="container mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -10,7 +49,7 @@ const Eventid = () => {
             {/* Header */}
             <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-6">
               <h1 className="text-3xl md:text-4xl font-extrabold text-black tracking-tight">
-                MoodX Event 2025
+                {data.EventName}
               </h1>
               <p className="text-black/80 mt-2 font-medium">
                 The Ultimate Student Developer Experience
@@ -24,7 +63,7 @@ const Eventid = () => {
               </h2>
               <div className="mb-6">
                 <p className="text-gray-200 bg-black/60 p-4 rounded-lg text-justify">
-                  We’re three passionate devs who believe in the power of
+                  {/* We’re three passionate devs who believe in the power of
                   community and code. MoodX is our mission to energize and
                   connect student minds through creativity, collaboration, and
                   chaos (the good kind). Built by students, for students — this
@@ -36,13 +75,43 @@ const Eventid = () => {
                   Whether you're into AI, art, activism or all of the above —
                   you’ll find your tribe here. We’re building a space that’s
                   less formal, more phenomenal. So bring your ideas, your code,
-                  and your chaos.
+                  and your chaos. */}
+                  {data.description}
                 </p>
               </div>
               <div className="mt-auto">
-                <button className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-8 rounded-xl transition duration-300 shadow-lg w-full md:w-auto">
+                <button
+                onClick={async() => {
+                 const BodyData = {
+                    eventId : id
+                  }
+                  const resp = await axios.post<{
+                    msg : string,
+                    ForkedUpId : string
+                  }>(`http://localhost:8000/api/v1/events/registerEvent`, BodyData , {
+                    headers : {
+                      authorization : `Bearer ${token}`
+                    }
+                  })
+
+                  if(resp && resp.status == 200){
+                    alert(resp.data.msg)
+                    setForkedUpId(resp.data.ForkedUpId)
+                  } else {
+                    alert('error')
+                  }
+                }}
+                className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-8 rounded-xl transition duration-300 shadow-lg w-full md:w-auto">
                   Register Now 🚀
                 </button>
+
+               {forkedUpId && <div className='flex gap-2 m-3'>
+
+                <h1 className='font-medium m-1'>Get your pass for this event on <a href='https://forkedup.mochak.me' className='text-blue-500 font-semibold'>Forked-Up</a> with the Id below.</h1>
+
+                  <label htmlFor="">ForkedUp Id</label> : {forkedUpId}
+                </div> } 
+
               </div>
             </div>
           </div>

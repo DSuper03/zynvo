@@ -1,5 +1,7 @@
 'use client';
 
+//need to add a leave club button 
+
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -72,9 +74,11 @@ export default function ClubPage({}: ClubPageProps) {
     name: '',
     collegeName: '',
     description: '',
-    members: 0,
+    members: [],
     image: '/default-club-image.jpg',
     category: 'tech',
+    founderEmail : '',
+    facultyEmail : ''
   });
   const [event, setEvent] = useState<EventType[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
@@ -119,7 +123,9 @@ export default function ClubPage({}: ClubPageProps) {
         name: response.data.response.name,
         collegeName: response.data.response.collegeName,
         description: response.data.response.description,
-        members: 100,
+        members: response.data.response.members,
+        founderEmail : response.data.response.founderEmail,
+        facultyEmail : response.data.response.facultyEmail,
         image: '/default-club-image.jpg',
         category: 'tech',
       });
@@ -569,7 +575,7 @@ export default function ClubPage({}: ClubPageProps) {
                     />
                   </div>
                   <div>
-                    <h4 className="text-white font-medium">Rahul Mehta</h4>
+                    <h4 className="text-white font-medium">{club.founderEmail}</h4>
                     <p className="text-gray-400 text-xs">President</p>
                   </div>
                 </div>
@@ -585,12 +591,12 @@ export default function ClubPage({}: ClubPageProps) {
                     />
                   </div>
                   <div>
-                    <h4 className="text-white font-medium">Aisha Sharma</h4>
-                    <p className="text-gray-400 text-xs">Vice President</p>
+                    <h4 className="text-white font-medium">{club.facultyEmail}</h4>
+                    <p className="text-gray-400 text-xs">Faculty</p>
                   </div>
                 </div>
 
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
                     <Image
                       src="https://i.pravatar.cc/150?img=21"
@@ -604,9 +610,9 @@ export default function ClubPage({}: ClubPageProps) {
                     <h4 className="text-white font-medium">Dev Patel</h4>
                     <p className="text-gray-400 text-xs">Secretary</p>
                   </div>
-                </div>
+                </div> */}
 
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
                     <Image
                       src="https://i.pravatar.cc/150?img=32"
@@ -620,39 +626,9 @@ export default function ClubPage({}: ClubPageProps) {
                     <h4 className="text-white font-medium">Neha Kapoor</h4>
                     <p className="text-gray-400 text-xs">Treasurer</p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
-
-            {/* Similar Clubs */}
-            {/* <div className="bg-gray-800 rounded-lg p-4">
-              <h3 className="text-lg font-bold text-white mb-3">Similar Clubs</h3>
-              <div className="space-y-3">
-                {clubData
-                  .filter(c => c.category === club.category && c.id !== club.id)
-                  .slice(0, 3)
-                  .map(similarClub => (
-                    <Link href={`/clubs/${similarClub.id}`} key={similarClub.id}>
-                      <div className="flex items-center p-2 hover:bg-gray-700 rounded-lg transition-colors">
-                        <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                          <div className="relative h-full w-full">
-                            <Image
-                              src={similarClub.image}
-                              alt={similarClub.name}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <h4 className="text-white font-medium">{similarClub.name}</h4>
-                          <p className="text-gray-400 text-xs">{similarClub.college}</p>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-              </div>
-            </div> */}
 
             {/* Join CTA */}
             <div className="bg-yellow-500 rounded-lg p-4 text-center">
@@ -685,6 +661,7 @@ export default function ClubPage({}: ClubPageProps) {
           onClose={() => setIsJoinModalOpen(false)}
           clubName={club.name}
           clubImage={club.image || '/default-club-image.jpg'}
+          clubId= {id}
         />
       )}
     </div>

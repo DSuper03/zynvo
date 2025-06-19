@@ -169,6 +169,7 @@ export interface JoinClubModalProps {
   onClose: () => void;
   clubName: string;
   clubImage: string;
+  clubId : string;
 }
 export enum clubType {
   Technology,
@@ -210,6 +211,9 @@ export interface Response {
     name: string;
     collegeName: string;
     description: string;
+    founderEmail : string;
+    facultyEmail : string;
+    members : any[]
   };
 }
 
@@ -235,7 +239,9 @@ export interface ClubTypeProps {
   collegeName: string;
   description: string;
   image?: string;
-  members?: number;
+  members?: any[];
+  founderEmail : string;
+  facultyEmail : string;
   isPopular?: boolean;
   isNew?: boolean;
   category?: string;
@@ -361,6 +367,37 @@ export interface eventData {
   endDate: Date | null;
 }
 
+export interface respnseUseState {
+ EventName : string,
+ description : string
+}
 
+export interface EventByIdResponse {
+  msg : string,
+  response : {
+  id: string;
+  posterUrl?: string;
+  EventMode: "Online" | "Offline" | "Hybrid";
+  EventType: string; // Consider creating a union type with specific event types
+  eventHeaderImage?: string;
+  EventName: string;
+  description: string;
+  prizes: string;
+  TeamSize: number;
+  Venue: string;
+  EventUrl?: string;
+  applicationStatus: "open" | "closed";
+  clubName: string;
+  clubId: string;
+  university: string;
+  createdAt: Date;
+  startDate: string;
+  endDate?: string;
+  collegeStudentsOnly: boolean;
+  participationFee: boolean;
+  contactEmail: string;
+  contactPhone?: number;
+}
+}
 
 // will fix it later 
