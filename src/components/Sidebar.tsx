@@ -4,9 +4,18 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { 
-  Home, Search, Bell, Calendar, Users, BookOpen, 
-  MessageSquare, User, Settings, LogOut ,NotebookText
+import {
+  Home,
+  Search,
+  Bell,
+  Calendar,
+  Users,
+  BookOpen,
+  MessageSquare,
+  User,
+  Settings,
+  LogOut,
+  NotebookText,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -14,12 +23,9 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ 
-  isOpen = true,
-  onClose
-}) => {
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
   const pathname = usePathname();
-  
+
   const menuItems = [
     { icon: <Home size={22} />, label: 'Home', href: '/' },
     { icon: <Search size={22} />, label: 'Discover', href: '/discover' },
@@ -39,37 +45,50 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const showText = isOpen;
 
   return (
-    <div className={`
+    <div
+      className={`
       h-full flex flex-col bg-black border-r border-gray-800
       transition-all duration-300 ease-in-out
       ${isOpen ? 'w-64' : 'w-16'}
-    `}>
+    `}
+    >
       {/* Logo */}
       <div className="p-4 flex items-center">
         <div className="flex-shrink-0">
-          <Image 
-            src="/logozynvo.jpg" 
-            alt="Zynvo Logo" 
-            width={32} 
+          <Image
+            src="/logozynvo.jpg"
+            alt="Zynvo Logo"
+            width={32}
             height={32}
             className="rounded-full"
           />
         </div>
-        <div className='flex items-center ml-2 bg-gradient-to-r from-yellow-900 to-yellow-200  rounded-full'>
-
-        {showText && (
-          <h1 className="ml-3 text-xl font-serif bg-gradient-to-r from-black to-yellow-900 bg-clip-text text-transparent tracking-wider">ZYNVO</h1>
-        )}
+        <div className="flex items-center ml-2 bg-gradient-to-r from-yellow-900 to-yellow-200  rounded-full">
+          {showText && (
+            <h1 className="ml-3 text-xl font-serif bg-gradient-to-r from-black to-yellow-900 bg-clip-text text-transparent tracking-wider">
+              ZYNVO
+            </h1>
+          )}
         </div>
-        
+
         {/* Close button - only on mobile when sidebar is open */}
         {isOpen && onClose && (
-          <button 
+          <button
             onClick={onClose}
             className="ml-auto p-1 rounded-full hover:bg-gray-800 md:hidden"
             aria-label="Close sidebar"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -81,16 +100,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
         {menuItems.map((item, index) => {
           const isActive = pathname === item.href;
-          
+
           return (
             <Link
               key={index}
               href={item.href}
               className={`
                 flex items-center py-3 px-3 rounded-lg transition-colors
-                ${isActive 
-                  ? 'bg-yellow-600/20 text-yellow-500' 
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'}
+                ${
+                  isActive
+                    ? 'bg-yellow-600/20 text-yellow-500'
+                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                }
               `}
               onClick={onClose} // Close sidebar on navigation for mobile
             >
@@ -128,11 +149,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-4 border-t border-gray-800">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <Image 
-                src="/logozynvo.jpg" 
-                alt="User avatar" 
-                width={40} 
-                height={40} 
+              <Image
+                src="/logozynvo.jpg"
+                alt="User avatar"
+                width={40}
+                height={40}
                 className="rounded-full border-2 border-yellow-500"
               />
             </div>

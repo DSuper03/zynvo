@@ -53,19 +53,16 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
- 
-    const token = localStorage.getItem('token')
+
+    const token = localStorage.getItem('token');
     const upload = await axios.post<{
-      msg :  string, 
-      clubId : string
-    }>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/club`,
-      clubData , {
-        headers : {
-          authorization : `Bearer ${token}`
-        }
-      }
-    );
+      msg: string;
+      clubId: string;
+    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/club`, clubData, {
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    });
 
     const msg = upload?.data;
     if (upload.status == 200) {
@@ -73,8 +70,8 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
       alert(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
       onClose();
     } else {
-      alert(msg.msg)
-    }  
+      alert(msg.msg);
+    }
   };
 
   if (!isOpen) return null;

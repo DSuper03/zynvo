@@ -127,15 +127,17 @@ export default function Feed() {
                           post.images.length === 1
                             ? 'grid-cols-1'
                             : post.images.length === 2
-                            ? 'grid-cols-2'
-                            : 'grid-cols-2 grid-rows-2'
+                              ? 'grid-cols-2'
+                              : 'grid-cols-2 grid-rows-2'
                         } gap-1 mb-3`}
                       >
                         {post.images.map((img, idx) => (
                           <div
                             key={idx}
                             className={`${
-                              post.images && post.images.length === 3 && idx === 0
+                              post.images &&
+                              post.images.length === 3 &&
+                              idx === 0
                                 ? 'col-span-2'
                                 : ''
                             } aspect-video overflow-hidden border border-yellow-900/30`}
@@ -272,14 +274,19 @@ export default function Feed() {
             {/* Suggestions */}
             <div className="bg-black rounded-lg p-4 shadow-md border border-yellow-900/30">
               <div className="flex justify-between items-center mb-3">
-                <h3 className="text-xl font-bold text-yellow-400">Suggestions</h3>
+                <h3 className="text-xl font-bold text-yellow-400">
+                  Suggestions
+                </h3>
                 <button className="text-xs text-yellow-500 hover:text-yellow-400">
                   See all
                 </button>
               </div>
               <div className="space-y-3">
                 {suggestedUsers.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between">
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex items-center space-x-2">
                       <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-yellow-500/50">
                         <Image
@@ -291,7 +298,9 @@ export default function Feed() {
                         />
                       </div>
                       <div>
-                        <h4 className="font-medium text-yellow-400">{user.name}</h4>
+                        <h4 className="font-medium text-yellow-400">
+                          {user.name}
+                        </h4>
                       </div>
                     </div>
                     <button className="px-3 py-1 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-medium rounded-full transition-colors">
@@ -304,7 +313,9 @@ export default function Feed() {
 
             {/* Interests - Fill the gap */}
             <div className="bg-black rounded-lg p-4 shadow-md border border-yellow-900/30">
-              <h3 className="text-xl font-bold text-yellow-400 mb-3">Interests</h3>
+              <h3 className="text-xl font-bold text-yellow-400 mb-3">
+                Interests
+              </h3>
               <div className="grid grid-cols-2 gap-2">
                 {interestCategories.map((category) => (
                   <div

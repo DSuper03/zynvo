@@ -11,7 +11,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
   onClose,
   clubName,
   clubImage,
-  clubId
+  clubId,
 }) => {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -35,18 +35,21 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = localStorage.getItem('token')
-    const res = await axios.post<{msg : string}>(`http://localhost:8000/api/v1/user/joinClub/${clubId}`, {
-      headers: {
-            authorization: `Bearer ${token}`,
-          }
-        })
-      if(res.status == 200) {
-        alert(res.data.msg)
-        onClose();
-      } else {
-        alert(res.data.msg)
+    const token = localStorage.getItem('token');
+    const res = await axios.post<{ msg: string }>(
+      `http://localhost:8000/api/v1/user/joinClub/${clubId}`,
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
       }
+    );
+    if (res.status == 200) {
+      alert(res.data.msg);
+      onClose();
+    } else {
+      alert(res.data.msg);
+    }
     // console.log('Join request data:', formData);
   };
 

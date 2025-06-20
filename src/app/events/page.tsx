@@ -54,7 +54,7 @@ export default function ZynvoEventsPage() {
   }, []);
 
   // Filter events based on active filter
-  const filteredEvents = events?.filter(event => {
+  const filteredEvents = events?.filter((event) => {
     if (activeFilter === 'all') return true;
     // Add your actual filtering logic here
     return true;
@@ -74,7 +74,12 @@ export default function ZynvoEventsPage() {
         </div>
 
         <div>
-          {isModalOpen && <CreateEventModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
+          {isModalOpen && (
+            <CreateEventModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+            />
+          )}
           <div className="flex justify-between items-center mb-8 sticky top-0 backdrop-blur-sm z-10 py-4 px-4">
             <CreateEventButton onClick={() => setIsModalOpen(true)} />
           </div>
@@ -130,7 +135,10 @@ export default function ZynvoEventsPage() {
           {isLoading ? (
             // Skeleton loading state
             [...Array(6)].map((_, index) => (
-              <div key={index} className="bg-gray-900 rounded-lg overflow-hidden shadow-md">
+              <div
+                key={index}
+                className="bg-gray-900 rounded-lg overflow-hidden shadow-md"
+              >
                 <Skeleton className="w-full h-48 sm:h-40 rounded-none" />
                 <div className="p-4 md:p-5 space-y-3">
                   <Skeleton className="h-6 w-3/4 rounded-md" />
@@ -189,7 +197,9 @@ export default function ZynvoEventsPage() {
                     </div>
                     <div className="flex items-center text-gray-300 text-sm">
                       <MapPin className="w-4 h-4 mr-2 text-yellow-400" />
-                      <span className="truncate">{event.clubName}'s College</span>
+                      <span className="truncate">
+                        {event.clubName}'s College
+                      </span>
                     </div>
                   </div>
 
