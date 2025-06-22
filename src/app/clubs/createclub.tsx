@@ -42,7 +42,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
         logo: file,
       }));
 
-      // Create preview URL for the image
+   
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewImage(reader.result as string);

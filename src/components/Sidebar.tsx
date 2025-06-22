@@ -17,6 +17,7 @@ import {
   LogOut,
   NotebookText,
 } from 'lucide-react';
+import { Button } from './ui/button';
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -73,7 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
 
         {/* Close button - only on mobile when sidebar is open */}
         {isOpen && onClose && (
-          <button
+          <Button
             onClick={onClose}
             className="ml-auto p-1 rounded-full hover:bg-gray-800 md:hidden"
             aria-label="Close sidebar"
@@ -92,7 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
-          </button>
+          </Button>
         )}
       </div>
 
@@ -134,7 +135,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
             key={index}
             href={item.href}
             className="flex items-center py-2 px-3 mt-1 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
-            onClick={onClose} // Close sidebar on navigation for mobile
+            onClick={onClose} 
           >
             <span className="flex-shrink-0">{item.icon}</span>
             {showText && (
