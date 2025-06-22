@@ -4,17 +4,17 @@ import { ReactNode } from 'react';
 
 export type EventMode = 'online' | 'offline' | 'hybrid';
 
-export type Eventtype = 
-  'hackathon' | 
-  'workshop' | 
-  'conference' | 
-  'competition' | 
-  'cultural' | 
-  'sports' | 
-  'technical';
+export type Eventtype =
+  | 'hackathon'
+  | 'workshop'
+  | 'conference'
+  | 'competition'
+  | 'cultural'
+  | 'sports'
+  | 'technical';
 
 export interface EventFormData {
-  eventMode: EventMode | ''; 
+  eventMode: EventMode | '';
   eventName: string;
   university: string;
   tagline: string;
@@ -37,7 +37,6 @@ export interface EventFormData {
   image: File | null;
 }
 
-
 // this is used in clubs/id/page.tsx where events of colleges are listed
 export interface EventType {
   id: string;
@@ -53,12 +52,12 @@ export interface EventType {
 // axios post data interface ( register event button )
 export interface UserEvent {
   userId: string;
-  eventId: string; 
+  eventId: string;
 }
 
-//registered user response 
+//registered user response
 export interface UserEvenResponse {
-  uniquePassId: string
+  uniquePassId: string;
 }
 
 //response
@@ -82,9 +81,8 @@ export interface Speaker {
   name: string;
   email: string;
   eventId: string;
- // event: Event;
+  // event: Event;
 }
-
 
 // post types---------------------------------------------------------------------------------------
 export interface CreatePost {
@@ -100,7 +98,6 @@ export interface CreatePost {
   authorId: string;
   author: User;
 }
-
 
 // club types ----------------------------------------------------------------------
 export type ClubType =
@@ -129,7 +126,6 @@ export interface Club {
   members: User[];
   events: Event[];
 }
-
 
 // dashboard and user info ------------------------------------------------------------------------------------------
 export interface User {
@@ -169,6 +165,7 @@ export interface JoinClubModalProps {
   onClose: () => void;
   clubName: string;
   clubImage: string;
+  clubId: string;
 }
 export enum clubType {
   Technology,
@@ -201,7 +198,6 @@ export interface ClubPageProps {
   };
 }
 
-
 // used in clubs/id
 export interface Response {
   msg: string;
@@ -210,9 +206,11 @@ export interface Response {
     name: string;
     collegeName: string;
     description: string;
+    founderEmail: string;
+    facultyEmail: string;
+    members: any[];
   };
 }
-
 
 // used in clubs/id
 export interface EventResponse {
@@ -235,13 +233,13 @@ export interface ClubTypeProps {
   collegeName: string;
   description: string;
   image?: string;
-  members?: number;
+  members?: any[];
+  founderEmail: string;
+  facultyEmail: string;
   isPopular?: boolean;
   isNew?: boolean;
   category?: string;
 }
-
-
 
 export interface Event {
   EventName: string;
@@ -346,8 +344,7 @@ export interface Attendee {
   user: UserEvents | null;
 }
 
-
-// all-events response ,  saare venets show krne wala page 
+// all-events response ,  saare venets show krne wala page
 export interface eventData {
   attendees: Attendee[];
   description: string;
@@ -361,6 +358,37 @@ export interface eventData {
   endDate: Date | null;
 }
 
+export interface respnseUseState {
+  EventName: string;
+  description: string;
+}
 
+export interface EventByIdResponse {
+  msg: string;
+  response: {
+    id: string;
+    posterUrl?: string;
+    EventMode: 'Online' | 'Offline' | 'Hybrid';
+    EventType: string; // Consider creating a union type with specific event types
+    eventHeaderImage?: string;
+    EventName: string;
+    description: string;
+    prizes: string;
+    TeamSize: number;
+    Venue: string;
+    EventUrl?: string;
+    applicationStatus: 'open' | 'closed';
+    clubName: string;
+    clubId: string;
+    university: string;
+    createdAt: Date;
+    startDate: string;
+    endDate?: string;
+    collegeStudentsOnly: boolean;
+    participationFee: boolean;
+    contactEmail: string;
+    contactPhone?: number;
+  };
+}
 
-// will fix it later 
+// will fix it later
