@@ -1,6 +1,6 @@
 'use client';
 
-//need to add a leave club button 
+//need to add a leave club button
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -77,8 +77,8 @@ export default function ClubPage({}: ClubPageProps) {
     members: [],
     image: '/default-club-image.jpg',
     category: 'tech',
-    founderEmail : '',
-    facultyEmail : ''
+    founderEmail: '',
+    facultyEmail: '',
   });
   const [event, setEvent] = useState<EventType[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
@@ -124,8 +124,8 @@ export default function ClubPage({}: ClubPageProps) {
         collegeName: response.data.response.collegeName,
         description: response.data.response.description,
         members: response.data.response.members,
-        founderEmail : response.data.response.founderEmail,
-        facultyEmail : response.data.response.facultyEmail,
+        founderEmail: response.data.response.founderEmail,
+        facultyEmail: response.data.response.facultyEmail,
         image: '/default-club-image.jpg',
         category: 'tech',
       });
@@ -575,7 +575,9 @@ export default function ClubPage({}: ClubPageProps) {
                     />
                   </div>
                   <div>
-                    <h4 className="text-white font-medium">{club.founderEmail}</h4>
+                    <h4 className="text-white font-medium">
+                      {club.founderEmail}
+                    </h4>
                     <p className="text-gray-400 text-xs">President</p>
                   </div>
                 </div>
@@ -591,7 +593,9 @@ export default function ClubPage({}: ClubPageProps) {
                     />
                   </div>
                   <div>
-                    <h4 className="text-white font-medium">{club.facultyEmail}</h4>
+                    <h4 className="text-white font-medium">
+                      {club.facultyEmail}
+                    </h4>
                     <p className="text-gray-400 text-xs">Faculty</p>
                   </div>
                 </div>
@@ -661,7 +665,7 @@ export default function ClubPage({}: ClubPageProps) {
           onClose={() => setIsJoinModalOpen(false)}
           clubName={club.name}
           clubImage={club.image || '/default-club-image.jpg'}
-          clubId= {id}
+          clubId={id}
         />
       )}
     </div>

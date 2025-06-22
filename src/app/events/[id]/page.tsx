@@ -1,44 +1,42 @@
-"use client"
+'use client';
 
 import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-
-
 const Eventid = () => {
-  const params = useParams()
+  const params = useParams();
   const id = params.id as string;
 
   const token = localStorage.getItem('token');
 
   const [data, setData] = useState<respnseUseState>({
-   EventName : '',
-   description : '',
-  })
+    EventName: '',
+    description: '',
+  });
 
-  const [forkedUpId, setForkedUpId] = useState<string | null>(null)
+  const [forkedUpId, setForkedUpId] = useState<string | null>(null);
 
-  useEffect(() =>{
-
+  useEffect(() => {
     async function call() {
-      const res =  await axios.get<EventByIdResponse>(`https://localhost:8000/api/v1/events/event/${id}`, {
-        headers : {
-          authorization : `Bearer ${token}`
+      const res = await axios.get<EventByIdResponse>(
+        `https://localhost:8000/api/v1/events/event/${id}`,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
         }
-      })
+      );
 
-      if(res && res.status == 200) {
+      if (res && res.status == 200) {
         setData({
-          EventName : res.data.response.EventName,
-          description : res.data.response.description
-        })
+          EventName: res.data.response.EventName,
+          description: res.data.response.description,
+        });
       }
     }
-
-  }, [])
-
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white py-8 px-2 md:px-6">
@@ -81,37 +79,50 @@ const Eventid = () => {
               </div>
               <div className="mt-auto">
                 <button
-                onClick={async() => {
-                 const BodyData = {
-                    eventId : id
-                  }
-                  const resp = await axios.post<{
-                    msg : string,
-                    ForkedUpId : string
-                  }>(`http://localhost:8000/api/v1/events/registerEvent`, BodyData , {
-                    headers : {
-                      authorization : `Bearer ${token}`
-                    }
-                  })
+                  onClick={async () => {
+                    const BodyData = {
+                      eventId: id,
+                    };
+                    const resp = await axios.post<{
+                      msg: string;
+                      ForkedUpId: string;
+                    }>(
+                      `http://localhost:8000/api/v1/events/registerEvent`,
+                      BodyData,
+                      {
+                        headers: {
+                          authorization: `Bearer ${token}`,
+                        },
+                      }
+                    );
 
-                  if(resp && resp.status == 200){
-                    alert(resp.data.msg)
-                    setForkedUpId(resp.data.ForkedUpId)
-                  } else {
-                    alert('error')
-                  }
-                }}
-                className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-8 rounded-xl transition duration-300 shadow-lg w-full md:w-auto">
+                    if (resp && resp.status == 200) {
+                      alert(resp.data.msg);
+                      setForkedUpId(resp.data.ForkedUpId);
+                    } else {
+                      alert('error');
+                    }
+                  }}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-8 rounded-xl transition duration-300 shadow-lg w-full md:w-auto"
+                >
                   Register Now 🚀
                 </button>
 
-               {forkedUpId && <div className='flex gap-2 m-3'>
-
-                <h1 className='font-medium m-1'>Get your pass for this event on <a href='https://forkedup.mochak.me' className='text-blue-500 font-semibold'>Forked-Up</a> with the Id below.</h1>
-
-                  <label htmlFor="">ForkedUp Id</label> : {forkedUpId}
-                </div> } 
-
+                {forkedUpId && (
+                  <div className="flex gap-2 m-3">
+                    <h1 className="font-medium m-1">
+                      Get your pass for this event on{' '}
+                      <a
+                        href="https://forkedup.mochak.me"
+                        className="text-blue-500 font-semibold"
+                      >
+                        Forked-Up
+                      </a>{' '}
+                      with the Id below.
+                    </h1>
+                    <label htmlFor="">ForkedUp Id</label> : {forkedUpId}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -129,11 +140,20 @@ const Eventid = () => {
                 strokeWidth={1.5}
                 viewBox="0 0 48 48"
               >
-                <rect x="8" y="8" width="32" height="32" rx="6" stroke="currentColor" />
+                <rect
+                  x="8"
+                  y="8"
+                  width="32"
+                  height="32"
+                  rx="6"
+                  stroke="currentColor"
+                />
                 <circle cx="24" cy="20" r="6" stroke="currentColor" />
                 <path d="M8 36l8-8 8 8 8-8 8 8" stroke="currentColor" />
               </svg>
-              <span className="text-lg font-semibold opacity-60">Event Poster</span>
+              <span className="text-lg font-semibold opacity-60">
+                Event Poster
+              </span>
             </span>
             {/* 
               To use a real image, replace the above <span> with:

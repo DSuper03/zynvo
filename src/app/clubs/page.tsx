@@ -32,7 +32,7 @@ const ClubsPage = () => {
   const [selectedClub, setSelectedClub] = useState<{
     name: string;
     image: string;
-    id : string
+    id: string;
   } | null>(null);
   const [clubData, setData] = useState<response['resp']>();
 
@@ -55,34 +55,14 @@ const ClubsPage = () => {
     call();
   }, []);
 
-  // Filter clubs based on active type and search query
-  // const filteredClubs = clubData.filter((club : any) => {
-  //   const matchestype = activetype === 'all' || club.type === activetype;
-  //   const matchesSearch =
-  //     club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //     club.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //     club.college.toLowerCase().includes(searchQuery.toLowerCase());
-  //   return matchestype && matchesSearch;
-  // });
-
-  // Sort clubs based on sortBy state
-  // const sortedClubs = [...filteredClubs].sort((a, b) => {
-  //   if (sortBy === 'new') {
-  //     return a.isNew ? -1 : b.isNew ? 1 : 0;
-  //   } else if (sortBy === 'trending') {
-
-  //     return a.isPopular ? -1 : b.isPopular ? 1 : 0;
-  //   } else {
-  //     return b.members - a.members;
-  //   }
-  // });
+ 
   console.log(clubData);
 
   const handleJoinClub = (club: response['resp'][0]) => {
     setSelectedClub({
       name: club.name,
       image: club.profilePicUrl || 'https://via.placeholder.com/150', // Fallback image if profilePicUrl is null
-      id : club.id
+      id: club.id,
     });
     setIsJoinModalOpen(true);
   };
@@ -274,24 +254,26 @@ const ClubsPage = () => {
                     Join Club
                   </button>
                 </div>
-              ))) : (  <div className="grid gris-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 w-full ">
-       {[...Array(8)].map((_, index) => (
-        <div key={index} className="space-y-3">
-          <Skeleton className="h-32 md:h-40 w-full rounded-xl" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-3 w-1/2" />
-            <Skeleton className="h-3 w-full" />
-            <Skeleton className="h-3 w-full" />
-            <div className="flex justify-between items-center">
-              <Skeleton className="h-4 w-20 rounded-md" />
-              <Skeleton className="h-8 w-24 rounded-lg" />
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>)
-              }
+              ))
+            ) : (
+              <div className="grid gris-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 w-full ">
+                {[...Array(8)].map((_, index) => (
+                  <div key={index} className="space-y-3">
+                    <Skeleton className="h-32 md:h-40 w-full rounded-xl" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-full" />
+                      <div className="flex justify-between items-center">
+                        <Skeleton className="h-4 w-20 rounded-md" />
+                        <Skeleton className="h-8 w-24 rounded-lg" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-3 md:space-y-4">
