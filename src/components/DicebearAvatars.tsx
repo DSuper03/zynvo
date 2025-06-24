@@ -1,5 +1,5 @@
 // DiceBearAvatar.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FiRefreshCw } from 'react-icons/fi';
 
 const DiceBearAvatar = ({
@@ -24,13 +24,23 @@ const DiceBearAvatar = ({
   ];
 
   // Generate a random seed for avatar regeneration
-  const generateRandomSeed = () => {
+  const generateRandomSeed = useCallback(() => {
     return Math.random().toString(36).substring(2, 10);
-  };
+  }, []);
+
+  // Initialize random seed only once when component mounts
+  useEffect(() => {
+    if (!randomSeed) {
+      setRandomSeed(generateRandomSeed());
+    }
+  }, [generateRandomSeed, randomSeed]);
 
   // Update the avatar URL when name, seed, or style changes
   useEffect(() => {
-    const seed = name.trim() ? name : randomSeed || generateRandomSeed();
+    // Only proceed if we have a randomSeed (prevents initial render issues)
+    if (!randomSeed && !name.trim()) return;
+    
+    const seed = name.trim() || randomSeed;
     const url = `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${encodeURIComponent(seed)}`;
     setAvatarUrl(url);
 
@@ -38,7 +48,7 @@ const DiceBearAvatar = ({
     if (onAvatarChange) {
       onAvatarChange(url);
     }
-  }, [name, randomSeed, avatarStyle, onAvatarChange]);
+  }, [name, randomSeed, avatarStyle]); // Removed onAvatarChange from dependencies
 
   // Handle regenerate button click
   const handleRegenerate = () => {
