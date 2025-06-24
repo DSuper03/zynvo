@@ -11,6 +11,7 @@ import axios from 'axios';
 import Image from 'next/image';
 import { response } from '@/types/global-Interface';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 
 const categories = [
   { id: 'all', name: 'All Clubs' },
@@ -83,7 +84,7 @@ const ClubsPage = () => {
             {/* Search Input */}
             <div className="relative flex-grow">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 md:h-5 md:w-5 text-gray-400" />
+                <Search  size={4} className=" md:h-5 md:w-5 text-gray-400" />
               </div>
               <input
                 type="text"
@@ -96,7 +97,7 @@ const ClubsPage = () => {
 
             {/* Sort Buttons */}
             <div className="flex space-x-2 overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
-              <button
+              <Button
                 onClick={() => setSortBy('popular')}
                 className={`flex items-center px-3 md:px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-colors ${
                   sortBy === 'popular'
@@ -104,11 +105,11 @@ const ClubsPage = () => {
                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                 }`}
               >
-                <Star className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                <Star size={4} className=" md:h-4 md:w-4 mr-1" />
                 <span>Popular</span>
-              </button>
+              </Button>
 
-              <button
+              <Button
                 onClick={() => setSortBy('new')}
                 className={`flex items-center px-3 md:px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-colors ${
                   sortBy === 'new'
@@ -116,11 +117,11 @@ const ClubsPage = () => {
                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                 }`}
               >
-                <Calendar className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                <Calendar size={4} className=" md:h-4 md:w-4 mr-1" />
                 <span>New</span>
-              </button>
+              </Button>
 
-              <button
+              <Button
                 onClick={() => setSortBy('trending')}
                 className={`flex items-center px-3 md:px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-colors ${
                   sortBy === 'trending'
@@ -128,13 +129,13 @@ const ClubsPage = () => {
                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                 }`}
               >
-                <TrendingUp className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                <TrendingUp size={4} className=" md:h-4 md:w-4 mr-1" />
                 <span>Trending</span>
-              </button>
+              </Button>
             </div>
 
             {/* View Toggle Button */}
-            <button
+            <Button
               onClick={() => setIsGridView(!isGridView)}
               className="bg-gray-800 text-white p-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center"
               title={isGridView ? 'Switch to List View' : 'Switch to Grid View'}
@@ -144,7 +145,7 @@ const ClubsPage = () => {
               ) : (
                 <Grid3X3 className="h-4 w-4 md:h-5 md:w-5" />
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -154,7 +155,7 @@ const ClubsPage = () => {
         <div className="max-w-none">
           <div className="flex space-x-2 pb-1 md:pb-0 scrollbar-hide">
             {categories.map((type) => (
-              <button
+              <Button
                 key={type.id}
                 onClick={() => setActivetype(type.id)}
                 className={`whitespace-nowrap px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-colors ${
@@ -164,7 +165,7 @@ const ClubsPage = () => {
                 }`}
               >
                 {type.name}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -215,7 +216,7 @@ const ClubsPage = () => {
                             </p>
                           </div>
                           <div className="flex items-center text-gray-400 text-xs md:text-sm ml-2">
-                            <Users className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                            <Users  size={3} className=" md:h-4 md:w-4 mr-1" />
                             <span>{club.members || 100}</span>
                           </div>
                         </div>
@@ -241,7 +242,7 @@ const ClubsPage = () => {
                     </Link>
                     
                     <div className="p-3 md:p-4 pt-0">
-                      <button
+                      <Button
                         className="w-full bg-yellow-500 hover:bg-yellow-400 text-black text-xs md:text-sm font-medium py-2 px-4 rounded-lg transition-colors"
                         onClick={(e) => {
                           e.preventDefault();
@@ -249,7 +250,7 @@ const ClubsPage = () => {
                         }}
                       >
                         Join Club
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -263,7 +264,7 @@ const ClubsPage = () => {
                   >
                     <div className="flex">
                       <Link href={`/clubs/${club.id}`} className="flex flex-1">
-                        <div className="w-24 h-24 md:w-32 md:h-32 overflow-hidden relative flex-shrink-0">
+                        <div className="size-24 md:w-32 md:h-32 overflow-hidden relative flex-shrink-0">
                           <div className="absolute inset-0 bg-black/30 z-10 group-hover:bg-black/20 transition-all"></div>
                           <Image
                             src={club.image || 'https://via.placeholder.com/150'}
@@ -285,7 +286,7 @@ const ClubsPage = () => {
                               </p>
                             </div>
                             <div className="flex items-center text-gray-400 text-xs md:text-sm ml-2">
-                              <Users className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                              <Users size={4} className=" md:h-4 md:w-4 mr-1" />
                               <span>{club.members || 100}</span>
                             </div>
                           </div>
@@ -311,7 +312,7 @@ const ClubsPage = () => {
                       </Link>
                       
                       <div className="p-3 md:p-4 flex items-center">
-                        <button
+                        <Button
                           className="bg-yellow-500 hover:bg-yellow-400 text-black text-xs md:text-sm font-medium py-2 px-3 md:px-4 rounded-lg transition-colors whitespace-nowrap"
                           onClick={(e) => {
                             e.preventDefault();
@@ -319,7 +320,7 @@ const ClubsPage = () => {
                           }}
                         >
                           Join Club
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -358,13 +359,14 @@ const ClubsPage = () => {
 
       {/* Floating Create Button */}
       <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-20">
-        <button
-          className="bg-yellow-500 hover:bg-yellow-400 text-black w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center shadow-lg transition-colors"
+        <Button
+        size="icon"
+          className="bg-yellow-500 hover:bg-yellow-400 text-black  md:w-14 md:h-14 rounded-full flex items-center justify-center shadow-lg transition-colors"
           onClick={() => setIsCreateModalOpen(true)}
           title="Create New Club"
         >
           <Plus className="w-5 h-5 md:w-6 md:h-6" />
-        </button>
+        </Button>
       </div>
 
       {/* Create Club Modal */}
