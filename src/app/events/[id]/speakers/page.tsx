@@ -9,30 +9,31 @@ import {
   FaGavel,
 } from 'react-icons/fa';
 import Image from 'next/image';
-import dotenv from "dotenv"
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
 
-dotenv.config();
-
 interface speakers {
-   id: number;
-    email: string;
-    name: string;
-    profilePic: string | null;
-    about: string;
-    eventId: string;
+  id: number;
+  email: string;
+  name: string;
+  profilePic: string | null;
+  about: string;
+  eventId: string;
 }
 
 interface speakerResponse {
-  msg : string;
-  speakers : speakers[]
+  msg: string;
+  speakers: speakers[];
 }
 
 const Speakers = () => {
-  const params = useParams()
-  const id = params.id as string
+  const params = useParams();
+  const id = params.id as string;
+  
+  console.log('Route params:', params); // Debug log to see what's available
+  console.log('Extracted ID:', id); // Debug log to verify ID extraction
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -49,68 +50,147 @@ const Speakers = () => {
     show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
   };
 
-  const token = localStorage.getItem('token')
-
-  useEffect(() => {
-    async function call(){
-      const res = await axios.get<speakerResponse>(`http://localhost:8000/api/v1/events/getSpeakers?id=${id}`)
-      const checkFounder = await axios.get<{msg : string}>(`http://localhost:8000/api/v1/user/isFounder`)
-
-      if(checkFounder.status == 200) {
-        setFounder(true)
-      } else if (checkFounder.status == 500) {
-        toast("internal server error")
-      }
-
-      if(res.status == 200) {
-        setSpeakers(res.data.speakers)
-      } else {
-        toast(res.data.msg)
-      }
-    }
-
-    call()
-  }, [])
-
-  const [Speakers, setSpeakers] = useState<speakers[]>([{
-     id: 0,
-    email: '',
-    name: '',
-    profilePic: '',
-    about: '',
-    eventId: ''
-  }])
-
-  const [founder , setFounder] = useState<boolean>(false)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [speakers, setSpeakers] = useState<speakers[]>([]);
+  const [founder, setFounder] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
   const [newSpeaker, setNewSpeaker] = useState({
     name: '',
     email: '',
     about: '',
     profilePic: '',
-    eventId : id
-  })
-  const handleAddSpeaker = async() => {
-    const add = await axios.post<{msg : string}>(`http://localhost:8000/api/v1/events/addSpeakers`, newSpeaker, {
-      headers : {
-        authorization : `Bearer ${token}`
-      }
-    })
-    if (add && add.status == 200) {
-      toast(add.data.msg)
-    } else {
-      toast(`error : ${add.data.msg}`)
+    eventId: id || ''
+  });
+
+  // Get token on client side only
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('token');
+      setToken(storedToken);
     }
-    
-    setNewSpeaker({ name: '', email: '', about: '', profilePic: '' , eventId : id})
-    setIsModalOpen(false)
-  }
+  }, []);
+
+  // Update eventId when id changes
+  useEffect(() => {
+    if (id) {
+      setNewSpeaker(prev => ({ ...prev, eventId: id }));
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (!id || !token) return;
+
+    async function fetchData() {
+      try {
+        setIsLoading(true);
+        
+        // Fetch speakers
+        const res = await axios.get<speakerResponse>(
+          `${'http://localhost:8000'}/api/v1/events/getSpeakers?id=${id}`,
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        // Check if user is founder
+        const checkFounder = await axios.get<{ msg: string }>(
+          `${'http://localhost:8000'}/api/v1/user/isFounder?id=${id}`,
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (checkFounder.status === 200 && checkFounder.data.msg === "identified") {
+          setFounder(true);
+          toast("welcome presidento")
+        } else if (checkFounder.status === 500) {
+          toast('Internal server error checking founder status');
+        }
+
+        if (res.status === 200) {
+          setSpeakers(res.data.speakers || []);
+        } else {
+          toast(res.data.msg || 'Failed to fetch speakers');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast('Error loading speakers data');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [id, token]);
+
+  const handleAddSpeaker = async () => {
+    if (!token) {
+      toast('Please login to add speakers');
+      return;
+    }
+
+    try {
+      const add = await axios.post<{ msg: string }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/v1/events/addSpeakers`,
+        newSpeaker,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (add && add.status === 200) {
+        toast(add.data.msg);
+        // Refresh speakers list
+        const res = await axios.get<speakerResponse>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/v1/events/getSpeakers?id=${id}`,
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (res.status === 200) {
+          setSpeakers(res.data.speakers || []);
+        }
+      } else {
+        toast(`Error: ${add.data.msg}`);
+      }
+    } catch (error) {
+      console.error('Error adding speaker:', error);
+      toast('Failed to add speaker');
+    }
+
+    setNewSpeaker({ name: '', email: '', about: '', profilePic: '', eventId: id || '' });
+    setIsModalOpen(false);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setNewSpeaker(prev => ({ ...prev, [name]: value }))
+    const { name, value } = e.target;
+    setNewSpeaker(prev => ({ ...prev, [name]: value }));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-yellow-400 text-xl">Loading speakers...</div>
+      </div>
+    );
   }
 
+  if (!id) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-red-400 text-xl">Invalid event ID</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-6 bg-gray-900">
@@ -138,15 +218,21 @@ const Speakers = () => {
             <h2 className="text-3xl font-bold text-white">Featured Speakers & Judges</h2>
           </div>
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            {Speakers
-              .filter((speaker) => speaker.name !== '') // Filter out empty initial state
-              .map((speaker) => (
+          {speakers.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 text-lg">No speakers added yet.</p>
+              {founder && (
+                <p className="text-gray-500 mt-2">Add the first speaker to get started!</p>
+              )}
+            </div>
+          ) : (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            >
+              {speakers.map((speaker) => (
                 <motion.div
                   key={speaker.id}
                   variants={itemVariants}
@@ -156,8 +242,8 @@ const Speakers = () => {
                     <div className="absolute inset-0 bg-yellow-400/20 group-hover:bg-yellow-400/10 transition-all duration-500"></div>
                     <Image
                       src={speaker.profilePic || "https://i.pravatar.cc/300?img=11"}
-                      width={40}
-                      height={30}
+                      width={400}
+                      height={300}
                       alt={speaker.name}
                       className="w-full h-full object-cover object-center group-hover:scale-105 transition-all duration-700"
                     />
@@ -183,18 +269,21 @@ const Speakers = () => {
                       <a
                         href="#"
                         className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-colors"
+                        aria-label="LinkedIn"
                       >
                         <FaLinkedin />
                       </a>
                       <a
                         href="#"
                         className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-colors"
+                        aria-label="Twitter"
                       >
                         <FaTwitter />
                       </a>
                       <a
                         href="#"
                         className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-colors"
+                        aria-label="GitHub"
                       >
                         <FaGithub />
                       </a>
@@ -202,39 +291,37 @@ const Speakers = () => {
                   </div>
                 </motion.div>
               ))}
-          </motion.div>
+            </motion.div>
+          )}
         </section>
 
-
-
         {/* CTA Section */}
-        { founder &&  
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="bg-gradient-to-r from-gray-900 to-black border-2 border-yellow-500/30 rounded-xl p-8 text-center"
-        >
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-            Manage Event Speakers
-          </h2>
-          <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-            Add new speakers to your event or manage existing ones. Build your expert panel to share knowledge with the community.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="px-8 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all duration-300 transform hover:-translate-y-1"
-            >
-              Add Speaker
-            </button>
-            <button className="px-8 py-3 bg-transparent border-2 border-yellow-400 text-yellow-400 font-bold rounded-lg hover:bg-yellow-400 hover:text-black transition-all duration-300 transform hover:-translate-y-1">
-              Manage Speakers
-            </button>
-          </div>
-        </motion.section>
-        }
-       
+        {founder && (
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="bg-gradient-to-r from-gray-900 to-black border-2 border-yellow-500/30 rounded-xl p-8 text-center"
+          >
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+              Manage Event Speakers
+            </h2>
+            <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
+              Add new speakers to your event or manage existing ones. Build your expert panel to share knowledge with the community.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="px-8 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all duration-300 transform hover:-translate-y-1"
+              >
+                Add Speaker
+              </button>
+              <button className="px-8 py-3 bg-transparent border-2 border-yellow-400 text-yellow-400 font-bold rounded-lg hover:bg-yellow-400 hover:text-black transition-all duration-300 transform hover:-translate-y-1">
+                Manage Speakers
+              </button>
+            </div>
+          </motion.section>
+        )}
 
         {/* Add Speaker Modal */}
         {isModalOpen && (
