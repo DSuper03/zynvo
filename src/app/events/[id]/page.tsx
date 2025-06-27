@@ -4,6 +4,9 @@ import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const Eventid = () => {
   const params = useParams();
@@ -14,6 +17,13 @@ const Eventid = () => {
   const [data, setData] = useState<respnseUseState>({
     EventName: '',
     description: '',
+    EventMode : '',
+     startDate : '',
+  endDate : '',
+  contactEmail : '',
+  contactPhone : 0,
+  university : '',
+  applicationStatus : 'open'
   });
 
   const [forkedUpId, setForkedUpId] = useState<string | null>(null);
@@ -21,7 +31,7 @@ const Eventid = () => {
   useEffect(() => {
     async function call() {
       const res = await axios.get<EventByIdResponse>(
-        `https://localhost:8000/api/v1/events/event/${id}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event/${id}`,
         {
           headers: {
             authorization: `Bearer ${token}`,
@@ -33,6 +43,13 @@ const Eventid = () => {
         setData({
           EventName: res.data.response.EventName,
           description: res.data.response.description,
+          EventMode : res.data.response.EventMode,
+          startDate : res.data.response.startDate,
+          endDate : res.data.response.endDate,
+          university : res.data.response.university,
+          contactEmail : res.data.response.contactEmail,
+          contactPhone : res.data.response.contactPhone,
+          applicationStatus : res.data.response.applicationStatus
         });
       }
     }
@@ -49,6 +66,13 @@ const Eventid = () => {
               <h1 className="text-3xl md:text-4xl font-extrabold text-black tracking-tight">
                 {data.EventName}
               </h1>
+              <div className='flex flex-col gap-2 m-2'>
+                  <p>Happening<h1 className='text-yellow-500 font-extrabold'>{data.EventMode}</h1> in <h1 className='text-yellow-500 font-extrabold'>{data.university}</h1></p>
+                  <div className='flex gap-2'>
+                        <p>From <h1 className='text-yellow-500 font-extrabold'>{data.startDate}</h1> - <h1 className='text-yellow-500 font-extrabold'>{data.endDate}</h1></p>
+                        <p>Applications are <h1 className='text-green-500 font-extrabold'>{data.applicationStatus}</h1></p>
+                  </div>
+              </div>
               <p className="text-black/80 mt-2 font-medium">
                 The Ultimate Student Developer Experience
               </p>
@@ -76,6 +100,9 @@ const Eventid = () => {
                   and your chaos. */}
                   {data.description}
                 </p>
+                <div className='p-6 text-yellow'>
+                      <p>For further queries contact us at</p> {data.contactEmail} <p>or at</p> {data.contactPhone}
+                </div>
               </div>
               <div className="mt-auto">
                 <button
@@ -87,7 +114,7 @@ const Eventid = () => {
                       msg: string;
                       ForkedUpId: string;
                     }>(
-                      `http://localhost:8000/api/v1/events/registerEvent`,
+                      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/registerEvent`,
                       BodyData,
                       {
                         headers: {

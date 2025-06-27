@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   FaLinkedin,
@@ -9,8 +9,30 @@ import {
   FaGavel,
 } from 'react-icons/fa';
 import Image from 'next/image';
+import dotenv from "dotenv"
+import axios from 'axios';
+import { useParams } from 'next/navigation';
+import { toast } from 'sonner';
+
+dotenv.config();
+
+interface speakers {
+   id: number;
+    email: string;
+    name: string;
+    profilePic: string | null;
+    about: string;
+    eventId: string;
+}
+
+interface speakerResponse {
+  msg : string;
+  speakers : speakers[]
+}
 
 const Speakers = () => {
+  const params = useParams()
+  const id = params.id as string
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -27,77 +49,68 @@ const Speakers = () => {
     show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
   };
 
-  // Speaker data
-  const speakers = [
-    {
-      id: 1,
-      name: 'Anirban Ghosh',
-      role: 'Technology Lead',
-      image: 'https://i.pravatar.cc/300?img=11',
-      bio: 'Anirban is a technology entrepreneur and developer with expertise in AI and machine learning. With multiple successful startups under his belt, he brings practical insights on scaling tech solutions and navigating the innovation landscape.',
-      tags: ['AI/ML', 'Entrepreneurship', 'Web3'],
-      type: 'speaker',
-      social: {
-        linkedin: '#',
-        twitter: '#',
-        github: '#',
-      },
-    },
-    {
-      id: 2,
-      name: 'Swarnendu Ghosh',
-      role: 'Product Design Expert',
-      image: 'https://i.pravatar.cc/300?img=12',
-      bio: 'Swarnendu specializes in product design and user experience. His background spans across multiple industries, helping teams create intuitive and engaging digital products. He focuses on the intersection of design thinking and technical implementation.',
-      tags: ['UX/UI', 'Product Strategy', 'Design Systems'],
-      type: 'speaker',
-      social: {
-        linkedin: '#',
-        twitter: '#',
-        github: '#',
-      },
-    },
-    {
-      id: 3,
-      name: 'Mohak Chakraborty',
-      role: 'Innovation Specialist',
-      image: 'https://i.pravatar.cc/300?img=13',
-      bio: 'Mohak has led innovation initiatives at several tech companies. His expertise in emerging technologies and digital transformation helps teams approach problems with fresh perspectives. He regularly mentors student startups and hackathon teams.',
-      tags: ['Innovation', 'Emerging Tech', 'Mentorship'],
-      type: 'speaker',
-      social: {
-        linkedin: '#',
-        twitter: '#',
-        github: '#',
-      },
-    },
-    {
-      id: 4,
-      name: 'Dr. Sarah Wilson',
-      role: 'Head Judge',
-      image: 'https://i.pravatar.cc/300?img=1',
-      bio: 'Dr. Wilson leads our judging panel with her extensive background in computer science and entrepreneurship. As department chair at Tech University, she brings academic rigor and industry connections to evaluate submissions.',
-      tags: ['Computer Science', 'Academic', 'Entrepreneurship'],
-      type: 'judge',
-      social: {
-        linkedin: '#',
-        twitter: '#',
-      },
-    },
-    {
-      id: 5,
-      name: 'Jay Park',
-      role: 'Industry Judge',
-      image: 'https://i.pravatar.cc/300?img=3',
-      bio: 'As CTO of TechVentures, Jay evaluates projects from a commercial viability perspective. His background in scaling startups makes him keenly aware of what takes an idea from concept to market success.',
-      tags: ['Startup', 'Investment', 'Scaling'],
-      type: 'judge',
-      social: {
-        linkedin: '#',
-        twitter: '#',
-      },
-    },
-  ];
+  const token = localStorage.getItem('token')
+
+  useEffect(() => {
+    async function call(){
+      const res = await axios.get<speakerResponse>(`http://localhost:8000/api/v1/events/getSpeakers?id=${id}`)
+      const checkFounder = await axios.get<{msg : string}>(`http://localhost:8000/api/v1/user/isFounder`)
+
+      if(checkFounder.status == 200) {
+        setFounder(true)
+      } else if (checkFounder.status == 500) {
+        toast("internal server error")
+      }
+
+      if(res.status == 200) {
+        setSpeakers(res.data.speakers)
+      } else {
+        toast(res.data.msg)
+      }
+    }
+
+    call()
+  }, [])
+
+  const [Speakers, setSpeakers] = useState<speakers[]>([{
+     id: 0,
+    email: '',
+    name: '',
+    profilePic: '',
+    about: '',
+    eventId: ''
+  }])
+
+  const [founder , setFounder] = useState<boolean>(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [newSpeaker, setNewSpeaker] = useState({
+    name: '',
+    email: '',
+    about: '',
+    profilePic: '',
+    eventId : id
+  })
+  const handleAddSpeaker = async() => {
+    const add = await axios.post<{msg : string}>(`http://localhost:8000/api/v1/events/addSpeakers`, newSpeaker, {
+      headers : {
+        authorization : `Bearer ${token}`
+      }
+    })
+    if (add && add.status == 200) {
+      toast(add.data.msg)
+    } else {
+      toast(`error : ${add.data.msg}`)
+    }
+    
+    setNewSpeaker({ name: '', email: '', about: '', profilePic: '' , eventId : id})
+    setIsModalOpen(false)
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setNewSpeaker(prev => ({ ...prev, [name]: value }))
+  }
+
 
   return (
     <div className="min-h-screen p-6 bg-gray-900">
@@ -112,8 +125,7 @@ const Speakers = () => {
             Speakers & Judges
           </h1>
           <p className="text-gray-300 text-xl max-w-2xl mx-auto">
-            Learn from industry experts and get your projects evaluated by our
-            distinguished panel of judges.
+            Learn from industry experts who will also be evaluating your projects.
           </p>
         </motion.div>
 
@@ -123,7 +135,7 @@ const Speakers = () => {
             <div className="h-10 w-10 rounded-full bg-yellow-400 flex items-center justify-center mr-4">
               <FaMicrophone className="text-black text-lg" />
             </div>
-            <h2 className="text-3xl font-bold text-white">Featured Speakers</h2>
+            <h2 className="text-3xl font-bold text-white">Featured Speakers & Judges</h2>
           </div>
 
           <motion.div
@@ -132,8 +144,8 @@ const Speakers = () => {
             animate="show"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            {speakers
-              .filter((person) => person.type === 'speaker')
+            {Speakers
+              .filter((speaker) => speaker.name !== '') // Filter out empty initial state
               .map((speaker) => (
                 <motion.div
                   key={speaker.id}
@@ -143,7 +155,7 @@ const Speakers = () => {
                   <div className="h-56 relative overflow-hidden">
                     <div className="absolute inset-0 bg-yellow-400/20 group-hover:bg-yellow-400/10 transition-all duration-500"></div>
                     <Image
-                      src={speaker.image}
+                      src={speaker.profilePic || "https://i.pravatar.cc/300?img=11"}
                       width={40}
                       height={30}
                       alt={speaker.name}
@@ -156,37 +168,32 @@ const Speakers = () => {
                       {speaker.name}
                     </h3>
                     <p className="text-yellow-400 font-medium mb-4">
-                      {speaker.role}
+                      {speaker.email}
                     </p>
 
-                    <p className="text-gray-300 mb-4">{speaker.bio}</p>
+                    <p className="text-gray-300 mb-4">{speaker.about}</p>
 
                     <div className="flex flex-wrap gap-2 mb-6">
-                      {speaker.tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="bg-gray-800 text-yellow-400 text-xs font-medium px-3 py-1 rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                      <span className="bg-gray-800 text-yellow-400 text-xs font-medium px-3 py-1 rounded-full">
+                        Speaker & Judge
+                      </span>
                     </div>
 
                     <div className="flex space-x-3">
                       <a
-                        href={speaker.social.linkedin}
+                        href="#"
                         className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-colors"
                       >
                         <FaLinkedin />
                       </a>
                       <a
-                        href={speaker.social.twitter}
+                        href="#"
                         className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-colors"
                       >
                         <FaTwitter />
                       </a>
                       <a
-                        href={speaker.social.github}
+                        href="#"
                         className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-colors"
                       >
                         <FaGithub />
@@ -198,82 +205,10 @@ const Speakers = () => {
           </motion.div>
         </section>
 
-        {/* Judges Section */}
-        <section className="mb-20">
-          <div className="flex items-center mb-10">
-            <div className="h-10 w-10 rounded-full bg-yellow-400 flex items-center justify-center mr-4">
-              <FaGavel className="text-black text-lg" />
-            </div>
-            <h2 className="text-3xl font-bold text-white">Expert Judges</h2>
-          </div>
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-1 md:grid-cols-2 gap-8"
-          >
-            {speakers
-              .filter((person) => person.type === 'judge')
-              .map((judge) => (
-                <motion.div
-                  key={judge.id}
-                  variants={itemVariants}
-                  className="bg-black border-2 border-yellow-500/20 rounded-xl overflow-hidden hover:border-yellow-400 transition-all duration-500 flex flex-col md:flex-row group"
-                >
-                  <div className="md:w-1/3 h-56 md:h-auto relative">
-                    <div className="absolute inset-0 bg-yellow-400/20 group-hover:bg-yellow-400/10 transition-all duration-500"></div>
-                    <Image
-                      src={judge.image}
-                      alt={judge.name}
-                      width={40}
-                      height={30}
-                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-all duration-700"
-                    />
-                  </div>
-
-                  <div className="p-6 md:w-2/3">
-                    <h3 className="text-xl font-bold text-white mb-1">
-                      {judge.name}
-                    </h3>
-                    <p className="text-yellow-400 font-medium mb-3">
-                      {judge.role}
-                    </p>
-
-                    <p className="text-gray-300 mb-4 text-sm">{judge.bio}</p>
-
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {judge.tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="bg-gray-800 text-yellow-400 text-xs font-medium px-2 py-1 rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="flex space-x-3">
-                      <a
-                        href={judge.social.linkedin}
-                        className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-colors"
-                      >
-                        <FaLinkedin />
-                      </a>
-                      <a
-                        href={judge.social.twitter}
-                        className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-colors"
-                      >
-                        <FaTwitter />
-                      </a>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-          </motion.div>
-        </section>
 
         {/* CTA Section */}
+        { founder &&  
         <motion.section
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -281,16 +216,118 @@ const Speakers = () => {
           className="bg-gradient-to-r from-gray-900 to-black border-2 border-yellow-500/30 rounded-xl p-8 text-center"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-            Want to speak at future events?
+            Manage Event Speakers
           </h2>
           <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-            We're always looking for industry experts and thought leaders to
-            share their knowledge with our community.
+            Add new speakers to your event or manage existing ones. Build your expert panel to share knowledge with the community.
           </p>
-          <button className="px-8 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all duration-300 transform hover:-translate-y-1">
-            Apply as Speaker
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="px-8 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all duration-300 transform hover:-translate-y-1"
+            >
+              Add Speaker
+            </button>
+            <button className="px-8 py-3 bg-transparent border-2 border-yellow-400 text-yellow-400 font-bold rounded-lg hover:bg-yellow-400 hover:text-black transition-all duration-300 transform hover:-translate-y-1">
+              Manage Speakers
+            </button>
+          </div>
         </motion.section>
+        }
+       
+
+        {/* Add Speaker Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-gray-900 border-2 border-yellow-500/30 rounded-xl p-6 w-full max-w-md"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-white">Add New Speaker</h3>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={(e) => { e.preventDefault(); handleAddSpeaker(); }} className="space-y-4">
+                <div>
+                  <label className="block text-white font-medium mb-2">Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={newSpeaker.name}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-yellow-400 focus:outline-none"
+                    placeholder="Enter speaker name"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-white font-medium mb-2">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={newSpeaker.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-yellow-400 focus:outline-none"
+                    placeholder="Enter speaker email"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-white font-medium mb-2">Profile Picture URL</label>
+                  <input
+                    type="url"
+                    name="profilePic"
+                    value={newSpeaker.profilePic}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-yellow-400 focus:outline-none"
+                    placeholder="Enter profile picture URL (optional)"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-white font-medium mb-2">About</label>
+                  <textarea
+                    name="about"
+                    value={newSpeaker.about}
+                    onChange={handleInputChange}
+                    rows={4}
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-yellow-400 focus:outline-none resize-none"
+                    placeholder="Enter speaker bio/description"
+                    required
+                  />
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-colors"
+                  >
+                    Add Speaker
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
       </div>
 
       {/* Visual elements */}

@@ -154,10 +154,6 @@ export default function SignIn() {
                 <span>Continue with Google</span>
               </button>
               <button className="flex items-center justify-center space-x-2 w-full p-3 rounded-lg border border-gray-700 text-white hover:bg-gray-800 transition">
-                <FaApple className="text-lg" />
-                <span>Continue with Apple</span>
-              </button>
-              <button className="flex items-center justify-center space-x-2 w-full p-3 rounded-lg border border-gray-700 text-white hover:bg-gray-800 transition">
                 <FaFacebook className="text-lg" />
                 <span>Continue with Facebook</span>
               </button>
