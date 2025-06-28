@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { Icons } from './Icons';
 import { BackgroundElements } from './TeamSection';
 import LandingHeader from './landingHeader';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 const ContactSection = () => {
   const [formState, setFormState] = useState({
@@ -23,14 +25,16 @@ const ContactSection = () => {
     setIsSubmitting(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const submit = await axios.post<{msg : string}>(`http://localhost:8000/api/v1/contact`, formState)
+      if(submit.status == 200) {
       setSubmitStatus('success');
       setFormState({ name: '', email: '', subject: '', message: '' });
+      toast(submit.data.msg)
+      }
     } catch (error) {
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
-      setTimeout(() => setSubmitStatus('idle'), 3000);
     }
   };
 

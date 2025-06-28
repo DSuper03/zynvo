@@ -361,6 +361,13 @@ export interface eventData {
 export interface respnseUseState {
   EventName: string;
   description: string;
+  EventMode : string;
+  startDate : any;
+  endDate : any;
+  contactEmail : string;
+  contactPhone : number;
+  university : string;
+  applicationStatus : string;
 }
 
 export interface EventByIdResponse {
@@ -387,7 +394,7 @@ export interface EventByIdResponse {
     collegeStudentsOnly: boolean;
     participationFee: boolean;
     contactEmail: string;
-    contactPhone?: number;
+    contactPhone: number;
   };
 }
 

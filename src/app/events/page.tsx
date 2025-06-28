@@ -16,6 +16,7 @@ import axios from 'axios';
 import CreateEventButton from './components/createEventButton';
 import CreateEventModal from './components/modals';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRouter } from 'next/navigation';
 
 interface apiRespEvents {
   msg: string;
@@ -29,6 +30,8 @@ export default function ZynvoEventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const router = useRouter()
 
   useEffect(() => {
     async function fetchEvents() {
@@ -249,6 +252,13 @@ export default function ZynvoEventsPage() {
                     </span>
                     <button className="px-3 md:px-4 py-2 text-sm rounded-md font-medium bg-yellow-400 text-gray-900 hover:bg-yellow-500 transition-colors">
                       Register
+                    </button>
+                    <button className='bg-black text-white font-bold p-2 m-1 rounded-2xl'
+                    onClick={()=> {
+                      router.push(`events/${event.id}`)
+                    }}
+                    >
+                        Check
                     </button>
                   </div>
                 </div>
