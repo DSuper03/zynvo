@@ -76,7 +76,7 @@ const ClubsPage = () => {
           <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:gap-4">
             {/* Search Input */}
             <div className="relative flex-grow">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" >
                 <Search  size={4} className=" md:h-5 md:w-5 text-gray-400" />
               </div>
               <input

@@ -196,14 +196,8 @@ export default function SignUp() {
                     <FaGoogle className="text-lg" />
                     <span>Continue with Google</span>
                   </button>
-                  <button className="flex items-center justify-center space-x-2 w-full p-3 rounded-lg border border-gray-700 text-white hover:bg-gray-800 transition">
-                    <FaApple className="text-lg" />
-                    <span>Continue with Apple</span>
-                  </button>
-                  <button className="flex items-center justify-center space-x-2 w-full p-3 rounded-lg border border-gray-700 text-white hover:bg-gray-800 transition">
-                    <FaFacebook className="text-lg" />
-                    <span>Continue with Facebook</span>
-                  </button>
+                 
+                
                 </div>
 
                 <div className="flex items-center justify-center mb-6">
@@ -295,6 +289,7 @@ export default function SignUp() {
                     <p className="text-gray-400 text-xs mt-2">
                       Password must be at least 8 characters long.
                     </p>
+                    <p className='text-gray-400 text-xs mt-2'>Password must have 1 Capital letter , a small letter and a number.</p>
                   </div>
 
                   <motion.button
@@ -328,7 +323,7 @@ export default function SignUp() {
                       value={formData.collegeName}
                       onChange={handleChange}
                       className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                      placeholder="John Doe"
+                      placeholder="IIT Dholakpur"
                       required
                     />
                   </div>

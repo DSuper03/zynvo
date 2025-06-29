@@ -138,11 +138,6 @@ const Events = () => {
             ))}
           </div>
 
-          <Link href="/events" className="mt-12 text-center">
-            <WrapButton className="bg-transparent text-black font-medium transition duration-300 transform hover:-translate-y-1">
-              View All Events
-            </WrapButton>
-          </Link>
         </div>
       </section>
     </div>
