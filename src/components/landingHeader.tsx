@@ -195,12 +195,7 @@ const LandingHeader = () => {
               </div>
             </MenuItem>
 
-            <MenuItem
-              setActive={setActiveItem}
-              active={activeItem}
-              item="Testimonials"
-              href="/testimonials"
-            />
+           
 
             <MenuItem
               setActive={setActiveItem}

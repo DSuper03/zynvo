@@ -78,12 +78,12 @@ const ClubsPage = () => {
   return (
     <div className="w-full">
       {/* Search and Filter Bar */}
-      <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-800 p-3 md:p-4 -mx-4 md:-mx-6 mb-4">
+      <div className="sticky top-0 z-10 bg-black p-3 md:p-4 -mx-4 md:-mx-6 mb-4">
         <div className="max-w-none px-4 md:px-6">
           <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:gap-4">
             {/* Search Input */}
             <div className="relative flex-grow">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" >
                 <Search  size={4} className=" md:h-5 md:w-5 text-gray-400" />
               </div>
               <input

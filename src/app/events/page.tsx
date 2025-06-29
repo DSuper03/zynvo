@@ -82,7 +82,7 @@ export default function ZynvoEventsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-black text-white">
       <main className="max-w-7xl mx-auto py-4 md:py-8 px-4">
         {/* Page Header */}
         <div className="mb-4 md:mb-8">
@@ -213,7 +213,7 @@ export default function ZynvoEventsPage() {
                 <div className="relative">
                   
                   <Image
-                    src="/consultclub.png"
+                    src="/logozynvo.jpg"
                     alt={event.description || event.EventName}
                     width={600}
                     height={300}
