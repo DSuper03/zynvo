@@ -224,7 +224,7 @@ export default function SignUp() {
                         value={formData.name}
                         onChange={handleChange}
                         className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                        placeholder="John Doe"
+                        placeholder="Aditya Kashyap"
                         required
                       />
                     </div>
@@ -274,7 +274,7 @@ export default function SignUp() {
                         value={formData.password}
                         onChange={handleChange}
                         className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                        placeholder="••••••••"
+                        placeholder="peterParkerisSpiderman@69"
                         required
                         minLength={8}
                       />

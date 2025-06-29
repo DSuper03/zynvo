@@ -1,6 +1,7 @@
 'use client';
 // have to fix types
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function FeedbackForm() {
   // Form state
@@ -75,9 +76,10 @@ export default function FeedbackForm() {
     }
   };
 
+   const token = localStorage.getItem('token')
   // Handle form submission
-  const handleSubmit = (e: any) => {
-    //need to look for a way to do this on dc.
+  const handleSubmit = async (e: any) => {
+    
 
     e.preventDefault();
     setSubmitting(true);
@@ -90,25 +92,28 @@ export default function FeedbackForm() {
       improvements: formData.improvements,
     };
 
-    console.log('Sending email with data:', emailData);
+    const feedback = await axios.post<{msg : string}>(`http://localhost:8000/api/v1/contact/feedback`, emailData, {
+      headers : {
+        authorization : `Bearer ${token}`
+      }
+    })
 
-    // Simulate sending email
-    setTimeout(() => {
+    if(feedback.status == 200) {
+      toast(feedback.data.msg)
+    } else {
+      toast(feedback.data.msg)
+    }
+
       setSubmitting(false);
       setSubmitted(true);
-
-      // Reset form after delay
-      setTimeout(() => {
-        setFormData({
+      setFormData({
           title: '',
           category: 'enhancement',
           description: '',
           improvements: '',
         });
-        setCurrentStep(1);
-        setSubmitted(false);
-      }, 4000);
-    }, 1500);
+      setCurrentStep(1);
+      setSubmitted(false);
   };
 
   // Progress indicator
