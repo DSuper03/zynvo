@@ -78,7 +78,7 @@ const ClubsPage = () => {
   return (
     <div className="w-full">
       {/* Search and Filter Bar */}
-      <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-800 p-3 md:p-4 -mx-4 md:-mx-6 mb-4">
+      <div className="sticky top-0 z-10 bg-black p-3 md:p-4 -mx-4 md:-mx-6 mb-4">
         <div className="max-w-none px-4 md:px-6">
           <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:gap-4">
             {/* Search Input */}

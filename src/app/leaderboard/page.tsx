@@ -163,14 +163,18 @@ const clubsData = [
   }
 ];
 
+// Define Month type for type safety
+type Month = "Jan" | "Feb" | "Mar" | "Apr" | "May" | "Jun" | 
+             "Jul" | "Aug" | "Sep" | "Oct" | "Nov" | "Dec";
+
 // All months for filtering
-const months = [
+const months: Month[] = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
 
 export default function LeaderboardPage() {
-  const [selectedMonth, setSelectedMonth] = useState("Oct");
+  const [selectedMonth, setSelectedMonth] = useState<Month>("Oct");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Calculate scores and sort clubs
@@ -291,7 +295,7 @@ export default function LeaderboardPage() {
           </div>
         </div>
         <div className="w-full sm:w-48">
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+          <Select value={selectedMonth} onValueChange={(value) => setSelectedMonth(value as Month)}>
             <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
               <SelectValue placeholder="Select month" />
             </SelectTrigger>

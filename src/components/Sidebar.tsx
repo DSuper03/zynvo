@@ -33,6 +33,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     { icon: <Calendar size={22} />, label: 'Events', href: '/events' },
     { icon: <Users size={22} />, label: 'Clubs', href: '/clubs' },
     { icon: <NotebookText size={22} />, label: 'Resources', href: '/feedback' },
+     { icon: <NotebookText size={22} />, label: 'Leaderboard', href: '/leaderboard' },
+
+
   ];
 
   const accountItems = [
@@ -64,13 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
             className="rounded-full"
           />
         </div>
-        <div className="flex items-center ml-2 bg-gradient-to-r from-yellow-900 to-yellow-200  rounded-full">
-          {showText && (
-            <h1 className="ml-3 text-xl font-serif bg-gradient-to-r from-black to-yellow-900 bg-clip-text text-transparent tracking-wider">
-              ZYNVO
-            </h1>
-          )}
-        </div>
+      
 
         {/* Close button - only on mobile when sidebar is open */}
         {isOpen && onClose && (
@@ -159,8 +156,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
               />
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-white">John Doe</p>
-              <p className="text-xs text-gray-400">@johndoe</p>
+              <p className="text-sm font-medium text-white">Anirban </p>
+              <p className="text-xs text-gray-400">@anirban001@gmail.com</p>
             </div>
           </div>
         </div>
