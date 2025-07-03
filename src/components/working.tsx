@@ -31,7 +31,7 @@ const HowItWorks = () => {
             <span className="gradient-text">How It Works</span>
           </h2>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Get started with Zynvo in just a few simple steps
+           Zync It  and connect with your campus life. Follow these simple steps to get started:
           </p>
         </div>
 
