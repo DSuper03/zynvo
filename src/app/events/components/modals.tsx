@@ -912,7 +912,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                 onClick={nextStep}
                 className="px-6 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 transition-colors flex items-center"
               >
-                Zynvo It
+                Zync It
                 <ChevronRight className="w-4 h-4 ml-1" />
               </button>
             ) : (

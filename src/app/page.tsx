@@ -87,9 +87,6 @@ export default function Home() {
         <ZynvoDashboard />
 
         <HowItWorks />
-
-        <Category />
-
         {/* Testimonials Section */}
         <Testimonials />
 

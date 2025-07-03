@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Users,
   Calendar,
@@ -6,17 +6,62 @@ import {
   Sparkles,
   ArrowRight,
   Star,
+  TrendingUp,
+  Globe,
+  BadgeCheck,
 } from 'lucide-react';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 const ZynvoDashboard = () => {
-  const heroref = React.useRef(null);
+  const heroRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+  
+  useEffect(() => {
+    setIsVisible(true);
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+    
+    if (heroRef.current) {
+      observer.observe(heroRef.current);
+    }
+    
+    return () => {
+      if (heroRef.current) {
+        observer.unobserve(heroRef.current);
+      }
+    };
+  }, []);
+  
+  const stats = [
+    { value: '8.5K', label: 'Active Students', icon: <Users className="w-5 h-5" /> },
+    { value: '142', label: 'Events Created', icon: <Calendar className="w-5 h-5" /> },
+    { value: '95%', label: 'Student Satisfaction', icon: <Star className="w-5 h-5" /> },
+    { value: '36', label: 'Colleges', icon: <Globe className="w-5 h-5" /> },
+  ];
+  
+  // Featured colleges
+  const colleges = [
+    "Tyler School of Martial Arts",
+    "Nikumb College of Design and Fashion",
+    "Ved School of Drama and Philosophy",
+    "Barney Stinson College of Simping",
+    "B99 Army College of Engineering"
+  ];
+  
   return (
     <section
-      ref={heroref}
+      ref={heroRef}
       className="relative min-h-screen flex items-center justify-center py-20 md:py-32 overflow-hidden"
     >
-      {/* Background Image - Fixed Correctly */}
+      {/* Minimalist background */}
       <div className="absolute inset-0 z-0">
         <Image
           src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/photo_2025-05-23_20-16-14.jpg?updatedAt=1748011606544"
@@ -26,165 +71,243 @@ const ZynvoDashboard = () => {
           className="object-cover"
           sizes="100vw"
         />
-        {/* Overlay to improve text readability */}
-        <div className="absolute inset-0 bg-black/50"></div>
+        {/* Simple dark overlay */}
+        <div className="absolute inset-0 bg-black/80"></div>
+        
+        {/* Minimal accent lines */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 to-transparent"></div>
+        <div className="absolute bottom-0 right-0 w-full h-1 bg-gradient-to-l from-yellow-500 to-transparent"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {/* Main Hero Card */}
-          <div className="col-span-1 md:col-span-2 lg:col-span-2  rounded-3xl p-8 text-white relative overflow-hidden">
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8  rounded-lg flex items-center justify-center">
-                  <Sparkles className="w-5 h-5" />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 w-full">
+        {/* Hero Content */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isVisible ? 1 : 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-16 text-center"
+        >
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="flex items-center justify-center gap-2 mb-4"
+          >
+            <div className="w-10 h-10 bg-yellow-500 rounded-md flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-black" />
+            </div>
+            <span className="text-lg font-semibold text-yellow-500">Zynvo</span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="text-4xl md:text-6xl font-bold mb-6 text-white"
+          >
+            Your Campus <br className="md:hidden" />
+            <span className="text-yellow-500">
+              Connection Hub
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+            className="text-gray-300 max-w-2xl mx-auto mb-8 text-lg"
+          >
+            Connect with clubs, discover events, and build your campus network all in one place.
+          </motion.p>
+
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.5 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            <Button className="bg-yellow-500 hover:bg-yellow-600 text-black px-8 py-2 rounded-md text-lg font-medium">
+              Zync it
+            </Button>
+            <Button variant="outline" className="border-yellow-500/50 text-yellow-500  px-8 py-2 rounded-md text-lg font-medium">
+              Learn More
+            </Button>
+          </motion.div>
+        </motion.div>
+
+        {/* Stats Section - Minimalist */}
+        <motion.div
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.7, delay: 0.6 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16"
+        >
+          {stats.map((stat, index) => (
+            <motion.div
+              key={index}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
+              className="bg-black/50 rounded-md p-6 border border-gray-800"
+            >
+              <div className="text-3xl font-bold text-white mb-2">
+                {stat.value}
+              </div>
+              <div className="flex items-center text-gray-400 text-sm">
+                <span className="mr-2 text-yellow-500">{stat.icon}</span>
+                {stat.label}
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+        
+        {/* Feature Cards - Minimalist */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 1 }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16"
+        >
+          {/* Main Feature Card */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 1.1 }}
+            className="border border-gray-800 rounded-md p-6 relative"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <Calendar className="w-5 h-5 text-yellow-500" />
+              <span className="text-yellow-500 text-sm font-medium">FEATURED</span>
+            </div>
+            
+            <h2 className="text-xl font-bold text-white mb-4">
+              Join the upcoming Tech Fest 2025
+            </h2>
+            
+            <p className="text-gray-300 mb-6 text-sm">
+              Connect with innovative tech clubs, participate in hackathons, and showcase your projects.
+            </p>
+            
+            
+            <Button className="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-md">
+              <Link href="/events">Register</Link>
+            </Button>
+          </motion.div>
+          
+          {/* Secondary Feature Card */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 1.2 }}
+            className="border border-gray-800 rounded-md p-6"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <BookOpen className="w-5 h-5 text-yellow-500" />
+              <span className="text-yellow-500 text-sm font-medium">NEW FEATURE</span>
+            </div>
+            
+            <h2 className="text-xl font-bold text-white mb-4">
+              Create Instant Club Rooms
+            </h2>
+            
+            <p className="text-gray-300 mb-6 text-sm">
+              Host virtual meetings and discussions for your club members with our new collaborative spaces.
+            </p>
+            
+            <Button variant="outline" className="border-yellow-500/50 text-yellow-500  px-4 py-2 rounded-md">
+              <span className='text-outline'>
+                <Link href="/resources">
+                  Try Now
+                </Link>
+                Try Now</span>  
+            </Button>
+          </motion.div>
+          
+          {/* Feature List - Minimal cards */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 1.3 }}
+            className="border border-gray-800 rounded-md p-6 md:col-span-2"
+          >
+            <h2 className="text-xl font-bold text-white mb-6">Key Features</h2>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                {
+                  title: "Club Discovery",
+                  description: "Find clubs matching your interests",
+                  icon: <BookOpen className="w-5 h-5 text-yellow-500" />,
+                },
+                {
+                  title: "Network Builder",
+                  description: "Connect with like-minded students",
+                  icon: <Users className="w-5 h-5 text-yellow-500" />,
+                },
+                {
+                  title: "Event Management",
+                  description: "Create and manage campus events",
+                  icon: <Calendar className="w-5 h-5 text-yellow-500" />,
+                },
+                {
+                  title: "Growth Analytics",
+                  description: "Track club engagement metrics",
+                  icon: <TrendingUp className="w-5 h-5 text-yellow-500" />,
+                }
+              ].map((feature, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    {feature.icon}
+                    <h3 className="font-bold text-white">{feature.title}</h3>
+                  </div>
+                  <p className="text-gray-400 text-sm">{feature.description}</p>
                 </div>
-                <span className="text-sm font-medium opacity-90">Zynvo</span>
-              </div>
-
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                Your Campus
-                <br />
-                Connection Hub
-              </h1>
-
-              <p className="text-purple-100 mb-6">
-                Connect with clubs, discover events, and build your campus
-                network
-              </p>
-
-              {/* Animated orb */}
-              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 md:block hidden">
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full">
-                  <Image
-                    src="/logozynvo.jpg"
-                    alt="Zynvo Logo"
-                    width={100}
-                    height={100}
-                    className="rounded-full w-full h-full object-cover"
-                  ></Image>
-                </div>
-                <div className="absolute inset-0 wid w-24 h-24 md:w-32 md:h-32 rounded-full animate-spin-slow opacity-60"></div>
-              </div>
-            </div>
-
-            {/* Background decoration */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-white to-transparent rounded-full transform translate-x-48 -translate-y-48"></div>
-            </div>
-          </div>
-
-          {/* Trial Card */}
-          <div className="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
-            <h3 className="text-white font-bold mb-2">Effortless</h3>
-            <h4 className="text-white font-bold mb-4">Campus Discovery</h4>
-
-            <div className="space-y-2 mb-4">
-              <div className="text-2xl font-bold text-orange-400">
-                30 days trial
-              </div>
-              <div className="text-sm text-slate-400">then - Free forever</div>
-            </div>
-          </div>
-
-          {/* Stats Card - Active Students */}
-          <div className="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-3xl font-bold text-orange-400">8.5K</div>
-              <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
-                <Users className="w-5 h-5 text-orange-400" />
-              </div>
-            </div>
-            <div className="text-white font-medium mb-2">active students</div>
-
-            {/* Avatar stack */}
-            <div className="flex -space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full border-2 border-slate-800"></div>
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full border-2 border-slate-800"></div>
-              <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-400 rounded-full border-2 border-slate-800"></div>
-              <div className="w-8 h-8 bg-slate-600 rounded-full border-2 border-slate-800 flex items-center justify-center">
-                <span className="text-xs text-white">+</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Events Created */}
-          <div className="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
-            <div className="text-5xl font-bold text-purple-400 mb-2">142</div>
-            <div className="text-white font-medium mb-1">events created</div>
-            <div className="text-slate-400 text-sm">this month</div>
-          </div>
-
-          {/* Generate Button */}
-          <div className="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 flex flex-col justify-center">
-            <button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center gap-2 group">
-              <Calendar className="w-5 h-5" />
-              <span>Explore Events</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-
-          {/* Club Discovery */}
-          <div className="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-orange-400" />
-              </div>
-            </div>
-            <h3 className="text-white font-bold mb-2">Club discovery</h3>
-            <p className="text-slate-400 text-sm mb-4">
-              Find and join clubs that match your interests and goals.
-            </p>
-          </div>
-
-          {/* Network Builder */}
-          <div className="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-purple-400" />
-              </div>
-            </div>
-            <h3 className="text-white font-bold mb-2">Network builder</h3>
-            <p className="text-slate-400 text-sm mb-4">
-              Connect with like-minded students and expand your campus network.
-            </p>
-          </div>
-
-          {/* Feature Templates */}
-          <div className="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
-            <h3 className="text-white font-bold mb-2">Campus templates</h3>
-            <p className="text-slate-400 text-sm mb-4">
-              Use pre-made templates to jumpstart club activities.
-            </p>
-
-            <div className="flex items-center justify-between">
-              <div className="bg-orange-500/20 text-orange-400 text-xs px-2 py-1 rounded-lg">
-                30 days trial
-              </div>
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Success Stories */}
-          <div className="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
-            <div className="text-4xl font-bold text-green-400 mb-2">95%</div>
-            <div className="text-white font-medium mb-1">
-              student satisfaction
-            </div>
-            <div className="flex items-center gap-1 mt-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                />
               ))}
             </div>
+          </motion.div>
+        </motion.div>
+        
+        {/* College List - Minimalist */}
+        <motion.div 
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.7, delay: 1.4 }}
+          className="mb-16"
+        >
+          <div className="flex items-center gap-2 mb-8 justify-center">
+            <BadgeCheck className="w-5 h-5 text-yellow-500" />
+            <h2 className="text-xl font-bold text-white">Partner Colleges</h2>
           </div>
-        </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {colleges.map((college, index) => (
+              <motion.div 
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.5 + index * 0.1 }}
+                className="bg-black/30 border border-gray-800 p-4 rounded-md text-center"
+              >
+                <span className="text-lg text-white">{college}</span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+        
+        {/* Minimal Call to Action */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 2 }}
+          className="text-center border-t border-gray-800 pt-16"
+        >
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Ready to join your campus community?
+          </h2>
+          <Button className="bg-yellow-500 hover:bg-yellow-600 text-black px-8 py-2 rounded-md text-lg font-medium mt-4">
+            Sign Up Today
+          </Button>
+        </motion.div>
       </div>
     </section>
   );

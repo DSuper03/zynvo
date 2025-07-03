@@ -32,7 +32,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     { icon: <Search size={22} />, label: 'Discover', href: '/discover' },
     { icon: <Calendar size={22} />, label: 'Events', href: '/events' },
     { icon: <Users size={22} />, label: 'Clubs', href: '/clubs' },
-    { icon: <NotebookText size={22} />, label: 'Resources', href: '/feedback' },
+    { icon: <NotebookText size={22} />, label: 'Resources', href: '/resources' },
      { icon: <NotebookText size={22} />, label: 'Leaderboard', href: '/leaderboard' },
 
 

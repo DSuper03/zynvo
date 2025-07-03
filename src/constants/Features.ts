@@ -37,7 +37,7 @@ export const features = [
     name: 'Promote Your Club',
     description: 'Create a profile for your club and showcase your activities.',
     href: '/create-club',
-    cta: 'Get Started',
+    cta: 'Zync It ',
     background: '/images/features/promote-bg.png',
     className: 'lg:col-span-1 lg:row-span-1',
     variant: 'tertiary', // Design variant

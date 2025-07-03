@@ -51,7 +51,7 @@ const Hero = () => {
 
         <Link href="/auth/signup" className="flex justify-center gap-4 mb-10">
           <WrapButton className="bg-yellow-500 text-black font-medium transition duration-300 transform hover:-translate-y-1">
-            Get Started
+             Zync It
           </WrapButton>
         </Link>
 

@@ -282,7 +282,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
               type="submit"
               className="px-6 py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg font-medium transition-colors"
             >
-              Create Club
+              Zync your Club
             </button>
           </div>
         </form>
