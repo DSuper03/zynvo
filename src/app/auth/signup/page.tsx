@@ -14,14 +14,15 @@ import {
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
 import dotenv from 'dotenv';
 import DiceBearAvatar from '@/components/DicebearAvatars';
-
+import { colleges } from '@/components/colleges/college';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { signupRes } from '@/types/global-Interface';
 import { toast } from 'sonner';
+import CollegeSearchSelect from '@/components/colleges/collegeSelect';
 
 dotenv.config();
-//const BASE_URL = process.env.BASE_URL
+
 
 export default function SignUp() {
   const router = useRouter();
@@ -36,8 +37,8 @@ export default function SignUp() {
   });
   const [agreeToTerms, setAgree] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type} = e.target;
 
     if (name === 'interests') {
       // Handle interest checkboxes
@@ -45,7 +46,7 @@ export default function SignUp() {
     } else {
       setFormData((prev) => ({
         ...prev,
-        [name]: type === 'checkbox' ? checked : value,
+         [name]: value,
       }));
     }
   };
@@ -308,26 +309,22 @@ export default function SignUp() {
             {currentStep === 2 && (
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                  <label
-                    htmlFor="collegeName"
-                    className="block text-gray-300 text-sm font-medium mb-2"
-                  >
-                    College/University Name
-                  </label>
-                  <div className="relative">
-                    <FiUser className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                    <input
-                      type="text"
-                      id="collegeName"
-                      name="collegeName"
-                      value={formData.collegeName}
-                      onChange={handleChange}
-                      className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                      placeholder="IIT Dholakpur"
-                      required
-                    />
-                  </div>
-                </div>
+ <div className="mb-4">
+  <label
+    htmlFor="collegeName"
+    className="block text-gray-300 text-sm font-medium mb-2"
+  >
+    College/University Name
+  </label>
+  <CollegeSearchSelect
+    colleges={colleges}
+    value={formData.collegeName}
+    onChange={(value) => setFormData(prev => ({ ...prev, collegeName: value }))}
+    placeholder="Search and select your college/university"
+    required
+  />
+</div>
+</div>
 
                 <div className="flex items-center mb-6">
                   <input
