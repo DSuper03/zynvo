@@ -197,10 +197,8 @@ export default function SignUp() {
                     <FaGoogle className="text-lg" />
                     <span>Continue with Google</span>
                   </button>
-                  <button className="flex items-center justify-center space-x-2 w-full p-3 rounded-lg border border-gray-700 text-white hover:bg-gray-800 transition">
-                    <FaFacebook className="text-lg" />
-                    <span>Continue with Facebook</span>
-                  </button>
+                 
+                
                 </div>
 
                 <div className="flex items-center justify-center mb-6">
@@ -292,6 +290,7 @@ export default function SignUp() {
                     <p className="text-gray-400 text-xs mt-2">
                       Password must be at least 8 characters long.
                     </p>
+                    <p className='text-gray-400 text-xs mt-2'>Password must have 1 Capital letter , a small letter and a number.</p>
                   </div>
 
                   <motion.button

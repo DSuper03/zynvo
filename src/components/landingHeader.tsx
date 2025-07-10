@@ -148,7 +148,7 @@ const LandingHeader = () => {
               href="/discover"
             >
               <div className="grid grid-cols-2 gap-4 w-[400px]">
-                <HoveredLink href="/discover/events">
+                <HoveredLink href="/events">
                   <div className="flex items-center space-x-2">
                     <span className="text-yellow-400 text-lg">⚡</span>
                     <div>
@@ -159,7 +159,7 @@ const LandingHeader = () => {
                     </div>
                   </div>
                 </HoveredLink>
-                <HoveredLink href="/discover/clubs">
+                <HoveredLink href="/clubs">
                   <div className="flex items-center space-x-2">
                     <span className="text-yellow-400 text-lg">👥</span>
                     <div>
@@ -170,24 +170,14 @@ const LandingHeader = () => {
                     </div>
                   </div>
                 </HoveredLink>
-                <HoveredLink href="/discover/contests">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-yellow-400 text-lg">🏆</span>
-                    <div>
-                      <p className="font-medium text-white">Competitions</p>
-                      <p className="text-xs text-gray-400">
-                        Showcase your skills and win prizes
-                      </p>
-                    </div>
-                  </div>
-                </HoveredLink>
-                <HoveredLink href="/discover/workshops">
+              
+                <HoveredLink href="/leaderboard">
                   <div className="flex items-center space-x-2">
                     <span className="text-yellow-400 text-lg">💡</span>
                     <div>
-                      <p className="font-medium text-white">Workshops</p>
+                      <p className="font-medium text-white">Leaderboard</p>
                       <p className="text-xs text-gray-400">
-                        Learn new skills and technologies
+                        Compete with others and climb the ranks
                       </p>
                     </div>
                   </div>
@@ -195,12 +185,7 @@ const LandingHeader = () => {
               </div>
             </MenuItem>
 
-            <MenuItem
-              setActive={setActiveItem}
-              active={activeItem}
-              item="Testimonials"
-              href="/testimonials"
-            />
+           
 
             <MenuItem
               setActive={setActiveItem}

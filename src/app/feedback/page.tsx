@@ -1,7 +1,8 @@
 'use client';
-// have to fix types
+
 import { useState } from 'react';
 import { toast } from 'sonner';
+import axios from 'axios'; // Add this missing import
 
 export default function FeedbackForm() {
   // Form state
@@ -16,7 +17,7 @@ export default function FeedbackForm() {
     'https://i.pinimg.com/736x/0a/8a/54/0a8a54b3aa265248460da6a0e9eb7179.jpg';
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1); // For multi-step form
+  const [currentStep, setCurrentStep] = useState(1);
 
   // Categories for selection
   const categories = [
@@ -46,8 +47,8 @@ export default function FeedbackForm() {
     },
   ];
 
-  // Handle form input changes
-  const handleInputChange = (e: any) => {
+  // Handle form input changes - Fix type
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -55,8 +56,8 @@ export default function FeedbackForm() {
     });
   };
 
-  // Handle category selection
-  const handleCategorySelect = (category: any) => {
+  // Handle category selection - Fix type
+  const handleCategorySelect = (category: string) => {
     setFormData({
       ...formData,
       category,
@@ -76,44 +77,56 @@ export default function FeedbackForm() {
     }
   };
 
-   const token = localStorage.getItem('token')
-  // Handle form submission
-  const handleSubmit = async (e: any) => {
-    
-
+  // Handle form submission - Fix type and move token inside function
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
 
-    // Format email data
-    const emailData = {
-      subject: `Feedback: ${formData.title}`,
-      category: formData.category,
-      description: formData.description,
-      improvements: formData.improvements,
-    };
+    try {
+      const token = localStorage.getItem('token'); // Move inside try block
 
-    const feedback = await axios.post<{msg : string}>(`http://localhost:8000/api/v1/contact/feedback`, emailData, {
-      headers : {
-        authorization : `Bearer ${token}`
-      }
-    })
+      // Format email data
+      const emailData = {
+        subject: `Feedback: ${formData.title}`,
+        category: formData.category,
+        description: formData.description,
+        improvements: formData.improvements,
+      };
 
-    if(feedback.status == 200) {
-      toast(feedback.data.msg)
-    } else {
-      toast(feedback.data.msg)
-    }
+      const feedback = await axios.post<{msg: string}>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/contact/feedback`, 
+        emailData, 
+        {
+          headers: {
+            authorization: `Bearer ${token}`
+          }
+        }
+      );
 
-      setSubmitting(false);
-      setSubmitted(true);
-      setFormData({
+      if (feedback.status === 200) {
+        toast(feedback.data.msg);
+        setSubmitted(true);
+        setFormData({
           title: '',
           category: 'enhancement',
           description: '',
           improvements: '',
         });
-      setCurrentStep(1);
-      setSubmitted(false);
+        setCurrentStep(1);
+        
+        // Reset submitted state after 3 seconds
+        setTimeout(() => {
+          setSubmitted(false);
+        }, 3000);
+      } else {
+        toast(feedback.data.msg || 'Something went wrong');
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast('Failed to submit feedback. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Progress indicator

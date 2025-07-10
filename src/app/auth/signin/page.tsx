@@ -147,18 +147,6 @@ export default function SignIn() {
               </p>
             </div>
 
-            {/* Social Sign-In Options */}
-            <div className="flex flex-col space-y-3 mb-6">
-              <button className="flex items-center justify-center space-x-2 w-full p-3 rounded-lg border border-gray-700 text-white hover:bg-gray-800 transition">
-                <FaGoogle className="text-lg" />
-                <span>Continue with Google</span>
-              </button>
-              <button className="flex items-center justify-center space-x-2 w-full p-3 rounded-lg border border-gray-700 text-white hover:bg-gray-800 transition">
-                <FaFacebook className="text-lg" />
-                <span>Continue with Facebook</span>
-              </button>
-            </div>
-
             <div className="flex items-center justify-center mb-6">
               <div className="h-px bg-gray-700 flex-1"></div>
               <p className="mx-4 text-gray-400 text-sm">OR</p>

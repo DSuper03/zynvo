@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import WrapButton from './ui/wrap-button';
 import Image from 'next/image';
+import { Button } from './ui/button';
 
 const Events = () => {
   const heroRef = React.useRef(null);
@@ -129,20 +130,17 @@ const Events = () => {
                     <span className="text-xs bg-yellow-500/30 text-yellow-100 rounded-full px-2 py-1">
                       {event.attendees} attending
                     </span>
-                    <button className="text-yellow-400 text-sm font-medium hover:text-yellow-300 hover:underline">
-                      Learn More
-                    </button>
+                    <Button className="text-yellow-400 text-sm font-medium hover:text-yellow-300 hover:underline">
+                      <Link href={`/events/${event.title.toLowerCase().replace(/\s+/g, '-')}`}>
+                        View Details
+                      </Link> 
+                    </Button>
                   </div>
                 </div>
               </motion.div>
             ))}
           </div>
 
-          <Link href="/events" className="mt-12 text-center">
-            <WrapButton className="bg-transparent text-black font-medium transition duration-300 transform hover:-translate-y-1">
-              View All Events
-            </WrapButton>
-          </Link>
         </div>
       </section>
     </div>

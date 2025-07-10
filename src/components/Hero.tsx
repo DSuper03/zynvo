@@ -28,7 +28,7 @@ const Hero = () => {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-6 text-center relative z-10">
+      <div className="container mx-auto px-6 text-center relative z-10 mb-10">
         {/* Hero Title - Adding this since it seems to be missing */}
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
@@ -51,7 +51,7 @@ const Hero = () => {
 
         <Link href="/auth/signup" className="flex justify-center gap-4 mb-10">
           <WrapButton className="bg-yellow-500 text-black font-medium transition duration-300 transform hover:-translate-y-1">
-            Get Started
+             Zync It
           </WrapButton>
         </Link>
 
@@ -61,7 +61,7 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="mt-16 relative max-w-4xl mx-auto"
         >
-          <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-400/20 rounded-2xl p-2">
+          {/* <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-400/20 rounded-2xl p-2">
             <HeroVideoDialog
               className="block dark:hidden"
               animationStyle="from-center"
@@ -69,7 +69,7 @@ const Hero = () => {
               thumbnailSrc="https://www.example.com/dummy-thumbnail.png"
               thumbnailAlt="Dummy Video Thumbnail"
             />
-          </div>
+          </div> */}
 
           {/* Decorative Elements - Enhanced brightness */}
           <div className="absolute -top-10 -right-10 w-20 h-20 bg-yellow-500/40 rounded-full blur-xl"></div>
