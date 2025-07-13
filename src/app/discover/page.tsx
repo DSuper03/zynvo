@@ -178,7 +178,7 @@ export default function Feed() {
                       </div>
                       <div className="text-xs text-gray-500">
                         {/* You can add timestamp here if available in your API */}
-                        Just now
+                        {post.createdAt}
                       </div>
                     </div>
                   </div>
@@ -207,45 +207,7 @@ export default function Feed() {
           </div>
 
           {/* Column 3: Sidebar (hidden on mobile) */}
-          <div className="hidden lg:block space-y-6 ">
-            {/* Quick Stats */}
-            <div className="bg-gray-800 rounded-lg p-4 border border-yellow-500/20">
-              <h3 className="font-semibold text-yellow-400 mb-3">
-                Quick Stats
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Total Posts</span>
-                  <span className="text-yellow-400 font-semibold">{posts.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Active Users</span>
-                  <span className="text-yellow-400 font-semibold">24</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Online Now</span>
-                  <span className="text-green-400 font-semibold">8</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Trending Topics */}
-            <div className="bg-gray-800 rounded-lg p-4 border border-yellow-500/20">
-              <h3 className="font-semibold text-yellow-400 mb-3">
-                Trending Topics
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {['Tech', 'Innovation', 'Campus', 'Events', 'Clubs'].map((topic) => (
-                  <span
-                    key={topic}
-                    className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded-full border border-yellow-500/30 hover:bg-yellow-500/30 cursor-pointer transition-colors"
-                  >
-                    #{topic}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
+       
         </div>
       </div>
 
