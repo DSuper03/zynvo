@@ -25,7 +25,7 @@ export default function Feed() {
     'recents'
   );
   const [posts, setPost] = useState<PostData[]>([]);
-  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false); // Modal state
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,7 +41,6 @@ export default function Feed() {
         
         console.log('Full API Response:', response.data);
         
-        // Now TypeScript knows the structure of response.data
         if (response.data && response.data.posts && Array.isArray(response.data.posts)) {
           setPost(response.data.posts);
           console.log('Posts set successfully:', response.data.posts);
@@ -65,16 +64,16 @@ export default function Feed() {
     <div className="min-h-screen w-full bg-black overflow-y-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-          {/* Column 1-2: Main Content (spans 2 columns on desktop) */}
+          {/* Column 1-2: Main Content */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Responsive buttons/actions row */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <CreatePostButton
-                onClick={() => setIsPostModalOpen(true)}
+                onClick={() => setIsPostModalOpen(true)} // Open modal on button click
                 className="w-full sm:w-auto"
               />
 
-              {/* Tab navigation - Scrollable on mobile */}
+              {/* Tab navigation */}
               <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                 <div className="flex space-x-2 min-w-max">
                   <button
@@ -195,7 +194,7 @@ export default function Feed() {
                       Be the first to share something with your community!
                     </p>
                     <button
-                      onClick={() => setIsPostModalOpen(true)}
+                      onClick={() => setIsPostModalOpen(true)} // Open modal on button click
                       className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2 rounded-md font-medium transition-colors"
                     >
                       Create Post
@@ -234,8 +233,8 @@ export default function Feed() {
 
       {/* Modal components */}
       <CreatePostModal
-        isOpen={isPostModalOpen}
-        onClose={() => setIsPostModalOpen(false)}
+        isOpen={isPostModalOpen} // Pass modal state
+        onClose={() => setIsPostModalOpen(false)} // Close modal
       />
     </div>
   );
