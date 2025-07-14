@@ -1,5 +1,5 @@
 'use client';
-
+import { collegesWithClubs } from '@/components/colleges/college';
 import React, { useState, useRef } from 'react';
 import {
   X,
@@ -18,38 +18,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-
-// Mock data - replace with actual data
-const colleges = [
-  'Massachusetts Institute of Technology',
-  'Harvard University',
-  'Stanford University',
-  'University of California, Berkeley',
-  'University of Oxford',
-  'University of Cambridge',
-  'California Institute of Technology',
-  'Princeton University',
-  'Yale University',
-  'Columbia University',
-  'University of Chicago',
-  'Cornell University',
-  'University of Pennsylvania',
-  'Johns Hopkins University',
-  'University of California, Los Angeles',
-];
-
-const clubs = [
-  'Photography Club',
-  'Chess Club',
-  'Debate Society',
-  'Dance Crew',
-  'Coding Club',
-  'Basketball Team',
-  'Environmental Awareness Club',
-  'Drama Club',
-  'Student Government',
-  'Music Band',
-];
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -129,9 +97,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   };
 
   // Filter colleges based on search
-  const filteredColleges = colleges.filter((college) =>
-    college.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+ const filteredColleges = collegesWithClubs.filter((college) =>
+  college.name.toLowerCase().includes(searchQuery.toLowerCase())
+);
 
   // Open college modal and focus search input
   const openCollegeModal = () => {
@@ -171,7 +139,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
           {/* Modal Header */}
           <div className="sticky top-0 z-10 bg-gray-900 border-b border-yellow-500/30 p-4 flex justify-between items-center">
-            <h2 className="text-xl font-bold text-white">Create Post</h2>
+            <h2 className="text-2xl font-extrabold text-white">Create Post</h2>
             <Button
               onClick={onClose}
               className="text-gray-400 hover:text-white transition-colors"
@@ -249,57 +217,51 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
             {/* Tag Options */}
             <div className="space-y-4">
-              {/* Club Selection - Standard dropdown */}
+              {/* College Selection */}
               <div>
                 <Label className="text-sm font-medium text-yellow-400 mb-1 flex items-center">
-                  <Award size={16} className="mr-1" />
-                  Tag a Club
+                  <School size={16} className="mr-1" />
+                  Select a College
                 </Label>
                 <select
-                  value={selectedClub}
-                  onChange={(e) => setSelectedClub(e.target.value)}
+                  value={selectedCollege}
+                  onChange={(e) => {
+                    setSelectedCollege(e.target.value);
+                    setSelectedClub(''); // Reset club selection when college changes
+                  }}
                   className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
                 >
-                  <option value="">Select club (optional)</option>
-                  {clubs.map((club) => (
-                    <option key={club} value={club}>
-                      {club}
+                  <option value="">Select a college</option>
+                  {collegesWithClubs.map((college) => (
+                    <option key={college.name} value={college.name}>
+                      {college.name}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* College Selection - Custom modal selector */}
+              {/* Club Selection */}
               <div>
-                <label className="text-sm font-medium text-yellow-400 mb-1 flex items-center">
-                  <School size={16} className="mr-1" />
-                  Tag a College
-                </label>
-                <button
-                  onClick={openCollegeModal}
-                  className="w-full flex items-center justify-between bg-gray-800 border border-gray-700 hover:border-yellow-500 text-left text-white px-4 py-2 rounded-lg focus:outline-none transition-colors"
+                <Label className="text-sm font-medium text-yellow-400 mb-1 flex items-center">
+                  <Award size={16} className="mr-1" />
+                  Select a Club
+                </Label>
+                <select
+                  value={selectedClub}
+                  onChange={(e) => setSelectedClub(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
+                  disabled={!selectedCollege} // Disable if no college is selected
                 >
-                  <span
-                    className={selectedCollege ? 'text-white' : 'text-gray-400'}
-                  >
-                    {selectedCollege || 'Select college (optional)'}
-                  </span>
-                  <Search size={16} className="text-gray-400" />
-                </button>
-                {selectedCollege && (
-                  <div className="flex items-center mt-2 bg-yellow-500/20 rounded-lg p-2">
-                    <School size={14} className="text-yellow-400 mr-2" />
-                    <span className="text-sm text-yellow-400">
-                      {selectedCollege}
-                    </span>
-                    <Button
-                      onClick={() => setSelectedCollege('')}
-                      className="ml-auto text-yellow-400 hover:text-yellow-300"
-                    >
-                      <X size={14} />
-                    </Button>
-                  </div>
-                )}
+                  <option value="">Select a club</option>
+                  {selectedCollege &&
+                    collegesWithClubs
+                      .find((college) => college.name === selectedCollege)
+                      ?.clubs.map((club) => (
+                        <option key={club} value={club}>
+                          {club}
+                        </option>
+                      ))}
+                </select>
               </div>
             </div>
           </div>
@@ -315,8 +277,8 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   : ''
               }`}
             >
-              <Send size={16} className="mr-2" />
-              {isSubmitting ? 'Posting...' : 'Post'}
+              <Send size={19} className="mr-2" />
+              {isSubmitting ? 'Zyncing It...' : 'Zync It'}
             </button>
           </div>
         </MagicCard>
@@ -360,13 +322,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
               <div className="max-h-72 overflow-y-auto pr-1">
                 {filteredColleges.length > 0 ? (
                   <ul className="space-y-1">
-                    {filteredColleges.map((college) => (
-                      <li key={college}>
+                    {filteredColleges.map((collegeWithClubs, ) => (
+                      <li key={collegeWithClubs.name}>
                         <Button
-                          onClick={() => selectCollege(college)}
+                          onClick={() => selectCollege(collegeWithClubs.name)}
                           className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors flex items-center"
                         >
-                          <span className="line-clamp-1">{college}</span>
+                          <span className="line-clamp-1">{collegeWithClubs.name}</span>
                         </Button>
                       </li>
                     ))}
