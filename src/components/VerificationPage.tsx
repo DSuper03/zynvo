@@ -66,15 +66,12 @@ function VerificationContent() {
 
   const handleResendVerification = async () => {
     try {
-      // Replace with your actual resend verification API endpoint
-      await fetch('/api/resend-verification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+     const resend = await axios.post<{msg : string}>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/ResendEmail?email=${email}`)
+     if(resend.status == 200) {
       alert('Verification email has been resent!');
+     } else {
+      alert(resend.data.msg);
+     }
     } catch (error) {
       alert('Failed to resend verification email. Please try again.');
     }

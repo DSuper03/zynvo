@@ -21,6 +21,7 @@ interface UserData {
 
 interface ApiResponse {
   user: {
+    id : string
     isVerified: boolean | null;
     name: string | null;
     email: string;
@@ -31,6 +32,10 @@ interface ApiResponse {
         id: string;
         EventName: string;
       };
+    }[];
+     CreatePost: {
+        id: string;
+        description: string;
     }[];
   };
 }
@@ -93,16 +98,19 @@ const sampleData = {
 
 export default function ZynvoDashboard() {
   const navigate = useRouter();
+  // integration is not complete therefore used any
+  const [events, setEvents] = useState<any[]>([])
+  const [posts, setPosts] = useState<any[]>([])
+  const [id, setId] = useState<string>("")
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // First useEffect to set isClient to true
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Second useEffect to fetch user data and handle authentication
+ 
   useEffect(() => {
     if (!isClient) return;
 
@@ -150,6 +158,9 @@ export default function ZynvoDashboard() {
               events,
               profileAvatar,
             });
+            setId(response.data.user.id)
+            setEvents(response.data.user.eventAttended)
+            setPosts(response.data.user.CreatePost)
           } else {
             setUserData(mockUserData);
           }
