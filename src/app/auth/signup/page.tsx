@@ -14,7 +14,7 @@ import {
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
 import dotenv from 'dotenv';
 import DiceBearAvatar from '@/components/DicebearAvatars';
-import { colleges } from '@/components/colleges/college';
+import { collegesWithClubs } from '@/components/colleges/college';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { signupRes } from '@/types/global-Interface';
@@ -317,7 +317,7 @@ export default function SignUp() {
     College/University Name
   </label>
   <CollegeSearchSelect
-    colleges={colleges}
+    colleges={collegesWithClubs}
     value={formData.collegeName}
     onChange={(value) => setFormData(prev => ({ ...prev, collegeName: value }))}
     placeholder="Search and select your college/university"
@@ -326,13 +326,13 @@ export default function SignUp() {
 </div>
 </div>
 
-                <div className="flex items-center mb-6">
-                  <input
-                    type="checkbox"
-                    id="agreeToTerms"
-                    name="agreeToTerms"
-                    checked={agreeToTerms}
-                    onChange={() => {
+   <div className="flex items-center mb-6">
+        <input
+         type="checkbox"
+         id="agreeToTerms"
+         name="agreeToTerms"
+         checked={agreeToTerms}
+                        onChange={() => {
                       setAgree(true);
                     }}
                     className="h-4 w-4 rounded border-gray-700 bg-gray-800 text-yellow-500 focus:ring-yellow-500"
