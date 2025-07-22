@@ -228,7 +228,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
 
           {/* Modal Body - Form Steps */}
-          <div className="px-6 py-4 max-h-[60vh] overflow-y-auto">
+          <div className="px-6 py-4 max-h-[60vh] overflow-y-auto scrollbar-hide">
             {/* Step 1: Basic Info */}
             {step === 1 && (
               <div className="space-y-6">
