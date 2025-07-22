@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FiSearch, FiChevronDown } from 'react-icons/fi';
 
 interface CollegeSearchSelectProps {
-  colleges: string[];
+  colleges: { name: string; clubs: string[]; }[];
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -26,7 +26,7 @@ export default function CollegeSearchSelect({
 
   // Filter colleges based on search term
   const filteredColleges = colleges.filter(college =>
-    college.toLowerCase().includes(searchTerm.toLowerCase())
+    college.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Handle clicking outside to close dropdown
@@ -69,7 +69,7 @@ export default function CollegeSearchSelect({
       case 'Enter':
         e.preventDefault();
         if (highlightedIndex >= 0 && highlightedIndex < filteredColleges.length) {
-          handleSelect(filteredColleges[highlightedIndex]);
+          handleSelect(filteredColleges[highlightedIndex].name);
         }
         break;
       case 'Escape':
@@ -132,10 +132,10 @@ export default function CollegeSearchSelect({
                     ? 'bg-yellow-500 text-black'
                     : 'text-white hover:bg-gray-700'
                 }`}
-                onClick={() => handleSelect(college)}
+                onClick={() => handleSelect(college.name)}
                 onMouseEnter={() => setHighlightedIndex(index)}
               >
-                {college}
+                {college.name}
               </div>
             ))
           ) : (
