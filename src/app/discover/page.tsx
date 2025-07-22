@@ -73,41 +73,6 @@ export default function Feed() {
                 className="w-full sm:w-auto"
               />
 
-              {/* Tab navigation */}
-              <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-                <div className="flex space-x-2 min-w-max">
-                  <button
-                    onClick={() => setActiveTab('recents')}
-                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
-                      activeTab === 'recents'
-                        ? 'bg-yellow-500 text-black'
-                        : 'text-yellow-400 hover:bg-yellow-500/10'
-                    }`}
-                  >
-                    Recents
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('friends')}
-                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
-                      activeTab === 'friends'
-                        ? 'bg-yellow-500 text-black'
-                        : 'text-yellow-400 hover:bg-yellow-500/10'
-                    }`}
-                  >
-                    Friends
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('popular')}
-                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
-                      activeTab === 'popular'
-                        ? 'bg-yellow-500 text-black'
-                        : 'text-yellow-400 hover:bg-yellow-500/10'
-                    }`}
-                  >
-                    Popular
-                  </button>
-                </div>
-              </div>
             </div>
 
             {/* Posts Display */}

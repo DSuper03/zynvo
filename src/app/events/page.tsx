@@ -17,6 +17,7 @@ import CreateEventButton from './components/createEventButton';
 import CreateEventModal from './components/modals';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
+import EventCard from './components/EventCard';
 
 interface apiRespEvents {
   msg: string;
@@ -123,13 +124,7 @@ export default function ZynvoEventsPage() {
           </div>
 
           <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row md:space-x-4">
-            <div className="relative">
-              <button className="w-full md:w-auto bg-gray-800 border border-gray-700 text-white px-4 py-2 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
-                <Filter className="w-4 h-4 mr-2" />
-                <span>Filter</span>
-                <ChevronDown className="w-4 h-4 ml-2" />
-              </button>
-            </div>
+            
 
             <div className="flex bg-gray-800 border border-gray-700 rounded-lg w-full md:w-auto">
               <button
@@ -167,120 +162,8 @@ export default function ZynvoEventsPage() {
         </div>
 
         {/* Events Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {isLoading ? (
-          
-            [...Array(6)].map((_, index) => (
-              <div key={index} className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-md">
-                <Skeleton className="w-full h-48 sm:h-40 rounded-none bg-gray-700" />
-                <div className="p-4 md:p-5 space-y-3">
-                  <Skeleton className="h-6 w-3/4 rounded-md bg-gray-700" />
-                  <Skeleton className="h-4 w-full rounded-md bg-gray-700" />
-                  <Skeleton className="h-4 w-5/6 rounded-md bg-gray-700" />
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <Skeleton className="h-4 w-4 rounded-full mr-2 bg-gray-700" />
-                      <Skeleton className="h-4 w-32 rounded-md bg-gray-700" />
-                    </div>
-                    <div className="flex items-center">
-                      <Skeleton className="h-4 w-4 rounded-full mr-2 bg-gray-700" />
-                      <Skeleton className="h-4 w-40 rounded-md bg-gray-700" />
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center pt-2">
-                    <Skeleton className="h-4 w-20 rounded-md bg-gray-700" />
-                    <Skeleton className="h-8 w-24 rounded-md bg-gray-700" />
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : error ? (
-            <div className="col-span-full text-center py-10">
-              <p className="text-red-400 text-lg">{error}</p>
-              <button 
-                className="mt-4 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition-colors"
-                onClick={() => window.location.reload()}
-              >
-                Retry
-              </button>
-            </div>
-          ) : filteredEvents && filteredEvents.length > 0 ? (
-            filteredEvents.map((event) => (
-              <div
-                key={event.id}
-                className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-              >
-                <div className="relative">
-                  
-                  <Image
-                    src="/logozynvo.jpg"
-                    alt={event.description || event.EventName}
-                    width={600}
-                    height={300}
-                    className="w-full h-48 sm:h-40 object-cover"
-                    priority={false}
-                  />
-                </div>
-                <div className="p-4 md:p-5">
-                  <h3 className="text-lg md:text-xl font-bold text-white mb-2">
-                    {event.EventName}
-                  </h3>
-                  <p className="text-sm text-gray-400 mb-4 line-clamp-2">
-                    {event.description || 'No description available'}
-                  </p>
-
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-gray-300 text-sm">
-                      <Calendar className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
-                      <span className="truncate">
-                        Deadline: {
-                        event.endDate ? formatDate(event.endDate) : ""
-                        }
-                      </span>
-                    </div>
-                    <div className="flex items-center text-gray-300 text-sm">
-                      <MapPin className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
-                      <span className="truncate">
-                        {event.clubName ? `${event.clubName}'s College` : 'Location TBD'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400 text-xs md:text-sm">
-                      {event.attendees?.length || 0} attending
-                    </span>
-                    <button className="px-3 md:px-4 py-2 text-sm rounded-md font-medium bg-yellow-400 text-gray-900 hover:bg-yellow-500 transition-colors">
-                      Register
-                    </button>
-                    <button className='bg-black text-white font-bold p-2 m-1 rounded-2xl'
-                    onClick={()=> {
-                      router.push(`events/${event.id}`)
-                    }}
-                    >
-                        Check
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-10">
-              <p className="text-gray-400 text-lg">
-                {searchTerm ? 'No events found matching your search' : 'No events found'}
-              </p>
-              {searchTerm && (
-                <button 
-                  className="mt-4 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                  onClick={() => setSearchTerm('')}
-                >
-                  Clear Search
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
+      
+<EventCard/>
         {/* Pagination */}
         {filteredEvents && filteredEvents.length > 0 && (
           <div className="flex justify-center mt-6 md:mt-10">

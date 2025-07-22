@@ -149,6 +149,17 @@ const ClubsPage = () => {
           </div>
         </div>
       </div>
+      {/* Create Club Button - Responsive, above categories */}
+      <div className="w-full flex justify-start px-3 md:px-2 mb-2">
+        <Button
+          className="bg-yellow-500 hover:bg-yellow-400 text-black rounded-full flex items-center justify-center shadow-lg transition-colors px-6 py-3 font-bold text-lg"
+          onClick={() => setIsCreateModalOpen(true)}
+          title="Create New Club"
+        >
+          <Plus className="w-5 h-5 md:w-6 md:h-6 mr-2" />
+          Create Your Club
+        </Button>
+      </div>
 
       {/* Categories */}
       <div className="py-3 md:py-4 overflow-x-auto -mx-4 md:-mx-6 px-4 md:px-6 mb-4">
@@ -358,16 +369,7 @@ const ClubsPage = () => {
       </div>
 
       {/* Floating Create Button */}
-      <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-20">
-        <Button
-        size="icon"
-          className="bg-yellow-500 hover:bg-yellow-400 text-black  md:w-14 md:h-14 rounded-full flex items-center justify-center shadow-lg transition-colors"
-          onClick={() => setIsCreateModalOpen(true)}
-          title="Create New Club"
-        >
-          <Plus className="w-5 h-5 md:w-6 md:h-6" />
-        </Button>
-      </div>
+      
 
       {/* Create Club Modal */}
       <CreateClubModal
