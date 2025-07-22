@@ -1,8 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Calendar, BarChart2, User } from 'lucide-react';
+import { Calendar, BarChart2, User, X } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 // Define interfaces for better type checking
 interface Event {
@@ -17,10 +18,21 @@ interface UserData {
   isVerified: boolean | null;
   events: Event[];
   profileAvatar: string;
+  bio : string
+  year : string 
+  tags : string[]
+  course : string
+  createdAt : Date
 }
 
 interface ApiResponse {
   user: {
+    id : string
+    createdAt : Date
+    bio : string
+    year : string 
+    tags : string[]
+    course : string
     isVerified: boolean | null;
     name: string | null;
     email: string;
@@ -32,77 +44,36 @@ interface ApiResponse {
         EventName: string;
       };
     }[];
+     CreatePost: {
+        id: string;
+        description: string;
+    }[];
   };
 }
 
-// Mock data to use as fallback
-const mockUserData = {
-  name: 'ASM devs',
-  profileAvatar: 'aaaa',
-  email: 'devSuper03@contact.com',
-  clubName: 'zynvo',
-  isVerified: true,
-  image: '/ASM.jpg',
-  events: [
-    {
-      EventName: 'lets create zynvo',
-      id: '20072004ID',
-    },
-    {
-      EventName: 'Zynvo is Deployed',
-      id: '70024002ID',
-    },
-  ],
-};
-
-// Sample static data
-const sampleData = {
-  posts: 24,
-  recentPosts: [
-    { id: 1, title: 'Blockchain Basics', date: 'Apr 28, 2025', likes: 42 },
-    { id: 2, title: 'Future of Web3', date: 'Apr 22, 2025', likes: 38 },
-    { id: 3, title: 'Understanding DeFi', date: 'Apr 15, 2025', likes: 29 },
-    {
-      id: 4,
-      title: 'NFT Marketplace Analysis',
-      date: 'Apr 8, 2025',
-      likes: 56,
-    },
-  ],
-  recentEvents: [
-    {
-      id: 1,
-      title: 'Web3 Developer Conference',
-      date: 'Apr 30, 2025',
-      location: 'San Francisco',
-    },
-    {
-      id: 2,
-      title: 'Crypto Investment Summit',
-      date: 'Apr 18, 2025',
-      location: 'New York',
-    },
-    {
-      id: 3,
-      title: 'Blockchain Technology Expo',
-      date: 'Mar 25, 2025',
-      location: 'London',
-    },
-  ],
-};
-
 export default function ZynvoDashboard() {
   const navigate = useRouter();
+  // integration is not complete therefore used any
+
+  const [posts, setPosts] = useState<{id : string, description : string}[]>([])
+  const [id, setId] = useState<string>("")
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    bio: '',
+    course: '',
+    year: '',
+    tags: ''
+  });
+  const [update, setUpdate] = useState<boolean>(false)
 
-  // First useEffect to set isClient to true
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Second useEffect to fetch user data and handle authentication
+ 
   useEffect(() => {
     if (!isClient) return;
 
@@ -134,6 +105,11 @@ export default function ZynvoDashboard() {
               isVerified,
               eventAttended,
               profileAvatar,
+              bio,
+              course,
+              year,
+              tags,
+              createdAt
             } = response.data.user;
 
             const events =
@@ -149,13 +125,30 @@ export default function ZynvoDashboard() {
               isVerified,
               events,
               profileAvatar,
+              tags,
+              course,
+              bio,
+              year, 
+              createdAt
+            });
+            setId(response.data.user.id)
+            setPosts(response.data.user.CreatePost)
+            setUpdate(false)
+            // Set form values with existing data
+            setProfileForm({
+              bio: bio || '',
+              course: course || '',
+              year: year || '',
+              tags: tags ? tags.join(', ') : ''
             });
           } else {
-            setUserData(mockUserData);
+            alert("Error fetching in details")
+            navigate.push("/auth/signin")
           }
         } catch (error) {
           console.error('API Error:', error);
-          setUserData(mockUserData);
+            alert("Error fetching in details")
+            navigate.push("/auth/signin")
         }
       } catch (error) {
         console.error('Error:', error);
@@ -165,8 +158,40 @@ export default function ZynvoDashboard() {
     };
 
     fetchUserData();
-  }, [isClient, navigate]);
+  }, [isClient, navigate, update]);
 
+  const handleProfileFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setProfileForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleProfileFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const data = {
+      ...profileForm,
+      tags: profileForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+    }
+    const update = await axios.put<{
+      msg : string
+    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/updateProfile`, 
+      data ,
+      {
+        headers : {
+          authorization : `Bearer ${localStorage.getItem("token")}`
+        }
+      }
+    )
+    if(update.status == 200) {
+      toast(update.data.msg);
+    } else {
+      toast("Error on backend");
+    }
+    setShowProfileModal(false);
+    setUpdate(true)
+  };
 
   if (!isClient || isLoading) {
     return (
@@ -176,9 +201,9 @@ export default function ZynvoDashboard() {
     );
   }
 
-  // If no userData after loading, redirect or show message (this should rarely happen)
+
   if (!userData) {
-    return null; // This will be brief as the redirect should happen in the useEffect
+    return null; 
   }
 
   return (
@@ -188,12 +213,20 @@ export default function ZynvoDashboard() {
         {/* Dashboard Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-white">Your Dashboard</h1>
-          <button
-            onClick={() => navigate.push('/feedback')}
-            className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-4 py-2 rounded-full"
-          >
-            Feature Request
-          </button>
+          <div className="flex space-x-4">
+            <button
+              onClick={() => setShowProfileModal(true)}
+              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-4 py-2 rounded-full"
+            >
+              Complete Profile
+            </button>
+            <button
+              onClick={() => navigate.push('/feedback')}
+              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-4 py-2 rounded-full"
+            >
+              Feature Request
+            </button>
+          </div>
         </div>
 
         {/* Profile Card */}
@@ -216,29 +249,33 @@ export default function ZynvoDashboard() {
               <h2 className="text-xl font-bold text-white">
                 {userData.name || 'User'}
               </h2>
-              <p className="text-gray-400 mb-4">Zynvo Community Member</p>
-              <div className="flex flex-wrap gap-2 mb-4">
-                <span className="bg-gray-800 text-yellow-400 px-3 py-1 rounded-full text-sm">
-                  Blockchain
-                </span>
-                <span className="bg-gray-800 text-yellow-400 px-3 py-1 rounded-full text-sm">
-                  NFT
-                </span>
-                <span className="bg-gray-800 text-yellow-400 px-3 py-1 rounded-full text-sm">
-                  Smart Contracts
-                </span>
-                <span className="bg-gray-800 text-yellow-400 px-3 py-1 rounded-full text-sm">
-                  DeFi
-                </span>
-              </div>
+              <p className="text-gray-400 mb-4">{userData.bio}</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                {userData.tags && userData.tags.length > 0 ? (
+                  userData.tags.map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="bg-gray-800 text-yellow-400 px-3 py-1 rounded-full text-sm"
+                  >
+                    {tag}
+                  </span>
+                  ))
+                ) : (
+                  <span className="bg-gray-800 text-yellow-400 px-3 py-1 rounded-full text-sm">
+                  complete your profile
+                  </span>
+                )}
+                </div>
               <div className="flex space-x-4 text-sm text-gray-400">
                 <div className="flex items-center">
                   <User className="w-4 h-4 mr-1 text-yellow-400" />
-                  <span>Joined Jan 2025</span>
+                    <span>
+                    Joined {userData.createdAt ? new Date(userData.createdAt).toLocaleString('default', { month: 'short', year: 'numeric' }) : 'July 2025'}
+                    </span>
                 </div>
                 <div className="flex items-center">
                   <BarChart2 className="w-4 h-4 mr-1 text-yellow-400" />
-                  <span>{sampleData.posts} Posts</span>
+                  <span>{posts.length} Posts</span>
                 </div>
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-1 text-yellow-400" />
@@ -256,11 +293,8 @@ export default function ZynvoDashboard() {
               <div>
                 <p className="text-gray-400 mb-1">Total Posts</p>
                 <h2 className="text-4xl font-bold text-white">
-                  {sampleData.posts}
+                  {posts.length}
                 </h2>
-                <p className="text-gray-400 mt-2 text-sm">
-                  +3 posts this month
-                </p>
               </div>
               <div className="bg-yellow-400 p-3 rounded-full">
                 <BarChart2 className="w-6 h-6 text-gray-900" />
@@ -275,9 +309,6 @@ export default function ZynvoDashboard() {
                 <h2 className="text-4xl font-bold text-white">
                   {userData.events?.length || 0}
                 </h2>
-                <p className="text-gray-400 mt-2 text-sm">
-                  +2 events this month
-                </p>
               </div>
               <div className="bg-yellow-400 p-3 rounded-full">
                 <Calendar className="w-6 h-6 text-gray-900" />
@@ -286,47 +317,31 @@ export default function ZynvoDashboard() {
           </div>
         </div>
 
-        {/* Recent Posts & Events */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Recent Posts */}
           <div className="bg-gray-900 p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-white">
                 Your Recent Posts
               </h3>
-              <a
-                href="#"
-                className="text-yellow-400 hover:text-yellow-500 text-sm font-medium"
-              >
-                View All
-              </a>
             </div>
-            <ul className="divide-y divide-gray-700">
-              {sampleData.recentPosts.map((post) => (
-                <li key={post.id} className="py-4">
-                  <div className="flex justify-between">
-                    <div>
-                      <h4 className="text-gray-200 font-medium">
-                        {post.title}
-                      </h4>
-                      <p className="text-gray-400 text-sm">{post.date}</p>
+            <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-gray-700">
+              <ul className="divide-y divide-gray-700">
+                {posts.map((post) => (
+                  <li key={post.id} className="py-4">
+                    <div className="flex justify-between">
+                      <div>
+                        <h4 className="text-gray-200 font-medium">
+                            {post.description.length > 100
+                            ? post.description.slice(0, 100) + '...'
+                            : post.description}
+                        </h4>
+                      </div>
                     </div>
-                    <div className="flex items-center">
-                      <span className="text-gray-400 text-sm mr-1">
-                        {post.likes}
-                      </span>
-                      <svg
-                        className="w-4 h-4 text-yellow-400"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M10 15.585l-7.07-7.07 1.41-1.41L10 12.585l5.66-5.66 1.41 1.41-7.07 7.07z" />
-                      </svg>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           {/* Recent Events */}
@@ -335,29 +350,119 @@ export default function ZynvoDashboard() {
               <h3 className="text-lg font-bold text-white">
                 Recent Events Attended
               </h3>
-              <a
-                href="#"
-                className="text-yellow-400 hover:text-yellow-500 text-sm font-medium"
-              >
-                View All
-              </a>
             </div>
-            <ul className="divide-y divide-gray-700">
-              {sampleData.recentEvents.map((event) => (
-                <li key={event.id} className="py-4">
-                  <h4 className="text-gray-200 font-medium">{event.title}</h4>
-                  <div className="flex items-center text-sm text-gray-400 mt-1">
-                    <Calendar className="w-4 h-4 mr-1 text-yellow-400" />
-                    <span>{event.date}</span>
-                    <span className="mx-2">•</span>
-                    <span>{event.location}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-gray-700">
+              <ul className="divide-y divide-gray-700">
+                {userData.events.map((event) => (
+                  <li
+                    key={event.id}
+                    className="py-4 cursor-pointer hover:bg-gray-800 rounded transition"
+                    onClick={() => navigate.push(`/events/${event.id}`)}
+                  >
+                    <h4 className="text-gray-200 font-medium">{event.EventName}</h4>
+                    <div className="flex items-center text-sm text-gray-400 mt-1">
+                      <Calendar className="w-4 h-4 mr-1 text-yellow-400" />
+                      <span>Event ID: {event.id}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </main>
+
+      {/* Complete Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b border-gray-700">
+              <h2 className="text-xl font-bold text-white">Complete Your Profile</h2>
+              <button
+                onClick={() => setShowProfileModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleProfileFormSubmit} className="p-6">
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Bio
+                </label>
+                <textarea
+                  name="bio"
+                  value={profileForm.bio}
+                  onChange={handleProfileFormChange}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                  rows={3}
+                  placeholder="Tell us about yourself..."
+                />
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Course
+                </label>
+                <input
+                  type="text"
+                  name="course"
+                  value={profileForm.course}
+                  onChange={handleProfileFormChange}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                  placeholder="e.g. Computer Science"
+                />
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Year
+                </label>
+                <input
+                  type="text"
+                  name="year"
+                  value={profileForm.year}
+                  onChange={handleProfileFormChange}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                  placeholder="e.g. 2025"
+                />
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Tags
+                </label>
+                <input
+                  type="text"
+                  name="tags"
+                  value={profileForm.tags}
+                  onChange={handleProfileFormChange}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                  placeholder="e.g. Web Development, React, JavaScript (comma separated)"
+                />
+                <p className="text-xs text-gray-400 mt-1">Separate tags with commas</p>
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setShowProfileModal(false)}
+                  className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-yellow-400 text-gray-900 rounded-md hover:bg-yellow-500 transition-colors font-medium"
+                >
+                  Save Profile
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
