@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Button } from './ui/button';
 
+
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
@@ -26,6 +27,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
   const pathname = usePathname();
+ 
 
   const menuItems = [
     { icon: <Home size={22} />, label: 'Home', href: '/' },
@@ -51,7 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
   return (
     <div
       className={`
-      h-full flex flex-col bg-black border-r border-gray-800
+      h-full min-h-screen flex flex-col bg-black border-r border-gray-800
       transition-all duration-300 ease-in-out
       ${isOpen ? 'w-64' : 'w-16'}
     `}
@@ -156,8 +158,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
               />
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-white">Anirban </p>
-              <p className="text-xs text-gray-400">@anirban001@gmail.com</p>
+              {/* <p className="text-sm font-medium text-white">Anirban </p>
+              <p className="text-xs text-gray-400">@anirban001@gmail.com</p> */}
+              <p className='text-sm font-bold text-yellow-500'>Zync it!</p>
             </div>
           </div>
         </div>

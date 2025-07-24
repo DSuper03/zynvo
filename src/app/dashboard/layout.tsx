@@ -74,7 +74,7 @@ export default function RootLayout({
       <main 
         className={`
           flex-1 overflow-auto p-4 md:p-6 
-          bg-gradient-to-br from-black to-gray-900
+          bg-black
           pt-16 md:pt-6 /* Add padding-top for mobile to avoid content behind the toggle button */
         `}
         onClick={handleMainContentClick}

@@ -11,7 +11,7 @@ interface Event {
   id: string;
 }
 
-interface UserData {
+export interface UserData {
   name: string | null;
   email: string;
   clubName: string | null;
@@ -25,7 +25,7 @@ interface UserData {
   createdAt : Date
 }
 
-interface ApiResponse {
+export interface ApiResponse {
   user: {
     id : string
     createdAt : Date
@@ -195,7 +195,7 @@ export default function ZynvoDashboard() {
 
   if (!isClient || isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-black text-gray-100 flex items-center justify-center">
         <div className="text-xl">Loading dashboard...</div>
       </div>
     );
@@ -207,7 +207,7 @@ export default function ZynvoDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-gray-100">
+    <div className="min-h-screen h-full bg-black text-gray-100">
       {/* Main Content */}
       <main className="max-w-7xl mx-auto pt-24 pb-8 px-4">
         {/* Dashboard Header */}
@@ -270,12 +270,12 @@ export default function ZynvoDashboard() {
                 <div className="flex items-center">
                   <User className="w-4 h-4 mr-1 text-yellow-400" />
                     <span>
-                    Joined {userData.createdAt ? new Date(userData.createdAt).toLocaleString('default', { month: 'short', year: 'numeric' }) : 'July 2025'}
+                    Joined {userData.createdAt ? new Date(userData.createdAt).toLocaleString('default', { month: 'short', year: 'numeric' }) : 'July 2026'}
                     </span>
                 </div>
                 <div className="flex items-center">
                   <BarChart2 className="w-4 h-4 mr-1 text-yellow-400" />
-                  <span>{posts.length} Posts</span>
+                  <span>{posts?.length || 0} Posts</span>
                 </div>
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-1 text-yellow-400" />
@@ -293,7 +293,7 @@ export default function ZynvoDashboard() {
               <div>
                 <p className="text-gray-400 mb-1">Total Posts</p>
                 <h2 className="text-4xl font-bold text-white">
-                  {posts.length}
+                  {posts?.length}
                 </h2>
               </div>
               <div className="bg-yellow-400 p-3 rounded-full">
@@ -327,7 +327,7 @@ export default function ZynvoDashboard() {
             </div>
             <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-gray-700">
               <ul className="divide-y divide-gray-700">
-                {posts.map((post) => (
+                {posts?.map((post) => (
                   <li key={post.id} className="py-4">
                     <div className="flex justify-between">
                       <div>
@@ -353,7 +353,7 @@ export default function ZynvoDashboard() {
             </div>
             <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-gray-700">
               <ul className="divide-y divide-gray-700">
-                {userData.events.map((event) => (
+                {userData.events?.map((event) => (
                   <li
                     key={event.id}
                     className="py-4 cursor-pointer hover:bg-gray-800 rounded transition"
