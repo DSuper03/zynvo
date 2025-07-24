@@ -77,15 +77,14 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-70 flex items-center justify-center">
-      <div className="relative bg-gray-900 border border-yellow-500/30 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-70 flex items-center justify-center scrollbar-hide">
+      <div className="relative bg-gray-900 border border-yellow-500/30 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-hide">
         <div className="sticky top-0 z-10 bg-gray-900 border-b border-yellow-500/30 p-4 flex justify-between items-center">
           <h2 className="text-xl font-bold text-white">Create a New Club</h2>
           <button onClick={onClose} className="text-gray-300 hover:text-white">
             <X size={24} />
           </button>
         </div>
-
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Logo Upload */}
           <div className="flex flex-col items-center mb-6">
