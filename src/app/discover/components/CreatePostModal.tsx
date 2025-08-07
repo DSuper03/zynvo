@@ -1,6 +1,6 @@
 'use client';
 import { collegesWithClubs } from '@/components/colleges/college';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   X,
   Image as ImageIcon,
@@ -18,6 +18,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import dotenv from "dotenv"
+import axios from 'axios';
+
+dotenv.config()
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -35,6 +39,33 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [clubs, setClubs] = useState<string[]>([""])
+  const [settingClubs, setSettingClubs] = useState<boolean>(false)
+
+  useEffect(()=> {
+    if(selectedCollege === '') {
+      return;
+    } 
+
+    async function call(college : string) {
+      setSettingClubs(true)
+      const clubs = await axios.get<{resp : {
+        name : string
+      }[]}>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClubs/${college}`)
+      console.log(clubs);
+      if(clubs.status === 200 && clubs.data.resp.length > 0) {
+        alert(200)
+        const clArray = clubs.data.resp.map((club: {name: string})=> club.name )
+        setClubs(clArray);
+      } else {
+        setClubs([""])
+        alert(404)
+      }
+    }
+
+    call(selectedCollege);
+    setSettingClubs(false)
+  }, [selectedCollege])
 
   // College selection modal state
   const [isCollegeModalOpen, setIsCollegeModalOpen] = useState(false);
@@ -98,7 +129,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
   // Filter colleges based on search
  const filteredColleges = collegesWithClubs.filter((college) =>
-  college.name.toLowerCase().includes(searchQuery.toLowerCase())
+  college.college.toLowerCase().includes(searchQuery.toLowerCase())
 );
 
   // Open college modal and focus search input
@@ -233,8 +264,8 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 >
                   <option value="">Select a college</option>
                   {collegesWithClubs.map((college) => (
-                    <option key={college.name} value={college.name}>
-                      {college.name}
+                    <option key={college.college} value={college.college}>
+                      {college.college}
                     </option>
                   ))}
                 </select>
@@ -253,14 +284,23 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   disabled={!selectedCollege} // Disable if no college is selected
                 >
                   <option value="">Select a club</option>
-                  {selectedCollege &&
-                    collegesWithClubs
-                      .find((college) => college.name === selectedCollege)
-                      ?.clubs.map((club) => (
-                        <option key={club} value={club}>
-                          {club}
-                        </option>
-                      ))}
+                    {selectedCollege && (
+                    settingClubs ? (
+                      <option value="" disabled>
+                      Loading clubs...
+                      </option>
+                    ) : clubs.length === 0 ? (
+                      <option value="" disabled>
+                      No clubs associated
+                      </option>
+                    ) : (
+                      clubs.map((clubName) => (
+                      <option key={clubName} value={clubName}>
+                        {clubName}
+                      </option>
+                      ))
+                    )
+                    )}
                 </select>
               </div>
             </div>
@@ -323,12 +363,12 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 {filteredColleges.length > 0 ? (
                   <ul className="space-y-1">
                     {filteredColleges.map((collegeWithClubs, ) => (
-                      <li key={collegeWithClubs.name}>
+                      <li key={collegeWithClubs.college}>
                         <Button
-                          onClick={() => selectCollege(collegeWithClubs.name)}
+                          onClick={() => selectCollege(collegeWithClubs.college)}
                           className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors flex items-center"
                         >
-                          <span className="line-clamp-1">{collegeWithClubs.name}</span>
+                          <span className="line-clamp-1">{collegeWithClubs.college}</span>
                         </Button>
                       </li>
                     ))}
