@@ -22,6 +22,7 @@ import EventCard from './components/EventCard';
 interface apiRespEvents {
   msg: string;
   response: eventData[];
+  totalPages : number
 }
 
 export default function ZynvoEventsPage() {
@@ -31,6 +32,8 @@ export default function ZynvoEventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const router = useRouter()
 
@@ -40,9 +43,10 @@ export default function ZynvoEventsPage() {
         setIsLoading(true);
         setError(null);
         const response = await axios.get<apiRespEvents>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/all`
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/all?page=${currentPage}`
         );
         setEvents(response.data.response);
+        setTotalPages(response.data.totalPages || 1); 
       } catch (err) {
         setError('Failed to load events');
         console.error(err);
@@ -164,28 +168,24 @@ export default function ZynvoEventsPage() {
         {/* Events Grid */}
       
 <EventCard/>
-        {/* Pagination */}
-        {filteredEvents && filteredEvents.length > 0 && (
-          <div className="flex justify-center mt-6 md:mt-10">
-            <div className="flex space-x-1 md:space-x-2">
-              <button className="px-3 md:px-4 py-2 text-sm bg-gray-800 border border-gray-700 text-white rounded-md hover:bg-gray-700 transition-colors">
-                Previous
-              </button>
-              <button className="px-3 md:px-4 py-2 text-sm bg-yellow-400 text-gray-900 rounded-md">
-                1
-              </button>
-              <button className="px-3 md:px-4 py-2 text-sm bg-gray-800 border border-gray-700 text-white rounded-md hover:bg-gray-700 transition-colors">
-                2
-              </button>
-              <button className="px-3 md:px-4 py-2 text-sm bg-gray-800 border border-gray-700 text-white rounded-md hover:bg-gray-700 transition-colors">
-                3
-              </button>
-              <button className="px-3 md:px-4 py-2 text-sm bg-gray-800 border border-gray-700 text-white rounded-md hover:bg-gray-700 transition-colors">
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-8">
+          {Array.from({ length: totalPages }, (_, idx) => (
+            <button
+              key={idx + 1}
+              onClick={() => setCurrentPage(idx + 1)}
+              className={`px-3 py-1 rounded ${
+                currentPage === idx + 1
+                  ? 'bg-yellow-500 text-black font-bold'
+                  : 'bg-gray-700 text-white'
+              }`}
+            >
+              {idx + 1}
+            </button>
+          ))}
+        </div>
+      )}
       </main>
     </div>
   );
