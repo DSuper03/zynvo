@@ -25,40 +25,62 @@ export default function Feed() {
     'recents'
   );
   const [posts, setPost] = useState<PostData[]>([]);
-  const [isPostModalOpen, setIsPostModalOpen] = useState(false); // Modal state
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Infinite scroll state 
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+  // Fetch posts with pagination
   useEffect(() => {
     const postData = async () => {
       try {
-        setIsLoading(true);
+        setIsLoading(page === 1);
+        setIsFetchingMore(page > 1);
         setError(null);
 
         const response = await axios.get<ApiResponse>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/all`
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/all?page=${page}`
         );
-        
-        console.log('Full API Response:', response.data);
-        
-        if (response.data && response.data.posts && Array.isArray(response.data.posts)) {
-          setPost(response.data.posts);
-          console.log('Posts set successfully:', response.data.posts);
+
+        const newPosts = response.data?.posts || [];
+        if (page === 1) {
+          setPost(newPosts);
         } else {
-          console.warn('No posts found in response or posts is not an array');
-          setPost([]);
+          setPost((prev) => [...prev, ...newPosts]);
         }
+        // If less than 10 posts returned, no more data
+        setHasMore(newPosts.length === 10);
       } catch (error) {
-        console.error('Error fetching posts:', error);
         setError('Failed to fetch posts');
-        setPost([]);
+        if (page === 1) setPost([]);
       } finally {
         setIsLoading(false);
+        setIsFetchingMore(false);
       }
     };
 
     postData();
-  }, []);
+  }, [page]);
+
+  // Infinite scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 200 &&
+        hasMore &&
+        !isLoading &&
+        !isFetchingMore
+      ) {
+        setPage((prev) => prev + 1);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasMore, isLoading, isFetchingMore]);
 
   return (
     <div className="min-h-screen w-full bg-black overflow-y-auto">

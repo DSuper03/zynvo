@@ -36,27 +36,26 @@ const ClubsPage = () => {
     id: string;
   } | null>(null);
   const [clubData, setData] = useState<response['resp']>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     async function call() {
       const token = localStorage.getItem('token');
       const response = await axios.get<response>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getAll`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getAll?page=${currentPage}`,
         {
           headers: {
             authorization: `Bearer ${token}`,
           },
         }
       );
-      console.log(token);
-      console.log(response);
       setData(response.data.resp);
+      setTotalPages(response.data.totalPages || 1); 
     }
 
     call();
-  }, []);
-
-  console.log(clubData);
+  }, [currentPage]); 
 
   const handleJoinClub = (club: response['resp'][0]) => {
     setSelectedClub({
@@ -368,8 +367,24 @@ const ClubsPage = () => {
         )}
       </div>
 
-      {/* Floating Create Button */}
-      
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-8">
+          {Array.from({ length: totalPages }, (_, idx) => (
+            <button
+              key={idx + 1}
+              onClick={() => setCurrentPage(idx + 1)}
+              className={`px-3 py-1 rounded ${
+                currentPage === idx + 1
+                  ? 'bg-yellow-500 text-black font-bold'
+                  : 'bg-gray-700 text-white'
+              }`}
+            >
+              {idx + 1}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Create Club Modal */}
       <CreateClubModal
