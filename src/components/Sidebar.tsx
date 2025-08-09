@@ -1,6 +1,4 @@
 'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
@@ -59,7 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     `}
     >
       {/* Logo */}
-      <div className="p-4 flex items-center">
+      <div className="p-4 flex items-center text-lg">
         <div className="flex-shrink-0">
           <Image
             src="/logozynvo.jpg"
