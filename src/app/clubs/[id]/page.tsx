@@ -160,7 +160,7 @@ export default function ClubPage({}: ClubPageProps) {
             <Image
               src={club.image || '/default-club-image.jpg'}
               alt={club.name}
-              fill
+              
               width={1000}
               height={500}
               className="object-cover"

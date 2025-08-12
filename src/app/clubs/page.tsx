@@ -368,8 +368,7 @@ const ClubsPage = () => {
         )}
       </div>
 
-      {/* Floating Create Button */}
-      
+
 
       {/* Create Club Modal */}
       <CreateClubModal

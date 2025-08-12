@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
@@ -26,7 +27,7 @@ const Eventid = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
-  // Get token on client side only
+ 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
@@ -61,6 +62,7 @@ const Eventid = () => {
             contactPhone: res.data.response.contactPhone || 0,
             applicationStatus: res.data.response.applicationStatus || 'open'
           });
+          console.log("data is here for events:", data);
         }
       } catch (error) {
         console.error('Error fetching event data:', error);
@@ -210,7 +212,7 @@ const Eventid = () => {
               </div>
 
               <div className="mt-auto">
-                <button
+                <Button
                   onClick={handleRegistration}
                   disabled={isRegistering || data.applicationStatus !== 'open'}
                   className={`font-bold py-3 px-8 rounded-xl transition duration-300 shadow-lg w-full md:w-auto ${
@@ -220,7 +222,7 @@ const Eventid = () => {
                   }`}
                 >
                   {isRegistering ? 'Registering...' : 'Register Now 🚀'}
-                </button>
+                </Button>
 
                 {forkedUpId && (
                   <div className="mt-4 p-4 bg-green-900/30 border border-green-500/30 rounded-lg">

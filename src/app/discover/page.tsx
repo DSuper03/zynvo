@@ -13,6 +13,7 @@ import {
 import CreatePostButton from './components/CreatePostButton';
 import CreatePostModal from './components/CreatePostModal';
 import { PostData } from '@/types/global-Interface';
+import { Button } from '@/components/ui/button';
 
 // Define the API response type
 interface ApiResponse {
@@ -25,7 +26,7 @@ export default function Feed() {
     'recents'
   );
   const [posts, setPost] = useState<PostData[]>([]);
-  const [isPostModalOpen, setIsPostModalOpen] = useState(false); // Modal state
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,18 +62,89 @@ export default function Feed() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-black overflow-y-auto">
+    <div className="min-h-screen w-full bg-transparent overflow-y-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Column 1-2: Main Content */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Responsive buttons/actions row */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <CreatePostButton
-                onClick={() => setIsPostModalOpen(true)} // Open modal on button click
-                className="w-full sm:w-auto"
-              />
+          
+              <div className="flex sm:hidden items-center justify-between w-full">
+                <div className="flex items-center space-x-3">
+                  {/* Circular Create Post Button for Mobile */}
+                  <Button
+                    onClick={() => setIsPostModalOpen(true)}
+                    className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-600 hover:to-yellow-500 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-105"
+                  >
+                    <Plus className="h-6 w-6 text-black" />
+                  </Button>
+                  
+                  {/* User Avatar */}
+                  <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-black font-bold shadow-md overflow-hidden">
+                    
+                    <Image
+                      src="/api/placeholder/40/40" 
+                      alt="User Avatar"
+                      width={40}
+                      height={40}
+                      className="rounded-full object-cover"
+                      onError={(e) => {
+                        
+                        e.currentTarget.style.display = 'none';
+                        
+                      }}
+                    />
+                    <div className="w-full h-full bg-yellow-500 rounded-full items-center justify-center text-black font-bold text-sm hidden">
+                      U 
+                    </div>
+                  </div>
+                </div>
+              </div>
 
+              {/* Desktop View - Original Create Post Button */}
+              <div className="hidden sm:block">
+                <CreatePostButton
+                  onClick={() => setIsPostModalOpen(true)}
+                  className="w-full sm:w-auto"
+                />
+              </div>
+
+              {/* Tab navigation - Hidden on mobile */}
+              <div className="hidden sm:block overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+                <div className="flex space-x-2 min-w-max">
+                  <button
+                    onClick={() => setActiveTab('recents')}
+                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
+                      activeTab === 'recents'
+                        ? 'bg-yellow-500 text-black'
+                        : 'text-yellow-400 hover:bg-yellow-500/10'
+                    }`}
+                  >
+                    Recents
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('friends')}
+                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
+                      activeTab === 'friends'
+                        ? 'bg-yellow-500 text-black'
+                        : 'text-yellow-400 hover:bg-yellow-500/10'
+                    }`}
+                  >
+                    Friends
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('popular')}
+                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
+                      activeTab === 'popular'
+                        ? 'bg-yellow-500 text-black'
+                        : 'text-yellow-400 hover:bg-yellow-500/10'
+                    }`}
+                  >
+                    Popular
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Posts Display */}
@@ -95,7 +167,7 @@ export default function Feed() {
                   </button>
                 </div>
               ) : posts && posts.length > 0 ? (
-                // Display fetched posts
+               
                 posts.map((post) => (
                   <div
                     key={post.id}
@@ -158,12 +230,12 @@ export default function Feed() {
                     <p className="text-gray-400 mb-4">
                       Be the first to share something with your community!
                     </p>
-                    <button
+                    <Button
                       onClick={() => setIsPostModalOpen(true)} // Open modal on button click
                       className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2 rounded-md font-medium transition-colors"
                     >
                       Create Post
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -176,25 +248,7 @@ export default function Feed() {
       </div>
 
       {/* Mobile bottom navigation (visible only on mobile) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 py-2 px-4">
-        <div className="flex items-center justify-around">
-          <button className="flex flex-col items-center text-yellow-400">
-            <Home className="h-6 w-6" />
-            <span className="text-xs mt-1">Home</span>
-          </button>
-          <button 
-            onClick={() => setIsPostModalOpen(true)}
-            className="flex flex-col items-center text-gray-400 hover:text-yellow-400 transition-colors"
-          >
-            <Plus className="h-6 w-6" />
-            <span className="text-xs mt-1">Create</span>
-          </button>
-          <button className="flex flex-col items-center text-gray-400">
-            <MessageCircle className="h-6 w-6" />
-            <span className="text-xs mt-1">Messages</span>
-          </button>
-        </div>
-      </div>
+    
 
       {/* Modal components */}
       <CreatePostModal
