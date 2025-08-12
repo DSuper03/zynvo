@@ -191,6 +191,7 @@ export interface response {
     profilePicUrl: string | null;
     clubContact: string;
   }[];
+  totalPages : number
 }
 export interface ClubPageProps {
   params: {
