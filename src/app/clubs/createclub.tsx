@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { X, Upload, Camera } from 'lucide-react';
 import { CreateClubModalProps } from '@/types/global-Interface';
 import { toast } from 'sonner';
+import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
 
 const CreateClubModal: React.FC<CreateClubModalProps> = ({
   isOpen,
@@ -34,9 +35,10 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     }));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      await uploadImageToImageKit(await toBase64(file), file.name)
       setClubData((prev) => ({
         ...prev,
         logo: file,
