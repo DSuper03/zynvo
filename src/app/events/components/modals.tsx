@@ -30,6 +30,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { EventFormData } from '@/types/global-Interface';
+import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
+import { toast } from 'sonner';
+import axios from 'axios';
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -39,6 +42,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const [img, setImg] = useState<File | null>(null)
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<EventFormData>({
     eventMode: '',
@@ -60,7 +64,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     prizes: '',
     contactEmail: '',
     contactPhone: '',
-    image: null,
+    image: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -92,11 +96,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   };
 
   // Handle file upload
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setFormData((prev: any) => ({ ...prev, image: file }));
-
+      setImg(file);
       // Create preview URL
       const fileReader = new FileReader();
       fileReader.onload = () => {
@@ -164,10 +167,41 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   };
 
   // Submit the form
-  const handleSubmit = () => {
+  const handleSubmit = async() => {
+    const token = localStorage.getItem("token")
+    if(!token){
+      toast("please login or signup")
+      return;
+    }
     if (!validateStep()) return;
-
+    if (!img) {
+      toast("you are required to upload a poster")
+    } else {
+      const link = await uploadImageToImageKit(await toBase64(img), (img.name))
+    setFormData((prev: any) => ({ ...prev, image: link }));
+    setImg(null)
+    }
+    
     setIsSubmitting(true);
+
+    const createEvent = await axios.post<{
+      msg : string,
+      id : string
+    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event`, formData ,{
+      headers : {
+        authorization : `Bearer ${token}`
+      }
+    } )
+
+    if(createEvent.status === 200){
+      toast("Event registered , start marketing now!!!")
+      setIsSubmitting(false)
+      
+    } else {
+      toast(createEvent.data.msg)
+      setIsSubmitting(false)
+      return;
+    }
   };
 
   if (!isOpen) return null;

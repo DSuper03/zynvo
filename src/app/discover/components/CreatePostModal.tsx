@@ -80,7 +80,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
         alert('You can only upload up to 4 images');
         return;
       }
-
+      
       setImages((prevImages) => [...prevImages, ...filesArray]);
 
       // Create preview URLs for new images

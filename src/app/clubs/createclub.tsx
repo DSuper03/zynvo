@@ -5,12 +5,14 @@ import Image from 'next/image';
 import { X, Upload, Camera } from 'lucide-react';
 import { CreateClubModalProps } from '@/types/global-Interface';
 import { toast } from 'sonner';
+import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
 
 const CreateClubModal: React.FC<CreateClubModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [clubData, setClubData] = useState({
+  const [img, setImg] = useState<File | null>(null)
+   const [clubData, setClubData] = useState({
     name: '',
     description: '',
     type: '',
@@ -18,8 +20,8 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     facultyEmail: '',
     requirements: '',
     clubContact: '',
+    logo : ''
   });
-
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const handleChange = (
@@ -34,15 +36,10 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     }));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setClubData((prev) => ({
-        ...prev,
-        logo: file,
-      }));
-
-   
+      setImg(file)
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewImage(reader.result as string);
@@ -53,7 +50,16 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    if(img){
+       const link =  await uploadImageToImageKit(await toBase64(img), img.name)
+       setClubData((prev) => ({
+      ...prev,
+      logo : link,
+    }))
+    }else {
+      toast("please upload a logo for your club")
+      return;
+    }
     const token = localStorage.getItem('token');
     const upload = await axios.post<{
       msg: string;

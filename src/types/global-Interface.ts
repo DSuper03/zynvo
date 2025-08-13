@@ -34,7 +34,7 @@ export interface EventFormData {
   prizes: string;
   contactEmail: string;
   contactPhone: string;
-  image: File | null;
+  image: string;
 }
 
 // this is used in clubs/id/page.tsx where events of colleges are listed
