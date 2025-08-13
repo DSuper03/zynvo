@@ -73,6 +73,8 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
               src={clubImage}
               alt={clubName}
               className="w-full h-full object-cover"
+              width={40}
+              height={40}
             />
           </div>
         </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
@@ -26,7 +27,7 @@ const Eventid = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
-  // Get token on client side only
+ 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
@@ -61,6 +62,7 @@ const Eventid = () => {
             contactPhone: res.data.response.contactPhone || 0,
             applicationStatus: res.data.response.applicationStatus || 'open'
           });
+          console.log("data is here for events:", data);
         }
       } catch (error) {
         console.error('Error fetching event data:', error);
@@ -119,7 +121,7 @@ const Eventid = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white py-8 px-2 md:px-6">
+    <div className="min-h-screen  text-white py-8 px-2 md:px-6">
       <div className="container mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left side content */}
         <div className="lg:col-span-7 flex flex-col">
@@ -210,7 +212,7 @@ const Eventid = () => {
               </div>
 
               <div className="mt-auto">
-                <button
+                <Button
                   onClick={handleRegistration}
                   disabled={isRegistering || data.applicationStatus !== 'open'}
                   className={`font-bold py-3 px-8 rounded-xl transition duration-300 shadow-lg w-full md:w-auto ${
@@ -220,7 +222,7 @@ const Eventid = () => {
                   }`}
                 >
                   {isRegistering ? 'Registering...' : 'Register Now 🚀'}
-                </button>
+                </Button>
 
                 {forkedUpId && (
                   <div className="mt-4 p-4 bg-green-900/30 border border-green-500/30 rounded-lg">
@@ -235,12 +237,12 @@ const Eventid = () => {
                         rel="noopener noreferrer"
                         className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
                       >
-                        Forked-Up
+                        Zynced It 
                       </a>{' '}
                       with the ID below:
                     </p>
                     <div className="bg-black/50 p-3 rounded font-mono text-yellow-400 break-all">
-                      <strong>ForkedUp ID:</strong> {forkedUpId}
+                      <strong>Zynced It ID:</strong> {forkedUpId}
                     </div>
                   </div>
                 )}
