@@ -1,6 +1,4 @@
 'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
@@ -16,6 +14,7 @@ import {
   Settings,
   LogOut,
   NotebookText,
+  Trophy,
 } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -35,7 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     { icon: <Calendar size={22} />, label: 'Events', href: '/events' },
     { icon: <Users size={22} />, label: 'Clubs', href: '/clubs' },
     { icon: <NotebookText size={22} />, label: 'Resources', href: '/resources' },
-     { icon: <NotebookText size={22} />, label: 'Leaderboard', href: '/leaderboard' },
+    { icon: <Trophy size={22} />, label: 'Leaderboard', href: '/leaderboard' },
 
 
   ];
@@ -59,7 +58,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     `}
     >
       {/* Logo */}
-      <div className="p-4 flex items-center">
+      <div className="p-4 flex items-center text-lg">
         <div className="flex-shrink-0">
           <Image
             src="/logozynvo.jpg"
@@ -152,15 +151,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
               <Image
                 src="/logozynvo.jpg"
                 alt="User avatar"
-                width={40}
-                height={40}
+                width={50}
+                height={50}
                 className="rounded-full border-2 border-yellow-500"
               />
             </div>
             <div className="ml-3">
               {/* <p className="text-sm font-medium text-white">Anirban </p>
               <p className="text-xs text-gray-400">@anirban001@gmail.com</p> */}
-              <p className='text-sm font-bold text-yellow-500'>Zync it!</p>
+              <p className='text-lg font-extrabold text-yellow-300'>Zync it!</p>
             </div>
           </div>
         </div>

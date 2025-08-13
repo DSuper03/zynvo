@@ -93,7 +93,8 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
                 <Image
                   src={previewImage}
                   alt="Club logo preview"
-                  fill
+                  width={40}
+                  height={40}
                   className="object-cover"
                 />
               ) : (
