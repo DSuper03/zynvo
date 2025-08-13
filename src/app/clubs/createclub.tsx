@@ -19,8 +19,8 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     facultyEmail: '',
     requirements: '',
     clubContact: '',
+    logo : ''
   });
-
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const handleChange = (
@@ -38,13 +38,11 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      await uploadImageToImageKit(await toBase64(file), file.name)
-      setClubData((prev) => ({
-        ...prev,
-        logo: file,
-      }));
-
-   
+     const link =  await uploadImageToImageKit(await toBase64(file), file.name)
+       setClubData((prev) => ({
+      ...prev,
+      logo : link,
+    }))
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewImage(reader.result as string);
@@ -55,7 +53,6 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const token = localStorage.getItem('token');
     const upload = await axios.post<{
       msg: string;
