@@ -12,6 +12,9 @@ import Image from 'next/image';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
+import dotenv from "dotenv"
+
+dotenv.config()
 
 interface speakers {
   id: number;
@@ -87,7 +90,7 @@ const Speakers = () => {
         
         // Fetch speakers
         const res = await axios.get<speakerResponse>(
-          `${'http://localhost:8000'}/api/v1/events/getSpeakers?id=${id}`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/getSpeakers?id=${id}`,
           {
             headers: {
               authorization: `Bearer ${token}`,
@@ -97,7 +100,7 @@ const Speakers = () => {
 
         // Check if user is founder
         const checkFounder = await axios.get<{ msg: string }>(
-          `${'http://localhost:8000'}/api/v1/user/isFounder?id=${id}`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isFounder?id=${id}`,
           {
             headers: {
               authorization: `Bearer ${token}`,

@@ -29,6 +29,7 @@ import {
   EventType,
   Response,
 } from '@/types/global-Interface';
+import { toast } from 'sonner';
 
 // Mock upcoming events
 
@@ -82,10 +83,24 @@ export default function ClubPage({}: ClubPageProps) {
   });
   const [event, setEvent] = useState<EventType[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [token, setToken] = useState("")
 
+  useEffect(()=> {
+     if (typeof window !== 'undefined') {
+     const tok = localStorage.getItem("token")
+     if(tok) setToken(tok)
+      else {
+       toast("login please")
+       return;
+      }
+    }
+  }, [])
   useEffect(() => {
     async function call() {
-      const token = localStorage.getItem('token');
+      if(!token) {
+        toast("login please");
+        return;
+      }
       const response = await axios.get<Response>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClub?id=${id}`,
         {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   X,
   Calendar,
@@ -42,6 +42,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const [token, setToken] = useState("")
   const [img, setImg] = useState<File | null>(null)
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<EventFormData>({
@@ -69,6 +70,15 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
+
+  useEffect(()=> {
+   const tok = localStorage.getItem("token")
+   if(tok) setToken(tok)
+    else {
+     toast("login please")
+     return;
+    }
+  }, [])
 
   // Handler for input changes
   const handleChange = (
@@ -168,7 +178,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
   // Submit the form
   const handleSubmit = async() => {
-    const token = localStorage.getItem("token")
     if(!token){
       toast("please login or signup")
       return;
