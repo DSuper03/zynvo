@@ -12,6 +12,10 @@ import Image from 'next/image';
 import { response } from '@/types/global-Interface';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import dotenv from "dotenv"
+
+dotenv.config()
 
 const categories = [
   { id: 'all', name: 'All Clubs' },
@@ -38,10 +42,26 @@ const ClubsPage = () => {
   const [clubData, setData] = useState<response['resp']>();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [token, setToken] = useState("")
+
+  useEffect(()=> {
+     if (typeof window !== 'undefined') {
+     const tok = localStorage.getItem("token")
+     if(tok) setToken(tok)
+      else {
+       toast("login please")
+       return;
+      }
+    }
+  }, [])
+
 
   useEffect(() => {
     async function call() {
-      const token = localStorage.getItem('token');
+      if(!token) {
+        toast("login please");
+        return;
+      }
       const response = await axios.get<response>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getAll?page=${currentPage}`,
         {

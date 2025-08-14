@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import axios from 'axios'; // Add this missing import
 
@@ -12,6 +12,18 @@ export default function FeedbackForm() {
     description: '',
     improvements: '',
   });
+    const [token, setToken] = useState("")
+
+  useEffect(()=> {
+     if (typeof window !== 'undefined') {
+     const tok = localStorage.getItem("token")
+     if(tok) setToken(tok)
+      else {
+       toast("login please")
+       return;
+      }
+    }
+  }, [])
 
   const backgroundImage =
     'https://i.pinimg.com/736x/0a/8a/54/0a8a54b3aa265248460da6a0e9eb7179.jpg';
@@ -83,7 +95,10 @@ export default function FeedbackForm() {
     setSubmitting(true);
 
     try {
-      const token = localStorage.getItem('token'); // Move inside try block
+     if(!token) {
+        toast("login please");
+        return;
+      }
 
       // Format email data
       const emailData = {

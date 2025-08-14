@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { X, Upload, Camera } from 'lucide-react';
 import { CreateClubModalProps } from '@/types/global-Interface';
@@ -23,6 +23,19 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     logo : ''
   });
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [token, setToken] = useState("")
+
+    useEffect(()=> {
+       if (typeof window !== 'undefined') {
+      const tok = localStorage.getItem("token")
+     if(tok) setToken(tok)
+      else {
+       toast("login please")
+       return;
+      }
+    }
+
+    }, [])
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -60,7 +73,12 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
       toast("please upload a logo for your club")
       return;
     }
-    const token = localStorage.getItem('token');
+
+    if(!token) {
+      toast("login please")
+      return;
+    }
+   
     const upload = await axios.post<{
       msg: string;
       clubId: string;

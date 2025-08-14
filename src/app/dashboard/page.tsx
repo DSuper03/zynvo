@@ -68,6 +68,18 @@ export default function ZynvoDashboard() {
     tags: ''
   });
   const [update, setUpdate] = useState<boolean>(false)
+   const [token, setToken] = useState("")
+
+  useEffect(()=> {
+     if (typeof window !== 'undefined') {
+     const tok = localStorage.getItem("token")
+     if(tok) setToken(tok)
+      else {
+       toast("login please")
+       return;
+      }
+    }
+  }, [])
 
   useEffect(() => {
     setIsClient(true);
@@ -80,7 +92,10 @@ export default function ZynvoDashboard() {
     const fetchUserData = async () => {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem('token');
+        if(!token) {
+        toast("login please");
+        return;
+      }
 
         if (!token) {
           navigate.push('/auth/signup');
@@ -170,6 +185,10 @@ export default function ZynvoDashboard() {
 
   const handleProfileFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if(!token) {
+        toast("login please");
+        return;
+      }
     const data = {
       ...profileForm,
       tags: profileForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
@@ -180,7 +199,7 @@ export default function ZynvoDashboard() {
       data ,
       {
         headers : {
-          authorization : `Bearer ${localStorage.getItem("token")}`
+          authorization : `Bearer ${token}`
         }
       }
     )

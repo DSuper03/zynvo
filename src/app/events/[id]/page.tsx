@@ -5,6 +5,9 @@ import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import dotenv from "dotenv"
+
+dotenv.config()
 
 const Eventid = () => {
   const params = useParams();
@@ -42,7 +45,7 @@ const Eventid = () => {
       try {
         setIsLoading(true);
         const res = await axios.get<EventByIdResponse>(
-          `${'http://localhost:8000'}/api/v1/events/event/${id}`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event/${id}`,
           {
             headers: {
               authorization: `Bearer ${token}`,
