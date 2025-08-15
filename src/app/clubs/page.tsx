@@ -75,7 +75,7 @@ const ClubsPage = () => {
     }
 
     call();
-  }, [currentPage]); 
+  }, [currentPage, token]); 
 
   const handleJoinClub = (club: response['resp'][0]) => {
     setSelectedClub({
@@ -227,7 +227,7 @@ const ClubsPage = () => {
                       <div className="h-32 md:h-40 overflow-hidden relative">
                         <div className="absolute inset-0 bg-black/30 z-10 group-hover:bg-black/20 transition-all"></div>
                         <Image
-                          src={club.image || 'https://via.placeholder.com/300x200'}
+                          src={club.profilePicUrl}
                           alt={club.name}
                           width={300}
                           height={200}

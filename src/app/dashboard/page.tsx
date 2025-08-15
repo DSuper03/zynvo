@@ -268,7 +268,9 @@ export default function ZynvoDashboard() {
               <h2 className="text-xl font-bold text-white">
                 {userData.name || 'User'}
               </h2>
-              <p className="text-gray-400 mb-4">{userData.bio}</p>
+              <p className="text-gray-400 mb-1">{userData.bio}</p>
+              <p className='text-yellow-400 font-bold mb-1'>Course : <span className='text-gray-400'>{userData.course ? userData.course : "complete profile"}</span> </p>
+              <p className='text-yellow-400 font-bold mb-4'>Year : <span className='text-gray-400'>{userData.year ? userData.year : "complete profile"}</span> </p>
                 <div className="flex flex-wrap gap-2 mb-4">
                 {userData.tags && userData.tags.length > 0 ? (
                   userData.tags.map((tag, idx) => (

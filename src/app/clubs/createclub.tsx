@@ -6,6 +6,7 @@ import { X, Upload, Camera } from 'lucide-react';
 import { CreateClubModalProps } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
+import axios from 'axios';
 
 const CreateClubModal: React.FC<CreateClubModalProps> = ({
   isOpen,
@@ -61,14 +62,18 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if(img){
+  async function uploadImg(img:File) {
        const link =  await uploadImageToImageKit(await toBase64(img), img.name)
        setClubData((prev) => ({
       ...prev,
-      logo : link,
+       logo : link,
     }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if(img){
+      await uploadImg(img)
     }else {
       toast("please upload a logo for your club")
       return;
@@ -91,10 +96,9 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     const msg = upload?.data;
     if (upload.status == 200) {
       toast(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
-      alert(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
       onClose();
     } else {
-      alert(msg.msg);
+      toast(msg.msg);
     }
   };
 

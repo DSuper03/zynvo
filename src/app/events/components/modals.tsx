@@ -155,10 +155,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         if (!formData.contactPhone?.trim())
           newErrors.contactPhone = 'Contact phone is required';
         break;
-
-      case 4:
-        if (!formData.image) newErrors.image = 'Event image is required';
-        break;
     }
 
     setErrors(newErrors);
@@ -189,6 +185,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       const link = await uploadImageToImageKit(await toBase64(img), (img.name))
     setFormData((prev: any) => ({ ...prev, image: link }));
     setImg(null)
+    toast("Image uploaded")
     }
     
     setIsSubmitting(true);

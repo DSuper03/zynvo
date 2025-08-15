@@ -17,7 +17,12 @@ import {
   Trophy,
 } from 'lucide-react';
 import { Button } from './ui/button';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import dotenv from "dotenv"
+import { toast } from 'sonner';
 
+dotenv.config()
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -26,7 +31,38 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
   const pathname = usePathname();
- 
+  const [token, setToken] = useState<string | null>("")
+  const [profile, setProfile] = useState<string | null>("")
+  const [name, setName] = useState<string | null>("")
+
+  useEffect(()=> {
+     if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('token');
+      setToken(storedToken);
+    }
+  }, []) 
+
+  useEffect(()=> {
+    if(!token) return;
+    async function call() {
+      const response = await axios.get<{msg : string, 
+        data : {
+        name : string,
+        profileAvatar : string
+      }}>(`${process.env.NET_PUBLIC_BACKEND_URL}/api/v1/user/getSidebarUser`, {
+        headers : {
+          authorization : `Bearer ${token}`
+        }
+      })
+
+      if(response && response.status === 200){
+        setName(response.data.data.name)
+        setProfile(response.data.data.profileAvatar)
+      }
+    }
+
+    call()
+  }, [token])
 
   const menuItems = [
     { icon: <Home size={22} />, label: 'Home', href: '/' },
@@ -41,8 +77,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
 
   const accountItems = [
     { icon: <User size={22} />, label: 'Profile', href: '/dashboard' },
-    { icon: <Settings size={22} />, label: 'Settings', href: '/dashboard' },
-    { icon: <LogOut size={22} />, label: 'Logout', href: '/logout' },
+    // { icon: <Settings size={22} />, label: 'Settings', href: '/dashboard' },
+    { icon: <LogOut size={22} />, label: 'Logout', href: '/' },
   ];
 
   // This will ensure text is ALWAYS visible when sidebar is open
@@ -57,17 +93,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
       ${isOpen ? 'w-64' : 'w-16'}
     `}
     >
-      {/* Logo */}
+      {/* user Profile */}
       <div className="p-4 flex items-center text-lg">
         <div className="flex-shrink-0">
-          <Image
-            src="/logozynvo.jpg"
+          <div className='flex justify-center items-center pl-8'>
+            {profile ?
+            <img src={profile} alt="pfp" /> :   <Image
+            src='/logozynvo.jpg'
             alt="Zynvo Logo"
             width={32}
             height={32}
             className="rounded-full"
           />
-        </div>
+          }
+          <h1 className='text-yellow-400 font-semibold ml-3'>{name ? name : "zynvo user"}</h1>
+          </div>
+       </div>
       
 
         {/* Close button - only on mobile when sidebar is open */}
@@ -129,12 +170,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
       {/* User Account Section */}
       <div className="px-2 pb-4 pt-2 border-t border-gray-800">
         {accountItems.map((item, index) => (
-          <Link
-            key={index}
-            href={item.href}
-            className="flex items-center py-2 px-3 mt-1 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
-            onClick={onClose} 
-          >
+           <Link
+      key={index}
+      href={item.href}
+      className="flex items-center py-2 px-3 mt-1 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+      onClick={() => {
+        if (item.label === "Logout") {
+          localStorage.removeItem("token");
+          toast("logged out")
+        }
+        onClose;
+      }}
+    >
             <span className="flex-shrink-0">{item.icon}</span>
             {showText && (
               <span className="ml-4 text-sm font-medium">{item.label}</span>
