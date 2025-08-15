@@ -15,10 +15,6 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
   clubId,
 }) => {
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    stream: '',
-    year: '',
     motivation: '',
   });
   const [token, setToken] = useState<string | null>("")
@@ -50,7 +46,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
       return;
     }
     const res = await axios.post<{ msg: string }>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/joinClub/${clubId}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/joinClub/${clubId}`,{},
       {
         headers: {
           authorization: `Bearer ${token}`,
@@ -93,94 +89,6 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Full Name */}
-          <div className="space-y-2">
-            <label
-              htmlFor="fullName"
-              className="block text-sm font-medium text-yellow-400"
-            >
-              Full Name*
-            </label>
-            <input
-              id="fullName"
-              name="fullName"
-              type="text"
-              required
-              placeholder="Enter your full name"
-              value={formData.fullName}
-              onChange={handleChange}
-              className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
-            />
-          </div>
-
-          {/* Email */}
-          <div className="space-y-2">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-yellow-400"
-            >
-              Email Address*
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              placeholder="Enter your email address"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Stream/Major */}
-            <div className="space-y-2">
-              <label
-                htmlFor="stream"
-                className="block text-sm font-medium text-yellow-400"
-              >
-                Stream/Major*
-              </label>
-              <input
-                id="stream"
-                name="stream"
-                type="text"
-                required
-                placeholder="E.g., Computer Science"
-                value={formData.stream}
-                onChange={handleChange}
-                className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
-              />
-            </div>
-
-            {/* Year */}
-            <div className="space-y-2">
-              <label
-                htmlFor="year"
-                className="block text-sm font-medium text-yellow-400"
-              >
-                Year of Study*
-              </label>
-              <select
-                id="year"
-                name="year"
-                required
-                value={formData.year}
-                onChange={handleChange}
-                className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
-              >
-                <option value="" disabled>
-                  Select your year
-                </option>
-                <option value="1">First Year</option>
-                <option value="2">Second Year</option>
-                <option value="3">Third Year</option>
-                <option value="4">Fourth Year</option>
-                <option value="5+">Fifth Year or Beyond</option>
-              </select>
-            </div>
-          </div>
 
           {/* Motivation */}
           <div className="space-y-2">
@@ -213,7 +121,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
               type="submit"
               className="px-6 py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg font-medium transition-colors"
             >
-              Submit Application
+              Zync in
             </button>
           </div>
         </form>
