@@ -381,6 +381,8 @@ export interface PostData{
   collegeId: string;
   club: Club;
   authorId: string;
+  collegeName : string;
+  clubName : string
 }
 export interface EventByIdResponse {
   msg: string;

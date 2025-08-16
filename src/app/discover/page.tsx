@@ -206,9 +206,9 @@ export default function Feed() {
 
                     {/* Post metadata */}
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {post.collegeId && (
+                      {post.collegeName && (
                         <span className="text-sm text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded">
-                          College ID: {post.collegeId}
+                          College Tagged: {post.collegeName}
                         </span>
                       )}
                       {post.id && (
@@ -235,7 +235,6 @@ export default function Feed() {
                         </button>
                       </div>
                       <div className="text-xs text-gray-500">
-                        {/* You can add timestamp here if available in your API */}
                         {post.createdAt}
                       </div>
                     </div>
