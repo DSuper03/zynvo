@@ -20,6 +20,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import dotenv from "dotenv"
 import axios from 'axios';
+import { toast } from 'sonner';
+import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
 
 dotenv.config()
 
@@ -41,6 +43,22 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clubs, setClubs] = useState<string[]>([""])
   const [settingClubs, setSettingClubs] = useState<boolean>(false)
+  const [token, setToken] = useState<string | null>("");
+  const [imageLink, setImageLink] = useState<string>("");
+  const [title, setTitle] = useState('');
+
+
+  useEffect(()=> {
+       if (typeof window !== 'undefined') {
+      const tok = localStorage.getItem("token")
+     if(tok) setToken(tok)
+      else {
+       toast("login please")
+       return;
+      }
+    }
+    }, [])
+
 
   useEffect(()=> {
     if(selectedCollege === '') {
@@ -73,23 +91,29 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Image upload handler
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const filesArray = Array.from(e.target.files);
-      if (images.length + filesArray.length > 4) {
-        alert('You can only upload up to 4 images');
-        return;
-      }
-      
-      setImages((prevImages) => [...prevImages, ...filesArray]);
-
-      // Create preview URLs for new images
-      const newPreviewUrls = filesArray.map((file) =>
-        URL.createObjectURL(file)
-      );
-      setPreviewUrls((prevUrls) => [...prevUrls, ...newPreviewUrls]);
+// Image upload handler
+const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (e.target.files) {
+    const filesArray = Array.from(e.target.files);
+    if (images.length + filesArray.length > 1) {
+      alert('You can only upload 1 image');
+      return;
     }
-  };
+    
+    setImages((prevImages) => [...prevImages, ...filesArray]);
+
+    // Create preview URLs for new images
+    const newPreviewUrls = filesArray.map((file) =>
+      URL.createObjectURL(file)
+    );
+    setPreviewUrls((prevUrls) => [...prevUrls, ...newPreviewUrls]);
+  }
+};
+
+    async function uploadImg(img:File) {
+         const link =  await uploadImageToImageKit(await toBase64(img), img.name)
+         setImageLink(link);
+    }
 
   // Remove an image
   const removeImage = (index: number) => {
@@ -101,30 +125,41 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   };
 
   // Submit post
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!postText.trim()) return;
+
+    if(images.length > 1) uploadImg(images[0]);
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log({
-        text: postText,
-        club: selectedClub,
-        college: selectedCollege,
-        images,
-      });
+    const payload = {
+    title,
+    description : postText,
+    collegeName : selectedCollege,
+    clubName : selectedClub,
+    image: imageLink || '',  // since max 1 image
+  };
+  
+    const submit = await axios.post<{
+      msg : string,
+      id : string
+    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/create`, payload, {
+      headers : {
+        authorization : `Bearer ${token}`
+      }
+    })
 
-      setIsSubmitting(false);
-      onClose();
+    if(submit.status === 200 && submit.data.id) {
+      toast(`${submit.data.msg} & here is your post id : ${submit.data.id}`)
+    } else {
+      toast(submit.data.msg)
+    }
 
-      // Reset form
       setPostText('');
       setSelectedClub('');
       setSelectedCollege('');
       setImages([]);
       setPreviewUrls([]);
-    }, 1000);
   };
 
   // Filter colleges based on search
@@ -181,6 +216,17 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
           {/* Modal Body */}
           <div className="p-4 max-h-[70vh] overflow-y-auto">
+
+            <div className="mb-4">
+              <Input
+                type="text"
+                placeholder="Enter a title..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
+              />
+            </div>
+
             {/* Post Content */}
             <div className="mb-4">
               <Textarea
@@ -223,15 +269,16 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
             <div className="flex items-center justify-between border-t border-b border-gray-700 py-3 mb-4">
               <span className="text-gray-400 text-sm">Add to your post</span>
               <div className="flex space-x-2">
-                <button
-                  onClick={() =>
-                    document.getElementById('image-upload')?.click()
-                  }
-                  className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-500/10"
-                  disabled={images.length >= 4}
-                >
-                  <ImageIcon size={20} />
-                </button>
+               <button
+                    onClick={() =>
+                      document.getElementById('image-upload')?.click()
+                    }
+                    className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-500/10"
+                    disabled={images.length >= 1}   // changed from 4 → 1
+                  >
+                    <ImageIcon size={20} />
+                  </button>
+
                 <input
                   id="image-upload"
                   type="file"
