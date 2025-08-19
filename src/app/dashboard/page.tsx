@@ -54,6 +54,147 @@ export interface ApiResponse {
   };
 }
 
+// Add these new components and styles to your dashboard
+
+// LEGO-like Skills Component
+const LegoSkillBlock = ({ skill, index, onClick }: { skill: string, index: number, onClick: () => void }) => {
+  const colors = [
+    'bg-red-500 hover:bg-red-400',
+    'bg-blue-500 hover:bg-blue-400', 
+    'bg-green-500 hover:bg-green-400',
+    'bg-yellow-500 hover:bg-yellow-400',
+    'bg-purple-500 hover:bg-purple-400',
+    'bg-pink-500 hover:bg-pink-400',
+    'bg-indigo-500 hover:bg-indigo-400',
+    'bg-teal-500 hover:bg-teal-400'
+  ];
+  
+  return (
+    <div
+      onClick={onClick}
+      className={`
+        relative cursor-pointer transition-all duration-300 transform hover:scale-110 hover:-translate-y-2
+        ${colors[index % colors.length]}
+        rounded-lg px-4 py-2 text-white font-bold text-sm shadow-lg
+        hover:shadow-xl hover:shadow-yellow-500/30
+        before:absolute before:top-1 before:left-1/2 before:transform before:-translate-x-1/2
+        before:w-3 before:h-1 before:bg-white/30 before:rounded-full
+        after:absolute after:top-2 after:left-1/2 after:transform after:-translate-x-1/2
+        after:w-1 after:h-1 after:bg-white/20 after:rounded-full
+        group
+      `}
+    >
+      <span className="relative z-10">{skill}</span>
+      <div className="absolute inset-0 rounded-lg border-2 border-white/20 group-hover:border-white/40 transition-all duration-300" />
+      
+      {/* LEGO studs effect */}
+      <div className="absolute top-0 left-0 right-0 flex justify-center space-x-1 p-1">
+        <div className="w-2 h-2 bg-white/20 rounded-full group-hover:bg-white/40 transition-all duration-300" />
+        <div className="w-2 h-2 bg-white/20 rounded-full group-hover:bg-white/40 transition-all duration-300" />
+      </div>
+    </div>
+  );
+};
+
+// High-Five Button Component
+const HighFiveButton = ({ postId, isHighFived, onHighFive }: { postId: string, isHighFived: boolean, onHighFive: (id: string) => void }) => {
+  return (
+    <button 
+      onClick={() => onHighFive(postId)}
+      className={`
+        flex items-center space-x-2 transition-all duration-300 transform
+        ${isHighFived 
+          ? 'text-yellow-400 scale-110' 
+          : 'text-gray-400 hover:text-yellow-400 hover:scale-105'
+        }
+        group relative
+      `}
+    >
+      <div className="relative">
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          className={`h-5 w-5 transition-all duration-300 ${isHighFived ? 'animate-bounce' : 'group-hover:rotate-12'}`}
+          fill={isHighFived ? 'currentColor' : 'none'} 
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5T6.5 15a2 2 0 104 0m-3-2.5v-3a2 2 0 114 0v3M14 13.5V11m0-1V7.5" />
+        </svg>
+        {isHighFived && (
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping" />
+        )}
+      </div>
+      <span className="text-xs font-medium">
+        {isHighFived ? 'High-Fived!' : 'High-Five'}
+      </span>
+      
+      {/* Sparkle effect on hover */}
+      <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+      </div>
+    </button>
+  );
+};
+
+// Skills Modal Component
+const SkillsModal = ({ skill, isOpen, onClose }: { skill: string, isOpen: boolean, onClose: () => void }) => {
+  if (!isOpen) return null;
+  
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-md">
+        <div className="flex justify-between items-center p-6 border-b border-gray-700">
+          <h2 className="text-xl font-bold text-white">Communities for "{skill}"</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        
+        <div className="p-6">
+          <div className="space-y-4">
+            <div className="bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors">
+              <h3 className="font-bold text-white">{skill} Club</h3>
+              <p className="text-gray-400 text-sm">Join fellow {skill} enthusiasts</p>
+              <div className="flex items-center mt-2 text-xs text-yellow-400">
+                <User className="w-3 h-3 mr-1" />
+                <span>142 members</span>
+              </div>
+            </div>
+            
+            <div className="bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors">
+              <h3 className="font-bold text-white">{skill} Study Group</h3>
+              <p className="text-gray-400 text-sm">Collaborate and learn together</p>
+              <div className="flex items-center mt-2 text-xs text-yellow-400">
+                <User className="w-3 h-3 mr-1" />
+                <span>89 members</span>
+              </div>
+            </div>
+            
+            <div className="bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors">
+              <h3 className="font-bold text-white">Upcoming {skill} Workshop</h3>
+              <p className="text-gray-400 text-sm">Hands-on session this Friday</p>
+              <div className="flex items-center mt-2 text-xs text-yellow-400">
+                <Calendar className="w-3 h-3 mr-1" />
+                <span>This Friday 3PM</span>
+              </div>
+            </div>
+          </div>
+          
+          <button
+            onClick={onClose}
+            className="w-full mt-6 bg-yellow-400 text-gray-900 py-2 rounded-lg font-medium hover:bg-yellow-500 transition-colors"
+          >
+            Explore More
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function ZynvoDashboard() {
   const navigate = useRouter();
   // integration is not complete therefore used any
@@ -72,6 +213,9 @@ export default function ZynvoDashboard() {
   });
   const [update, setUpdate] = useState<boolean>(false)
    const [token, setToken] = useState("")
+   const [selectedSkill, setSelectedSkill] = useState<string>('');
+   const [showSkillsModal, setShowSkillsModal] = useState(false);
+   const [highFivedPosts, setHighFivedPosts] = useState<Set<string>>(new Set());
 
   useEffect(()=> {
      if (typeof window !== 'undefined') {
@@ -213,6 +357,32 @@ export default function ZynvoDashboard() {
     }
     setShowProfileModal(false);
     setUpdate(true)
+  };
+
+  const handleSkillClick = (skill: string) => {
+    setSelectedSkill(skill);
+    setShowSkillsModal(true);
+  };
+
+  const handleHighFive = (postId: string) => {
+    setHighFivedPosts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+        // Add celebration animation
+        toast(`🙌 High-Five sent!`, {
+          duration: 2000,
+          style: {
+            background: '#FCD34D',
+            color: '#1F2937',
+            border: 'none',
+          }
+        });
+      }
+      return newSet;
+    });
   };
 
   if (!isClient || isLoading) {
@@ -517,6 +687,13 @@ export default function ZynvoDashboard() {
           </div>
         </div>
       )}
+
+      {/* Skills Modal */}
+      <SkillsModal
+        skill={selectedSkill}
+        isOpen={showSkillsModal}
+        onClose={() => setShowSkillsModal(false)}
+      />
     </div>
   );
 }
