@@ -44,7 +44,7 @@ const MenuItem = ({
         <motion.div
           initial={{ opacity: 0, scale: 0.85, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={transition}
+          
         >
           {active === item && children && (
             <>
@@ -53,7 +53,7 @@ const MenuItem = ({
 
               <div className="absolute top-[calc(100%_+_1.2rem)] left-1/2 transform -translate-x-1/2 z-50">
                 <motion.div
-                  transition={transition}
+                  
                   layoutId="active"
                   className="bg-black/90 backdrop-blur-sm rounded-2xl overflow-hidden border border-yellow-500/20 shadow-xl"
                 >

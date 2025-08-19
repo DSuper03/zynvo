@@ -14,7 +14,7 @@ const founders = [
     github: 'https://github.com/kekubhai',
     twitter: 'onirbanhere',
     linkedin: 'anirban-ghosh010',
-    website: 'https://onirban.netlify.app/',
+    website: 'https://anirban-three.vercel.app/',
     bio: `A visionary second-year tech enthusiast who's revolutionizing the college community landscape. As the mastermind behind Zynvo, Anirban brings his deep passion for innovation and community building to the forefront. His impressive portfolio, including projects like TempoFlow and Algo-Prep, demonstrates his ability to create impactful solutions. With a keen eye for user experience and a deep understanding of modern web technologies, he's leading Zynvo's mission to transform how college students connect and engage with campus activities. His experience in building platforms like BeatNest and OrbitX showcases his versatility in creating engaging user experiences. Anirban's commitment to innovation is evident in his approach to combining technology with community building, making him the perfect leader to guide Zynvo's vision of revolutionizing campus engagement.`,
     quote:
       'Building the future of campus communities, one connection at a time.',
@@ -136,8 +136,18 @@ const TeamSection = () => {
           animate={{ opacity: 1, y: 0 }}
           className="relative z-10 text-center px-4 max-w-4xl mx-auto"
         >
+          <div className="relative w-full h-[250px] mb-8">
+            <Image
+              src={'/banners/foundersbanner.png'}
+              alt={founders[activeFounder].name}
+              layout="fill"
+              objectFit="cover"
+              className="object-top"
+              priority
+            />
+          </div>
           <motion.h1
-            className="text-6xl md:text-8xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 via-yellow-200 to-yellow-500 mb-6"
+            className=""
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -170,12 +180,11 @@ const TeamSection = () => {
                 <Image
                   src={founder.image}
                   alt={founder.name}
-                  width={400}
-                  height={400}
-                  className="object-cover"
-                  sizes="(max-width: 768px) 128px, 160px"
+                  width={10000}
+                  height={10000}
+                  className='object-cover'
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent group-hover:opacity-0 transition-opacity" />
+                <div className="absolute inset-0   group-hover:opacity-0 transition-opacity" />
                 <div className="absolute inset-0 ring-2 ring-yellow-500/20 group-hover:ring-yellow-500/50 transition-all" />
               </div>
               <div
@@ -196,15 +205,15 @@ const TeamSection = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch"
         >
-          <div className="relative aspect-square rounded-3xl overflow-hidden group">
+          <div className="relative rounded-3xl overflow-hidden group h-full min-h-[600px]">
             <Image
               src={founders[activeFounder].image}
               alt={founders[activeFounder].name}
-              width={400}
-              height={400}
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              layout="fill"
+              objectFit="cover"
+              className="transition-transform duration-500 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform">
@@ -219,7 +228,7 @@ const TeamSection = () => {
             </div>
           </div>
 
-          <div className="space-y-8 backdrop-blur-sm bg-black/30 p-8 rounded-3xl border border-yellow-500/10">
+          <div className="space-y-8 backdrop-blur-sm p-8 rounded-3xl border border-yellow-500/10">
             <motion.blockquote
               className="text-2xl italic text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-200 font-light"
               initial={{ opacity: 0, x: -20 }}
