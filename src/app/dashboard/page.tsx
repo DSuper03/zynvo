@@ -366,7 +366,7 @@ export default function ZynvoDashboard() {
           </div>
 
           {/* Recent Events */}
-          <div className="bg-gray-900 p-6 rounded-lg shadow-md">
+          {/* <div className="bg-gray-900 p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-white">
                 Recent Events Attended
@@ -389,7 +389,7 @@ export default function ZynvoDashboard() {
                 ))}
               </ul>
             </div>
-          </div>
+          </div> */}
         </div>
       </main>
 

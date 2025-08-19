@@ -197,7 +197,7 @@ export default function LeaderboardPage() {
 
       {/* Region chips */}
       <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-        {['Worldwide', 'United States', 'India', 'Europe', 'Zip: 10001'].map((r) => (
+        {['Worldwide', 'India', 'Maharashtra', 'Gujrat'].map((r) => (
           <button
             key={r}
             onClick={() => setRegion(r)}

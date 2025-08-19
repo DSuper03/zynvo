@@ -49,7 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
         data : {
         name : string,
         profileAvatar : string
-      }}>(`${process.env.NET_PUBLIC_BACKEND_URL}/api/v1/user/getSidebarUser`, {
+      }}>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getSidebarUser`, {
         headers : {
           authorization : `Bearer ${token}`
         }

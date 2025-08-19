@@ -191,15 +191,7 @@ export default function SignUp() {
             {/* Step 1: Account Information */}
             {currentStep === 1 && (
               <>
-                {/* Social Sign-Up Options */}
-                <div className="flex flex-col space-y-3 mb-6">
-                  <button className="flex items-center justify-center space-x-2 w-full p-3 rounded-lg border border-gray-700 text-white hover:bg-gray-800 transition">
-                    <FaGoogle className="text-lg" />
-                    <span>Continue with Google</span>
-                  </button>
-                 
-                
-                </div>
+            
 
                 <div className="flex items-center justify-center mb-6">
                   <div className="h-px bg-gray-700 flex-1"></div>

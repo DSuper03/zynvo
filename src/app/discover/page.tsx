@@ -103,24 +103,7 @@ export default function Feed() {
                   </Button>
                   
                   {/* User Avatar */}
-                  <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-black font-bold shadow-md overflow-hidden">
-                    
-                    <Image
-                      src="/api/placeholder/40/40" 
-                      alt="User Avatar"
-                      width={40}
-                      height={40}
-                      className="rounded-full object-cover"
-                      onError={(e) => {
-                        
-                        e.currentTarget.style.display = 'none';
-                        
-                      }}
-                    />
-                    <div className="w-full h-full bg-yellow-500 rounded-full items-center justify-center text-black font-bold text-sm hidden">
-                      U 
-                    </div>
-                  </div>
+                 
                 </div>
               </div>
 
@@ -219,7 +202,7 @@ export default function Feed() {
                     </div>
 
                     {/* Post actions */}
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-700">
+                    {/* <div className="flex items-center justify-between pt-3 border-t border-gray-700">
                       <div className="flex items-center space-x-4">
                         <button className="flex items-center space-x-1 text-gray-400 hover:text-yellow-400 transition-colors group">
                           <Heart size={18} className="group-hover:scale-110 transition-transform" />
@@ -237,7 +220,7 @@ export default function Feed() {
                       <div className="text-xs text-gray-500">
                         {post.createdAt}
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 ))
               ) : (
@@ -264,7 +247,75 @@ export default function Feed() {
           </div>
 
           {/* Column 3: Sidebar (hidden on mobile) */}
-       
+          <div className="hidden lg:block">
+  <div className="sticky top-4">
+    <div className="bg-gray-800 rounded-lg border border-yellow-500/20 overflow-hidden">
+      <div className="bg-gradient-to-r from-yellow-500 to-yellow-400 px-4 py-3">
+        <h3 className="text-black font-semibold">Upcoming Events</h3>
+      </div>
+      
+      <div className="p-4 space-y-4">
+        {/* Event 1 */}
+        <div className="group cursor-pointer">
+          <div className="relative overflow-hidden rounded-lg mb-2">
+            <div className="aspect-[3/4] bg-gray-700 rounded-lg overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80" 
+                alt="Tech Conference"
+                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+              />
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+              <span className="bg-yellow-500 text-black text-xs font-medium px-2 py-1 rounded-full">May 25</span>
+            </div>
+          </div>
+          <h4 className="font-medium text-white group-hover:text-yellow-400 transition-colors">Tech Innovation Summit</h4>
+          <p className="text-xs text-gray-400">Stanford University</p>
+        </div>
+        
+        {/* Event 2 */}
+        <div className="group cursor-pointer">
+          <div className="relative overflow-hidden rounded-lg mb-2">
+            <div className="aspect-[3/4] bg-gray-700 rounded-lg overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80" 
+                alt="Music Festival"
+                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+              />
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+              <span className="bg-yellow-500 text-black text-xs font-medium px-2 py-1 rounded-full">Jun 2</span>
+            </div>
+          </div>
+          <h4 className="font-medium text-white group-hover:text-yellow-400 transition-colors">Spring Music Festival</h4>
+          <p className="text-xs text-gray-400">Berkeley Arts Center</p>
+        </div>
+        
+        {/* Event 3 */}
+        <div className="group cursor-pointer">
+          <div className="relative overflow-hidden rounded-lg mb-2">
+            <div className="aspect-[3/4] bg-gray-700 rounded-lg overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80" 
+                alt="Sports Tournament"
+                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+              />
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+              <span className="bg-yellow-500 text-black text-xs font-medium px-2 py-1 rounded-full">Jun 15</span>
+            </div>
+          </div>
+          <h4 className="font-medium text-white group-hover:text-yellow-400 transition-colors">Intercollegiate Basketball</h4>
+          <p className="text-xs text-gray-400">State University Arena</p>
+        </div>
+        
+        <button className="w-full py-2 text-sm text-yellow-400 hover:text-yellow-300 transition-colors">
+          View all events →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
         </div>
       </div>
 

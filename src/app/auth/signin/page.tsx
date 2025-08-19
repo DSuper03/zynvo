@@ -35,8 +35,13 @@ export default function SignIn() {
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    //
     e.preventDefault();
+    if (!rememberMe) {
+      toast('Please check "Remember me for 30 days" to continue.', {
+        position: 'top-center',
+      });
+      return;
+    }
     const msg = await axios.post<signinRes>(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
       formData
@@ -189,7 +194,7 @@ export default function SignIn() {
                     href="/auth/forgot-password"
                     className="text-sm text-yellow-500 hover:text-yellow-400 transition"
                   >
-                    Forgot password?
+                  
                   </Link>
                 </div>
                 <div className="relative">
