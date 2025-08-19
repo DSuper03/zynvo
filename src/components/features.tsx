@@ -1,4 +1,9 @@
+'use client';
+
 import React, { useEffect, useRef, useState } from 'react';
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
 import {
   Users,
   Calendar,
@@ -9,13 +14,178 @@ import {
   TrendingUp,
   Globe,
   BadgeCheck,
+  MessageCircle,
+  Activity
 } from 'lucide-react';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
+import { AuroraText } from './magicui/aurora-text';
 
-const ZynvoDashboard = () => {
+// Custom Skeletons for Bento Grid Items
+const HeroSkeleton = () => {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="relative w-full h-full rounded-lg overflow-hidden"
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-black/50" />
+      <div className="absolute inset-0 flex flex-col justify-center items-center p-6 text-center">
+        <Sparkles className="w-12 h-12 text-yellow-500 mb-2" />
+        <h2 className="text-xl font-bold text-white">Your Campus Connection Hub</h2>
+        <p className="text-sm text-gray-300 mt-2">Connect with clubs, discover events, build your network</p>
+      </div>
+    </motion.div>
+  );
+};
+
+const StatsSkeleton = () => {
+  const stats = [
+    { value: '8.5K', label: 'Students', icon: <Users className="w-4 h-4" /> },
+    { value: '142', label: 'Events', icon: <Calendar className="w-4 h-4" /> },
+    { value: '95%', label: 'Satisfaction', icon: <Star className="w-4 h-4" /> },
+    { value: '36', label: 'Colleges', icon: <Globe className="w-4 h-4" /> },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 gap-3 w-full h-full">
+      {stats.map((stat, idx) => (
+        <motion.div
+          key={idx}
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: idx * 0.1 }}
+          className="bg-black/30 rounded-lg p-3 border border-gray-800"
+        >
+          <div className="text-xl font-bold text-white">{stat.value}</div>
+          <div className="flex items-center text-xs text-gray-400">
+            <span className="mr-1 text-yellow-500">{stat.icon}</span>
+            {stat.label}
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+const EventSkeleton = () => {
+  return (
+    <motion.div
+      initial={{ y: 0 }}
+      whileHover={{ y: -5 }}
+      className="relative w-full h-full rounded-lg overflow-hidden"
+    >
+      <Image
+        src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/photo_2025-05-23_20-16-14.jpg?updatedAt=1748011606544"
+        alt="Tech Fest"
+        fill
+        className="object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 p-4">
+        <div className="inline-block bg-yellow-500 text-black text-xs font-medium px-2 py-1 rounded-full mb-2">MAY 25</div>
+        <h3 className="text-white font-bold">Tech Fest 2025</h3>
+        <p className="text-gray-300 text-xs">Connect with innovative tech clubs</p>
+      </div>
+    </motion.div>
+  );
+};
+
+const FeaturesSkeleton = () => {
+  const features = [
+    { title: "Club Discovery", icon: <BookOpen className="w-5 h-5" /> },
+    { title: "Event Management", icon: <Calendar className="w-5 h-5" /> },
+    { title: "Network Builder", icon: <Users className="w-5 h-5" /> },
+    { title: "Growth Analytics", icon: <TrendingUp className="w-5 h-5" /> },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 gap-3 w-full h-full">
+      {features.map((feature, idx) => (
+        <motion.div
+          key={idx}
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          whileHover={{ scale: 1.05 }}
+          transition={{ delay: idx * 0.1 }}
+          className="bg-black/30 border border-gray-800 rounded-lg p-3 flex flex-col items-center justify-center"
+        >
+          <div className="h-10 w-10 rounded-full bg-yellow-500/10 flex items-center justify-center mb-2">
+            <div className="text-yellow-500">{feature.icon}</div>
+          </div>
+          <span className="text-white text-sm font-medium">{feature.title}</span>
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+const CollegesSkeleton = () => {
+  const colleges = [
+    "Tyler School of Martial Arts",
+    "Nikumb College of Design",
+    "Ved School of Drama",
+    "Barney Stinson College",
+    "B99 Army College",
+  ];
+
+  return (
+    <div className="w-full h-full flex flex-col space-y-2">
+      {colleges.map((college, idx) => (
+        <motion.div
+          key={idx}
+          initial={{ x: -10, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          whileHover={{ x: 5 }}
+          transition={{ delay: idx * 0.1 }}
+          className="bg-black/20 rounded-lg p-2 flex items-center"
+        >
+          <BadgeCheck className="w-4 h-4 text-yellow-500 mr-2" />
+          <span className="text-white text-sm truncate">{college}</span>
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+const ClubRoomSkeleton = () => {
+  return (
+    <motion.div
+      initial={{ opacity: 0.8 }}
+      whileHover={{ opacity: 1 }}
+      className="relative w-full h-full rounded-lg overflow-hidden bg-gradient-to-br from-yellow-500/20 to-black/80 flex items-center justify-center"
+    >
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative">
+          <div className="absolute -top-6 -left-6 w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center">
+            <MessageCircle className="w-6 h-6 text-black" />
+          </div>
+          <div className="w-32 h-20 bg-gray-800 rounded-lg border border-gray-700 flex items-center justify-center">
+            <span className="text-yellow-500 text-sm font-medium">Club Rooms</span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const CtaSkeleton = () => {
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-yellow-500/20 to-black rounded-lg p-6"
+    >
+      <h3 className="text-white font-bold text-xl mb-3">Ready to join?</h3>
+      <Button className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-md">
+        <Link href="/auth/signup">Sign Up Today</Link>
+      </Button>
+    </motion.div>
+  );
+};
+
+const Features = () => {
   const heroRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
   
@@ -39,58 +209,64 @@ const ZynvoDashboard = () => {
       }
     };
   }, []);
-  
-  const stats = [
-    { value: '8.5K', label: 'Active Students', icon: <Users className="w-5 h-5" /> },
-    { value: '142', label: 'Events Created', icon: <Calendar className="w-5 h-5" /> },
-    { value: '95%', label: 'Student Satisfaction', icon: <Star className="w-5 h-5" /> },
-    { value: '36', label: 'Colleges', icon: <Globe className="w-5 h-5" /> },
+
+  // Define BentoGrid items
+  const items = [
+    {
+      title: "Welcome to Zynvo",
+      description: <span className="text-sm">Your ultimate campus connection platform</span>,
+      header: <HeroSkeleton />,
+      className: "md:col-span-2",
+      icon: <Sparkles className="h-5 w-5 text-neutral-500" />,
+    },
+    {
+      title: "Platform Stats",
+      description: <span className="text-sm">Growing network of students and colleges</span>,
+      header: <StatsSkeleton />,
+      className: "md:col-span-1",
+      icon: <Activity className="h-5 w-5 text-neutral-500" />,
+    },
+    {
+      title: "Tech Fest 2025",
+      description: <span className="text-sm">Join the upcoming campus-wide tech festival</span>,
+      header: <EventSkeleton />,
+      className: "md:col-span-1",
+      icon: <Calendar className="h-5 w-5 text-neutral-500" />,
+    },
+    {
+      title: "Create Club Rooms",
+      description: <span className="text-sm">Host virtual meetings and discussions instantly</span>,
+      header: <ClubRoomSkeleton />,
+      className: "md:col-span-1",
+      icon: <MessageCircle className="h-5 w-5 text-neutral-500" />,
+    },
+    {
+      title: "Key Features",
+      description: <span className="text-sm">Tools designed for campus networking</span>,
+      header: <FeaturesSkeleton />,
+      className: "md:col-span-1",
+      icon: <BookOpen className="h-5 w-5 text-neutral-500" />,
+    },
+   
+
   ];
-  
-  // Featured colleges
-  const colleges = [
-    "Tyler School of Martial Arts",
-    "Nikumb College of Design and Fashion",
-    "Ved School of Drama and Philosophy",
-    "Barney Stinson College of Simping",
-    "B99 Army College of Engineering"
-  ];
-  
+
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center py-20 md:py-32 overflow-hidden"
+      className="relative min-h-screen py-16 md:py-24 overflow-hidden bg-black"
     >
-      {/* Minimalist background */}
+      {/* Background elements */}
       <div className="absolute inset-0 z-0">
-        <Image
-          src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/photo_2025-05-23_20-16-14.jpg?updatedAt=1748011606544"
-          alt="Hero Background"
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
-        {/* Simple dark overlay */}
-        <div className="absolute inset-0 bg-black/80"></div>
-        
-        {/* Minimal accent lines */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 to-transparent"></div>
         <div className="absolute bottom-0 right-0 w-full h-1 bg-gradient-to-l from-yellow-500 to-transparent"></div>
       </div>
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 w-full">
-        {/* Hero Content */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isVisible ? 1 : 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-16 text-center"
-        >
+      
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+        <div className="text-center mb-12">
           <motion.div 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
             className="flex items-center justify-center gap-2 mb-4"
           >
             <div className="w-10 h-10 bg-yellow-500 rounded-md flex items-center justify-center">
@@ -102,215 +278,29 @@ const ZynvoDashboard = () => {
           <motion.h1
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            className="text-4xl md:text-6xl font-bold mb-6 text-white"
+            transition={{ delay: 0.2 }}
+            className="text-4xl md:text-5xl font-bold mb-6 text-white"
           >
-            Your Campus <br className="md:hidden" />
-            <span className="text-yellow-500">
-              Connection Hub
-            </span>
+            Your Campus <AuroraText className="text-yellow-500  to-yellow-900">Connection Hub</AuroraText>
           </motion.h1>
+        </div>
 
-          <motion.p
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.4 }}
-            className="text-gray-300 max-w-2xl mx-auto mb-8 text-lg"
-          >
-            Connect with clubs, discover events, and build your campus network all in one place.
-          </motion.p>
-
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.5 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-          >
-            <Button className="bg-yellow-500 hover:bg-yellow-600 text-black px-8 py-2 rounded-md text-lg font-medium">
-              Zync it
-            </Button>
-            <Button variant="outline" className="border-yellow-500/50 text-yellow-500  px-8 py-2 rounded-md text-lg font-medium">
-              Learn More
-            </Button>
-          </motion.div>
-        </motion.div>
-
-        {/* Stats Section - Minimalist */}
-        <motion.div
-          initial={{ y: 40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.6 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16"
-        >
-          {stats.map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
-              className="bg-black/50 rounded-md p-6 border border-gray-800"
-            >
-              <div className="text-3xl font-bold text-white mb-2">
-                {stat.value}
-              </div>
-              <div className="flex items-center text-gray-400 text-sm">
-                <span className="mr-2 text-yellow-500">{stat.icon}</span>
-                {stat.label}
-              </div>
-            </motion.div>
+        {/* Use the imported BentoGrid component */}
+        <BentoGrid className="max-w-6xl mx-auto md:auto-rows-[20rem]">
+          {items.map((item, i) => (
+            <BentoGridItem
+              key={i}
+              title={item.title}
+              description={item.description}
+              header={item.header}
+              className={cn("[&>p:text-lg]", item.className)}
+              icon={item.icon}
+            />
           ))}
-        </motion.div>
-        
-        {/* Feature Cards - Minimalist */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 1 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16"
-        >
-          {/* Main Feature Card */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 1.1 }}
-            className="border border-gray-800 rounded-md p-6 relative"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <Calendar className="w-5 h-5 text-yellow-500" />
-              <span className="text-yellow-500 text-sm font-medium">FEATURED</span>
-            </div>
-            
-            <h2 className="text-xl font-bold text-white mb-4">
-              Join the upcoming Tech Fest 2025
-            </h2>
-            
-            <p className="text-gray-300 mb-6 text-sm">
-              Connect with innovative tech clubs, participate in hackathons, and showcase your projects.
-            </p>
-            
-            
-            <Button className="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-md">
-              <Link href="/events">Register</Link>
-            </Button>
-          </motion.div>
-          
-          {/* Secondary Feature Card */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 1.2 }}
-            className="border border-gray-800 rounded-md p-6"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <BookOpen className="w-5 h-5 text-yellow-500" />
-              <span className="text-yellow-500 text-sm font-medium">NEW FEATURE</span>
-            </div>
-            
-            <h2 className="text-xl font-bold text-white mb-4">
-              Create Instant Club Rooms
-            </h2>
-            
-            <p className="text-gray-300 mb-6 text-sm">
-              Host virtual meetings and discussions for your club members with our new collaborative spaces.
-            </p>
-            
-            <Button variant="outline" className="border-yellow-500/50 text-yellow-500  px-4 py-2 rounded-md">
-              <span className='text-outline'>
-                <Link href="/resources">
-                  Try Now
-                </Link>
-                Try Now</span>  
-            </Button>
-          </motion.div>
-          
-          {/* Feature List - Minimal cards */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 1.3 }}
-            className="border border-gray-800 rounded-md p-6 md:col-span-2"
-          >
-            <h2 className="text-xl font-bold text-white mb-6">Key Features</h2>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                {
-                  title: "Club Discovery",
-                  description: "Find clubs matching your interests",
-                  icon: <BookOpen className="w-5 h-5 text-yellow-500" />,
-                },
-                {
-                  title: "Network Builder",
-                  description: "Connect with like-minded students",
-                  icon: <Users className="w-5 h-5 text-yellow-500" />,
-                },
-                {
-                  title: "Event Management",
-                  description: "Create and manage campus events",
-                  icon: <Calendar className="w-5 h-5 text-yellow-500" />,
-                },
-                {
-                  title: "Growth Analytics",
-                  description: "Track club engagement metrics",
-                  icon: <TrendingUp className="w-5 h-5 text-yellow-500" />,
-                }
-              ].map((feature, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    {feature.icon}
-                    <h3 className="font-bold text-white">{feature.title}</h3>
-                  </div>
-                  <p className="text-gray-400 text-sm">{feature.description}</p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </motion.div>
-        
-        {/* College List - Minimalist */}
-        <motion.div 
-          initial={{ y: 40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.7, delay: 1.4 }}
-          className="mb-16"
-        >
-          <div className="flex items-center gap-2 mb-8 justify-center">
-            <BadgeCheck className="w-5 h-5 text-yellow-500" />
-            <h2 className="text-xl font-bold text-white">Partner Colleges</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {colleges.map((college, index) => (
-              <motion.div 
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.5 + index * 0.1 }}
-                className="bg-black/30 border border-gray-800 p-4 rounded-md text-center"
-              >
-                <span className="text-lg text-white">{college}</span>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-        
-        {/* Minimal Call to Action */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 2 }}
-          className="text-center border-t border-gray-800 pt-16"
-        >
-          <h2 className="text-2xl font-bold text-white mb-4">
-            Ready to join your campus community?
-          </h2>
-          <Button className="bg-yellow-500 hover:bg-yellow-600 text-black px-8 py-2 rounded-md text-lg font-medium mt-4">
-            Sign Up Today
-          </Button>
-        </motion.div>
+        </BentoGrid>
       </div>
     </section>
   );
 };
 
-export default ZynvoDashboard;
+export default Features;

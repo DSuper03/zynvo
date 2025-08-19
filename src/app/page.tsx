@@ -22,6 +22,7 @@ import Testimonials from '@/components/testimonials';
 import Events from '@/components/Events';
 import Hero from '@/components/Hero';
 import Footer from '@/components/Footer';
+import Features from '@/components/features';
 export default function Home() {
   const heroRef = useRef(null);
 
@@ -83,8 +84,9 @@ export default function Home() {
         <LandingHeader />
 
         <Hero />
-
-        <ZynvoDashboard />
+{/*     
+        <ZynvoDashboard /> */}
+        <Features/>
 
         <HowItWorks />
         {/* Testimonials Section */}
