@@ -47,7 +47,7 @@ const ClubsPage = () => {
   useEffect(()=> {
      if (typeof window !== 'undefined') {
      const tok = localStorage.getItem("token")
-     if(tok) setToken(tok)
+     if(token) setToken(token)
       else {
        toast("login please")
        return;

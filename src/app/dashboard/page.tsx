@@ -1,9 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Calendar, BarChart2, User, X } from 'lucide-react';
+import { Calendar, BarChart2, User, X, BellDotIcon } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import Image from 'next/image';
+import { AuroraText } from '@/components/magicui/aurora-text';
 
 // Define interfaces for better type checking
 interface Event {
@@ -226,38 +229,55 @@ export default function ZynvoDashboard() {
   }
 
   return (
-    <div className="min-h-screen h-full bg-black text-gray-100">
+    <div className="min-h-screen h-full bg-black text-gray-100 pt-3">
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto pt-24 pb-8 px-4">
+      <main className="max-w-7xl mx-auto pt-24 pb- px-4">
         {/* Dashboard Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-white">Your Dashboard</h1>
+          <AuroraText className="text-4xl font-bold text-white">Welcome {userData.name}</AuroraText>
           <div className="flex space-x-4">
-            <button
+            <Button
               onClick={() => setShowProfileModal(true)}
               className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-4 py-2 rounded-full"
             >
               Complete Profile
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => navigate.push('/feedback')}
               className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-4 py-2 rounded-full"
             >
               Feature Request
-            </button>
+            </Button>
+            <Button className='bg-yellow-500'>
+              <BellDotIcon  className='text-black'/>
+            </Button>
           </div>
         </div>
 
         {/* Profile Card */}
         <div className="bg-gray-900 rounded-lg shadow-lg mb-8 overflow-hidden">
-          <div className="h-32 bg-gradient-to-r from-yellow-400 to-yellow-600"></div>
+          <div className="h-32 relative overflow-hidden">
+            <Image
+              src="/banners/profilebanner.jpg"
+              alt="Profile Banner"
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 ">
+              {/* Optional overlay */}
+            </div>
+          </div>
           <div className="relative px-6 pb-6">
             <div className="absolute -top-12 left-6">
               {userData.profileAvatar ? (
                 <img
                   className="w-24 h-24 rounded-full border-4 border-gray-900 bg-yellow-400"
                   src={userData.profileAvatar}
-                ></img>
+                  width={96}
+                  height={96}
+                  alt='your image'
+                />
               ) : (
                 <div className="w-24 h-24 rounded-full border-4 border-gray-900 bg-yellow-400 flex items-center justify-center text-gray-900 text-4xl font-bold">
                   {userData.name ? userData.name.charAt(0) : 'Z'}
@@ -330,6 +350,19 @@ export default function ZynvoDashboard() {
                 <h2 className="text-4xl font-bold text-white">
                   {userData.events?.length || 0}
                 </h2>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {userData.events && userData.events.length > 0 ? (
+                    userData.events.map(event => (
+                      <span key={event.id} 
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-yellow-400/20 text-yellow-300 border border-yellow-500/30">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {event.EventName}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-500 text-sm italic">No events attended yet</span>
+                  )}
+                </div>
               </div>
               <div className="bg-yellow-400 p-3 rounded-full">
                 <Calendar className="w-6 h-6 text-gray-900" />

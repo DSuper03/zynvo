@@ -206,7 +206,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
             <div className="ml-3">
               {/* <p className="text-sm font-medium text-white">Anirban </p>
               <p className="text-xs text-gray-400">@anirban001@gmail.com</p> */}
-              <p className='text-lg font-extrabold text-yellow-300'>Zync it!</p>
+              <p className='text-lg font-extrabold text-yellow-300 text-'>Zync it!</p>
             </div>
           </div>
         </div>
