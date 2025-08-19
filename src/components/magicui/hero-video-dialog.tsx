@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Play, XIcon } from 'lucide-react';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 
 import { cn } from '@/lib/utils';
 

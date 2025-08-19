@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import Link from 'next/link';
 import WrapButton from './ui/wrap-button';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { Button } from './ui/button';
 
 const Events = () => {
@@ -20,7 +20,8 @@ const Events = () => {
           <Image
             src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/20250524_1536_LEGO%20College%20Life_remix_01jw0w1w0jfv9am8a3bxcg8erg.png?updatedAt=1748081232078"
             alt="Hero Background"
-            fill
+            width={1920}
+            height={1080}
             priority
             className="object-cover"
             sizes="100vw"

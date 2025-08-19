@@ -1,5 +1,5 @@
 import React from 'react';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { 
   Facebook, 
   Twitter, 
@@ -90,9 +90,7 @@ function Footer() {
             </div>
             {/* Product Links */}
             <div className="space-y-6">
-              <h3 className="text-xl font-semibold text-yellow-400 border-b border-yellow-500/30 pb-2">
-                Product
-              </h3>
+             
             
             </div>
             {/* Resources & Social */}

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { JoinClubModalProps } from '@/types/global-Interface';
 import axios from 'axios';
 import { toast } from 'sonner';

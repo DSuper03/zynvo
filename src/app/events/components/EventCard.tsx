@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Modal, ModalTrigger } from '@/components/ui/animated-modal';
 import { eventData } from '@/types/global-Interface';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import axios from 'axios';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';

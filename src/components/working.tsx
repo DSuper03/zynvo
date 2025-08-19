@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaUsers, FaSearch, FaCalendarAlt, FaRocket } from 'react-icons/fa';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 
 // How It Works Section
 const HowItWorks = () => {
@@ -16,7 +16,8 @@ const HowItWorks = () => {
         <Image
           src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/20250520_1731_LEGO%20College%20Festivities_simple_compose_01jvps0810emxrm5zr3tre0vas%20(1).png?updatedAt=1748011509153"
           alt="Hero Background"
-          fill
+          width={1920}
+          height={1080}
           priority
           className="object-cover"
           sizes="100vw"

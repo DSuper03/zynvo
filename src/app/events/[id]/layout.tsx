@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { Tablist } from '@/components/Tablist';
 import { EventLayoutProps } from '@/types/global-Interface';
 
@@ -23,7 +23,8 @@ export default function EventLayout({ children, params }: EventLayoutProps) {
             <Image
               src="/landing.png"
               alt="Event Banner"
-              fill
+              width={1920}
+              height={1080}
               className="object-cover"
               priority
             />

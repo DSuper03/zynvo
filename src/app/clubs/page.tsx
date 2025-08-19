@@ -8,7 +8,7 @@ import Link from 'next/link';
 import CreateClubModal from './createclub';
 import JoinClubModal from './joinclub';
 import axios from 'axios';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { response } from '@/types/global-Interface';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';

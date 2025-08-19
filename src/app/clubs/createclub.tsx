@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { X, Upload, Camera } from 'lucide-react';
 import { CreateClubModalProps } from '@/types/global-Interface';
 import { toast } from 'sonner';

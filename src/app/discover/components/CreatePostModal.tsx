@@ -11,7 +11,7 @@ import {
   School,
   Search,
 } from 'lucide-react';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { MagicCard } from '@/components/magicui/magic-card';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -251,7 +251,8 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                     <Image
                       src={url}
                       alt={`Preview ${index + 1}`}
-                      fill
+                      width={400}
+                      height={300}
                       className="object-cover"
                     />
                     <button

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { Lens } from './magicui/lens';
 
 // Animation transition settings

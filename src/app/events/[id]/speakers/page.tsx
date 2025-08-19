@@ -8,7 +8,7 @@ import {
   FaMicrophone,
   FaGavel,
 } from 'react-icons/fa';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';

@@ -12,7 +12,7 @@ import {
 import LandingHeader from '@/components/landingHeader';
 import WrapButton from '@/components/ui/wrap-button';
 import HeroVideoDialog from '@/components/magicui/hero-video-dialog';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import Link from 'next/link';
 import ZynvoDashboard from '@/components/features';
 import HowItWorks from '@/components/working';
@@ -90,7 +90,7 @@ export default function Home() {
 
         <HowItWorks />
         {/* Testimonials Section */}
-        <Testimonials />
+        {/* <Testimonials /> */}
 
         {/* Event Highlights Section */}
         <Events />

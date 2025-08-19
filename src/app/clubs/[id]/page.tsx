@@ -3,7 +3,7 @@
 //need to add a leave club button
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import Link from 'next/link';
 import {
   CalendarDays,
@@ -191,7 +191,7 @@ export default function ClubPage({}: ClubPageProps) {
             <Image
               src={club.image || 'default-club-image.jpg'}
               alt={club.name}
-              fill
+              
               width={128}
               height={128}
               className="object-cover"
@@ -416,7 +416,7 @@ export default function ClubPage({}: ClubPageProps) {
                       <Image
                         src={event.image || '/default-event-image.jpg'}
                         alt={event.title || 'Event Image'}
-                        fill
+                        
                         width={100}
                         height={100}
                         className="object-cover"

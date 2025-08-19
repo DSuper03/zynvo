@@ -1,7 +1,7 @@
 'use client';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import {
   Heart,
   MessageCircle,
@@ -156,13 +156,13 @@ export default function Feed() {
             <div className="space-y-4 sm:space-y-6">
               {isLoading ? (
                 // Loading state
-                <div className="flex justify-center items-center py-8">
+                (<div className="flex justify-center items-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
                   <span className="ml-3 text-yellow-400">Loading posts...</span>
-                </div>
+                </div>)
               ) : error ? (
                 // Error state
-                <div className="bg-red-900/20 border border-red-500/30 rounded-md p-4">
+                (<div className="bg-red-900/20 border border-red-500/30 rounded-md p-4">
                   <p className="text-red-400">{error}</p>
                   <button 
                     onClick={() => window.location.reload()} 
@@ -170,7 +170,7 @@ export default function Feed() {
                   >
                     Try again
                   </button>
-                </div>
+                </div>)
               ) : posts && posts.length > 0 ? (
                
                 posts.map((post) => (
@@ -225,7 +225,7 @@ export default function Feed() {
                 ))
               ) : (
                 // No posts state
-                <div className="text-center py-12">
+                (<div className="text-center py-12">
                   <div className="bg-gray-800 rounded-lg p-8 border border-yellow-500/20">
                     <MessageCircle size={48} className="text-yellow-500 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-yellow-400 mb-2">
@@ -241,7 +241,7 @@ export default function Feed() {
                       Create Post
                     </Button>
                   </div>
-                </div>
+                </div>)
               )}
             </div>
           </div>
@@ -318,10 +318,7 @@ export default function Feed() {
 </div>
         </div>
       </div>
-
       {/* Mobile bottom navigation (visible only on mobile) */}
-    
-
       {/* Modal components */}
       <CreatePostModal
         isOpen={isPostModalOpen} // Pass modal state

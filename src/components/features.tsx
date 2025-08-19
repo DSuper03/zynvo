@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { AuroraText } from './magicui/aurora-text';
 
 // Custom Skeletons for Bento Grid Items
@@ -80,8 +80,10 @@ const EventSkeleton = () => {
       <Image
         src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/photo_2025-05-23_20-16-14.jpg?updatedAt=1748011606544"
         alt="Tech Fest"
-        fill
         className="object-cover"
+        width={400}
+        height={300}
+        
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-4">

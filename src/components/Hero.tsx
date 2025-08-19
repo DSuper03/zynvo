@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import WrapButton from './ui/wrap-button';
 import Link from 'next/link';
 import HeroVideoDialog from './magicui/hero-video-dialog';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 
 const Hero = () => {
   const heroRef = useRef(null);
@@ -18,7 +18,8 @@ const Hero = () => {
         <Image
           src="/landing page.png"
           alt="Hero Background"
-          fill
+          width={1920}
+          height={1080}
           priority
           className="object-cover"
           sizes="100vw"

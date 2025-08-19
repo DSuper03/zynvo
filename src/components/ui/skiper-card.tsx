@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type MouseEvent } from 'react';
-import Image, { type StaticImageData } from 'next/image';
+import Image, { type StaticImageData } from "next/legacy/image";
 import {
   motion,
   useMotionTemplate,

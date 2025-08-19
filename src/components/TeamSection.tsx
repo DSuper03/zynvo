@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import Link from 'next/link';
 import { useState } from 'react';
 import LandingHeader from './landingHeader';
@@ -170,7 +170,8 @@ const TeamSection = () => {
                 <Image
                   src={founder.image}
                   alt={founder.name}
-                  fill
+                  width={400}
+                  height={400}
                   className="object-cover"
                   sizes="(max-width: 768px) 128px, 160px"
                 />
@@ -201,7 +202,8 @@ const TeamSection = () => {
             <Image
               src={founders[activeFounder].image}
               alt={founders[activeFounder].name}
-              fill
+              width={400}
+              height={400}
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />

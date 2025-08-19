@@ -14,7 +14,7 @@ import {
   Mail,
   Phone,
 } from 'lucide-react';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { MagicCard } from '@/components/magicui/magic-card';
 import { Card } from '@/components/ui/card';
 import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
