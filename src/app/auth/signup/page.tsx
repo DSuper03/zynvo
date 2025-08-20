@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import { signupRes } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import CollegeSearchSelect from '@/components/colleges/collegeSelect';
+import { Button } from '@/components/ui/button';
 
 dotenv.config();
 
@@ -191,15 +192,7 @@ export default function SignUp() {
             {/* Step 1: Account Information */}
             {currentStep === 1 && (
               <>
-                {/* Social Sign-Up Options */}
-                <div className="flex flex-col space-y-3 mb-6">
-                  <button className="flex items-center justify-center space-x-2 w-full p-3 rounded-lg border border-gray-700 text-white hover:bg-gray-800 transition">
-                    <FaGoogle className="text-lg" />
-                    <span>Continue with Google</span>
-                  </button>
-                 
-                
-                </div>
+            
 
                 <div className="flex items-center justify-center mb-6">
                   <div className="h-px bg-gray-700 flex-1"></div>
@@ -279,13 +272,13 @@ export default function SignUp() {
                         required
                         minLength={8}
                       />
-                      <button
+                      <Button
                         type="button"
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? <FiEyeOff /> : <FiEye />}
-                      </button>
+                      </Button>
                     </div>
                     <p className="text-gray-400 text-xs mt-2">
                       Password must be at least 8 characters long.
@@ -360,13 +353,13 @@ export default function SignUp() {
                 </div>
 
                 <div className="flex space-x-4">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setCurrentStep(1)}
                     className="flex-1 py-3 px-4 rounded-lg border border-gray-700 text-white hover:bg-gray-800 transition"
                   >
                     Back
-                  </button>
+                  </Button>
 
                   <motion.button
                     type="submit"

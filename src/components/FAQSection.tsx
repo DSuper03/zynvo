@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import LandingHeader from './landingHeader';
 import { BackgroundElements } from './TeamSection';
+import { Button } from './ui/button';
 
 export interface FAQItem {
   question: string;
@@ -142,7 +143,7 @@ const FAQSection = () => {
         {/* Category Filter */}
         <div className="flex flex-wrap justify-center gap-4 mb-12">
           {categories.map((category) => (
-            <button
+            <Button
               key={category}
               onClick={() => setActiveCategory(category)}
               className={`px-4 py-2 rounded-full transition-colors ${
@@ -152,7 +153,7 @@ const FAQSection = () => {
               }`}
             >
               {category}
-            </button>
+            </Button>
           ))}
         </div>
 

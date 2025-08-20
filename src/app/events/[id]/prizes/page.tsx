@@ -8,6 +8,7 @@ import {
   FaArrowRight,
 } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 
 export default function PrizePage() {
   // Animation variants for staggered animations
@@ -75,10 +76,10 @@ export default function PrizePage() {
               </ul>
             </div>
             <div className="px-6 pb-6">
-              <button className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-semibold py-2 px-4 rounded-lg w-full flex justify-center items-center space-x-2 hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300">
+              <Button className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-semibold py-2 px-4 rounded-lg w-full flex justify-center items-center space-x-2 hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300">
                 <span>Claim Your Glory</span>
                 <FaArrowRight />
-              </button>
+              </Button>
             </div>
           </motion.div>
 
@@ -113,10 +114,10 @@ export default function PrizePage() {
               </ul>
             </div>
             <div className="px-6 pb-6">
-              <button className="bg-gradient-to-r from-yellow-500/80 to-yellow-600/80 text-black font-semibold py-2 px-4 rounded-lg w-full flex justify-center items-center space-x-2 hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300">
+              <Button className="bg-gradient-to-r from-yellow-500/80 to-yellow-600/80 text-black font-semibold py-2 px-4 rounded-lg w-full flex justify-center items-center space-x-2 hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300">
                 <span>Silver Status</span>
                 <FaArrowRight />
-              </button>
+              </Button>
             </div>
           </motion.div>
 
@@ -151,10 +152,10 @@ export default function PrizePage() {
               </ul>
             </div>
             <div className="px-6 pb-6">
-              <button className="bg-gradient-to-r from-yellow-600/60 to-yellow-700/60 text-black font-semibold py-2 px-4 rounded-lg w-full flex justify-center items-center space-x-2 hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300">
+              <Button className="bg-gradient-to-r from-yellow-600/60 to-yellow-700/60 text-black font-semibold py-2 px-4 rounded-lg w-full flex justify-center items-center space-x-2 hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300">
                 <span>Bronze Contender</span>
                 <FaArrowRight />
-              </button>
+              </Button>
             </div>
           </motion.div>
         </motion.div>
@@ -289,10 +290,10 @@ export default function PrizePage() {
             </div>
           </div>
 
-          <button className="mt-6 bg-yellow-400 text-black font-bold py-3 px-6 rounded-lg hover:bg-yellow-500 transition duration-300 flex items-center justify-center space-x-2 w-full md:w-auto">
+          <Button className="mt-6 bg-yellow-400 text-black font-bold py-3 px-6 rounded-lg hover:bg-yellow-500 transition duration-300 flex items-center justify-center space-x-2 w-full md:w-auto">
             <span>Download Contest Rules</span>
             <FaArrowRight />
-          </button>
+          </Button>
         </motion.div>
       </div>
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaUniversity } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 const Category = () => {
   const heroRef = React.useRef(null);
   return (
@@ -16,7 +16,7 @@ const Category = () => {
           <Image
             src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/photo_2025-05-23_20-16-18.jpg?updatedAt=1748011606531"
             alt="Hero Background"
-            fill
+            
             priority
             className="object-cover"
             sizes="100vw"

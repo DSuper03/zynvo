@@ -10,18 +10,12 @@ import {
 } from 'react-icons/fa';
 
 import LandingHeader from '@/components/landingHeader';
-import WrapButton from '@/components/ui/wrap-button';
-import HeroVideoDialog from '@/components/magicui/hero-video-dialog';
-import Image from 'next/image';
-import Link from 'next/link';
-import ZynvoDashboard from '@/components/features';
 import HowItWorks from '@/components/working';
-import Category from '@/components/category';
 
-import Testimonials from '@/components/testimonials';
 import Events from '@/components/Events';
 import Hero from '@/components/Hero';
 import Footer from '@/components/Footer';
+import Features from '@/components/features';
 export default function Home() {
   const heroRef = useRef(null);
 
@@ -83,12 +77,13 @@ export default function Home() {
         <LandingHeader />
 
         <Hero />
-
-        <ZynvoDashboard />
+{/*     
+        <ZynvoDashboard /> */}
+        <Features/>
 
         <HowItWorks />
         {/* Testimonials Section */}
-        <Testimonials />
+        {/* <Testimonials /> */}
 
         {/* Event Highlights Section */}
         <Events />

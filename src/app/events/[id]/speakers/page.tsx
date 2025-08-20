@@ -8,11 +8,12 @@ import {
   FaMicrophone,
   FaGavel,
 } from 'react-icons/fa';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
 import dotenv from "dotenv"
+import { Button } from '@/components/ui/button';
 
 dotenv.config()
 
@@ -313,15 +314,15 @@ const Speakers = () => {
               Add new speakers to your event or manage existing ones. Build your expert panel to share knowledge with the community.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
+              <Button
                 onClick={() => setIsModalOpen(true)}
                 className="px-8 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all duration-300 transform hover:-translate-y-1"
               >
                 Add Speaker
-              </button>
-              <button className="px-8 py-3 bg-transparent border-2 border-yellow-400 text-yellow-400 font-bold rounded-lg hover:bg-yellow-400 hover:text-black transition-all duration-300 transform hover:-translate-y-1">
+              </Button>
+              <Button className="px-8 py-3 bg-transparent border-2 border-yellow-400 text-yellow-400 font-bold rounded-lg hover:bg-yellow-400 hover:text-black transition-all duration-300 transform hover:-translate-y-1">
                 Manage Speakers
-              </button>
+              </Button>
             </div>
           </motion.section>
         )}
@@ -337,14 +338,14 @@ const Speakers = () => {
             >
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-bold text-white">Add New Speaker</h3>
-                <button
+                <Button
                   onClick={() => setIsModalOpen(false)}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                </button>
+                </Button>
               </div>
 
               <form onSubmit={(e) => { e.preventDefault(); handleAddSpeaker(); }} className="space-y-4">
@@ -400,19 +401,19 @@ const Speakers = () => {
                 </div>
 
                 <div className="flex gap-4 pt-4">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
                     className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="submit"
                     className="flex-1 px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-colors"
                   >
                     Add Speaker
-                  </button>
+                  </Button>
                 </div>
               </form>
             </motion.div>

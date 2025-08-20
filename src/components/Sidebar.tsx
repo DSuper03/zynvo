@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import {
   Home,
   Search,
@@ -49,7 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
         data : {
         name : string,
         profileAvatar : string
-      }}>(`${process.env.NET_PUBLIC_BACKEND_URL}/api/v1/user/getSidebarUser`, {
+      }}>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getSidebarUser`, {
         headers : {
           authorization : `Bearer ${token}`
         }
@@ -206,7 +206,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
             <div className="ml-3">
               {/* <p className="text-sm font-medium text-white">Anirban </p>
               <p className="text-xs text-gray-400">@anirban001@gmail.com</p> */}
-              <p className='text-lg font-extrabold text-yellow-300'>Zync it!</p>
+              <p className='text-lg font-extrabold text-yellow-300 text-'>Zync it!</p>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 'use client';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import React, { useEffect, useState, useRef } from 'react';
+import Image from "next/legacy/image";
 import {
   Heart,
   MessageCircle,
@@ -14,6 +14,7 @@ import CreatePostButton from './components/CreatePostButton';
 import CreatePostModal from './components/CreatePostModal';
 import { PostData } from '@/types/global-Interface';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 // Define the API response type
 interface ApiResponse {
@@ -34,6 +35,35 @@ export default function Feed() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+  // Slider events data
+  const sliderEvents = [
+    {
+      img: "/posters/1.png",
+      title: "Tech Conference",
+      desc: "Join the latest in tech innovation.",
+    },
+    {
+      img: "/posters/2.png",
+      title: "Music Festival",
+      desc: "Experience live music and fun.",
+    },
+    {
+      img: "/posters/4.png",
+      title: "Art Expo",
+      desc: "Explore creative artworks.",
+    },
+  ];
+  const [slideIdx, setSlideIdx] = useState(0);
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  // Auto-slide effect for mobile
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSlideIdx((idx) => (idx + 1) % sliderEvents.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [sliderEvents.length]);
 
   // Fetch posts with pagination
   useEffect(() => {
@@ -103,24 +133,7 @@ export default function Feed() {
                   </Button>
                   
                   {/* User Avatar */}
-                  <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-black font-bold shadow-md overflow-hidden">
-                    
-                    <Image
-                      src="/api/placeholder/40/40" 
-                      alt="User Avatar"
-                      width={40}
-                      height={40}
-                      className="rounded-full object-cover"
-                      onError={(e) => {
-                        
-                        e.currentTarget.style.display = 'none';
-                        
-                      }}
-                    />
-                    <div className="w-full h-full bg-yellow-500 rounded-full items-center justify-center text-black font-bold text-sm hidden">
-                      U 
-                    </div>
-                  </div>
+                 
                 </div>
               </div>
 
@@ -135,7 +148,7 @@ export default function Feed() {
               {/* Tab navigation - Hidden on mobile */}
               <div className="hidden sm:block overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                 <div className="flex space-x-2 min-w-max">
-                  <button
+                  <Button
                     onClick={() => setActiveTab('recents')}
                     className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
                       activeTab === 'recents'
@@ -144,8 +157,8 @@ export default function Feed() {
                     }`}
                   >
                     Recents
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => setActiveTab('friends')}
                     className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
                       activeTab === 'friends'
@@ -154,8 +167,8 @@ export default function Feed() {
                     }`}
                   >
                     Friends
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => setActiveTab('popular')}
                     className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
                       activeTab === 'popular'
@@ -164,7 +177,46 @@ export default function Feed() {
                     }`}
                   >
                     Popular
-                  </button>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile slider: now placed above posts */}
+            <div className="lg:hidden mt-2">
+              <div className="relative w-full overflow-hidden" ref={sliderRef}>
+                <div className="flex transition-transform duration-700"
+                  style={{ transform: `translateX(-${slideIdx * 100}%)` }}>
+                  {sliderEvents.map((ev, i) => (
+                    <div key={i} className="min-w-full px-2">
+                      <Card className="group cursor-pointer">
+                        <div className="relative overflow-hidden rounded-lg mb-2">
+                          <div className="aspect-[3/4] bg-gray-700 rounded-lg overflow-hidden">
+                            <Image
+                              src={ev.img}
+                              alt={ev.title}
+                              layout="fill"
+                              className="object-cover transition-transform group-hover:scale-105"
+                            />
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                            <span className="text-black text-xs font-medium px-2 py-1 rounded-full">{ev.title}</span>
+                          </div>
+                        </div>
+                        <h4 className="font-medium text-white transition-colors">{ev.title}</h4>
+                        <p className="text-xs text-gray-400">{ev.desc}</p>
+                      </Card>
+                    </div>
+                  ))}
+                </div>
+                {/* Dots indicator */}
+                <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2">
+                  {sliderEvents.map((_, i) => (
+                    <span
+                      key={i}
+                      className={`inline-block w-2 h-2 rounded-full ${slideIdx === i ? 'bg-yellow-400' : 'bg-gray-600'}`}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
@@ -173,21 +225,21 @@ export default function Feed() {
             <div className="space-y-4 sm:space-y-6">
               {isLoading ? (
                 // Loading state
-                <div className="flex justify-center items-center py-8">
+                (<div className="flex justify-center items-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
                   <span className="ml-3 text-yellow-400">Loading posts...</span>
-                </div>
+                </div>)
               ) : error ? (
                 // Error state
-                <div className="bg-red-900/20 border border-red-500/30 rounded-md p-4">
+                (<div className="bg-red-900/20 border border-red-500/30 rounded-md p-4">
                   <p className="text-red-400">{error}</p>
-                  <button 
+                  <Button 
                     onClick={() => window.location.reload()} 
                     className="mt-2 text-sm text-red-300 hover:text-red-200 underline"
                   >
                     Try again
-                  </button>
-                </div>
+                  </Button>
+                </div>)
               ) : posts && posts.length > 0 ? (
                
                 posts.map((post) => (
@@ -219,7 +271,7 @@ export default function Feed() {
                     </div>
 
                     {/* Post actions */}
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-700">
+                    {/* <div className="flex items-center justify-between pt-3 border-t border-gray-700">
                       <div className="flex items-center space-x-4">
                         <button className="flex items-center space-x-1 text-gray-400 hover:text-yellow-400 transition-colors group">
                           <Heart size={18} className="group-hover:scale-110 transition-transform" />
@@ -237,12 +289,12 @@ export default function Feed() {
                       <div className="text-xs text-gray-500">
                         {post.createdAt}
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 ))
               ) : (
                 // No posts state
-                <div className="text-center py-12">
+                (<div className="text-center py-12">
                   <div className="bg-gray-800 rounded-lg p-8 border border-yellow-500/20">
                     <MessageCircle size={48} className="text-yellow-500 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-yellow-400 mb-2">
@@ -258,19 +310,89 @@ export default function Feed() {
                       Create Post
                     </Button>
                   </div>
-                </div>
+                </div>)
               )}
             </div>
           </div>
 
           {/* Column 3: Sidebar (hidden on mobile) */}
-       
+          <div>
+            {/* Desktop sidebar */}
+            <div className="hidden lg:block">
+              <div className="sticky top-4">
+                <div className="bg-gray-800 rounded-lg border border-yellow-500/20 overflow-hidden">
+                  <div className="bg-gradient-to-r from-yellow-500 to-yellow-400 px-4 py-3">
+                    <h3 className="text-black font-semibold">Powered by Zynvo</h3>
+                  </div>
+                  <div className="space-y-4">
+                    {sliderEvents.map((ev, i) => (
+                      <Card key={i} className="group cursor-pointer">
+                        <div className="relative overflow-hidden rounded-lg mb-2">
+                          <div className="aspect-[3/4] bg-gray-700 rounded-lg overflow-hidden">
+                            <Image
+                              src={ev.img}
+                              alt={ev.title}
+                              layout="fill"
+                              className="object-cover transition-transform group-hover:scale-105"
+                            />
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                            <span className="text-black text-xs font-medium px-2 py-1 rounded-full">{ev.title}</span>
+                          </div>
+                        </div>
+                        <h4 className="font-medium text-white transition-colors">{ev.title}</h4>
+                        <p className="text-xs text-gray-400">{ev.desc}</p>
+                      </Card>
+                    ))}
+                    <Button className="w-full py-2 text-sm text-yellow-400 hover:text-yellow-300 transition-colors">
+                      View all events →
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Mobile slider */}
+            <div className="lg:hidden mt-4">
+              <div className="relative w-full overflow-hidden" ref={sliderRef}>
+                <div className="flex transition-transform duration-700"
+                  style={{ transform: `translateX(-${slideIdx * 100}%)` }}>
+                  {sliderEvents.map((ev, i) => (
+                    <div key={i} className="min-w-full px-2">
+                      <Card className="group cursor-pointer">
+                        <div className="relative overflow-hidden rounded-lg mb-2">
+                          <div className="aspect-[3/4] bg-gray-700 rounded-lg overflow-hidden">
+                            <Image
+                              src={ev.img}
+                              alt={ev.title}
+                              layout="fill"
+                              className="object-cover transition-transform group-hover:scale-105"
+                            />
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                            <span className="text-black text-xs font-medium px-2 py-1 rounded-full">{ev.title}</span>
+                          </div>
+                        </div>
+                        <h4 className="font-medium text-white transition-colors">{ev.title}</h4>
+                        <p className="text-xs text-gray-400">{ev.desc}</p>
+                      </Card>
+                    </div>
+                  ))}
+                </div>
+                {/* Dots indicator */}
+                <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2">
+                  {sliderEvents.map((_, i) => (
+                    <span
+                      key={i}
+                      className={`inline-block w-2 h-2 rounded-full ${slideIdx === i ? 'bg-yellow-400' : 'bg-gray-600'}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
       {/* Mobile bottom navigation (visible only on mobile) */}
-    
-
       {/* Modal components */}
       <CreatePostModal
         isOpen={isPostModalOpen} // Pass modal state

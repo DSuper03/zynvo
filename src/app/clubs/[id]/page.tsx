@@ -3,7 +3,7 @@
 //need to add a leave club button
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import Link from 'next/link';
 import {
   CalendarDays,
@@ -30,6 +30,7 @@ import {
   Response,
 } from '@/types/global-Interface';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 // Mock upcoming events
 
@@ -147,7 +148,7 @@ export default function ClubPage({}: ClubPageProps) {
     }
 
     call();
-  }, [id]); // Added id as dependency
+  }, [id, token]);
 
   if (!club) {
     return (
@@ -191,7 +192,7 @@ export default function ClubPage({}: ClubPageProps) {
             <Image
               src={club.image || 'default-club-image.jpg'}
               alt={club.name}
-              fill
+              
               width={128}
               height={128}
               className="object-cover"
@@ -416,7 +417,7 @@ export default function ClubPage({}: ClubPageProps) {
                       <Image
                         src={event.image || '/default-event-image.jpg'}
                         alt={event.title || 'Event Image'}
-                        fill
+                        
                         width={100}
                         height={100}
                         className="object-cover"
@@ -453,9 +454,9 @@ export default function ClubPage({}: ClubPageProps) {
                           <span className="text-sm">{100} going</span>
                         </div>
 
-                        <button className="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg text-sm font-medium transition-colors">
+                        <Button className="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg text-sm font-medium transition-colors">
                           RSVP
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -519,20 +520,20 @@ export default function ClubPage({}: ClubPageProps) {
                     )}
 
                     <div className="flex justify-between text-gray-400 border-t border-gray-700 pt-3">
-                      <button className="flex items-center hover:text-yellow-400">
+                      <Button className="flex items-center hover:text-yellow-400">
                         <Heart size={18} className="mr-1" />
                         <span>{post.likes}</span>
-                      </button>
+                      </Button>
 
-                      <button className="flex items-center hover:text-yellow-400">
+                      <Button className="flex items-center hover:text-yellow-400">
                         <MessageCircle size={18} className="mr-1" />
                         <span>{post.comments}</span>
-                      </button>
+                      </Button>
 
-                      <button className="flex items-center hover:text-yellow-400">
+                      <Button className="flex items-center hover:text-yellow-400">
                         <Share2 size={18} className="mr-1" />
                         <span>Share</span>
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -658,12 +659,12 @@ export default function ClubPage({}: ClubPageProps) {
                 Connect with like-minded peers and grow your skills.
               </p>
               {!isJoined && (
-                <button
+                <Button
                   onClick={() => setIsJoinModalOpen(true)}
                   className="w-full py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
                 >
                   Become a Member
-                </button>
+                </Button>
               )}
               {isJoined && (
                 <p className="font-medium text-black">You are a member! 🎉</p>

@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-import Image from 'next/image';
+import Image from "next/legacy/image";
 const Testimonials = () => {
   const heroRef = React.useRef(null);
   return (
@@ -16,7 +16,8 @@ const Testimonials = () => {
           <Image
             src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/photo_2025-05-23_20-16-08.jpg?updatedAt=1748011607137"
             alt="Hero Background"
-            fill
+            width={1920}
+            height={1080}
             priority
             className="object-cover"
             sizes="100vw"
@@ -45,7 +46,7 @@ const Testimonials = () => {
               image: '/student1.png',
               },
               {
-              name: 'Meera Patel',
+              name: 'import  ',
               role: 'Member, Cultural Society',
               university: 'Delhi University',
               quote:

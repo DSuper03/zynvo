@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Camera, Trash2, Image, Send, Award, School } from 'lucide-react';
-
+import { Camera, Trash2, Send, Award, School } from 'lucide-react';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
 export default function CreatePostModal() {
   const [postText, setPostText] = useState('');
   const [selectedClub, setSelectedClub] = useState('');
@@ -12,7 +13,7 @@ export default function CreatePostModal() {
   const [isLoading, setIsLoading] = useState(false);
   const [bgLoaded, setBgLoaded] = useState(false);
 
-  // Simulate background image loading
+ 
   useEffect(() => {
     // This would normally load an actual image from public folder
     // Here we're just simulating the loading with a timeout
@@ -186,7 +187,7 @@ export default function CreatePostModal() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-yellow-500 font-medium">
-                <Image size={18} />
+               
                 Add Photos
               </label>
               <span className="text-sm text-gray-400">
@@ -202,18 +203,19 @@ export default function CreatePostModal() {
                     key={index}
                     className="relative aspect-square bg-gray-800 bg-opacity-50 rounded-lg overflow-hidden"
                   >
-                    <img
-                      src="/api/placeholder/150/150"
-                      alt="Preview"
-                      className="w-full h-full object-cover opacity-80"
+                    <Image
+                      src={url}
+                      alt={`Preview ${index + 1}`}
+                      layout="fill"
+                      className="object-cover opacity-80"
                     />
-                    <button
+                    <Button
                       type="button"
                       onClick={() => removeImage(index)}
                       className="absolute top-1 right-1 bg-black bg-opacity-70 rounded-full p-1 hover:bg-red-500 transition-colors"
                     >
                       <Trash2 size={16} />
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -244,7 +246,7 @@ export default function CreatePostModal() {
 
           {/* Submit button */}
           <div className="pt-4">
-            <button
+            <Button
               type="button"
               onClick={handleSubmit}
               disabled={
@@ -271,7 +273,7 @@ export default function CreatePostModal() {
                   <span>Post Now</span>
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </div>
 
