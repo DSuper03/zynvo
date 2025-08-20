@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Trophy, Filter, Search, TrendingUp, Users, Calendar, MapPin } from 'lucide-react';
+import Image from 'next/image';
 
 // Mock data for clubs (theme intact)
 const clubsData = [
@@ -198,7 +199,7 @@ export default function LeaderboardPage() {
       {/* Region chips */}
       <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1">
         {['Worldwide', 'India', 'Maharashtra', 'Gujrat'].map((r) => (
-          <button
+          <Button
             key={r}
             onClick={() => setRegion(r)}
             className={`px-3 py-1.5 rounded-full text-xs sm:text-sm whitespace-nowrap border transition-colors ${
@@ -208,7 +209,7 @@ export default function LeaderboardPage() {
             }`}
           >
             {r}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -264,7 +265,7 @@ export default function LeaderboardPage() {
                 {/* 2nd */}
                 <div className="flex flex-col items-center">
                   <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full ring-2 ring-yellow-500/40 overflow-hidden shadow-lg">
-                    <img alt="2nd" className="w-full h-full object-cover" src={avatars[topThree[1]?.id ?? 0]} />
+                    <Image alt="2nd" width={500} height={500} className="w-full h-full object-cover" src={avatars[topThree[1]?.id ?? 0]} />
                   </div>
                   <div className="mt-2 text-center">
                     <div className="text-xs sm:text-sm text-gray-300 line-clamp-1">{topThree[1]?.name || '-'}</div>
@@ -336,7 +337,7 @@ export default function LeaderboardPage() {
                 )}
               </div>
               <div className="w-10 h-10 rounded-full overflow-hidden ring-1 ring-yellow-500/30">
-                <img alt={club.name} src={avatars[club.id]} className="w-full h-full object-cover" />
+                <Image alt={club.name} src={avatars[club.id]} layout="fill" className="object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-white truncate">{club.name}</div>
@@ -392,7 +393,7 @@ export default function LeaderboardPage() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-yellow-500/30">
-                          <img alt={club.name} src={avatars[club.id]} className="w-full h-full object-cover" />
+                          <Image alt={club.name} src={avatars[club.id]} layout="fill" className="object-cover" />
                         </div>
                         <div className="font-medium text-white">{club.name}</div>
                       </div>

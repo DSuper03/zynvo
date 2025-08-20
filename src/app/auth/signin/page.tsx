@@ -4,13 +4,14 @@ import { useState, ChangeEvent } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
-import { FiArrowRight, FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiArrowRight, FiUser, FiLock, FiEye, FiEyeOff, FiLoader } from 'react-icons/fi';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { signinRes } from '@/types/global-Interface';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 dotenv.config();
 // const BASE_URL = process.env.BASE_URL
@@ -25,6 +26,7 @@ export default function SignIn() {
     password: '',
   });
   const [rememberMe, setRem] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -42,20 +44,24 @@ export default function SignIn() {
       });
       return;
     }
-    const msg = await axios.post<signinRes>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
-      formData
-    );
-    if (!msg) {
-      toast('Some Internal Server Error Occured');
-    } else if (msg && msg.data.msg !== 'login success') {
-      toast(msg.data.msg);
-    }
-    if (msg.data.msg == 'login success') {
-      localStorage.setItem('token', msg.data.token);
-      toast('login success');
-      router.push('/dashboard');
-    }
+    setLoading(true);
+    setTimeout(async () => {
+      const msg = await axios.post<signinRes>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
+        formData
+      );
+      setLoading(false);
+      if (!msg) {
+        toast('Some Internal Server Error Occured');
+      } else if (msg && msg.data.msg !== 'login success') {
+        toast(msg.data.msg);
+      }
+      if (msg.data.msg == 'login success') {
+        localStorage.setItem('token', msg.data.token);
+        toast('login success');
+        router.push('/dashboard');
+      }
+    }, 5000); // 5 seconds delay
   };
 
   return (
@@ -194,7 +200,7 @@ export default function SignIn() {
                     href="/auth/forgot-password"
                     className="text-sm text-yellow-500 hover:text-yellow-400 transition"
                   >
-                  
+                    
                   </Link>
                 </div>
                 <div className="relative">
@@ -209,13 +215,13 @@ export default function SignIn() {
                     placeholder="••••••••"
                     required
                   />
-                  <button
+                  <Button
                     type="button"
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <FiEyeOff /> : <FiEye />}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -242,9 +248,19 @@ export default function SignIn() {
                 type="submit"
                 className="w-full flex items-center justify-center py-3 px-4 rounded-lg bg-yellow-500 text-black font-medium hover:bg-yellow-400 transition duration-300 transform hover:-translate-y-1"
                 whileTap={{ scale: 0.98 }}
+                disabled={loading}
               >
-                <span>Sign In</span>
-                <FiArrowRight className="ml-2" />
+                {loading ? (
+                  <>
+                    <FiLoader className="animate-spin mr-2" />
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    <span>Sign In</span>
+                    <FiArrowRight className="ml-2" />
+                  </>
+                )}
               </motion.button>
             </form>
 

@@ -284,6 +284,7 @@ export default function ZynvoEventsPage() {
         </div>
 
         {/* Pagination Controls */}
+
         {!isLoading && !error && totalPages > 1 && (
           <div className="flex flex-wrap justify-center items-center gap-2 mt-8 py-4">
             <Button

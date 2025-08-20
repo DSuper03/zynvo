@@ -46,7 +46,7 @@ const ClubsPage = () => {
 
   useEffect(()=> {
      if (typeof window !== 'undefined') {
-     const tok = localStorage.getItem("token")
+     const token = localStorage.getItem("token")
      if(token) setToken(token)
       else {
        toast("login please")
@@ -391,7 +391,7 @@ const ClubsPage = () => {
       {totalPages > 1 && (
         <div className="flex justify-center items-center gap-2 mt-8">
           {Array.from({ length: totalPages }, (_, idx) => (
-            <button
+            <Button
               key={idx + 1}
               onClick={() => setCurrentPage(idx + 1)}
               className={`px-3 py-1 rounded ${
@@ -401,7 +401,7 @@ const ClubsPage = () => {
               }`}
             >
               {idx + 1}
-            </button>
+            </Button>
           ))}
         </div>
       )}

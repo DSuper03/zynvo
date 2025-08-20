@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Menu, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function RootLayout({
   children,
@@ -39,13 +40,13 @@ export default function RootLayout({
     <div className="flex flex-col md:flex-row h-screen bg-black">
       {/* Mobile Menu Toggle Button */}
       {isMobileView && (
-        <button
+        <Button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="fixed top-4 left-4 z-50 p-2 bg-gray-800 rounded-md text-white"
           aria-label="Toggle menu"
         >
           {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        </Button>
       )}
 
       {/* Sidebar - hidden on mobile by default, shown when toggled */}

@@ -65,7 +65,6 @@ const Eventid = () => {
             contactPhone: res.data.response.contactPhone || 0,
             applicationStatus: res.data.response.applicationStatus || 'open'
           });
-          console.log("data is here for events:", data);
         }
       } catch (error) {
         console.error('Error fetching event data:', error);

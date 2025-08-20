@@ -10,15 +10,8 @@ import {
 } from 'react-icons/fa';
 
 import LandingHeader from '@/components/landingHeader';
-import WrapButton from '@/components/ui/wrap-button';
-import HeroVideoDialog from '@/components/magicui/hero-video-dialog';
-import Image from "next/legacy/image";
-import Link from 'next/link';
-import ZynvoDashboard from '@/components/features';
 import HowItWorks from '@/components/working';
-import Category from '@/components/category';
 
-import Testimonials from '@/components/testimonials';
 import Events from '@/components/Events';
 import Hero from '@/components/Hero';
 import Footer from '@/components/Footer';

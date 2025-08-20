@@ -180,12 +180,12 @@ const SkillsModal = ({ skill, isOpen, onClose }: { skill: string, isOpen: boolea
             </div>
           </div>
           
-          <button
+          <Button
             onClick={onClose}
             className="w-full mt-4 sm:mt-6 bg-yellow-400 text-gray-900 py-2 rounded-lg font-medium hover:bg-yellow-500 transition-colors text-sm sm:text-base"
           >
             Explore More
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -304,7 +304,7 @@ const TagSelector = ({
       <div className="max-h-60 overflow-y-auto bg-gray-800 rounded-lg p-3 border border-gray-700">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {displayTags.map(tag => (
-            <button
+            <Button
               key={tag}
               type="button"
               onClick={() => toggleTag(tag)}
@@ -317,28 +317,28 @@ const TagSelector = ({
               `}
             >
               {tag}
-            </button>
+            </Button>
           ))}
         </div>
         
         {!showAll && filteredTags.length > 30 && (
-          <button
+          <Button
             type="button"
             onClick={() => setShowAll(true)}
             className="mt-3 text-yellow-400 text-xs hover:text-yellow-300 transition-colors"
           >
             Show {filteredTags.length - 30} more tags...
-          </button>
+          </Button>
         )}
         
         {showAll && (
-          <button
+          <Button
             type="button"
             onClick={() => setShowAll(false)}
             className="mt-3 text-yellow-400 text-xs hover:text-yellow-300 transition-colors"
           >
             Show fewer tags
-          </button>
+          </Button>
         )}
       </div>
       
@@ -620,12 +620,12 @@ export default function ZynvoDashboard() {
           <div className="relative px-4 sm:px-6 pb-4 sm:pb-6">
             <div className="absolute -top-8 sm:-top-12 left-4 sm:left-6">
               {userData.profileAvatar ? (
-                <img
-                  className="w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400"
+                <Image
+                  className="w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 object-cover"
                   src={userData.profileAvatar}
                   width={96}
                   height={96}
-                  alt="your image"
+                  alt="User profile avatar"
                 />
               ) : (
                 <div className="w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 flex items-center justify-center text-gray-900 text-xl sm:text-3xl md:text-4xl font-bold">
@@ -769,12 +769,12 @@ export default function ZynvoDashboard() {
           <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4">
             <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-700">
               <h2 className="text-lg sm:text-xl font-bold text-white">Complete Your Profile</h2>
-              <button
+              <Button
                 onClick={() => setShowProfileModal(false)}
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 <X className="w-5 h-5 sm:w-6 sm:h-6" />
-              </button>
+              </Button>
             </div>
             
             <form onSubmit={handleProfileFormSubmit} className="p-4 sm:p-6">

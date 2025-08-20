@@ -256,7 +256,7 @@ const Features = () => {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen py-16 md:py-24 overflow-hidden bg-black"
+      className="relative min-h-screen py-10 sm:py-16 md:py-24 overflow-hidden bg-black"
     >
       {/* Background elements */}
       <div className="absolute inset-0 z-0">
@@ -265,7 +265,7 @@ const Features = () => {
       </div>
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 sm:mb-12">
           <motion.div 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -281,21 +281,24 @@ const Features = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-4xl md:text-5xl font-bold mb-6 text-white"
+            className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white"
           >
             Your Campus <AuroraText className="text-yellow-500  to-yellow-900">Connection Hub</AuroraText>
           </motion.h1>
         </div>
 
-        {/* Use the imported BentoGrid component */}
-        <BentoGrid className="max-w-6xl mx-auto md:auto-rows-[20rem]">
+        {/* Responsive BentoGrid */}
+        <BentoGrid className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto md:auto-rows-[20rem]">
           {items.map((item, i) => (
             <BentoGridItem
               key={i}
               title={item.title}
               description={item.description}
               header={item.header}
-              className={cn("[&>p:text-lg]", item.className)}
+              className={cn(
+                "[&>p:text-base] sm:[&>p:text-lg] rounded-lg",
+                item.className
+              )}
               icon={item.icon}
             />
           ))}

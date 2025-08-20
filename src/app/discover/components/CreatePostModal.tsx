@@ -255,12 +255,12 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                       height={300}
                       className="object-cover"
                     />
-                    <button
+                    <Button
                       onClick={() => removeImage(index)}
                       className="absolute top-2 right-2 bg-black/70 rounded-full p-1 text-red-400 hover:text-red-500"
                     >
                       <Trash2 size={16} />
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -270,15 +270,15 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
             <div className="flex items-center justify-between border-t border-b border-gray-700 py-3 mb-4">
               <span className="text-gray-400 text-sm">Add to your post</span>
               <div className="flex space-x-2">
-               <button
-                    onClick={() =>
-                      document.getElementById('image-upload')?.click()
-                    }
-                    className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-500/10"
-                    disabled={images.length >= 1}   // changed from 4 → 1
-                  >
-                    <ImageIcon size={20} />
-                  </button>
+                <Button
+                  onClick={() =>
+                    document.getElementById('image-upload')?.click()
+                  }
+                  className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-500/10"
+                  disabled={images.length >= 1} // changed from 4 → 1
+                >
+                  <ImageIcon size={20} />
+                </Button>
 
                 <input
                   id="image-upload"
@@ -288,9 +288,9 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                   onChange={handleImageUpload}
                   className="hidden"
                 />
-                <button className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-500/10">
+                <Button className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-500/10">
                   <Camera size={20} />
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -356,7 +356,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 
           {/* Modal Footer */}
           <div className="sticky bottom-0 bg-gray-900 border-t border-yellow-500/30 p-4 flex justify-end">
-            <button
+            <Button
               onClick={handleSubmit}
               disabled={isSubmitting || !postText.trim()}
               className={`px-6 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 transition-colors flex items-center ${
@@ -367,7 +367,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
             >
               <Send size={19} className="mr-2" />
               {isSubmitting ? 'Zyncing It...' : 'Zync It'}
-            </button>
+            </Button>
           </div>
         </MagicCard>
       </div>

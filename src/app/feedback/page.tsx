@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import axios from 'axios'; // Add this missing import
+import { Button } from '@/components/ui/button';
 
 export default function FeedbackForm() {
   // Form state
@@ -278,7 +279,7 @@ export default function FeedbackForm() {
 
                   {/* Navigation */}
                   <div className="mt-8 flex justify-end">
-                    <button
+                    <Button
                       type="button"
                       onClick={nextStep}
                       className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-medium px-6 py-3 rounded-lg transition-colors flex items-center"
@@ -297,7 +298,7 @@ export default function FeedbackForm() {
                           d="M9 5l7 7-7 7"
                         />
                       </svg>
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -350,7 +351,7 @@ export default function FeedbackForm() {
 
                   {/* Navigation */}
                   <div className="mt-8 flex justify-between">
-                    <button
+                    <Button
                       type="button"
                       onClick={prevStep}
                       className="text-gray-400 hover:text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center"
@@ -369,8 +370,8 @@ export default function FeedbackForm() {
                         />
                       </svg>
                       Back
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={nextStep}
                       className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-medium px-6 py-3 rounded-lg transition-colors flex items-center"
@@ -389,7 +390,7 @@ export default function FeedbackForm() {
                           d="M9 5l7 7-7 7"
                         />
                       </svg>
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -448,7 +449,7 @@ export default function FeedbackForm() {
 
                   {/* Navigation */}
                   <div className="mt-8 flex justify-between items-center">
-                    <button
+                    <Button
                       type="button"
                       onClick={prevStep}
                       className="text-gray-400 hover:text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center"
@@ -467,8 +468,8 @@ export default function FeedbackForm() {
                         />
                       </svg>
                       Edit
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="submit"
                       disabled={submitting}
                       className={`px-8 py-3 rounded-lg font-medium transition-all flex items-center ${
@@ -503,7 +504,7 @@ export default function FeedbackForm() {
                       ) : (
                         'Submit Feedback'
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}

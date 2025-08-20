@@ -8,6 +8,7 @@ import {
   FaChevronDown,
   FaChevronRight,
 } from 'react-icons/fa';
+import { Button } from '@/components/ui/button';
 
 const SchedulePage = () => {
   const [activeDay, setActiveDay] = useState(1);
@@ -329,7 +330,7 @@ const SchedulePage = () => {
         {/* Day Selection Tabs */}
         <div className="flex overflow-x-auto mb-8 sticky top-0 z-10 bg-gray-900 py-2">
           {schedule.map((day) => (
-            <button
+            <Button
               key={day.day}
               onClick={() => setActiveDay(day.day)}
               className={`flex-shrink-0 px-6 py-3 rounded-lg mr-2 font-medium transition-all ${
@@ -340,7 +341,7 @@ const SchedulePage = () => {
             >
               <span className="block text-xs mb-1">{day.date}</span>
               <span className="block font-bold">Day {day.day}</span>
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -452,12 +453,12 @@ const SchedulePage = () => {
             Download the complete event schedule to your calendar or as a PDF.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button className="bg-yellow-500 text-black font-bold py-2 px-6 rounded-lg hover:bg-yellow-400 transition-colors">
+            <Button className="bg-yellow-500 text-black font-bold py-2 px-6 rounded-lg hover:bg-yellow-400 transition-colors">
               Add to Calendar
-            </button>
-            <button className="bg-gray-800 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700 transition-colors">
+            </Button>
+            <Button className="bg-gray-800 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700 transition-colors">
               Download PDF
-            </button>
+            </Button>
           </div>
         </motion.div>
       </div>

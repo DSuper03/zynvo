@@ -5,6 +5,7 @@ import Image from "next/legacy/image";
 import { X, Upload, Camera } from 'lucide-react';
 import { CreateClubModalProps } from '@/types/global-Interface';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
 import axios from 'axios';
 
@@ -109,9 +110,9 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
       <div className="relative bg-gray-900 border border-yellow-500/30 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-hide">
         <div className="sticky top-0 z-10 bg-gray-900 border-b border-yellow-500/30 p-4 flex justify-between items-center">
           <h2 className="text-xl font-bold text-white">Create a New Club</h2>
-          <button onClick={onClose} className="text-gray-300 hover:text-white">
+          <Button onClick={onClose} className="text-gray-300 hover:text-white">
             <X size={24} />
-          </button>
+          </Button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Logo Upload */}
@@ -299,19 +300,19 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
           </div>
 
           <div className="flex justify-end space-x-3 pt-4 border-t border-gray-800">
-            <button
+            <Button
               type="button"
               onClick={onClose}
               className="px-6 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               className="px-6 py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg font-medium transition-colors"
             >
               Zync your Club
-            </button>
+            </Button>
           </div>
         </form>
       </div>

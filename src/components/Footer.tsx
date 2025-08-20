@@ -1,5 +1,5 @@
 import React from 'react';
-import Image from "next/legacy/image";
+
 import { 
   Facebook, 
   Twitter, 
@@ -11,6 +11,7 @@ import {
   ArrowRight,
   Heart
 } from 'lucide-react';
+
 
 function Footer() {
   const productLinks = [
@@ -88,11 +89,19 @@ function Footer() {
                 </div>
               </div>
             </div>
+            
             {/* Product Links */}
             <div className="space-y-6">
-             
-            
+         
+              
+              {/* SpinningText - Now properly placed and centered */}
+              <div className="mt-8 flex items-center justify-center">
+                <div className="transform scale-75 sm:scale-90 md:scale-100">
+               
+                </div>
+              </div>
             </div>
+
             {/* Resources & Social */}
             <div className="space-y-6">
               <div>

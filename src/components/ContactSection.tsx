@@ -7,6 +7,7 @@ import { BackgroundElements } from './TeamSection';
 import LandingHeader from './landingHeader';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { Button } from './ui/button';
 
 const ContactSection = () => {
   const [formState, setFormState] = useState({
@@ -178,7 +179,7 @@ const ContactSection = () => {
                 />
               </div>
 
-              <button
+              <Button
                 type="submit"
                 disabled={isSubmitting}
                 className={`w-full py-3 px-6 rounded-lg font-medium transition-colors ${
@@ -188,7 +189,7 @@ const ContactSection = () => {
                 } text-black`}
               >
                 {isSubmitting ? 'Sending...' : 'Send Message'}
-              </button>
+              </Button>
 
               {submitStatus === 'success' && (
                 <p className="text-green-400 text-center">
