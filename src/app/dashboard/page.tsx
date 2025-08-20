@@ -27,6 +27,7 @@ export interface UserData {
   tags : string[]
   course : string
   createdAt : Date
+  collegeName : string | null
 }
 
 export interface ApiResponse {
@@ -41,6 +42,7 @@ export interface ApiResponse {
     name: string | null;
     email: string;
     clubName: string | null;
+    collegeName : string | null;
     profileAvatar: string;
     eventAttended: {
       event: {
@@ -437,7 +439,8 @@ export default function ZynvoDashboard() {
               course,
               year,
               tags,
-              createdAt
+              createdAt,
+              collegeName
             } = response.data.user;
 
             const events =
@@ -457,7 +460,8 @@ export default function ZynvoDashboard() {
               course,
               bio,
               year, 
-              createdAt
+              createdAt,
+              collegeName
             });
             setId(response.data.user.id)
             setPosts(response.data.user.CreatePost)
@@ -620,13 +624,14 @@ export default function ZynvoDashboard() {
           <div className="relative px-4 sm:px-6 pb-4 sm:pb-6">
             <div className="absolute -top-8 sm:-top-12 left-4 sm:left-6">
               {userData.profileAvatar ? (
-                <Image
-                  className="w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 object-cover"
-                  src={userData.profileAvatar}
-                  width={96}
-                  height={96}
-                  alt="User profile avatar"
-                />
+                // <Image
+                //   className="w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 object-cover"
+                //   src={userData.profileAvatar}
+                //   width={96}
+                //   height={96}
+                //   alt="User profile avatar"
+                // />
+                <img src={userData.profileAvatar} className='w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 object-cover' alt="user pfp"/>
               ) : (
                 <div className="w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 flex items-center justify-center text-gray-900 text-xl sm:text-3xl md:text-4xl font-bold">
                   {userData.name ? userData.name.charAt(0) : 'Z'}
