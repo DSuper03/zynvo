@@ -59,7 +59,6 @@ const ClubsPage = () => {
   useEffect(() => {
     async function call() {
       if(!token) {
-        toast("login please");
         return;
       }
       const response = await axios.get<response>(
