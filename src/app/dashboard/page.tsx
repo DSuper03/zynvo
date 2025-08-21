@@ -8,10 +8,16 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { AuroraText } from '@/components/magicui/aurora-text';
 import { Badge } from '@/components/ui/badge';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
 
 // Define interfaces for better type checking
 interface Event {
   EventName: string;
+  startDate: string;
   id: string;
 }
 
@@ -48,6 +54,7 @@ export interface ApiResponse {
       event: {
         id: string;
         EventName: string;
+        startDate: string;
       };
     }[];
      CreatePost: {
@@ -446,6 +453,7 @@ export default function ZynvoDashboard() {
             const events =
               eventAttended?.map((eve) => ({
                 EventName: eve.event.EventName,
+                startDate: eve.event.startDate,
                 id: eve.event.id,
               })) || [];
 
@@ -579,11 +587,12 @@ export default function ZynvoDashboard() {
 
 
   if (!userData) {
+
     return null; 
   }
 
   return (
-    <div className="min-h-screen h-full bg-black text-gray-100 pt-3">
+    <div className="min-h-screen h-full bg-black text-gray-100 ">
       {/* Main Content */}
       <main className="max-w-7xl mx-auto pt-16 sm:pt-20 md:pt-24 pb-8 px-4 sm:px-6 lg:px-8">
         {/* Dashboard Header - Mobile Responsive */}
@@ -614,6 +623,8 @@ export default function ZynvoDashboard() {
         <div className="bg-gray-900 rounded-lg shadow-lg mb-6 sm:mb-8 overflow-hidden">
           <div className="h-24 sm:h-32 relative overflow-hidden">
             <Image
+
+            
               src="/banners/profilebanner.jpg"
               alt="Profile Banner"
               fill
@@ -651,7 +662,10 @@ export default function ZynvoDashboard() {
                 </p>
                 <p className="text-yellow-400 font-bold text-sm sm:text-base">
                   Year: <span className="text-gray-400">{userData.year ? userData.year : "complete profile"}</span>
+
                 </p>
+
+                <p className='text-white'>{userData.collegeName ? userData.collegeName : "complete profile"}</p>
               </div>
 
               
@@ -693,76 +707,151 @@ export default function ZynvoDashboard() {
           </div>
         </div>
 
-        {/* Stats Cards - Mobile Responsive */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        {/* Combined Posts & Events Section - Horizontal Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 sm:mb-8">
+          {/* Posts Section - Left Side */}
           <div className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md border-l-4 border-yellow-400">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-gray-400 mb-1 text-sm sm:text-base">Total Posts</p>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-                  {posts?.length}
-                </h2>
-              </div>
-              <div className="bg-yellow-400 p-2 sm:p-3 rounded-full">
-                <BarChart2 className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md border-l-4 border-yellow-400">
-            <div className="flex justify-between items-start">
-              <div className="flex-1 min-w-0">
-                <p className="text-gray-400 mb-1 text-sm sm:text-base">Events Attended</p>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">
-                  {userData.events?.length || 0}
-                </h2>
-                <div className="flex flex-wrap gap-1 sm:gap-2">
-                  {userData.events && userData.events.length > 0 ? (
-                    userData.events.map(event => (
-                      <span 
-                        key={event.id} 
-                        className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs bg-yellow-400/20 text-yellow-300 border border-yellow-500/30"
-                      >
-                        <Calendar className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
-                        <span className="truncate max-w-20 sm:max-w-none">{event.EventName}</span>
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-gray-500 text-xs sm:text-sm italic">No events attended yet</span>
-                  )}
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-yellow-400 p-2 rounded-full">
+                  <BarChart2 className="w-5 h-5 text-gray-900" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Your Posts</h3>
+                  <p className="text-xl font-bold text-yellow-400">
+                    Total: {posts?.length || 0}
+                  </p>
                 </div>
               </div>
-              <div className="bg-yellow-400 p-2 sm:p-3 rounded-full ml-2 flex-shrink-0">
-                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900" />
-              </div>
+            </div>
+            
+            <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-gray-700">
+              {posts && posts.length > 0 ? (
+                <ul className="space-y-2">
+                  {posts.map((post, index) => (
+                    <li key={post.id} className="py-2">
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <div className="cursor-pointer hover:bg-gray-800 rounded-lg p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
+                            <div className="flex justify-between items-center">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-yellow-400 text-xs font-medium">
+                                    #{index + 1}
+                                  </span>
+                                  <Badge variant="secondary" className="text-xs">
+                                    Recent
+                                  </Badge>
+                                </div>
+                                <h4 className="text-gray-200 font-medium text-sm truncate">
+                                  {post.description.length > 40
+                                    ? post.description.slice(0, 40) + '...'
+                                    : post.description || 'Untitled Post'}
+                                </h4>
+                              </div>
+                              <div className="ml-2 text-gray-500 text-xs">
+                                Hover →
+                              </div>
+                            </div>
+                          </div>
+                        </HoverCardTrigger>
+                        <HoverCardContent 
+                          className="w-80 bg-gray-800 border-gray-700" 
+                          side="right"
+                        >
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-sm font-semibold text-white">
+                                Post #{index + 1}
+                              </h4>
+                          
+                            </div>
+                            <div className="space-y-2">
+                              <p className="text-sm text-gray-300 leading-relaxed">
+                                {post.description || 'No description available for this post.'}
+                              </p>
+                            </div>
+                            <div className="flex items-center justify-between pt-2 border-t border-gray-700">
+                              <div className="flex items-center gap-2 text-xs text-gray-400">
+                                <Calendar className="w-3 h-3" />
+                                <span>{post.description}</span>
+                              </div>
+                              <HighFiveButton
+                               postId={post.id}
+                                isHighFived={highFivedPosts.has(post.id)}
+                                onHighFive={handleHighFive}
+                              />
+                            </div>
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center py-6">
+                  <BarChart2 className="w-10 h-10 mx-auto mb-2 text-gray-500 opacity-50" />
+                  <p className="text-gray-400 text-sm">No posts yet</p>
+                  <p className="text-gray-500 text-xs">Start sharing!</p>
+                </div>
+              )}
             </div>
           </div>
-        </div>
 
-        {/* Recent Posts - Mobile Responsive */}
-        <div className="grid grid-cols-1 gap-6 sm:gap-8">
-          <div className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md">
-            <div className="flex justify-between items-center mb-4 sm:mb-6">
-              <h3 className="text-base sm:text-lg font-bold text-white">
-                Your Recent Posts
-              </h3>
+          {/* Events Section - Right Side */}
+          <div className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md border-l-4 border-yellow-400">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-yellow-400 p-2 rounded-full">
+                  <Calendar className="w-5 h-5 text-gray-900" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Events Attended</h3>
+                  <p className="text-xl font-bold text-yellow-400">
+                    Total: {userData.events?.length || 0}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="max-h-60 sm:max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-gray-700">
-              <ul className="divide-y divide-gray-700">
-                {posts?.map((post) => (
-                  <li key={post.id} className="py-3 sm:py-4">
-                    <div className="flex justify-between">
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-gray-200 font-medium text-sm sm:text-base pr-2">
-                          {post.description.length > (window.innerWidth < 640 ? 60 : 100)
-                            ? post.description.slice(0, window.innerWidth < 640 ? 60 : 100) + '...'
-                            : post.description}
-                        </h4>
+            
+            <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-gray-700">
+              {userData.events && userData.events.length > 0 ? (
+                <ul className="space-y-2">
+                  {userData.events.map((event, index) => (
+                    <li key={event.id} className="py-2">
+                      <div className="hover:bg-gray-800 rounded-lg p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-yellow-400 text-xs font-medium">
+                                #{index + 1}
+                              </span>
+                              <Badge variant="secondary" className="text-xs">
+                                Attended
+                              </Badge>
+                            </div>
+                            <h4 className="text-gray-200 font-medium text-sm truncate">
+                              {event.EventName}
+                            </h4>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {new Date(event.startDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="ml-2">
+                            <Calendar className="w-4 h-4 text-yellow-400" />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center py-6">
+                  <Calendar className="w-10 h-10 mx-auto mb-2 text-gray-500 opacity-50" />
+                  <p className="text-gray-400 text-sm">No events yet</p>
+                  <p className="text-gray-500 text-xs">Join some events!</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

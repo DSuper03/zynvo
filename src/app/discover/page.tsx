@@ -1,7 +1,7 @@
 'use client';
 import axios from 'axios';
 import React, { useEffect, useState, useRef } from 'react';
-import Image from "next/legacy/image";
+import Image from 'next/image';
 import {
   Heart,
   MessageCircle,
@@ -195,16 +195,15 @@ export default function Feed() {
                             <Image
                               src={ev.img}
                               alt={ev.title}
-                              layout="fill"
+                           layout='fill'
                               className="object-cover transition-transform group-hover:scale-105"
                             />
                           </div>
                           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                            <span className="text-black text-xs font-medium px-2 py-1 rounded-full">{ev.title}</span>
+                          
                           </div>
                         </div>
-                        <h4 className="font-medium text-white transition-colors">{ev.title}</h4>
-                        <p className="text-xs text-gray-400">{ev.desc}</p>
+                       
                       </Card>
                     </div>
                   ))}
@@ -340,8 +339,7 @@ export default function Feed() {
                             <span className="text-black text-xs font-medium px-2 py-1 rounded-full">{ev.title}</span>
                           </div>
                         </div>
-                        <h4 className="font-medium text-white transition-colors">{ev.title}</h4>
-                        <p className="text-xs text-gray-400">{ev.desc}</p>
+                       
                       </Card>
                     ))}
                     <Button className="w-full py-2 text-sm text-yellow-400 hover:text-yellow-300 transition-colors">
