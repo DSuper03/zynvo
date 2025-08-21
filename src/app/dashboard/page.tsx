@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 // Define interfaces for better type checking
 interface Event {
   EventName: string;
+  startDate: string;
   id: string;
 }
 
@@ -48,6 +49,7 @@ export interface ApiResponse {
       event: {
         id: string;
         EventName: string;
+        startDate: string;
       };
     }[];
      CreatePost: {
@@ -446,6 +448,7 @@ export default function ZynvoDashboard() {
             const events =
               eventAttended?.map((eve) => ({
                 EventName: eve.event.EventName,
+                startDate: eve.event.startDate,
                 id: eve.event.id,
               })) || [];
 
@@ -579,11 +582,12 @@ export default function ZynvoDashboard() {
 
 
   if (!userData) {
+
     return null; 
   }
 
   return (
-    <div className="min-h-screen h-full bg-black text-gray-100 pt-3">
+    <div className="min-h-screen h-full bg-black text-gray-100 ">
       {/* Main Content */}
       <main className="max-w-7xl mx-auto pt-16 sm:pt-20 md:pt-24 pb-8 px-4 sm:px-6 lg:px-8">
         {/* Dashboard Header - Mobile Responsive */}
@@ -653,7 +657,10 @@ export default function ZynvoDashboard() {
                 </p>
                 <p className="text-yellow-400 font-bold text-sm sm:text-base">
                   Year: <span className="text-gray-400">{userData.year ? userData.year : "complete profile"}</span>
+
                 </p>
+
+                <p className='text-white'>{userData.collegeName ? userData.collegeName : "complete profile"}</p>
               </div>
 
               

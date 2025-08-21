@@ -85,7 +85,7 @@ const ClubsPage = () => {
     setIsJoinModalOpen(true);
   };
 
-  // Filter and sort clubs based on search and filters
+
   const filteredClubs = clubData?.filter(club => {
     const matchesSearch = club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          club.description.toLowerCase().includes(searchQuery.toLowerCase());
