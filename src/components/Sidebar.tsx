@@ -66,7 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
   }, [token])
 
   const menuItems = [
-    { icon: <Home size={22} />, label: 'Home', href: '/' },
+    
     { icon: <Search size={22} />, label: 'Discover', href: '/discover' },
     { icon: <Calendar size={22} />, label: 'Events', href: '/events' },
     { icon: <Users size={22} />, label: 'Clubs', href: '/clubs' },
