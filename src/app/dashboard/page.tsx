@@ -610,6 +610,8 @@ export default function ZynvoDashboard() {
         <div className="bg-gray-900 rounded-lg shadow-lg mb-6 sm:mb-8 overflow-hidden">
           <div className="h-24 sm:h-32 relative overflow-hidden">
             <Image
+
+            
               src="/banners/profilebanner.jpg"
               alt="Profile Banner"
               fill

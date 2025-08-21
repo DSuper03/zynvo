@@ -29,13 +29,18 @@ const HeroSkeleton = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="relative w-full h-full rounded-lg overflow-hidden"
+      className="relative w-full h-full rounded-lg overflow-hidden bg-yellow-200"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-black/50" />
+      <div className="absolute inset-0 bg-gradient-to-br from-yellow-200/20 to-yellow-500" />
+      <Image
+        src="/banners/featurebanner1.jpg"
+        alt="Hero Image"
+        layout="fill"
+        objectFit="cover"
+      />
       <div className="absolute inset-0 flex flex-col justify-center items-center p-6 text-center">
-        <Sparkles className="w-12 h-12 text-yellow-500 mb-2" />
-        <h2 className="text-xl font-bold text-white">Your Campus Connection Hub</h2>
-        <p className="text-sm text-gray-300 mt-2">Connect with clubs, discover events, build your network</p>
+      
+      
       </div>
     </motion.div>
   );
@@ -216,38 +221,38 @@ const Features = () => {
   const items = [
     {
       title: "Welcome to Zynvo",
-      description: <span className="text-sm">Your ultimate campus connection platform</span>,
+      description: <span className="text-sm text-neutral-50">Your ultimate campus connection platform</span>,
       header: <HeroSkeleton />,
       className: "md:col-span-2",
-      icon: <Sparkles className="h-5 w-5 text-neutral-500" />,
+      icon: <Sparkles className="h-5 w-5 text-neutral-50" />,
     },
     {
       title: "Platform Stats",
-      description: <span className="text-sm">Growing network of students and colleges</span>,
+      description: <span className="text-sm text-neutral-50">Growing network of students and colleges</span>,
       header: <StatsSkeleton />,
       className: "md:col-span-1",
-      icon: <Activity className="h-5 w-5 text-neutral-500" />,
+      icon: <Activity className="h-5 w-5 text-neutral-50" />,
     },
     {
       title: "Tech Fest 2025",
       description: <span className="text-sm">Join the upcoming campus-wide tech festival</span>,
       header: <EventSkeleton />,
       className: "md:col-span-1",
-      icon: <Calendar className="h-5 w-5 text-neutral-500" />,
+      icon: <Calendar className="h-5 w-5 text-neutral-50" />,
     },
     {
       title: "Create Club Rooms",
       description: <span className="text-sm">Host virtual meetings and discussions instantly</span>,
       header: <ClubRoomSkeleton />,
       className: "md:col-span-1",
-      icon: <MessageCircle className="h-5 w-5 text-neutral-500" />,
+      icon: <MessageCircle className="h-5 w-5 text-neutral-50" />,
     },
     {
       title: "Key Features",
-      description: <span className="text-sm">Tools designed for campus networking</span>,
+      description: <span className="text-sm text-neutral-50 ">Tools designed for campus networking</span>,
       header: <FeaturesSkeleton />,
       className: "md:col-span-1",
-      icon: <BookOpen className="h-5 w-5 text-neutral-500" />,
+      icon: <BookOpen className="h-5 w-5 text-neutral-50" />,
     },
    
 
@@ -288,7 +293,7 @@ const Features = () => {
         </div>
 
         {/* Responsive BentoGrid */}
-        <BentoGrid className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto md:auto-rows-[20rem]">
+        <BentoGrid className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto md:auto-rows-[20rem] text-neutral-100">
           {items.map((item, i) => (
             <BentoGridItem
               key={i}
@@ -296,7 +301,7 @@ const Features = () => {
               description={item.description}
               header={item.header}
               className={cn(
-                "[&>p:text-base] sm:[&>p:text-lg] rounded-lg",
+                "[&>p:text-base] sm:[&>p:text-lg] rounded-lg text-neutral-100",
                 item.className
               )}
               icon={item.icon}

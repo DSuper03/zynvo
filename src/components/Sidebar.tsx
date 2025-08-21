@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import dotenv from "dotenv"
 import { toast } from 'sonner';
+import { FaBahai } from 'react-icons/fa';
 
 dotenv.config()
 
@@ -69,6 +70,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     { icon: <Search size={22} />, label: 'Discover', href: '/discover' },
     { icon: <Calendar size={22} />, label: 'Events', href: '/events' },
     { icon: <Users size={22} />, label: 'Clubs', href: '/clubs' },
+    { icon: <FaBahai />, label: 'AI', href: '/ai' },
+    { icon: <MessageSquare size={22} />, label: 'Forum', href: '/forum' },
     { icon: <NotebookText size={22} />, label: 'Resources', href: '/resources' },
     { icon: <Trophy size={22} />, label: 'Leaderboard', href: '/leaderboard' },
 
