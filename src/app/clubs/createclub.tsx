@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from "next/legacy/image";
-import { X, Upload, Camera } from 'lucide-react';
+import { X, Upload, Camera, Plus, Trash2 } from 'lucide-react';
 import { CreateClubModalProps } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -22,10 +22,12 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     facultyEmail: '',
     requirements: '',
     clubContact: '',
-    logo : ''
+    logo : '',
+    wings: [] as string[]  
   });
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [token, setToken] = useState("")
+  const [newWing, setNewWing] = useState('');
 
     useEffect(()=> {
        if (typeof window !== 'undefined') {
@@ -103,6 +105,24 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     }
   };
 
+    const addWing = () => {
+    if(newWing.trim() !== ''){
+      setClubData((prev) => ({
+        ...prev,
+        wings: [...prev.wings, newWing.trim()]
+      }));
+      setNewWing('');
+    }
+  }
+
+  // ✅ Remove a wing
+  const removeWing = (index: number) => {
+    setClubData((prev) => ({
+      ...prev,
+      wings: prev.wings.filter((_, i) => i !== index)
+    }));
+  }
+
   if (!isOpen) return null;
 
   return (
@@ -168,6 +188,39 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
               onChange={handleChange}
               className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
             />
+          </div>
+
+           {/* ✅ Wings Section */}
+          <div className="space-y-2">
+            <label
+              htmlFor="wings"
+              className="block text-sm font-medium text-yellow-400"
+            >
+              Club Wings (Departments/Divisions)
+            </label>
+            <div className="flex space-x-2">
+              <input
+                id="wings"
+                type="text"
+                placeholder="Add a wing (e.g. Technical, PR, Events)"
+                value={newWing}
+                onChange={(e) => setNewWing(e.target.value)}
+                className="flex-1 bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
+              />
+              <Button type="button" onClick={addWing} className="bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg px-4">
+                <Plus size={18}/>
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-3">
+              {clubData.wings.map((wing, index) => (
+                <span key={index} className="flex items-center bg-gray-800 text-yellow-400 px-3 py-1 rounded-lg">
+                  {wing}
+                  <button type="button" onClick={() => removeWing(index)} className="ml-2 text-red-500 hover:text-red-400">
+                    <Trash2 size={14}/>
+                  </button>
+                </span>
+              ))}
+            </div>
           </div>
 
           {/* Club Description */}
