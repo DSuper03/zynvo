@@ -30,28 +30,33 @@ export interface UserData {
   isVerified: boolean | null;
   events: Event[];
   profileAvatar: string;
-  bio : string
-  year : string 
-  tags : string[]
-  course : string
-  createdAt : Date
-  collegeName : string | null
+  bio: string;
+  year: string;
+  tags: string[];
+  course: string;
+  createdAt: Date;
+  collegeName: string | null;
+  twitter : string | null;
+  instagram : string | null;
+  linkedin : string | null;
 }
-
 export interface ApiResponse {
   user: {
-    id : string
-    createdAt : Date
-    bio : string
-    year : string 
-    tags : string[]
-    course : string
+    id: string;
+    createdAt: Date;
+    bio: string;
+    year: string;
+    tags: string[];
+    course: string;
     isVerified: boolean | null;
     name: string | null;
     email: string;
     clubName: string | null;
-    collegeName : string | null;
+    collegeName: string | null;
     profileAvatar: string;
+    twitter : string | null;
+  instagram : string | null;
+  linkedin : string | null;
     eventAttended: {
       event: {
         id: string;
@@ -59,9 +64,9 @@ export interface ApiResponse {
         startDate: string;
       };
     }[];
-     CreatePost: {
-        id: string;
-        description: string;
+    CreatePost: {
+      id: string;
+      description: string;
     }[];
   };
 }
@@ -418,7 +423,6 @@ export default function ZynvoDashboard() {
       setIsLoading(true);
       try {
         if(!token) {
-        toast("login please");
         return;
       }
 
@@ -450,7 +454,10 @@ export default function ZynvoDashboard() {
               year,
               tags,
               createdAt,
-              collegeName
+              collegeName,
+              twitter,
+            instagram,
+            linkedin
             } = response.data.user;
 
             const events =
@@ -472,7 +479,10 @@ export default function ZynvoDashboard() {
               bio,
               year, 
               createdAt,
-              collegeName
+              collegeName,
+              twitter,
+            instagram,
+            linkedin
             });
             setId(response.data.user.id)
             setPosts(response.data.user.CreatePost)
