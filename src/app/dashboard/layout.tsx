@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { WarmupProvider } from '@/components/WarmupProvider';
+
 
 export default function RootLayout({
   children,
@@ -79,7 +81,7 @@ export default function RootLayout({
         `}
         onClick={handleMainContentClick}
       >
-        {children}
+        <WarmupProvider>{children}</WarmupProvider>
       </main>
     </div>
   );

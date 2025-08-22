@@ -22,6 +22,7 @@ import axios from 'axios';
 import dotenv from "dotenv"
 import { toast } from 'sonner';
 import { FaBahai } from 'react-icons/fa';
+import { useWarmup } from './WarmupProvider';
 
 dotenv.config()
 
@@ -32,38 +33,9 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
   const pathname = usePathname();
-  const [token, setToken] = useState<string | null>("")
-  const [profile, setProfile] = useState<string | null>("")
-  const [name, setName] = useState<string | null>("")
+  const { userData, loading } = useWarmup();
+  const { name, profileAvatar: profile } = userData;
 
-  useEffect(()=> {
-     if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('token');
-      setToken(storedToken);
-    }
-  }, []) 
-
-  useEffect(()=> {
-    if(!token) return;
-    async function call() {
-      const response = await axios.get<{msg : string, 
-        data : {
-        name : string,
-        profileAvatar : string
-      }}>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getSidebarUser`, {
-        headers : {
-          authorization : `Bearer ${token}`
-        }
-      })
-
-      if(response && response.status === 200){
-        setName(response.data.data.name)
-        setProfile(response.data.data.profileAvatar)
-      }
-    }
-
-    call()
-  }, [token])
 
   const menuItems = [
     
@@ -108,7 +80,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
             className="rounded-full"
           />
           }
-          <h1 className='text-yellow-400 font-semibold ml-3'>{name ? name : "zynvo user"}</h1>
+                                        <h1 className="relative inline-block text-lg ml-3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 animate-aurora">
+            {name ? name : "zynvo user"}
+          </h1>
           </div>
        </div>
       
