@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 // Floating particles animation component
 const FloatingParticles = () => {
-  return (
+  return ( 
     <div className="fixed inset-0 overflow-hidden pointer-events-none">
       {[...Array(20)].map((_, i) => (
         <div
