@@ -31,8 +31,7 @@ function Footer() {
     'Best Practices',
     'Success Stories'
   ];
-  // const localData=localStorage.getItem('userData')
-  // console.log("localData",localData)
+
   const socialLinks = [
    
     { icon: <Twitter className="h-5 w-5" />, href: "https://x.com/Zynvonow" },
