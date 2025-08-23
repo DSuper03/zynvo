@@ -21,7 +21,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import dotenv from "dotenv"
 import { toast } from 'sonner';
-import { FaBahai } from 'react-icons/fa';
+import { FaBahai, FaHollyBerry, FaUsers } from 'react-icons/fa';
 import { useWarmup } from './WarmupProvider';
 
 dotenv.config()
@@ -40,7 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
   const menuItems = [
     
     { icon: <Search size={22} />, label: 'Discover', href: '/discover' },
-    { icon: <Home size={22} />, label: 'Home', href: '/zyncers' },
+    { icon: <FaUsers  size={22} />, label: 'Zyncers', href: '/zyncers' },
     { icon: <Calendar size={22} />, label: 'Events', href: '/events' },
     { icon: <Users size={22} />, label: 'Clubs', href: '/clubs' },
     { icon: <FaBahai />, label: 'AI', href: '/ai' }, 
@@ -52,12 +52,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
 
   const accountItems = [
     { icon: <User size={22} />, label: 'Profile', href: '/dashboard' },
-    // { icon: <Settings size={22} />, label: 'Settings', href: '/dashboard' },
+
     { icon: <LogOut size={22} />, label: 'Logout', href: '/' },
   ];
 
-  // This will ensure text is ALWAYS visible when sidebar is open
-  // Especially important for mobile
   const showText = isOpen;
 
   return (
@@ -80,8 +78,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
             height={32}
             className="rounded-full"
           />
-          }
-                                        <h1 className="relative inline-block text-lg ml-3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 animate-aurora">
+          }    <h1 className="relative inline-block text-lg  font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 animate-aurora">
             {name ? name : "zynvo user"}
           </h1>
           </div>
