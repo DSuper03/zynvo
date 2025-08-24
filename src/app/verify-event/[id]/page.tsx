@@ -80,24 +80,14 @@ export default function VerificationPage() {
         {[...Array(50)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-yellow-400 rounded-full opacity-70"
+            className="absolute w-1 h-1 bg-yellow-400 rounded-full opacity-70 animate-float"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 20}s`,
               animationDuration: `${15 + Math.random() * 10}s`
             }}
-          >
-            <style jsx>{`
-              @keyframes float {
-                0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
-                50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
-              }
-              div {
-                animation: float infinite ease-in-out;
-              }
-            `}</style>
-          </div>
+          />
         ))}
       </div>
 
@@ -181,7 +171,12 @@ export default function VerificationPage() {
         </div>
       </div>
 
-      <style jsx>{`
+      {/* Global styles */}
+      <style jsx global>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+          50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
         @keyframes fade-in {
           from { opacity: 0; transform: translateY(-20px); }
           to { opacity: 1; transform: translateY(0); }
@@ -189,6 +184,9 @@ export default function VerificationPage() {
         @keyframes slide-up {
           from { opacity: 0; transform: translateY(50px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-float {
+          animation: float infinite ease-in-out;
         }
         .animate-fade-in {
           animation: fade-in 0.8s ease-out;
