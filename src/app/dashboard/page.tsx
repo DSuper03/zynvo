@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Calendar, BarChart2, User, X, BellDotIcon, Menu } from 'lucide-react';
+import { Calendar, BarChart2, User, X, BellDotIcon, Menu, School } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -13,6 +13,8 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
+import CollegeSearchSelect from '@/components/colleges/collegeSelect';
+import { FaSchool } from 'react-icons/fa';
 
 // Define interfaces for better type checking
 interface Event {
@@ -388,7 +390,8 @@ export default function ZynvoDashboard() {
     bio: '',
     course: '',
     year: '',
-    tags: ''
+    tags: '',
+    collegeName: '',
   });
   const [update, setUpdate] = useState<boolean>(false)
    const [token, setToken] = useState("")
@@ -489,7 +492,8 @@ export default function ZynvoDashboard() {
               bio: bio || '',
               course: course || '',
               year: year || '',
-              tags: tags ? tags.join(', ') : ''
+              tags: tags ? tags.join(', ') : '',
+              collegeName: collegeName || '',
             });
             
             // Set selected predefined tags
@@ -674,8 +678,10 @@ export default function ZynvoDashboard() {
                   Year: <span className="text-gray-400">{userData.year ? userData.year : "complete profile"}</span>
 
                 </p>
-
-                <p className='text-white'>{userData.collegeName ? userData.collegeName : "complete profile"}</p>
+             <div className='flex items-center bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs sm:text-sm'>
+                <FaSchool className="w-4 h-4 mr-2 text-yellow-400" />
+                <span>{userData.collegeName ? userData.collegeName : "College not set"}</span>
+             </div>
               </div>
 
               
