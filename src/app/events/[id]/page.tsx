@@ -232,20 +232,17 @@ const Eventid = () => {
                       Registration Successful! 🎉
                     </p>
                     <p className="text-gray-300 mb-2">
-                      Get your pass for this event on{' '}
+                      Make sure to get your pass for this event on{' '}
                       <a
-                        href="https://forkedup.mochak.me"
+                        href={`https://zynvo.social/ticket/${forkedUpId}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
                       >
                         Zynced It 
                       </a>{' '}
-                      with the ID below:
+                       Without this you'll not be allowed to take part.
                     </p>
-                    <div className="bg-black/50 p-3 rounded font-mono text-yellow-400 break-all">
-                      <strong>Zynced It ID:</strong> {forkedUpId}
-                    </div>
                   </div>
                 )}
               </div>

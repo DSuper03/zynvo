@@ -3,12 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
-import { useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
 export default function VerificationPage() {
-  const params = useSearchParams();
-  const id = params.get('id');
+  const params = useParams();
+  const id = params.id as string
   const [userStatus, setUserStatus] = useState('');
   const [verificationResult, setVerificationResult] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +23,7 @@ export default function VerificationPage() {
         setUserStatus(verifyUser.data.status);
 
         let result;
-        if (!id?.startsWith('Zynvo') || !id || verifyUser.data.status === 'invalid') {
+        if (!id?.startsWith('Z') || !id || verifyUser.data.status === 'invalid') {
           result = {
             status: 'invalid',
             title: 'Invalid ID Format',
