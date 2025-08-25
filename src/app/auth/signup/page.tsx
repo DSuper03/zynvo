@@ -34,21 +34,32 @@ export default function SignUp() {
     email: '',
     password: '',
     collegeName: '',
-    avatarUrl: '', // Added avatarUrl to store the avatar URL
+    avatarUrl: '',
   });
   const [agreeToTerms, setAgree] = useState(false);
 
+  // NEW: password error + validator
+  const [passwordError, setPasswordError] = useState<string>('');
+  const isValidPassword = (pw: string) =>
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(pw);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type} = e.target;
+    const { name, value, type } = e.target as HTMLInputElement | HTMLSelectElement;
 
     if (name === 'interests') {
       // Handle interest checkboxes
       // interests deleted
     } else {
-      setFormData((prev) => ({
-        ...prev,
-         [name]: value,
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
+
+      // NEW: validate password as user types
+      if (name === 'password') {
+        setPasswordError(
+          isValidPassword(value)
+            ? ''
+            : 'Password must be 8+ chars and include uppercase, lowercase, and a number.'
+        );
+      }
     }
   };
 
@@ -62,6 +73,13 @@ export default function SignUp() {
 
   const handleNextStep = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // NEW: block next step if password invalid
+    if (!isValidPassword(formData.password)) {
+      setPasswordError('Password must be 8+ chars and include uppercase, lowercase, and a number.');
+      toast('Please fix your password to continue');
+      return;
+    }
+    setPasswordError('');
     setCurrentStep(2);
   };
 
@@ -267,10 +285,16 @@ export default function SignUp() {
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
-                        className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                        className={`bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 ${
+                          passwordError ? 'focus:ring-red-500' : 'focus:ring-yellow-500'
+                        }`}
                         placeholder="peterParkerisSpiderman@69"
                         required
                         minLength={8}
+                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
+                        title="At least 8 characters, with uppercase, lowercase, and a number"
+                        aria-invalid={!!passwordError}
+                        aria-describedby="password-help"
                       />
                       <Button
                         type="button"
@@ -280,16 +304,19 @@ export default function SignUp() {
                         {showPassword ? <FiEyeOff /> : <FiEye />}
                       </Button>
                     </div>
-                    <p className="text-gray-400 text-xs mt-2">
-                      Password must be at least 8 characters long.
+                    <p id="password-help" className="text-gray-400 text-xs mt-2">
+                      Password must be at least 8 characters long and include uppercase, lowercase, and a number.
                     </p>
-                    <p className='text-gray-400 text-xs mt-2'>Password must have 1 Capital letter , a small letter and a number.</p>
+                    {passwordError && (
+                      <p className="text-red-400 text-xs mt-2">{passwordError}</p>
+                    )}
                   </div>
 
                   <motion.button
                     type="submit"
-                    className="w-full flex items-center justify-center py-3 px-4 rounded-lg bg-yellow-500 text-black font-medium hover:bg-yellow-400 transition duration-300 transform hover:-translate-y-1"
+                    className="w-full flex items-center justify-center py-3 px-4 rounded-lg bg-yellow-500 text-black font-medium hover:bg-yellow-400 transition duration-300 transform hover:-translate-y-1 disabled:opacity-60 disabled:cursor-not-allowed"
                     whileTap={{ scale: 0.98 }}
+                    disabled={!isValidPassword(formData.password)}
                   >
                     <span>Continue</span>
                     <FiArrowRight className="ml-2" />
