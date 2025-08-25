@@ -256,7 +256,7 @@ export const collegesWithClubs = [
     "State": "West Bengal"
   },
   {
-    "college": "R. G. Kar Medical College and Hospital",
+    "college": "RG. Kar Medical College and Hospital",
     "State": "West Bengal"
   },
   {
@@ -1591,10 +1591,7 @@ export const collegesWithClubs = [
     "college": "Silicon Institute of Technology, Orissa",
     "State": "Orissa"
   },
-  {
-    "college": "Silicon Institute of Technology, Orissa",
-    "State": "Orissa"
-  },
+
   {
     "college": "Xavier University, Orissa",
     "State": "Orissa"
@@ -1887,10 +1884,7 @@ export const collegesWithClubs = [
     "college": "Sandip University, Madhuban, Bihar",
     "State": "Bihar"
   },
-  {
-    "college": "Government Engineering College, Bihar",
-    "State": "Bihar"
-  },
+  
   {
     "college": "Amity University, Patna, Bihar",
     "State": "Bihar"
@@ -2019,10 +2013,7 @@ export const collegesWithClubs = [
     "college": "Bhilai Institute of Technology, Chhattisgarh",
     "State": "Chhattisgarh"
   },
-  {
-    "college": "Bhilai Institute of Technology, Chhattisgarh",
-    "State": "Chhattisgarh"
-  },
+  
   {
     "college": "Govt Engineering College, Bilaspur, Chhattisgarh",
     "State": "Chhattisgarh"
@@ -3017,10 +3008,63 @@ export const collegesWithClubs = [
     "State": "West Bengal"
   },
   {
-    "college": "Techno Main Salt Lake, Kolkata",
-    "State": "West Bengal"
+"college":"Delhi Technological University, Delhi",
+"State": "Delhi"
   },
-  // Outside Kolkata Engineering Colleges
+  
+  {
+    "college": "Indian Institute of Technology Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Netaji Subhas University of Technology (NSUT), Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Indira Gandhi Delhi Technical University for Women (IGDTUW)",
+    "State": "Delhi"
+  },
+  {
+    "college": "Delhi College of Engineering (DCE), Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Bharati Vidyapeeth College of Engineering, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Guru Gobind Singh Indraprastha University, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "All India Institute of Medical Sciences (AIIMS), Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Maulana Azad Medical College, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Lady Hardinge Medical College, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "University College of Medical Sciences, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Vardhman Mahavir Medical College, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Army College of Medical Sciences, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Jamia Hamdard Medical College, Delhi",
+    "State": "Delhi"
+  },
+  
   {
     "college": "National Institute of Technology, Durgapur",
     "State": "West Bengal"
