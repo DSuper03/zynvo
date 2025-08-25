@@ -10,6 +10,7 @@ import {
   LogOut,
   NotebookText,
   Trophy,
+  Newspaper,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -35,6 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     { icon: <FaUsers  size={22} />, label: 'Zyncers', href: '/zyncers' },
     { icon: <Calendar size={22} />, label: 'Events', href: '/events' },
     { icon: <Users size={22} />, label: 'Clubs', href: '/clubs' },
+    { icon: <Newspaper size={22} />, label: 'News', href: '/news' },
     { icon: <FaBahai />, label: 'AI', href: '/ai' }, 
     { icon: <NotebookText size={22} />, label: 'Resources', href: '/resources' },
     { icon: <Trophy size={22} />, label: 'Leaderboard', href: '/leaderboard' },
@@ -136,3 +138,5 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     </div>
   );
 };
+
+export default Sidebar;
