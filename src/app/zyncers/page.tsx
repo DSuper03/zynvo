@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Search, User, ArrowLeft, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 const FloatingParticles = () => {
   return (  
@@ -181,12 +182,12 @@ export default function UserSearchPage() {
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center gap-4">
             {/* Back button */}
-            <button
+            <Button
               onClick={handleBackToDashboard}
               className="backdrop-blur-md bg-white/10 border border-white/20 rounded-full p-2 hover:bg-yellow-400/20 hover:border-yellow-400/30 transition-all duration-300 group"
             >
               <ArrowLeft className="w-5 h-5 text-gray-300 group-hover:text-yellow-400 transition-colors duration-300" />
-            </button>
+            </Button>
 
             {/* Search Bar */}
             <div className="flex-1 relative">
