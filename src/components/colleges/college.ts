@@ -232,11 +232,7 @@ export const collegesWithClubs = [
     "State": "Maharashtra"
   },
   {
-    "college": "Indian Institute of Technology, Uttar pradesh",
-    "State": "Uttar pradesh"
-  },
-  {
-    "college": "Indian Institute of Technology, Uttar pradesh",
+    "college": "Indian Institute of Technology, (IITBHU)",
     "State": "Uttar pradesh"
   },
   {
@@ -255,9 +251,13 @@ export const collegesWithClubs = [
     "college": "Jaypee Institute of Information Technology University, Uttar pradesh",
     "State": "Uttar pradesh"
   },
+ {
+    "college": "Techno Main Salt Lake",
+    "State": "West Bengal"
+  },
   {
-    "college": "Indian Institute of Information Technology, Uttar pradesh",
-    "State": "Uttar pradesh"
+    "college": "R. G. Kar Medical College and Hospital",
+    "State": "West Bengal"
   },
   {
     "college": "Dayalbagh Educational Institute Faculty of Engineering, Agra, Uttar pradesh",
@@ -1202,6 +1202,10 @@ export const collegesWithClubs = [
   {
     "college": "Delhi Technical Campus, Haryana",
     "State": "Haryana"
+  },
+  {
+    "college": "Delhi Technical Campus, Gr. Noida",
+    "State": "Uttar Pradesh"
   },
   {
     "college": "Chandigarh College of Engineering and Technology, Haryana",
