@@ -106,6 +106,12 @@ const LandingHeader = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isMobileMenuOpen]);
+
   return (
     <header
       className={`fixed w-full space-x-10 px-10 top-0 left-0 z-50 transition-all duration-300 ${
@@ -250,89 +256,95 @@ const LandingHeader = () => {
           {/* Mobile menu button */}
           <button
             className="md:hidden text-white"
+            aria-label="Open menu"
+            aria-expanded={isMobileMenuOpen}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               {isMobileMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               )}
             </svg>
           </button>
         </div>
       </div>
 
-      {/* Mobile menu dropdown */}
+      {/* Mobile menu panel */}
       {isMobileMenuOpen && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.3 }}
-          className="md:hidden bg-black/90 backdrop-blur-md"
-        >
-          <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
-            <Link
-              href="/discover"
-              className="text-gray-300 hover:text-white transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Discover
-            </Link>
-            <Link
-              href="/testimonials"
-              className="text-gray-300 hover:text-white transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Testimonials
-            </Link>
-            <Link
-              href="/founders"
-              className="text-gray-300 hover:text-white transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Devs
-            </Link>
-            <Link
-              href="/faq"
-              className="text-gray-300 hover:text-white transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              FAQ
-            </Link>
-            <Link
-              href="/contact"
-              className="text-gray-300 hover:text-white transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            <Link
-              href="/auth/signup"
-              className="bg-yellow-500 text-black hover:bg-yellow-400 transition-colors px-5 py-2 rounded-md font-medium text-center"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Sign Up
-            </Link>
-          </div>
-        </motion.div>
+        <div className="fixed inset-0 z-[60] md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          {/* Panel */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.25 }}
+            className="relative mx-6 mt-24 rounded-[28px] bg-[#0b0b0b] border border-yellow-500/20 shadow-[0_0_60px_0_rgba(234,179,8,0.35)]"
+            role="dialog"
+            aria-modal="true"
+          >
+            {/* Header row inside panel */}
+            <div className="flex items-center justify-between px-6 pt-6">
+              <div className="flex items-center gap-1">
+                <span className="text-yellow-400 font-extrabold text-3xl">Z</span>
+                <span className="text-white font-semibold text-2xl">ynvo</span>
+              </div>
+              <button
+                aria-label="Close menu"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="h-10 w-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Menu items */}
+            <div className="px-6 py-6 space-y-6">
+              <Link href="/discover" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+                Discover
+              </Link>
+              <Link href="/testimonials" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+                Testimonials
+              </Link>
+              {/* <Link href="/founders" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+                Devs
+              </Link> */}
+              <Link href="/faq" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+                FAQ
+              </Link>
+              <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+                Contact
+              </Link>
+            </div>
+
+            {/* Actions */}
+            <div className="px-6 pb-6 pt-2 grid grid-cols-2 gap-3">
+              <Link
+                href="/auth/signin"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="rounded-2xl bg-white/5 text-yellow-300 hover:bg-white/10 text-center py-3 font-medium"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/auth/signup"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="rounded-2xl bg-yellow-500 text-black hover:bg-yellow-400 text-center py-3 font-semibold"
+              >
+                Sign Up
+              </Link>
+            </div>
+          </motion.div>
+        </div>
       )}
     </header>
   );

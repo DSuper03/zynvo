@@ -117,10 +117,14 @@ export default function Feed() {
   return (
     <div className="min-h-screen w-full bg-transparent overflow-y-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        {/* Single Discover Header - Works for both mobile and desktop */}
-        <div className="flex justify-center items-center ">
-          <AuroraText className="text-4xl text-center font-mono from-accent-foreground">Discover</AuroraText>
-        </div>
+        {/* Page heading */}
+        <header className="mb-4 sm:mb-6">
+          <h1 className="text-center">
+            <AuroraText className="text-3xl sm:text-4xl font-bold leading-tight tracking-tight">
+              Discover
+            </AuroraText>
+          </h1>
+        </header>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Column 1-2: Main Content */}
