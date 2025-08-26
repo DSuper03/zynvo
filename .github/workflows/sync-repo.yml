@@ -1,0 +1,21 @@
+name: Sync to Fork
+
+on:
+  push:
+    branches:
+      - main   
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Push changes to fork
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote add fork https://dsuper03ASM:${{ secrets.FORK_TOKEN }}@github.com/dsuper03ASM/zynvo-main.git
+          git push --force fork main
