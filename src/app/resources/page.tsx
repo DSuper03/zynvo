@@ -50,11 +50,12 @@ const ResourcesPage = () => {
 						</CardHeader>
 						<CardContent>
 							<div className="flex flex-col items-center">
-								<img
+								<p className='text-yellow-400'>Coming Soon</p>
+								{/* <img
 									src={tutorial.image}
 									alt={tutorial.name}
 									className="w-24 h-24 object-cover rounded-lg mb-4 border border-yellow-500/30"
-								/>
+								/> */}
 								<p className="text-gray-300 text-sm text-center">
 									{tutorial.description}
 								</p>
@@ -78,13 +79,14 @@ const ResourcesPage = () => {
 						<h2 className="text-2xl font-bold text-yellow-400 mb-4 text-center">
 							{tutorials[openIndex].name}
 						</h2>
-						<Image
+						<span className='text-yellow-400'>Coming Soon</span>
+						{/* <Image
 							src={tutorials[openIndex].image}
 							alt={tutorials[openIndex].name}
                             width={160}
                             height={160}
 							className="w-40 h-40 object-cover rounded-lg mx-auto mb-6 border border-yellow-500/30"
-						/>
+						/> */}
 						<p className="text-gray-200 text-base text-center mb-4">
 							{tutorials[openIndex].description}
 						</p>

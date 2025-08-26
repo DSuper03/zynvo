@@ -114,7 +114,7 @@ export default function UserSearchPage() {
 
     try {
       const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-      const url = new URL('/api/v1/user/SearchUser', baseUrl);
+      const url = new URL('/api/v1/users', baseUrl);
       url.searchParams.set('name', query);
       
       const headers: HeadersInit = {};
@@ -129,6 +129,7 @@ export default function UserSearchPage() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log("data of users", data)
         setUsers(data.users || []);
       } else if (response.status === 404) {
         setUsers([]);
