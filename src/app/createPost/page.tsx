@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Camera, Trash2, Send, Award, School } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { Camera, Trash2, Send, Award, School, Search, X, Check } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { collegesWithClubs } from '@/components/colleges/college'; // Import colleges data
+
 export default function CreatePostModal() {
   const [postText, setPostText] = useState('');
   const [selectedClub, setSelectedClub] = useState('');
@@ -13,7 +15,34 @@ export default function CreatePostModal() {
   const [isLoading, setIsLoading] = useState(false);
   const [bgLoaded, setBgLoaded] = useState(false);
 
- 
+  // New state variables for searchable dropdown
+  const [isCollegeDropdownOpen, setIsCollegeDropdownOpen] = useState(false);
+  const [collegeSearchQuery, setCollegeSearchQuery] = useState('');
+  const collegeDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Extract college names from the imported data
+  const collegeList = collegesWithClubs.map(item => 
+    typeof item === 'string' ? item : item.college
+  ).filter(Boolean);
+
+  // Filter colleges based on search query
+  const filteredColleges = collegeSearchQuery
+    ? collegeList.filter(college => 
+        college.toLowerCase().includes(collegeSearchQuery.toLowerCase())
+      )
+    : collegeList;
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (collegeDropdownRef.current && !collegeDropdownRef.current.contains(event.target as Node)) {
+        setIsCollegeDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   useEffect(() => {
     // This would normally load an actual image from public folder
     // Here we're just simulating the loading with a timeout
@@ -36,19 +65,6 @@ export default function CreatePostModal() {
     'Sports Club',
     'Art Society',
     'Drama Club',
-  ];
-
-  const colleges = [
-    'Engineering College',
-    'Business School',
-    'Medical College',
-    'Fine Arts Academy',
-    'Law School',
-    'Science College',
-    'Liberal Arts College',
-    'Architecture School',
-    'Design Institute',
-    'Education College',
   ];
 
   const handleImageUpload = (e: any) => {
@@ -109,6 +125,60 @@ export default function CreatePostModal() {
     }, 1500);
   };
 
+  // Group colleges alphabetically
+  const alphabeticalColleges = useMemo(() => {
+    const grouped: Record<string, string[]> = {};
+    
+    // Process all colleges
+    collegeList.forEach(college => {
+      if (!college) return;
+      // Get first letter and capitalize it
+      const firstLetter = college.charAt(0).toUpperCase();
+      // Initialize group if it doesn't exist
+      if (!grouped[firstLetter]) {
+        grouped[firstLetter] = [];
+      }
+      // Add college to its letter group
+      grouped[firstLetter].push(college);
+    });
+    
+    // Sort college names within each group
+    Object.keys(grouped).forEach(letter => {
+      grouped[letter].sort((a, b) => a.localeCompare(b));
+    });
+    
+    return grouped;
+  }, [collegeList]);
+
+  // Get all available letters for the alphabet bar
+  const availableLetters =useMemo(() => 
+    Object.keys(alphabeticalColleges).sort(),
+  [alphabeticalColleges]);
+  
+  // Function to filter colleges but keep alphabetical structure
+  const getFilteredAlphabeticalColleges = () => {
+    if (!collegeSearchQuery) return alphabeticalColleges;
+    
+    const filtered: Record<string, string[]> = {};
+    
+    // Filter each letter group
+    Object.entries(alphabeticalColleges).forEach(([letter, colleges]) => {
+      const matchingColleges = colleges.filter(college => 
+        college.toLowerCase().includes(collegeSearchQuery.toLowerCase())
+      );
+      
+      if (matchingColleges.length > 0) {
+        filtered[letter] = matchingColleges;
+      }
+    });
+    
+    return filtered;
+  };
+
+  // Get filtered colleges in alphabetical structure
+  const filteredAlphabeticalColleges = getFilteredAlphabeticalColleges();
+  const hasFilteredResults = Object.keys(filteredAlphabeticalColleges).length > 0;
+
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 relative">
       {/* Background Image */}
@@ -144,6 +214,7 @@ export default function CreatePostModal() {
 
           {/* Dropdowns */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Club dropdown */}
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-yellow-500 font-medium">
                 <Award size={18} />
@@ -163,125 +234,183 @@ export default function CreatePostModal() {
               </select>
             </div>
 
-            <div className="space-y-2">
+            {/* Searchable College Dropdown */}
+            <div className="space-y-2" ref={collegeDropdownRef}>
               <label className="flex items-center gap-2 text-yellow-500 font-medium">
                 <School size={18} />
                 Select College
               </label>
-              <select
-                value={selectedCollege}
-                onChange={(e) => setSelectedCollege(e.target.value)}
-                className="w-full bg-gray-800 bg-opacity-70 border border-gray-700 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white appearance-none"
-              >
-                <option value="">Select a college</option>
-                {colleges.map((college, index) => (
-                  <option key={index} value={college}>
-                    {college}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <div 
+                  className={`flex items-center w-full bg-gray-800 bg-opacity-70 border rounded-lg p-3 cursor-pointer ${
+                    isCollegeDropdownOpen ? 'border-yellow-500 ring-2 ring-yellow-500' : 'border-gray-700'
+                  }`}
+                  onClick={() => setIsCollegeDropdownOpen(!isCollegeDropdownOpen)}
+                >
+                  {selectedCollege ? (
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-white truncate">{selectedCollege}</span>
+                      <Button
+                        type="button"
+                        variant="ghost" 
+                        size="sm"
+                        className="ml-2 p-0 h-auto hover:bg-transparent hover:text-yellow-500"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCollege('');
+                        }}
+                      >
+                        <X size={16} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="text-gray-400">Select a college</span>
+                  )}
+                </div>
+                
+                {/* Dropdown Panel */}
+                {isCollegeDropdownOpen && (
+                  <div className="absolute left-0 right-0 mt-1 max-h-60 overflow-auto bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10">
+                    {/* Search input */}
+                    <div className="sticky top-0 z-20 bg-gray-800 p-2 border-b border-gray-700">
+                      <div className="relative">
+                        <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="text"
+                          value={collegeSearchQuery}
+                          onChange={(e) => setCollegeSearchQuery(e.target.value)}
+                          placeholder="Search colleges..."
+                          className="w-full bg-gray-700 border-none rounded-md pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-yellow-500"
+                          onClick={(e) => e.stopPropagation()}
+                          autoFocus
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Alphabet quick-jump bar */}
+                    <div className="sticky top-[52px] z-10 bg-gray-900 px-2 py-1 border-b border-gray-700 flex flex-wrap gap-1 justify-center">
+                      {availableLetters.map(letter => (
+                        <button
+                          key={letter}
+                          className={`w-6 h-6 text-xs rounded-full flex items-center justify-center
+                            ${filteredAlphabeticalColleges[letter] 
+                              ? 'bg-yellow-500 text-black hover:bg-yellow-400' 
+                              : 'bg-gray-700 text-gray-400'}`}
+
+                          disabled={!filteredAlphabeticalColleges[letter]}
+                          onClick={() => {
+                            if (filteredAlphabeticalColleges[letter]) {
+                              // Scroll to section
+                              document.getElementById(`college-section-${letter}`)?.scrollIntoView({ behavior: 'smooth' });
+                            }
+                          }}
+                        >
+                          {letter}
+                        </button>
+                      ))}
+                    </div>
+                    
+                    {/* Alphabetical college list */}
+                    <div className="py-1">
+                      {hasFilteredResults ? (
+                        Object.entries(filteredAlphabeticalColleges)
+                          .sort(([a], [b]) => a.localeCompare(b))
+                          .map(([letter, colleges]) => (
+                            <div key={letter} id={`college-section-${letter}`}>
+                              {/* Letter header */}
+                              <div className="sticky top-[84px] z-10 bg-yellow-500 bg-opacity-10 px-4 py-1 text-yellow-400 font-medium border-b border-yellow-500 border-opacity-30">
+                                {letter}
+                              </div>
+                              
+                              {/* Colleges in this section */}
+                               {colleges.map((college, index) => (
+                    <div
+                      key={`${letter}-${index}`}
+                      className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-700 ${
+                        selectedCollege === college ? 'bg-yellow-500 bg-opacity-20 text-yellow-400' : 'text-white'
+                      }`}
+                      onClick={() => {
+                        setSelectedCollege(college);
+                        setIsCollegeDropdownOpen(false);
+                        setCollegeSearchQuery('');
+                      }}
+                    >
+                      {selectedCollege === college && <Check size={16} className="mr-2 text-yellow-500" />}
+                      <span className="truncate">{college}</span>
+                    </div>
+                  ))}
+                </div>
+              ))
+          ) : (
+            <div className="px-4 py-3 text-sm text-gray-400 text-center">
+              No colleges match your search
+            </div>
+          )}
+        </div>
+      </div>
+    )}
             </div>
           </div>
 
           {/* Image upload */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-yellow-500 font-medium">
-               
-                Add Photos
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-yellow-500 font-medium">
+              <Camera size={18} />
+              Upload Images (max 4)
+            </label>
+            <div className="flex items-center gap-4">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                id="imageUpload"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+              <label htmlFor="imageUpload" className="cursor-pointer">
+                <div className="w-12 h-12 bg-gray-800 bg-opacity-70 border border-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                  <Camera size={24} className="text-gray-400" />
+                </div>
               </label>
-              <span className="text-sm text-gray-400">
-                {images.length}/4 images
-              </span>
-            </div>
 
-            {/* Image preview area */}
-            {previewUrls.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {/* Image previews */}
+              <div className="flex items-center gap-4 overflow-x-auto">
                 {previewUrls.map((url, index) => (
-                  <div
-                    key={index}
-                    className="relative aspect-square bg-gray-800 bg-opacity-50 rounded-lg overflow-hidden"
-                  >
+                  <div key={index} className="relative w-20 h-20 flex-shrink-0">
                     <Image
                       src={url}
                       alt={`Preview ${index + 1}`}
                       layout="fill"
-                      className="object-cover opacity-80"
+                      objectFit="cover"
+                      className="rounded-lg"
                     />
-                    <Button
+                    <button
                       type="button"
+                      className="absolute top-1 right-1 bg-black bg-opacity-70 rounded-full p-1 hover:bg-red-600 transition-colors"
                       onClick={() => removeImage(index)}
-                      className="absolute top-1 right-1 bg-black bg-opacity-70 rounded-full p-1 hover:bg-red-500 transition-colors"
                     >
-                      <Trash2 size={16} />
-                    </Button>
+                      <Trash2 size={14} className="text-white" />
+                    </button>
                   </div>
                 ))}
               </div>
-            )}
-
-            {/* Upload button */}
-            <div className="flex justify-center">
-              <label
-                className={`
-                flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer
-                ${images.length >= 4 ? 'bg-gray-700 text-gray-500' : 'bg-yellow-500 text-black hover:bg-yellow-400'}
-                transition-colors font-medium
-              `}
-              >
-                <Camera size={18} />
-                Upload Images
-                <input
-                  type="file"
-                  onChange={handleImageUpload}
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  disabled={images.length >= 4}
-                />
-              </label>
             </div>
           </div>
 
           {/* Submit button */}
-          <div className="pt-4">
+          <div className="text-right">
             <Button
               type="button"
+              disabled={!postText.trim() || !selectedClub || !selectedCollege || isLoading}
               onClick={handleSubmit}
-              disabled={
-                isLoading || !postText || !selectedClub || !selectedCollege
-              }
-              className={`
-                w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-semibold
-                ${
-                  !postText || !selectedClub || !selectedCollege || isLoading
-                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                    : 'bg-yellow-500 text-black hover:bg-yellow-400'
-                }
-                transition-all
-              `}
+              className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin h-5 w-5 border-2 border-black border-t-transparent rounded-full"></div>
-                  <span>Posting...</span>
-                </>
-              ) : (
-                <>
-                  <Send size={18} />
-                  <span>Post Now</span>
-                </>
-              )}
+              {isLoading ? 'Posting...' : 'Post Zynvo'}
             </Button>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-gray-800 text-center text-gray-400 text-sm bg-black bg-opacity-30">
-          Boost your campus engagement with every post!
-        </div>
       </div>
-    </div>
-  );
+      </div>
+      </div>
+  )
 }
