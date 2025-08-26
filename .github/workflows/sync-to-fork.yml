@@ -3,19 +3,19 @@ name: Sync to Fork
 on:
   push:
     branches:
-      - main   # branch you want to sync
+      - main  
 
 jobs:
   sync:
     runs-on: ubuntu-latest
 
-    permissions: {} # 🚨 disables the default GITHUB_TOKEN so only your PAT is used
+    permissions: {} 
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.FORK_TOKEN }} # 🚨 force checkout using your PAT
+          token: ${{ secrets.FORK_TOKEN }}
 
       - name: Push changes to fork
         run: |
