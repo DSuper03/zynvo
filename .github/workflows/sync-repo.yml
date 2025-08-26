@@ -3,7 +3,7 @@ name: Sync to Fork
 on:
   push:
     branches:
-      - main   
+      - main
 
 jobs:
   sync:
@@ -14,8 +14,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Push changes to fork
+        env:
+          PAT: ${{ secrets.FORK_TOKEN }}
         run: |
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git remote add fork https://dsuper03ASM:${{ secrets.FORK_TOKEN }}@github.com/dsuper03ASM/zynvo-main.git
+          git remote add fork https://dsuper03ASM:${PAT}@github.com/dsuper03ASM/zynvo-main.git
           git push --force fork main
