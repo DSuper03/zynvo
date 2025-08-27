@@ -3,10 +3,10 @@ import { useState, useEffect } from 'react';
 import { Search, User, ArrowLeft, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
 
+// Floating particles animation component
 const FloatingParticles = () => {
-  return (  
+  return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none">
       {[...Array(20)].map((_, i) => (
         <div
@@ -35,12 +35,14 @@ const AnimatedBackground = () => {
   );
 };
 
+// User card component with glassmorphism
 const UserCard = ({ user, onClick }: { user: any, onClick: () => void }) => {
   return (
     <div
       onClick={onClick}
       className="group relative backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 cursor-pointer transition-all duration-500 hover:bg-yellow-400/20 hover:border-yellow-400/30 hover:scale-105 hover:shadow-2xl hover:shadow-yellow-400/10 transform-gpu"
     >
+      {/* Glow effect on hover */}
       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-yellow-400/0 via-yellow-400/5 to-yellow-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
       <div className="relative flex items-center space-x-4">
@@ -80,6 +82,7 @@ const UserCard = ({ user, onClick }: { user: any, onClick: () => void }) => {
         </div>
       </div>
 
+      {/* Sparkle effect on hover */}
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
         <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
       </div>
@@ -113,7 +116,7 @@ export default function UserSearchPage() {
     setHasSearched(true);
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const baseUrl = 'http://localhost:8000';
       const url = new URL('/api/v1/user/SearchUser', baseUrl);
       url.searchParams.set('name', query);
       
@@ -159,6 +162,7 @@ export default function UserSearchPage() {
   };
 
   const handleUserClick = (userId: string) => {
+    // Navigate to profile page - you'll need to implement navigation logic
     toast(`Navigating to profile`);
     if (typeof window !== 'undefined') {
       window.location.href = `/zyncers/${userId}`;
@@ -177,68 +181,82 @@ export default function UserSearchPage() {
       <AnimatedBackground />
       <FloatingParticles />
 
-      {/* Top Header with Search */}
-      <div className="sticky top-0 z-20 backdrop-blur-md bg-black/80 border-b border-gray-800/50">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            {/* Back button */}
-            <Button
-              onClick={handleBackToDashboard}
-              className="backdrop-blur-md bg-white/10 border border-white/20 rounded-full p-2 hover:bg-yellow-400/20 hover:border-yellow-400/30 transition-all duration-300 group"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-300 group-hover:text-yellow-400 transition-colors duration-300" />
-            </Button>
+      {/* Back button - only show when searching */}
+      {hasSearched && (
+        <div className="absolute top-6 left-6 z-10">
+          <button
+            onClick={handleBackToDashboard}
+            className="backdrop-blur-md bg-white/10 border border-white/20 rounded-full p-3 hover:bg-yellow-400/20 hover:border-yellow-400/30 transition-all duration-300 group"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-300 group-hover:text-yellow-400 transition-colors duration-300" />
+          </button>
+        </div>
+      )}
+
+      <div className="relative z-10">
+        {/* Search Section */}
+        <div className={`transition-all duration-700 ease-in-out ${
+          hasSearched 
+            ? 'pt-24 pb-8' 
+            : 'flex items-center justify-center min-h-screen'
+        }`}>
+          <div className={`w-full max-w-2xl mx-auto px-6 transition-all duration-700 ${
+            hasSearched ? 'transform -translate-y-0' : ''
+          }`}>
+            
+            {/* Greeting - hide when searched */}
+            {!hasSearched && (
+              <div className="text-center mb-12 animate-fade-in">
+                <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-yellow-400 to-white bg-clip-text text-transparent animate-pulse-slow">
+                  Hello
+                </h1>
+                <p className="text-xl md:text-2xl text-gray-400 mb-2">
+                  Who do you seek?
+                </p>
+                <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full animate-pulse" />
+              </div>
+            )}
 
             {/* Search Bar */}
-            <div className="flex-1 relative">
+            <div className={`relative transition-all duration-700 ${
+              hasSearched ? 'mb-8' : 'mb-0'
+            }`}>
               <div className="relative group">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-400/30 via-yellow-400/20 to-yellow-400/30 rounded-full blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300" />
+                {/* Glow effect */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-400/50 via-yellow-400/30 to-yellow-400/50 rounded-full blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-500" />
                 
                 <div className="relative flex items-center">
-                  <Search className="absolute left-4 w-5 h-5 text-gray-900 z-10" />
+                  <Search className="absolute left-6 w-6 h-6 text-gray-900 z-10" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={handleInputChange}
                     placeholder="Search for users..."
-                    className="w-full pl-12 pr-6 py-3 bg-yellow-400 text-gray-900 placeholder-gray-700 rounded-full text-base font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400/50 transition-all duration-300 shadow-lg"
+                    className="w-full pl-16 pr-6 py-4 bg-yellow-400 text-gray-900 placeholder-gray-700 rounded-full text-lg font-medium focus:outline-none focus:ring-4 focus:ring-yellow-400/30 transition-all duration-300 shadow-2xl backdrop-blur-sm"
                   />
                   
                   {/* Loading indicator */}
                   {isSearching && (
-                    <div className="absolute right-4">
-                      <div className="w-4 h-4 border-2 border-gray-700 border-t-transparent rounded-full animate-spin" />
+                    <div className="absolute right-6">
+                      <div className="w-5 h-5 border-2 border-gray-700 border-t-transparent rounded-full animate-spin" />
                     </div>
                   )}
                 </div>
               </div>
             </div>
+
+            {/* Search hint - only show when not searched */}
+            {!hasSearched && (
+              <p className="text-center text-gray-500 text-sm animate-fade-in-delay">
+                Start typing to discover amazing people...
+              </p>
+            )}
           </div>
         </div>
-      </div>
-
-      <div className="relative z-10">
-        {/* Welcome Section - Show when no search */}
-        {!hasSearched && (
-          <div className="flex items-center justify-center min-h-[calc(100vh-100px)] px-6">
-            <div className="text-center max-w-2xl mx-auto animate-fade-in">
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-yellow-400 to-white bg-clip-text text-transparent animate-pulse-slow">
-                Hello
-              </h1>
-              <p className="text-xl md:text-2xl text-gray-400 mb-4">
-                Who do you seek?
-              </p>
-              <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full animate-pulse mb-8" />
-              <p className="text-gray-500 text-sm animate-fade-in-delay">
-                Use the search bar above to discover amazing people...
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Results Section */}
         {hasSearched && (
-          <div className="max-w-6xl mx-auto px-6 py-8">
+          <div className="max-w-4xl mx-auto px-6 pb-12">
             {/* Results Header */}
             <div className="flex items-center justify-between mb-8">
               <div>

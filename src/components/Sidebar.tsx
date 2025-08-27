@@ -10,6 +10,7 @@ import {
   LogOut,
   NotebookText,
   Trophy,
+  Newspaper,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -35,13 +36,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     { icon: <FaUsers  size={22} />, label: 'Zyncers', href: '/zyncers' },
     { icon: <Calendar size={22} />, label: 'Events', href: '/events' },
     { icon: <Users size={22} />, label: 'Clubs', href: '/clubs' },
+     { icon: <Newspaper size={22} />, label: 'News', href: '/news' }, 
+     // @keku bhai agent banne ke ba dconnect karke uncomment kar dena🫡 good night
     { icon: <FaBahai />, label: 'AI', href: '/ai' }, 
     { icon: <NotebookText size={22} />, label: 'Resources', href: '/resources' },
     { icon: <Trophy size={22} />, label: 'Leaderboard', href: '/leaderboard' },
+     { icon: <User size={22} />, label: 'Profile', href: '/dashboard' },
   ];
 
   const accountItems = [
-    { icon: <User size={22} />, label: 'Profile', href: '/dashboard' },
+
     { icon: <LogOut size={22} />, label: 'Logout', href: '/' },
   ];
 
@@ -60,14 +64,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
           <div className={`flex flex-col items-center ${isOpen ? 'w-full' : 'w-full'}`}>
             {/* Profile Image - Slightly to the right with margin */}
             <div className="flex-shrink-0 ml-2">
-              {profile ? (
-                <img
-                  src={profile}
-                  alt="Profile"
-                  className={`rounded-full object-cover border-2 border-yellow-500 ${
+              <Link href="/dashboard">
+                  {profile ? (
+                    <img
+                      src={profile}
+                      alt="Profile"
+                      className={`rounded-full object-cover border-2 border-yellow-500 ${
                     isOpen ? 'w-14 h-14 sm:w-16 sm:h-16' : 'w-10 h-10'
-                  }`}
-                />
+                  }`} />
               ) : (
                 <div className={`bg-yellow-500 rounded-full flex items-center justify-center border-2 border-yellow-500 ${
                   isOpen ? 'w-14 h-14 sm:w-16 sm:h-16' : 'w-10 h-10'
@@ -75,6 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
                   <User className={`text-black ${isOpen ? 'w-8 h-8' : 'w-5 h-5'}`} />
                 </div>
               )}
+              </Link>
             </div>
 
             {/* Name - Below the image */}
@@ -136,3 +141,5 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     </div>
   );
 };
+
+export default Sidebar;

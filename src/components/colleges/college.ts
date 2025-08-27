@@ -256,7 +256,7 @@ export const collegesWithClubs = [
     "State": "West Bengal"
   },
   {
-    "college": "R. G. Kar Medical College and Hospital",
+    "college": "RG. Kar Medical College and Hospital",
     "State": "West Bengal"
   },
   {
@@ -1591,10 +1591,7 @@ export const collegesWithClubs = [
     "college": "Silicon Institute of Technology, Orissa",
     "State": "Orissa"
   },
-  {
-    "college": "Silicon Institute of Technology, Orissa",
-    "State": "Orissa"
-  },
+
   {
     "college": "Xavier University, Orissa",
     "State": "Orissa"
@@ -1887,10 +1884,7 @@ export const collegesWithClubs = [
     "college": "Sandip University, Madhuban, Bihar",
     "State": "Bihar"
   },
-  {
-    "college": "Government Engineering College, Bihar",
-    "State": "Bihar"
-  },
+  
   {
     "college": "Amity University, Patna, Bihar",
     "State": "Bihar"
@@ -2019,10 +2013,7 @@ export const collegesWithClubs = [
     "college": "Bhilai Institute of Technology, Chhattisgarh",
     "State": "Chhattisgarh"
   },
-  {
-    "college": "Bhilai Institute of Technology, Chhattisgarh",
-    "State": "Chhattisgarh"
-  },
+  
   {
     "college": "Govt Engineering College, Bilaspur, Chhattisgarh",
     "State": "Chhattisgarh"
@@ -2930,5 +2921,462 @@ export const collegesWithClubs = [
   {
     "college": "Government Polytechnic, Daman, Daman",
     "State": "Daman"
+  },
+  // Additional Kolkata Engineering Colleges
+  {
+    "college": "Heritage Institute of Technology, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Techno India College of Technology, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Institute of Engineering and Management (IEM), Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "University of Engineering and Management (UEM), Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Future Institute of Engineering and Management (FIEM), Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Guru Nanak Institute of Technology, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Pailan College of Management and Technology, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Meghnad Saha Institute of Technology, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Netaji Subhash Engineering College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Swami Vivekananda Institute of Science and Technology, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Om Dayal Group of Institutions, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Dream Institute of Technology, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Camellia Institute of Technology, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Calcutta Institute of Engineering and Management, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "George Group of Colleges, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Kingston Educational Institute, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Jadavpur University (Faculty of Engineering and Technology), Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "University of Calcutta (Rashbehari Siksha Prangan – Tech Campus), Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Government College of Engineering and Ceramic Technology, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Government College of Engineering and Leather Technology, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Government College of Engineering and Textile Technology, Serampore",
+    "State": "West Bengal"
+  },
+  {
+"college":"Delhi Technological University, Delhi",
+"State": "Delhi"
+  },
+  
+  {
+    "college": "Indian Institute of Technology Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Netaji Subhas University of Technology (NSUT), Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Indira Gandhi Delhi Technical University for Women (IGDTUW)",
+    "State": "Delhi"
+  },
+  {
+    "college": "Delhi College of Engineering (DCE), Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Bharati Vidyapeeth College of Engineering, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Guru Gobind Singh Indraprastha University, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "All India Institute of Medical Sciences (AIIMS), Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Maulana Azad Medical College, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Lady Hardinge Medical College, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "University College of Medical Sciences, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Vardhman Mahavir Medical College, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Army College of Medical Sciences, Delhi",
+    "State": "Delhi"
+  },
+  {
+    "college": "Jamia Hamdard Medical College, Delhi",
+    "State": "Delhi"
+  },
+  
+  {
+    "college": "National Institute of Technology, Durgapur",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Kalyani Government Engineering College, Kalyani",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Jalpaiguri Government Engineering College, Jalpaiguri",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Bengal College of Engineering and Technology, Durgapur",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Haldia Institute of Technology, Haldia",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Murshidabad College of Engineering & Technology, Murshidabad",
+    "State": "West Bengal"
+  },
+  // Medical Colleges Kolkata
+  {
+    "college": "Calcutta Medical College (Medical College and Hospital), Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "R. G. Kar Medical College and Hospital, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Nil Ratan Sircar Medical College and Hospital, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Institute of Post Graduate Medical Education and Research (SSKM Hospital), Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Chittaranjan National Cancer Institute, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "National Institute of Homeopathy, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "KPC Medical College and Hospital, Jadavpur",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Peerless Hospital & B. K. Roy Research Centre, Kolkata",
+    "State": "West Bengal"
+  },
+  // General / Arts / Commerce / Management Colleges Kolkata
+  {
+    "college": "The Bhawanipur Education Society College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Shri Shikshayatan College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Maulana Azad College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Asutosh College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "City College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Bangabasi College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Surendranath College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Netaji Nagar College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "South Calcutta Girls' College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Rani Birla Girls' College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Basanti Devi College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Acharya Jagadish Chandra Bose College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Dinabandhu Andrews College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Seth Anandram Jaipuria College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Sivanath Sastri College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Vidyasagar College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Vidyasagar Evening College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Vidyasagar College for Women, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Women's Christian College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Jogamaya Devi College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Khudiram Bose Central College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "K. K. Das College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Naba Ballygunge Mahavidyalaya, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Prafulla Chandra College, Kolkata",
+    "State": "West Bengal"
+  },
+  {
+    "college": "Ramakrishna Mission Vidyamandira, Belur",
+    "State": "West Bengal"
+  },
+  // Additional IITs and NITs
+  {
+    "college": "Indian Institute of Information Technology Bhubaneswar",
+    "State": "Odisha"
+  },
+  {
+    "college": "Indian Institute of Technology (BHU), Varanasi",
+    "State": "Uttar Pradesh"
+  },
+
+  {
+    "college": "Assam Engineering College, Guwahati",
+    "State": "Assam"
+  },
+
+  {
+    "college": "Assam Medical College, Dibrugarh",
+    "State": "Assam"
+  },
+  {
+    "college": "Gauhati Medical College, Guwahati",
+    "State": "Assam"
+  },
+  {
+    "college": "Fakhruddin Ali Ahmed Medical College, Barpeta",
+    "State": "Assam"
+  },
+  {
+    "college": "Silchar Medical College, Silchar",
+    "State": "Assam"
+  },
+  {
+    "college": "Tezpur Medical College, Tezpur",
+    "State": "Assam"
+  },
+  {
+    "college": "Jorhat Medical College, Jorhat",
+    "State": "Assam"
+  },
+  {
+    "college": "Girijananda Chowdhury Institute of Medical Science, Guwahati",
+    "State": "Assam"
+  },
+  {
+    "college": "Northeast Frontier Technical University, Guwahati",
+    "State": "Assam"
+  },
+  {
+    "college": "Central Institute of Technology, Kokrajhar",
+    "State": "Assam"
   }
-]
+  ,
+  {
+    "college": "Indian Institute of Technology Ropar",
+    "State": "Punjab"
+  },
+  {
+    "college": "Indian Institute of Technology Mandi",
+    "State": "Himachal Pradesh"
+  },
+  {
+    "college": "Indian Institute of Technology Indore",
+    "State": "Madhya Pradesh"
+  },
+  {
+    "college": "Indian Institute of Technology (ISM) Dhanbad",
+    "State": "Jharkhand"
+  },
+  {
+    "college": "Indian Institute of Technology Palamuru",
+    "State": "Telangana"
+  },
+  {
+    "college": "Indian Institute of Technology Jammu",
+    "State": "Jammu and Kashmir"
+  },
+  {
+    "college": "Indian Institute of Technology Palakkad",
+    "State": "Kerala"
+  },
+  {
+    "college": "Indian Institute of Technology Tirupati", 
+    "State": "Andhra Pradesh"
+  },
+  {
+    "college": "Indian Institute of Technology Dharwad",
+    "State": "Karnataka"
+  },
+  {
+    "college": "Indian Institute of Technology Bhilai",
+    "State": "Chhattisgarh"
+  },
+  {
+    "college": "National Institute of Technology Andhra Pradesh",
+    "State": "Andhra Pradesh"
+  },
+  {
+    "college": "National Institute of Technology Uttarakhand",
+    "State": "Uttarakhand"
+  },
+  {
+    "college": "Indian Institute of Information Technology Kottayam",
+    "State": "Kerala"
+  },
+  {
+    "college": "Indian Institute of Information Technology Sri City",
+    "State": "Andhra Pradesh"
+  },
+  {
+    "college": "Indian Institute of Information Technology Vadodara",
+    "State": "Gujarat"
+  },
+  {
+    "college": "Indian Institute of Information Technology Kurnool",
+    "State": "Andhra Pradesh"
+  },
+  {
+    "college": "Indian Institute of Information Technology Pune",
+    "State": "Maharashtra"
+  },
+  {
+    "college": "Indian Institute of Information Technology Ranchi",
+    "State": "Jharkhand"
+  },
+  {
+    "college": "Indian Institute of Information Technology Nagpur",
+    "State": "Maharashtra"
+  },
+  {
+    "college": "Indian Institute of Information Technology Surat",
+    "State": "Gujarat"
+  },
+  {
+    "college": "Indian Institute of Information Technology Bhagalpur",
+    "State": "Bihar"
+  },
+  {
+    "college": "Indian Institute of Information Technology Bhopal",
+    "State": "Madhya Pradesh"
+  },
+  {
+    "college": "Indian Institute of Information Technology Srirangam",
+    "State": "Tamil Nadu"
+  },
+  {
+    "college": "Indian Institute of Information Technology Lucknow",
+    "State": "Uttar Pradesh"
+  },
+  {
+    "college": "Indian Institute of Information Technology Dharwad",
+    "State": "Karnataka"
+  },
+  {
+    "college": "Indian Institute of Information Technology Una",
+    "State": "Himachal Pradesh"
+  }
+]  

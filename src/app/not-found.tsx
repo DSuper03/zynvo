@@ -137,9 +137,9 @@ export default function SmoothSnake404Game() {
   }, [direction, gameStarted, gameOver]);
 
   return (
-    <div className="h-screen w-screen bg-black text-yellow-400 flex overflow-hidden">
+    <div className="min-h-screen w-full bg-black text-yellow-400 flex flex-col md:flex-row overflow-hidden">
       {/* Left Side - Game */}
-      <div className="w-1/2 h-full flex flex-col items-center justify-center p-8 bg-gradient-to-br from-gray-900 to-black relative">
+      <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center p-4 md:p-8 bg-gradient-to-br from-gray-900 to-black relative">
         {/* Animated background particles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(30)].map((_, i) => (
@@ -157,7 +157,7 @@ export default function SmoothSnake404Game() {
         </div>
 
         {/* Game Container */}
-        <div className="bg-black border-4 border-yellow-400 rounded-xl p-6 shadow-2xl z-10 transform hover:scale-105 transition-transform duration-300">
+        <div className="bg-black border-4 border-yellow-400 rounded-xl p-4 md:p-6 shadow-2xl z-10 transform hover:scale-105 transition-transform duration-300 w-full max-w-xs md:max-w-md">
           <div className="flex justify-between items-center mb-4">
             <div className="text-lg font-mono">
               Score: <span className="text-yellow-300">{score}</span>
@@ -172,8 +172,9 @@ export default function SmoothSnake404Game() {
             className="grid bg-gray-900 border-2 border-yellow-600 mx-auto rounded-lg overflow-hidden shadow-inner"
             style={{
               gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
-              width: '400px',
-              height: '400px',
+              width: '100%',
+              maxWidth: '340px',
+              height: '340px',
             }}
           >
             {[...Array(GRID_SIZE * GRID_SIZE)].map((_, index) => {
@@ -240,7 +241,7 @@ export default function SmoothSnake404Game() {
       </div>
 
       {/* Right Side - 404 Display */}
-      <div className="w-1/2 h-full flex flex-col items-center justify-center p-8 bg-gradient-to-bl from-black to-gray-900 relative">
+      <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center p-4 md:p-8 bg-gradient-to-bl from-black to-gray-900 relative">
         {/* Large floating elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(20)].map((_, i) => (
@@ -259,10 +260,10 @@ export default function SmoothSnake404Game() {
           ))}
         </div>
 
-        <div className="text-center z-10 space-8">
+        <div className="text-center z-10 space-y-8 w-full max-w-md mx-auto">
           {/* Main 404 */}
           <div className="relative">
-            <h1 className="text-9xl md:text-[12rem] font-black leading-none">
+            <h1 className="text-7xl md:text-9xl font-black leading-none">
               <span className="text-yellow-400 animate-pulse drop-shadow-[0_0_30px_rgba(255,215,0,0.5)]">
                 4
               </span>
@@ -279,26 +280,26 @@ export default function SmoothSnake404Game() {
                 4
               </span>
             </h1>
-            <div className="absolute inset-0 text-9xl md:text-[12rem] font-black leading-none opacity-20 blur-sm">
+            <div className="absolute inset-0 text-7xl md:text-9xl font-black leading-none opacity-20 blur-sm">
               <span className="text-yellow-500">404</span>
             </div>
           </div>
 
           {/* Error Message */}
           <div className="space-y-4">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-widest text-yellow-300">
+            <h2 className="text-2xl md:text-4xl font-bold tracking-widest text-yellow-300">
               PAGE NOT FOUND
             </h2>
-            <div className="w-32 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent mx-auto animate-pulse"></div>
+            <div className="w-24 md:w-32 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent mx-auto animate-pulse"></div>
           </div>
 
           {/* Fun Messages */}
-          <div className="space-y-6 max-w-md">
-            <p className="text-xl text-yellow-200 leading-relaxed">
+          <div className="space-y-6 max-w-md mx-auto">
+            <p className="text-lg md:text-xl text-yellow-200 leading-relaxed">
               Oops! The page you're looking for has slithered away...
             </p>
 
-            <div className="flex items-center justify-center space-x-4 text-4xl">
+            <div className="flex items-center justify-center space-x-4 text-3xl md:text-4xl">
               <span className="animate-bounce" style={{ animationDelay: '0s' }}>
                 🐍
               </span>
@@ -316,14 +317,14 @@ export default function SmoothSnake404Game() {
               </span>
             </div>
 
-            <p className="text-lg text-yellow-300 opacity-80">
+            <p className="text-base md:text-lg text-yellow-300 opacity-80">
               But hey, enjoy the Snake game while you're here!
             </p>
 
             {/* Navigation */}
-            <div className="pt-6">
+            <div className="pt-4 md:pt-6">
               <button
-                className="inline-flex items-center px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-yellow-400/25"
+                className="inline-flex items-center px-4 md:px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-yellow-400/25"
                 onClick={() => {
                   router.push('/');
                 }}
@@ -335,7 +336,6 @@ export default function SmoothSnake404Game() {
         </div>
       </div>
 
-      {/* let it be like this */}
       <style jsx>{`
         @keyframes float {
           0%,

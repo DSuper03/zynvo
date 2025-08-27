@@ -400,6 +400,12 @@ export default function ZynvoDashboard() {
    const [highFivedPosts, setHighFivedPosts] = useState<Set<string>>(new Set());
    const [selectedPredefinedTags, setSelectedPredefinedTags] = useState<string[]>([]);
 
+  // NEW: compact UI controls
+  const [activePane, setActivePane] = useState<'posts' | 'events'>('posts');
+  const [viewAllPosts, setViewAllPosts] = useState(false);
+  const [viewAllEvents, setViewAllEvents] = useState(false);
+  const [showAllProfileTags, setShowAllProfileTags] = useState(false);
+
   useEffect(()=> {
      if (typeof window !== 'undefined') {
      const tok = localStorage.getItem("token")
@@ -608,37 +614,32 @@ export default function ZynvoDashboard() {
   return (
     <div className="min-h-screen h-full bg-black text-gray-100 ">
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto pt-16 sm:pt-20 md:pt-24 pb-8 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-4xl mx-auto pt-12 sm:pt-16 md:pt-20 pb-10 px-4 sm:px-6">
         {/* Dashboard Header - Mobile Responsive */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
-          <AuroraText className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-            Welcome {userData.name}
-          </AuroraText>
-          <div className="flex flex-wrap gap-2 sm:gap-4 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+          <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
             <Button
               onClick={() => setShowProfileModal(true)}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-3 py-2 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm flex-1 sm:flex-initial"
+              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-4 py-2 rounded-full text-sm"
             >
               Complete Profile
             </Button>
             <Button
               onClick={() => navigate.push('/feedback')}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-3 py-2 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm flex-1 sm:flex-initial"
+              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-4 py-2 rounded-full text-sm"
             >
               Feature Request
             </Button>
-            <Button className="bg-yellow-500 px-3 py-2 sm:px-4 sm:py-2">
-              <BellDotIcon className="text-black w-4 h-4 sm:w-5 sm:h-5" />
+            <Button className="bg-yellow-500 h-10 w-10 rounded-full grid place-items-center">
+              <BellDotIcon className="text-black w-5 h-5" />
             </Button>
           </div>
         </div>
 
         {/* Profile Card - Mobile Responsive */}
-        <div className="bg-gray-900 rounded-lg shadow-lg mb-6 sm:mb-8 overflow-hidden">
-          <div className="h-24 sm:h-32 relative overflow-hidden">
+        <div className="bg-gray-900 rounded-2xl shadow-lg mb-10 overflow-hidden">
+          <div className="h-28 sm:h-36 relative overflow-hidden">
             <Image
-
-            
               src="/banners/profilebanner.jpg"
               alt="Profile Banner"
               fill
@@ -646,76 +647,89 @@ export default function ZynvoDashboard() {
               priority
             />
           </div>
-          <div className="relative px-4 sm:px-6 pb-4 sm:pb-6">
+          <div className="relative px-4 sm:px-6 pb-6">
             <div className="absolute -top-8 sm:-top-12 left-4 sm:left-6">
               {userData.profileAvatar ? (
-                // <Image
-                //   className="w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 object-cover"
-                //   src={userData.profileAvatar}
-                //   width={96}
-                //   height={96}
-                //   alt="User profile avatar"
-                // />
-                <img src={userData.profileAvatar} className='w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 object-cover' alt="user pfp"/>
+                <img
+                  src={userData.profileAvatar}
+                  className="w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-4 border-gray-900 bg-yellow-400 object-cover"
+                  alt="user pfp"
+                />
               ) : (
-                <div className="w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 flex items-center justify-center text-gray-900 text-xl sm:text-3xl md:text-4xl font-bold">
+                <div className="w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-4 border-gray-900 bg-yellow-400 flex items-center justify-center text-gray-900 text-2xl sm:text-3xl md:text-4xl font-bold">
                   {userData.name ? userData.name.charAt(0) : 'Z'}
                 </div>
               )}
             </div>
-            <div className="pt-10 sm:pt-12 md:pt-16">
-              <h2 className="text-lg sm:text-xl font-bold text-white mb-1 sm:mb-2">
+
+            <div className="pt-12 sm:pt-14 md:pt-16">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-white mb-1">
                 {userData.name || 'User'}
               </h2>
-              <p className="text-gray-400 mb-2 text-sm sm:text-base">{userData.bio}</p>
-              
-              {/* Course and Year - Mobile Stack */}
-              <div className="flex flex-col sm:flex-row gap-1 sm:gap-4 mb-3 sm:mb-4">
-                <p className="text-yellow-400 font-bold text-sm sm:text-base">
-                  Course: <span className="text-gray-400">{userData.course ? userData.course : "complete profile"}</span>
-                </p>
-                <p className="text-yellow-400 font-bold text-sm sm:text-base">
-                  Year: <span className="text-gray-400">{userData.year ? userData.year : "complete profile"}</span>
+              <p className="text-gray-400 mb-3 text-sm sm:text-base line-clamp-2">
+                {userData.bio}
+              </p>
 
+              {/* Course / Year / College */}
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-5">
+                <p className="text-yellow-400 font-bold text-sm sm:text-base">
+                  Course: <span className="text-gray-300 font-normal">{userData.course || "complete profile"}</span>
                 </p>
-             <div className='flex items-center bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs sm:text-sm'>
-                <FaSchool className="w-4 h-4 mr-2 text-yellow-400" />
-                <span>{userData.collegeName ? userData.collegeName : "College not set"}</span>
-             </div>
+                <p className="text-yellow-400 font-bold text-sm sm:text-base">
+                  Year: <span className="text-gray-300 font-normal">{userData.year || "complete profile"}</span>
+                </p>
+                <div className="flex items-center bg-gray-800 text-gray-200 px-3 py-1 rounded-full text-xs sm:text-sm">
+                  <FaSchool className="w-4 h-4 mr-2 text-yellow-400" />
+                  <span className="truncate max-w-[220px] sm:max-w-none">
+                    {userData.collegeName || "College not set"}
+                  </span>
+                </div>
               </div>
 
-              
-              <div className="flex flex-wrap gap-1 sm:gap-2 mb-3 sm:mb-4">
-                {userData.tags && userData.tags.length > 0 ? (
-                  userData.tags.map((tag, idx) => (
+              {/* Tags (limited) */}
+              <div className="mb-4">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  {(userData.tags && userData.tags.length > 0
+                    ? (showAllProfileTags ? userData.tags : userData.tags.slice(0, 8))
+                    : []
+                  ).map((tag, idx) => (
                     <LegoSkillBlock
                       key={idx}
                       skill={tag}
                       index={idx}
                       onClick={() => handleSkillClick(tag)}
                     />
-                  ))
-                ) : (
-                  <span className=" text-yellow-400 px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm">
-                    complete your profile
-                  </span>
+                  ))}
+                  {(!userData.tags || userData.tags.length === 0) && (
+                    <span className="text-yellow-400 px-2 py-1 rounded-full text-xs sm:text-sm">
+                      complete your profile
+                    </span>
+                  )}
+                </div>
+                {userData.tags && userData.tags.length > 8 && (
+                  <button
+                    className="mt-3 text-xs text-yellow-400 hover:text-yellow-300"
+                    onClick={() => setShowAllProfileTags(v => !v)}
+                  >
+                    {showAllProfileTags ? 'Show less' : `Show ${userData.tags.length - 8} more`}
+                  </button>
                 )}
               </div>
 
-              {/* Stats - Mobile Stack */}
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400">
+              {/* Stats */}
+              <div className="flex flex-wrap gap-4 text-xs sm:text-sm text-gray-400">
                 <div className="flex items-center">
-                  <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-yellow-400" />
+                  <User className="w-4 h-4 mr-1 text-yellow-400" />
                   <span>
-                    Joined {userData.createdAt ? new Date(userData.createdAt).toLocaleString('default', { month: 'short', year: 'numeric' }) : 'July 2026'}
+                    Joined {userData.createdAt ? new Date(userData.createdAt).toLocaleString('default', { month: 'short', year: 'numeric' }) : '—'}
                   </span>
                 </div>
                 <div className="flex items-center">
-                  <BarChart2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-yellow-400" />
+                  <BarChart2 className="w-4 h-4 mr-1 text-yellow-400" />
                   <span>{posts?.length || 0} Posts</span>
                 </div>
                 <div className="flex items-center">
-                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-yellow-400" />
+                  <Calendar className="w-4 h-4 mr-1 text-yellow-400" />
                   <span>{userData.events?.length || 0} Events</span>
                 </div>
               </div>
@@ -723,154 +737,165 @@ export default function ZynvoDashboard() {
           </div>
         </div>
 
-        {/* Combined Posts & Events Section - Horizontal Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 sm:mb-8">
-          {/* Posts Section - Left Side */}
-          <div className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md border-l-4 border-yellow-400">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-yellow-400 p-2 rounded-full">
-                  <BarChart2 className="w-5 h-5 text-gray-900" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white">Your Posts</h3>
-                  <p className="text-xl font-bold text-yellow-400">
-                    Total: {posts?.length || 0}
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-gray-700">
-              {posts && posts.length > 0 ? (
-                <ul className="space-y-2">
-                  {posts.map((post, index) => (
-                    <li key={post.id} className="py-2">
-                      <HoverCard>
-                        <HoverCardTrigger asChild>
-                          <div className="cursor-pointer hover:bg-gray-800 rounded-lg p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
-                            <div className="flex justify-between items-center">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="text-yellow-400 text-xs font-medium">
-                                    #{index + 1}
-                                  </span>
-                                  <Badge variant="secondary" className="text-xs">
-                                    Recent
-                                  </Badge>
-                                </div>
-                                <h4 className="text-gray-200 font-medium text-sm truncate">
-                                  {post.description.length > 40
-                                    ? post.description.slice(0, 40) + '...'
-                                    : post.description || 'Untitled Post'}
-                                </h4>
-                              </div>
-                              <div className="ml-2 text-gray-500 text-xs">
-                                Hover →
-                              </div>
-                            </div>
-                          </div>
-                        </HoverCardTrigger>
-                        <HoverCardContent 
-                          className="w-80 bg-gray-800 border-gray-700" 
-                          side="right"
-                        >
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-sm font-semibold text-white">
-                                Post #{index + 1}
-                              </h4>
-                          
-                            </div>
-                            <div className="space-y-2">
-                              <p className="text-sm text-gray-300 leading-relaxed">
-                                {post.description || 'No description available for this post.'}
-                              </p>
-                            </div>
-                            <div className="flex items-center justify-between pt-2 border-t border-gray-700">
-                              <div className="flex items-center gap-2 text-xs text-gray-400">
-                                <Calendar className="w-3 h-3" />
-                                <span>{post.description}</span>
-                              </div>
-                              <HighFiveButton
-                               postId={post.id}
-                                isHighFived={highFivedPosts.has(post.id)}
-                                onHighFive={handleHighFive}
-                              />
-                            </div>
-                          </div>
-                        </HoverCardContent>
-                      </HoverCard>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="text-center py-6">
-                  <BarChart2 className="w-10 h-10 mx-auto mb-2 text-gray-500 opacity-50" />
-                  <p className="text-gray-400 text-sm">No posts yet</p>
-                  <p className="text-gray-500 text-xs">Start sharing!</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Events Section - Right Side */}
-          <div className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md border-l-4 border-yellow-400">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-yellow-400 p-2 rounded-full">
-                  <Calendar className="w-5 h-5 text-gray-900" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white">Events Attended</h3>
-                  <p className="text-xl font-bold text-yellow-400">
-                    Total: {userData.events?.length || 0}
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-gray-700">
-              {userData.events && userData.events.length > 0 ? (
-                <ul className="space-y-2">
-                  {userData.events.map((event, index) => (
-                    <li key={event.id} className="py-2">
-                      <div className="hover:bg-gray-800 rounded-lg p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-yellow-400 text-xs font-medium">
-                                #{index + 1}
-                              </span>
-                              <Badge variant="secondary" className="text-xs">
-                                Attended
-                              </Badge>
-                            </div>
-                            <h4 className="text-gray-200 font-medium text-sm truncate">
-                              {event.EventName}
-                            </h4>
-                            <p className="text-xs text-gray-400 mt-1">
-                              {new Date(event.startDate).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="ml-2">
-                            <Calendar className="w-4 h-4 text-yellow-400" />
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="text-center py-6">
-                  <Calendar className="w-10 h-10 mx-auto mb-2 text-gray-500 opacity-50" />
-                  <p className="text-gray-400 text-sm">No events yet</p>
-                  <p className="text-gray-500 text-xs">Join some events!</p>
-                </div>
-              )}
-            </div>
+        {/* Segmented control: Posts | Events */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="inline-flex rounded-full bg-gray-800 border border-gray-700 p-1">
+            <button
+              onClick={() => setActivePane('posts')}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+                activePane === 'posts' ? 'bg-yellow-500 text-black' : 'text-gray-300 hover:text-white'
+              }`}
+            >
+              Posts
+            </button>
+            <button
+              onClick={() => setActivePane('events')}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+                activePane === 'events' ? 'bg-yellow-500 text-black' : 'text-gray-300 hover:text-white'
+              }`}
+            >
+              Events
+            </button>
           </div>
         </div>
+
+        {/* Posts */}
+        {activePane === 'posts' && (
+          <div className="bg-gray-900 p-5 rounded-2xl shadow-md border-l-4 border-yellow-400 mb-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-yellow-400 p-2 rounded-full">
+                <BarChart2 className="w-5 h-5 text-gray-900" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Your Posts</h3>
+                <p className="text-xl font-bold text-yellow-400">Total: {posts?.length || 0}</p>
+              </div>
+            </div>
+
+            {posts && posts.length > 0 ? (
+              <ul className="space-y-2">
+                {(viewAllPosts ? posts : posts.slice(0, 5)).map((post, index) => (
+                  <li key={post.id} className="py-2">
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <div className="cursor-pointer hover:bg-gray-800 rounded-lg p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
+                          <div className="flex justify-between items-center">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-yellow-400 text-xs font-medium">#{index + 1}</span>
+                                <Badge variant="secondary" className="text-xs">Recent</Badge>
+                              </div>
+                              <h4 className="text-gray-200 font-medium text-sm truncate">
+                                {post.description?.length > 60 ? post.description.slice(0, 60) + '...' : post.description || 'Untitled Post'}
+                              </h4>
+                            </div>
+                            <div className="ml-2 text-gray-500 text-xs">Hover →</div>
+                          </div>
+                        </div>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80 bg-gray-800 border-gray-700" side="right">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-sm font-semibold text-white">Post #{index + 1}</h4>
+                          </div>
+                          <div className="space-y-2">
+                            <p className="text-sm text-gray-300 leading-relaxed">
+                              {post.description || 'No description available for this post.'}
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-700">
+                            <div className="flex items-center gap-2 text-xs text-gray-400">
+                              <Calendar className="w-3 h-3" />
+                              <span>{post.description}</span>
+                            </div>
+                            <HighFiveButton
+                              postId={post.id}
+                              isHighFived={highFivedPosts.has(post.id)}
+                              onHighFive={handleHighFive}
+                            />
+                          </div>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center py-6">
+                <BarChart2 className="w-10 h-10 mx-auto mb-2 text-gray-500 opacity-50" />
+                <p className="text-gray-400 text-sm">No posts yet</p>
+                <p className="text-gray-500 text-xs">Start sharing!</p>
+              </div>
+            )}
+
+            {posts && posts.length > 5 && (
+              <div className="mt-4 flex justify-center">
+                <Button
+                  className="bg-white/10 hover:bg-white/15 text-gray-200"
+                  onClick={() => setViewAllPosts(v => !v)}
+                >
+                  {viewAllPosts ? 'View less' : `View all (${posts.length})`}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Events */}
+        {activePane === 'events' && (
+          <div className="bg-gray-900 p-5 rounded-2xl shadow-md border-l-4 border-yellow-400 mb-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-yellow-400 p-2 rounded-full">
+                <Calendar className="w-5 h-5 text-gray-900" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Events Attended</h3>
+                <p className="text-xl font-bold text-yellow-400">Total: {userData.events?.length || 0}</p>
+              </div>
+            </div>
+
+            {userData.events && userData.events.length > 0 ? (
+              <ul className="space-y-2">
+                {(viewAllEvents ? userData.events : userData.events.slice(0, 5)).map((event, index) => (
+                  <li key={event.id} className="py-2">
+                    <div className="hover:bg-gray-800 rounded-lg p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-yellow-400 text-xs font-medium">#{index + 1}</span>
+                            <Badge variant="secondary" className="text-xs">Attended</Badge>
+                          </div>
+                          <h4 className="text-gray-200 font-medium text-sm truncate">{event.EventName}</h4>
+                          <p className="text-xs text-gray-400 mt-1">{new Date(event.startDate).toLocaleDateString()}</p>
+                        </div>
+                        <div className="ml-2">
+                          <Calendar className="w-4 h-4 text-yellow-400" />
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center py-6">
+                <Calendar className="w-10 h-10 mx-auto mb-2 text-gray-500 opacity-50" />
+                <p className="text-gray-400 text-sm">No events yet</p>
+                <p className="text-gray-500 text-xs">Join some events!</p>
+              </div>
+            )}
+
+            {userData.events && userData.events.length > 5 && (
+              <div className="mt-4 flex justify-center">
+                <Button
+                  className="bg-white/10 hover:bg-white/15 text-gray-200"
+                  onClick={() => setViewAllEvents(v => !v)}
+                >
+                  {viewAllEvents ? 'View less' : `View all (${userData.events.length})`}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
       {/* Complete Profile Modal - Mobile Responsive */}
