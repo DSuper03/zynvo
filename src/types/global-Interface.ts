@@ -370,19 +370,22 @@ export interface respnseUseState {
   university : string;
   applicationStatus : string;
 }
-export interface PostData{
+export interface PostData {
   id: string;
   title: string;
   description: string;
-  image?: string;
-  createdAt: string;
-  updatedAt: string;
+  image: string | null;
+  createdAt: Date;
+  updatedAt: Date;
   published: boolean;
-  collegeId: string;
-  club: Club;
+  collegeId: string | null;
   authorId: string;
-  collegeName : string;
-  clubName : string
+  collegeName: string;
+  clubName: string;
+  author: {
+    profileAvatar: string | null;
+    name: string | null;
+  };
 }
 export interface EventByIdResponse {
   msg: string;

@@ -23,7 +23,7 @@ export default function VerificationPage() {
         setUserStatus(verifyUser.data.status);
 
         let result;
-        if (!id?.startsWith('Z') || !id || verifyUser.data.status === 'invalid') {
+        if (!id || verifyUser.data.status === 'invalid') {
           result = {
             status: 'invalid',
             title: 'Invalid ID Format',
@@ -43,7 +43,7 @@ export default function VerificationPage() {
             borderColor: 'border-green-400',
             bgGlow: 'shadow-green-400/20'
           };
-        } else {
+        } else if (verifyUser.data.status === 'unregistered') {
           result = {
             status: 'not-registered',
             title: 'Not Registered Yet',
