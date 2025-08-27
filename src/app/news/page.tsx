@@ -7,6 +7,10 @@
 
 'use client';
 
+
+
+
+
 import React, { useState } from 'react';
 import { Search, Calendar, TrendingUp, X, ArrowUpRight, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
