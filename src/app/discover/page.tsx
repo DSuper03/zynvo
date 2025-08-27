@@ -285,12 +285,6 @@ export default function Feed() {
                     <div className="flex items-center gap-3 mb-4">
                       <div className="relative w-10 h-10">
                         {post.author.profileAvatar ? (
-                          // <Image
-                          //   src={post.author.profileAvatar}
-                          //   alt={post.author.name || 'User'}
-                          //   layout="fill"
-                          //   className="rounded-full object-cover"
-                          // />
                           <img src={post.author.profileAvatar} alt={post.author.name || 'User'} className="rounded-full object-cover" />
                         ) : (
                           <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-400 rounded-full flex items-center justify-center">

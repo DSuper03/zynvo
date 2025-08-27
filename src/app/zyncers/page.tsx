@@ -1,8 +1,9 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { Search, User, ArrowLeft, Sparkles } from 'lucide-react';
+import { Search, User, ArrowLeft, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 // Floating particles animation component
 const FloatingParticles = () => {
@@ -35,50 +36,101 @@ const AnimatedBackground = () => {
   );
 };
 
-// User card component with glassmorphism
-const UserCard = ({ user, onClick }: { user: any, onClick: () => void }) => {
+// Enhanced User card component with expand/collapse functionality
+const UserCard = ({ user, onClick, onNavigate }: { 
+  user: any, 
+  onClick: () => void,
+  onNavigate: () => void 
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleClick = () => {
+    if (!isExpanded) {
+      setIsExpanded(true);
+      onClick();
+    } else {
+      onNavigate();
+    }
+  };
+
   return (
     <div
-      onClick={onClick}
-      className="group relative backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 cursor-pointer transition-all duration-500 hover:bg-yellow-400/20 hover:border-yellow-400/30 hover:scale-105 hover:shadow-2xl hover:shadow-yellow-400/10 transform-gpu"
+      onClick={handleClick}
+      className="group relative backdrop-blur-md bg-white/5 border border-white/10 rounded-xl cursor-pointer transition-all duration-500 hover:bg-yellow-400/20 hover:border-yellow-400/30 hover:scale-105 hover:shadow-2xl hover:shadow-yellow-400/10 transform-gpu overflow-hidden"
     >
       {/* Glow effect on hover */}
       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-yellow-400/0 via-yellow-400/5 to-yellow-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
-      <div className="relative flex items-center space-x-4">
-        {/* Profile Picture */}
-        <div className="relative">
-          {user.profileAvatar ? (
-            <img
-              src={user.profileAvatar}
-              alt={user.name}
-              className="w-16 h-16 rounded-full object-cover border-2 border-gray-700 group-hover:border-yellow-400 transition-colors duration-300"
-            />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-yellow-400 flex items-center justify-center text-gray-900 font-bold text-xl border-2 border-gray-700 group-hover:border-yellow-400 transition-colors duration-300">
-              {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+      {/* Main card content */}
+      <div className="relative p-6">
+        <div className="flex items-center space-x-4">
+          {/* Profile Picture */}
+          <div className="relative">
+            {user.profileAvatar ? (
+              <img
+                src={user.profileAvatar}
+                alt={user.name}
+                className="w-16 h-16 rounded-full object-cover border-2 border-gray-700 group-hover:border-yellow-400 transition-colors duration-300"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-yellow-400 flex items-center justify-center text-gray-900 font-bold text-xl border-2 border-gray-700 group-hover:border-yellow-400 transition-colors duration-300">
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+            )}
+            
+            {/* Subtle glow around profile pic */}
+            <div className="absolute inset-0 rounded-full bg-yellow-400/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          </div>
+
+          {/* User Name */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-white group-hover:text-yellow-400 transition-colors duration-300 truncate">
+              {user.name}
+            </h3>
+          </div>
+
+          {/* Expand indicator */}
+          <div className="text-gray-600 group-hover:text-yellow-400 transition-all duration-300">
+            {isExpanded ? (
+              <ChevronUp className="w-5 h-5" />
+            ) : (
+              <ChevronDown className="w-5 h-5" />
+            )}
+          </div>
+        </div>
+
+        {/* Expanded content */}
+        <div className={`transition-all duration-500 overflow-hidden ${
+          isExpanded ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'
+        }`}>
+          <div className="pt-4 border-t border-white/10">
+            <div className="space-y-2">
+              <p className="text-gray-400 text-sm">
+                <span className="text-white font-medium">College:</span> {user.collegeName || 'Not specified'}
+              </p>
+              {user.clubName && (
+                <p className="text-gray-400 text-sm">
+                  <span className="text-white font-medium">club:</span> {user.clubName}
+                </p>
+              )}
+              {user.year && (
+                <p className="text-gray-400 text-sm">
+                  <span className="text-white font-medium">Year:</span> {user.email}
+                </p>
+              )}
+              {user.course && (
+                <p className="text-gray-400 text-sm">
+                  <span className="text-white font-medium">Course:</span> {user.course}
+                </p>
+              )}
             </div>
-          )}
-          
-          {/* Subtle glow around profile pic */}
-          <div className="absolute inset-0 rounded-full bg-yellow-400/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        </div>
-
-        {/* User Info */}
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-white group-hover:text-yellow-400 transition-colors duration-300 truncate">
-            {user.name}
-          </h3>
-          <p className="text-gray-400 text-sm truncate">
-            {user.collegeName || 'College not specified'}
-          </p>
-        </div>
-
-        {/* Arrow indicator */}
-        <div className="text-gray-600 group-hover:text-yellow-400 transform group-hover:translate-x-1 transition-all duration-300">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
+            
+            <div className="mt-4 text-center">
+              <p className="text-yellow-400 text-sm font-medium">
+                Click again to visit profile →
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -93,10 +145,13 @@ const UserCard = ({ user, onClick }: { user: any, onClick: () => void }) => {
 export default function UserSearchPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [users, setUsers] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [token, setToken] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -105,18 +160,63 @@ export default function UserSearchPage() {
     }
   }, []);
 
+  // Fetch all users with pagination
+  const fetchAllUsers = async (page = 1) => {
+    try {
+      setIsLoadingUsers(true);
+      const response = await axios.get<{
+        msg : string;
+        totalPages : number
+         users: {
+    id: string;
+    collegeName: string;
+    profileAvatar: string | null;
+    name: string | null;
+    clubName : string | null;
+    year : string | null;
+    course : string | null;
+}[]
+      }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getAllUsers?page=${page}`
+      );
+
+      if (response.data) {
+        const { users, totalPages: total } = response.data;
+        
+        setAllUsers(users || []);
+        setTotalPages(total || 1);
+        setCurrentPage(page);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Failed to load users');
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllUsers(1);
+  }, []);
+
+  const handlePageChange = (page: number) => {
+    if (page !== currentPage && page >= 1 && page <= totalPages && !isLoadingUsers) {
+      fetchAllUsers(page);
+    }
+  };
+
+
+
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
-      setUsers([]);
-      setHasSearched(false);
+      setSearchResults([]);
       return;
     }
 
     setIsSearching(true);
-    setHasSearched(true);
 
     try {
-      const baseUrl = 'http://localhost:8000';
+      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL as string;
       const url = new URL('/api/v1/user/SearchUser', baseUrl);
       url.searchParams.set('name', query);
       
@@ -132,18 +232,18 @@ export default function UserSearchPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setUsers(data.users || []);
+        setSearchResults(data.users || []);
       } else if (response.status === 404) {
-        setUsers([]);
+        setSearchResults([]);
         console.log("No users found with that name");
       } else {
         console.log("Error searching users");
-        setUsers([]);
+        setSearchResults([]);
       }
     } catch (error) {
       console.error('Search error:', error);
       console.log("Network error occurred");
-      setUsers([]);
+      setSearchResults([]);
     } finally {
       setIsSearching(false);
     }
@@ -162,7 +262,10 @@ export default function UserSearchPage() {
   };
 
   const handleUserClick = (userId: string) => {
-    // Navigate to profile page - you'll need to implement navigation logic
+    // Just for the expand functionality - no navigation yet
+  };
+
+  const handleUserNavigate = (userId: string) => {
     toast(`Navigating to profile`);
     if (typeof window !== 'undefined') {
       window.location.href = `/zyncers/${userId}`;
@@ -175,140 +278,206 @@ export default function UserSearchPage() {
     }
   };
 
+  const displayUsers = searchQuery.trim() ? searchResults : allUsers;
+
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       {/* Animated Background */}
       <AnimatedBackground />
       <FloatingParticles />
 
-      {/* Back button - only show when searching */}
-      {hasSearched && (
-        <div className="absolute top-6 left-6 z-10">
-          <button
-            onClick={handleBackToDashboard}
-            className="backdrop-blur-md bg-white/10 border border-white/20 rounded-full p-3 hover:bg-yellow-400/20 hover:border-yellow-400/30 transition-all duration-300 group"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-300 group-hover:text-yellow-400 transition-colors duration-300" />
-          </button>
-        </div>
-      )}
+      {/* Back button */}
+      <div className="absolute top-6 left-6 z-10">
+        <button
+          onClick={handleBackToDashboard}
+          className="backdrop-blur-md bg-white/10 border border-white/20 rounded-full p-3 hover:bg-yellow-400/20 hover:border-yellow-400/30 transition-all duration-300 group"
+        >
+          <ArrowLeft className="w-5 h-5 text-gray-300 group-hover:text-yellow-400 transition-colors duration-300" />
+        </button>
+      </div>
 
-      <div className="relative z-10">
+      <div className="relative z-10 pt-24">
         {/* Search Section */}
-        <div className={`transition-all duration-700 ease-in-out ${
-          hasSearched 
-            ? 'pt-24 pb-8' 
-            : 'flex items-center justify-center min-h-screen'
-        }`}>
-          <div className={`w-full max-w-2xl mx-auto px-6 transition-all duration-700 ${
-            hasSearched ? 'transform -translate-y-0' : ''
-          }`}>
-            
-            {/* Greeting - hide when searched */}
-            {!hasSearched && (
-              <div className="text-center mb-12 animate-fade-in">
-                <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-yellow-400 to-white bg-clip-text text-transparent animate-pulse-slow">
-                  Hello
-                </h1>
-                <p className="text-xl md:text-2xl text-gray-400 mb-2">
-                  Who do you seek?
-                </p>
-                <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full animate-pulse" />
-              </div>
-            )}
-
-            {/* Search Bar */}
-            <div className={`relative transition-all duration-700 ${
-              hasSearched ? 'mb-8' : 'mb-0'
-            }`}>
-              <div className="relative group">
-                {/* Glow effect */}
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-400/50 via-yellow-400/30 to-yellow-400/50 rounded-full blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-500" />
+        <div className="w-full max-w-4xl mx-auto px-6 mb-12">
+          {/* Search Bar - Made bigger */}
+          <div className="relative mb-8">
+            <div className="relative group">
+              {/* Glow effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400/50 via-yellow-400/30 to-yellow-400/50 rounded-2xl blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-500" />
+              
+              <div className="relative flex items-center">
+                <Search className="absolute left-8 w-8 h-8 text-gray-900 z-10" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleInputChange}
+                  placeholder="Search for users by name..."
+                  className="w-full pl-20 pr-8 py-6 bg-yellow-400 text-gray-900 placeholder-gray-700 rounded-2xl text-xl font-medium focus:outline-none focus:ring-4 focus:ring-yellow-400/30 transition-all duration-300 shadow-2xl backdrop-blur-sm"
+                />
                 
-                <div className="relative flex items-center">
-                  <Search className="absolute left-6 w-6 h-6 text-gray-900 z-10" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={handleInputChange}
-                    placeholder="Search for users..."
-                    className="w-full pl-16 pr-6 py-4 bg-yellow-400 text-gray-900 placeholder-gray-700 rounded-full text-lg font-medium focus:outline-none focus:ring-4 focus:ring-yellow-400/30 transition-all duration-300 shadow-2xl backdrop-blur-sm"
-                  />
-                  
-                  {/* Loading indicator */}
-                  {isSearching && (
-                    <div className="absolute right-6">
-                      <div className="w-5 h-5 border-2 border-gray-700 border-t-transparent rounded-full animate-spin" />
-                    </div>
-                  )}
-                </div>
+                {/* Loading indicator */}
+                {isSearching && (
+                  <div className="absolute right-8">
+                    <div className="w-6 h-6 border-2 border-gray-700 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
               </div>
             </div>
-
-            {/* Search hint - only show when not searched */}
-            {!hasSearched && (
-              <p className="text-center text-gray-500 text-sm animate-fade-in-delay">
-                Start typing to discover amazing people...
-              </p>
-            )}
           </div>
+
+          {/* Search hint */}
+          <p className="text-center text-gray-500 text-sm mb-8">
+            {searchQuery.trim() 
+              ? `Showing ${displayUsers.length} search results` 
+              : 'Search above or browse all users below'}
+          </p>
         </div>
 
-        {/* Results Section */}
-        {hasSearched && (
-          <div className="max-w-4xl mx-auto px-6 pb-12">
-            {/* Results Header */}
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  Search Results
-                </h2>
-                <p className="text-gray-400">
-                  {isSearching 
-                    ? 'Searching...' 
-                    : `Found ${users.length} user${users.length !== 1 ? 's' : ''} for "${searchQuery}"`
-                  }
-                </p>
-              </div>
-              
-              {users.length > 0 && (
-                <div className="text-yellow-400 text-sm font-medium">
-                  {users.length} result{users.length !== 1 ? 's' : ''}
-                </div>
-              )}
+        {/* Users Section */}
+        <div className="max-w-6xl mx-auto px-6 pb-12">
+          {/* Section Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-2">
+                {searchQuery.trim() ? 'Search Results' : 'All Users'}
+              </h2>
+              <p className="text-gray-400">
+                {isSearching || isLoadingUsers
+                  ? 'Loading...' 
+                  : `${displayUsers.length} user${displayUsers.length !== 1 ? 's' : ''} found`
+                }
+              </p>
             </div>
+          </div>
 
-            {/* Users Grid */}
-            {users.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {users.map((user: any, index) => (
+          {/* Users Grid */}
+          {displayUsers.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {displayUsers.map((user: any, index) => (
                   <div
                     key={user.id}
                     className="animate-fade-in-up"
-                    style={{ animationDelay: `${index * 100}ms` }}
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <UserCard
                       user={user}
                       onClick={() => handleUserClick(user.id)}
+                      onNavigate={() => handleUserNavigate(user.id)}
                     />
                   </div>
                 ))}
               </div>
-            ) : searchQuery && !isSearching ? (
-              <div className="text-center py-16">
-                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-800/50 flex items-center justify-center">
-                  <User className="w-12 h-12 text-gray-600" />
+
+              {/* Pagination Bar - only for all users view */}
+              {!searchQuery.trim() && totalPages > 1 && (
+                <div className="flex justify-center items-center space-x-2 mt-12">
+                  {/* Previous button */}
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage <= 1 || isLoadingUsers}
+                    className="backdrop-blur-md bg-white/10 border border-white/20 rounded-lg px-4 py-2 hover:bg-yellow-400/20 hover:border-yellow-400/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+
+                  {/* Page numbers */}
+                  <div className="flex space-x-1">
+                    {/* First page */}
+                    {currentPage > 3 && (
+                      <>
+                        <button
+                          onClick={() => handlePageChange(1)}
+                          className="backdrop-blur-md bg-white/10 border border-white/20 rounded-lg w-10 h-10 hover:bg-yellow-400/20 hover:border-yellow-400/30 transition-all duration-300"
+                        >
+                          1
+                        </button>
+                        {currentPage > 4 && (
+                          <span className="flex items-center px-2 text-gray-400">...</span>
+                        )}
+                      </>
+                    )}
+
+                    {/* Visible page numbers */}
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+
+                      if (pageNum < 1 || pageNum > totalPages) return null;
+
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          disabled={isLoadingUsers}
+                          className={`backdrop-blur-md border rounded-lg w-10 h-10 transition-all duration-300 ${
+                            pageNum === currentPage
+                              ? 'bg-yellow-400 border-yellow-400 text-gray-900 font-bold'
+                              : 'bg-white/10 border-white/20 hover:bg-yellow-400/20 hover:border-yellow-400/30'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+
+                    {/* Last page */}
+                    {currentPage < totalPages - 2 && (
+                      <>
+                        {currentPage < totalPages - 3 && (
+                          <span className="flex items-center px-2 text-gray-400">...</span>
+                        )}
+                        <button
+                          onClick={() => handlePageChange(totalPages)}
+                          className="backdrop-blur-md bg-white/10 border border-white/20 rounded-lg w-10 h-10 hover:bg-yellow-400/20 hover:border-yellow-400/30 transition-all duration-300"
+                        >
+                          {totalPages}
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Next button */}
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage >= totalPages || isLoadingUsers}
+                    className="backdrop-blur-md bg-white/10 border border-white/20 rounded-lg px-4 py-2 hover:bg-yellow-400/20 hover:border-yellow-400/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+
+                  {/* Page info */}
+                  <div className="ml-4 text-gray-400 text-sm">
+                    Page {currentPage} of {totalPages}
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-400 mb-2">
-                  No users found
-                </h3>
-                <p className="text-gray-500">
-                  Try searching with a different name or spelling
-                </p>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-800/50 flex items-center justify-center">
+                <User className="w-12 h-12 text-gray-600" />
               </div>
-            ) : null}
-          </div>
-        )}
+              <h3 className="text-xl font-semibold text-gray-400 mb-2">
+                {searchQuery.trim() ? 'No users found' : 'No users available'}
+              </h3>
+              <p className="text-gray-500">
+                {searchQuery.trim() 
+                  ? 'Try searching with a different name or spelling'
+                  : 'Check back later for new users'
+                }
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Custom CSS for animations */}
@@ -324,11 +493,6 @@ export default function UserSearchPage() {
           50% { opacity: 0.3; }
         }
         
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
         @keyframes fade-in-up {
           from { opacity: 0; transform: translateY(40px); }
           to { opacity: 1; transform: translateY(0); }
@@ -340,15 +504,6 @@ export default function UserSearchPage() {
         
         .animate-pulse-slow {
           animation: pulse-slow 6s ease-in-out infinite;
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 1s ease-out forwards;
-        }
-        
-        .animate-fade-in-delay {
-          animation: fade-in 1s ease-out 0.5s forwards;
-          opacity: 0;
         }
         
         .animate-fade-in-up {
