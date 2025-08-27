@@ -7,10 +7,6 @@
 
 'use client';
 
-
-
-
-
 import React, { useState } from 'react';
 import { Search, Calendar, TrendingUp, X, ArrowUpRight, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -170,9 +166,7 @@ const NewsPage: React.FC = () => {
                 </div>
                 
                 {/* Coming Soon Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-4 text-center">
-                 
-                </div>
+
 
                 {/* Hover Preview */}
                 <AnimatePresence>
@@ -266,7 +260,9 @@ const NewsPage: React.FC = () => {
                 </div>
                 
                 <div className="mt-8 flex justify-end">
-                
+                  <div className="animate-pulse text-yellow-400 text-base font-bold">
+                    Full Article Coming Soon
+                  </div>
                 </div>
               </div>
             </motion.div>
