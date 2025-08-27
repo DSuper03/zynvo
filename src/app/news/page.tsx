@@ -7,8 +7,11 @@
 
 'use client';
 
-import React, { useState } from 'react';
-import { Search, Calendar, TrendingUp, X, ArrowUpRight, Info } from 'lucide-react';
+
+
+import React, { useState, useEffect } from 'react';
+import { Search, Calendar, TrendingUp, Clock, ExternalLink, Grid3X3, List, Bookmark, Share2, Eye, Star } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
