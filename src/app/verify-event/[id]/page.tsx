@@ -18,7 +18,7 @@ export default function VerificationPage() {
       setIsLoading(true);
       try {
         const verifyUser = await axios.get<{ status: string }>(
-          `http://localhost:8000/api/v1/events/ver-event?id=${id}`
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/ver-event?id=${id}`
         );
         setUserStatus(verifyUser.data.status);
 
@@ -33,7 +33,7 @@ export default function VerificationPage() {
             borderColor: 'border-red-400',
             bgGlow: 'shadow-red-400/20'
           };
-        } else if (verifyUser.data.status === 'unregistered') {
+        } else if (verifyUser.data.status === 'registered') {
           result = {
             status: 'registered',
             title: 'Successfully Registered! 🎉',

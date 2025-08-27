@@ -9,6 +9,10 @@ import {
   Home,
   MoreHorizontal,
   Plus,
+  Calendar,
+  User,
+  Building,
+  Users,
 } from 'lucide-react';
 import CreatePostButton from './components/CreatePostButton';
 import CreatePostModal from './components/CreatePostModal';
@@ -16,8 +20,9 @@ import { PostData } from '@/types/global-Interface';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { AuroraText } from '@/components/magicui/aurora-text';
+import { toast } from 'sonner';
 
-// Define the API response type
+
 interface ApiResponse {
   msg: string;
   posts: PostData[];
@@ -58,7 +63,32 @@ export default function Feed() {
   const [slideIdx, setSlideIdx] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
 
-  // Auto-slide effect for mobile
+  //function to format date
+  const formatDate = (date: Date | string) => {
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  //function to get time ago
+  const getTimeAgo = (date: Date | string) => {
+    const now = new Date();
+    const postDate = new Date(date);
+    const diffInMs = now.getTime() - postDate.getTime();
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    return formatDate(date);
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       setSlideIdx((idx) => (idx + 1) % sliderEvents.length);
@@ -66,7 +96,6 @@ export default function Feed() {
     return () => clearInterval(interval);
   }, [sliderEvents.length]);
 
-  // Fetch posts with pagination
   useEffect(() => {
     const postData = async () => {
       try {
@@ -247,33 +276,114 @@ export default function Feed() {
                   </Button>
                 </div>)
               ) : posts && posts.length > 0 ? (
-               
                 posts.map((post) => (
                   <div
                     key={post.id}
                     className="bg-gray-800 p-6 rounded-lg border border-yellow-500/20 hover:border-yellow-500/40 transition-colors"
                   >
+                    {/* Author Info Header */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="relative w-10 h-10">
+                        {post.author.profileAvatar ? (
+                          // <Image
+                          //   src={post.author.profileAvatar}
+                          //   alt={post.author.name || 'User'}
+                          //   layout="fill"
+                          //   className="rounded-full object-cover"
+                          // />
+                          <img src={post.author.profileAvatar} alt={post.author.name || 'User'} className="rounded-full object-cover" />
+                        ) : (
+                          <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-400 rounded-full flex items-center justify-center">
+                            <User className="w-5 h-5 text-black" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-white">
+                            {post.author.name || 'Anonymous User'}
+                          </span>
+                          {!post.published && (
+                            <span className="px-2 py-0.5 bg-gray-600 text-xs rounded-full text-gray-300">
+                              Draft
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-400">
+                          <Calendar className="w-3 h-3" />
+                          <span>{getTimeAgo(post.createdAt)}</span>
+                          {post.createdAt !== post.updatedAt && (
+                            <span className="text-gray-500">• Edited</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Post Content */}
                     <div className="mb-4">
                       <h3 className="text-xl font-semibold text-yellow-400 mb-2">
                         {post.title}
                       </h3>
-                      <p className="text-gray-300 leading-relaxed">
+                      <p className="text-gray-300 leading-relaxed mb-4">
                         {post.description}
                       </p>
+                      
+                      {/* Post Image */}
+                      {post.image && (
+                        <div className="relative w-full max-w-2xl mx-auto mb-4">
+                          <div className="aspect-video bg-gray-700 rounded-lg overflow-hidden">
+                            <Image
+                              src={post.image}
+                              alt={post.title}
+                              layout="fill"
+                              className="object-cover"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Post metadata */}
+                    {/* Post Metadata */}
                     <div className="flex flex-wrap gap-2 mb-4">
                       {post.collegeName && (
-                        <span className="text-sm bg-yellow-500/10 px-2 py-1 rounded">
-                          <AuroraText className="text-yellow-200">{post.collegeName}</AuroraText>
+                        <span className="flex items-center gap-1 text-sm bg-blue-500/10 text-blue-300 px-2 py-1 rounded">
+                          <Building className="w-3 h-3" />
+                          {post.collegeName}
                         </span>
                       )}
-                      {post.id && (
-                        <span className="text-sm text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
-                          Post #{post.id}
+                      {post.clubName && (
+                        <span className="flex items-center gap-1 text-sm bg-purple-500/10 text-purple-300 px-2 py-1 rounded">
+                          <Users className="w-3 h-3" />
+                          {post.clubName}
                         </span>
                       )}
+                      <span className="text-sm text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
+                        Post #{post.id.slice(-6)}
+                      </span>
+                    </div>
+
+                    {/* Post Actions */}
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-700">
+                      <div className="flex items-center space-x-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-400 hover:text-yellow-400 hover:bg-black transition-colors"
+                          onClick={()=> {
+                            toast("share feature coming soon")
+                          }}
+                        >
+                          <Share className="w-4 h-4 mr-1" />
+                          <span className="text-sm">Share</span>
+                        </Button>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:text-gray-300"
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                 ))
@@ -289,13 +399,21 @@ export default function Feed() {
                       Be the first to create a post!
                     </AuroraText>
                     <Button
-                      onClick={() => setIsPostModalOpen(true)} // Open modal on button click
+                      onClick={() => setIsPostModalOpen(true)}
                       className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2 rounded-md font-medium transition-colors mt-4"
                     >
                       Create Post
                     </Button>
                   </div>
                 </div>)
+              )}
+
+              {/* Loading more indicator */}
+              {isFetchingMore && (
+                <div className="flex justify-center items-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-500"></div>
+                  <span className="ml-2 text-yellow-400 text-sm">Loading more posts...</span>
+                </div>
               )}
             </div>
           </div>
@@ -340,8 +458,8 @@ export default function Feed() {
       </div>
       
       <CreatePostModal
-        isOpen={isPostModalOpen} // Pass modal state
-        onClose={() => setIsPostModalOpen(false)} // Close modal
+        isOpen={isPostModalOpen}
+        onClose={() => setIsPostModalOpen(false)}
       />
     </div>
   );
