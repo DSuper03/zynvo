@@ -276,10 +276,7 @@ const Features = () => {
             animate={{ y: 0, opacity: 1 }}
             className="flex items-center justify-center gap-2 mb-4"
           >
-            <div className="w-10 h-10 bg-yellow-500 rounded-md flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-black" />
-            </div>
-            <span className="text-lg font-semibold text-yellow-500">Zynvo</span>
+            <span className="text-xl font-semibold text-yellow-500">Zynvo</span>
           </motion.div>
 
           <motion.h1
@@ -288,7 +285,7 @@ const Features = () => {
             transition={{ delay: 0.2 }}
             className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white"
           >
-            Your Campus <AuroraText className="text-yellow-500  to-yellow-900">Connection Hub</AuroraText>
+            Your Campus <span className=" text-yellow-500  to-yellow-900">Connection Hub</span>
           </motion.h1>
         </div>
 
