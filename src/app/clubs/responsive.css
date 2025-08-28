@@ -1,0 +1,61 @@
+/* Additional responsive styles for clubs page */
+@media (min-width: 360px) {
+  .xs\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .xs\:flex-row {
+    flex-direction: row;
+  }
+  .xs\:flex {
+    display: flex;
+  }
+  .xs\:hidden {
+    display: none;
+  }
+  .xs\:w-24 {
+    width: 6rem;
+  }
+  .xs\:h-24 {
+    height: 6rem;
+  }
+  .xs\:w-auto {
+    width: auto;
+  }
+  .xs\:pt-3 {
+    padding-top: 0.75rem;
+  }
+  .xs\:items-center {
+    align-items: center;
+  }
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Hide scrollbar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
