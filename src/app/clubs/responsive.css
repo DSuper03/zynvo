@@ -1,4 +1,13 @@
 /* Additional responsive styles for clubs page */
+
+/* Default club card styling */
+.club-card {
+  max-width: 24rem; /* max-w-sm equivalent for mobile */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Extra small screens (360px and up) - 2 columns */
 @media (min-width: 360px) {
   .xs\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -26,6 +35,53 @@
   }
   .xs\:items-center {
     align-items: center;
+  }
+  .club-card {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* Small screens (640px and up) - Override to 2 columns */
+@media (min-width: 640px) {
+  .responsive-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .club-card {
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+/* Medium screens (768px and up) - 3 columns */
+@media (min-width: 768px) {
+  .responsive-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  .club-card {
+    max-width: none !important;
+  }
+}
+
+/* Large screens (1024px and up) - 3 columns (not 4) */
+@media (min-width: 1024px) {
+  .responsive-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  .club-card {
+    max-width: none !important;
+  }
+}
+
+/* Extra large screens (1280px and up) - Still 3 columns */
+@media (min-width: 1280px) {
+  .responsive-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  .club-card {
+    max-width: none !important;
   }
 }
 

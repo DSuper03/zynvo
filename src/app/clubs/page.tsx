@@ -217,11 +217,11 @@ const ClubsPage = () => {
         {clubData ? (
           filteredClubs.length > 0 ? (
             isGridView ? (
-              <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 xs:grid-cols-2 responsive-grid gap-4">
                 {filteredClubs.map((club: any) => (
                   <div
                     key={club.id}
-                    className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-yellow-500/50 transition-all duration-300 group flex flex-col hover:shadow-xl hover:shadow-yellow-500/10 hover:scale-[1.02] max-w-sm mx-auto w-full"
+                    className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-yellow-500/50 transition-all duration-300 group flex flex-col hover:shadow-xl hover:shadow-yellow-500/10 hover:scale-[1.02] club-card w-full"
                   >
                     <Link href={`/clubs/${club.id}`} className="flex-1">
                       <div className="h-32 overflow-hidden relative">
@@ -229,8 +229,7 @@ const ClubsPage = () => {
                         <Image
                           src={club.profilePicUrl}
                           alt={club.name}
-                          width={300}
-                          height={200}
+                             layout='fill'
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           priority={false}
                         />
@@ -372,9 +371,9 @@ const ClubsPage = () => {
             </div>
           )
         ) : (
-          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 responsive-grid gap-4">
             {[...Array(8)].map((_, index) => (
-              <div key={index} className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 max-w-sm mx-auto w-full">
+              <div key={index} className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 club-card w-full">
                 <Skeleton className="h-32 w-full" />
                 <div className="p-3 space-y-2">
                   <Skeleton className="h-4 w-3/4" />
