@@ -273,12 +273,7 @@ export default function SignIn() {
                 Terms of Service
               </Link>{' '}
               and acknowledge you&lsquo;ve read our{' '}
-              <Link
-                href="/privacy"
-                className="text-yellow-500 hover:text-yellow-400"
-              >
-                Privacy Policy
-              </Link>
+            
             </p>
           </div>
         </div>
