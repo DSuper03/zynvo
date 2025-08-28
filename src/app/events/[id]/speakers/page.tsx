@@ -140,7 +140,7 @@ const Speakers = () => {
 
     try {
       const add = await axios.post<{ msg: string }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/v1/events/addSpeakers`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL  }/api/v1/events/addSpeakers`,
         newSpeaker,
         {
           headers: {
@@ -153,7 +153,7 @@ const Speakers = () => {
         toast(add.data.msg);
         // Refresh speakers list
         const res = await axios.get<speakerResponse>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/v1/events/getSpeakers?id=${id}`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL }/api/v1/events/getSpeakers?id=${id}`,
           {
             headers: {
               authorization: `Bearer ${token}`,

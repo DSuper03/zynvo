@@ -93,7 +93,7 @@ const Eventid = () => {
         msg: string;
         ForkedUpId: string;
       }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/v1/events/registerEvent`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL }/api/v1/events/registerEvent`,
         bodyData,
         {
           headers: {

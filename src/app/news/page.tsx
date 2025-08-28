@@ -12,7 +12,7 @@ import { Search, Calendar, TrendingUp, X, ArrowUpRight, Info } from 'lucide-reac
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNews, NewsItem } from '@/api/hooks/useNews';
+import { useNews, NewsItem } from '@/app/api/hooks/useNews';
 
 const CATEGORY_STYLES: Record<string, string> = {
   General: 'bg-yellow-500 text-black',
