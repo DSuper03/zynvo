@@ -193,7 +193,7 @@ const LandingHeader = () => {
 
            
 
-            <MenuItem
+            {/* <MenuItem
               setActive={setActiveItem}
               active={activeItem}
               item="Devs"
@@ -223,13 +223,13 @@ const LandingHeader = () => {
                   </div>
                 </HoveredLink>
               </div>
-            </MenuItem>
+            </MenuItem> */}
 
             <MenuItem
               setActive={setActiveItem}
               active={activeItem}
-              item="FAQ"
-              href="/faq"
+              item="Clubs"
+              href="/clubs"
             />
 
             <MenuItem
@@ -312,14 +312,14 @@ const LandingHeader = () => {
               <Link href="/discover" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
                 Discover
               </Link>
-              <Link href="/testimonials" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+              <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
                 Testimonials
               </Link>
               {/* <Link href="/founders" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
                 Devs
               </Link> */}
-              <Link href="/faq" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
-                FAQ
+              <Link href="/clubs" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+                Clubs
               </Link>
               <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
                 Contact

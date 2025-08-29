@@ -45,7 +45,7 @@ export default function RootLayout({
           className="fixed top-4 left-4 z-50 p-2 bg-gray-800 rounded-md text-white"
           aria-label="Toggle menu"
         >
-          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          {isMobileMenuOpen ? <X size={60}/> : <Menu size={20} />}
         </Button>
       )}
 

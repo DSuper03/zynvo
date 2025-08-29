@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import axios from 'axios';
 
-// Floating particles animation component
+// Floating particles animation component - FIXED Z-INDEX
 const FloatingParticles = () => {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
       {[...Array(20)].map((_, i) => (
         <div
           key={i}
@@ -25,10 +25,10 @@ const FloatingParticles = () => {
   );
 };
 
-// Animated gradient background
+// Animated gradient background - FIXED Z-INDEX
 const AnimatedBackground = () => {
   return (
-    <div className="fixed inset-0 overflow-hidden">
+    <div className="fixed inset-0 overflow-hidden z-0">
       <div className="absolute -top-40 -right-40 w-80 h-80 bg-yellow-400/5 rounded-full blur-3xl animate-pulse-slow" />
       <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-yellow-400/3 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-yellow-400/2 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '4s' }} />
@@ -205,8 +205,6 @@ export default function UserSearchPage() {
     }
   };
 
-
-
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -281,13 +279,14 @@ export default function UserSearchPage() {
   const displayUsers = searchQuery.trim() ? searchResults : allUsers;
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+    // FIXED: Removed overflow-hidden and adjusted container
+    <div className="min-h-screen bg-black text-white relative">
       {/* Animated Background */}
       <AnimatedBackground />
       <FloatingParticles />
 
-      {/* Back button */}
-      <div className="absolute top-6 left-6 z-10">
+      {/* Back button - FIXED Z-INDEX */}
+      <div className="absolute top-6 left-6 z-30">
         <button
           onClick={handleBackToDashboard}
           className="backdrop-blur-md bg-white/10 border border-white/20 rounded-full p-3 hover:bg-yellow-400/20 hover:border-yellow-400/30 transition-all duration-300 group"
@@ -296,6 +295,7 @@ export default function UserSearchPage() {
         </button>
       </div>
 
+      {/* FIXED: Main content with proper z-index */}
       <div className="relative z-10 pt-24">
         {/* Search Section */}
         <div className="w-full max-w-4xl mx-auto px-6 mb-12">
