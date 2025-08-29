@@ -37,15 +37,15 @@ export default function RootLayout({
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-black">
+    <div className="flex flex-col md:flex-row h-screen bg-black ">
       {/* Mobile Menu Toggle Button */}
       {isMobileView && (
         <Button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="fixed top-4 left-4 z-50 p-2 bg-gray-800 rounded-md text-white"
+          className="fixed top-4 left-4 z-50 p-2 size-10 bg-gray-800 rounded-md text-white"
           aria-label="Toggle menu"
         >
-          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          {isMobileMenuOpen ? <X size={60} color='#e1d71f' strokeWidth={6} /> : <Menu size={60} color='#dc6c72fe'/>}
         </Button>
       )}
 

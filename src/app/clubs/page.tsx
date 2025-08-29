@@ -105,95 +105,97 @@ const ClubsPage = () => {
     }) || [];
 
   return (
-    <div className="w-full">
-      {/* Search and Filter Bar */}
-      <div className="sticky top-0 z-10 bg-black p-3 md:p-4 -mx-4 md:-mx-6 mb-4">
-        <div className="max-w-none px-4 md:px-6">
-          <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:gap-4">
-            {/* Search Input */}
-            <div className="relative flex-grow">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 md:h-5 md:w-5 text-gray-400" />
+    <div className="flex flex-col h-screen">
+      {/* Fixed Header Section */}
+      <div className="flex-shrink-0 sticky top-0 z-20 bg-black border-b border-gray-800 shadow-lg">
+        {/* Search, Sort, View Toggle */}
+        <div className="p-3 md:p-4">
+          <div className="max-w-none">
+            <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:gap-4">
+              {/* Search Input */}
+              <div className="relative flex-grow">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 md:h-5 md:w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  className="bg-gray-800 text-white w-full py-2.5 md:py-3 pl-10 md:pl-11 pr-4 rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all duration-200"
+                  placeholder="Search clubs..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
-              <input
-                type="text"
-                className="bg-gray-800 text-white w-full py-2.5 md:py-3 pl-10 md:pl-11 pr-4 rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all duration-200"
-                placeholder="Search clubs..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+
+              {/* Sort Buttons */}
+              <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+                <Button
+                  onClick={() => setSortBy('popular')}
+                  className={`flex items-center px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm whitespace-nowrap transition-all duration-200 ${
+                    sortBy === 'popular'
+                      ? 'bg-yellow-500 text-black shadow-lg'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  <Star className="h-3 w-3 md:h-4 md:w-4 mr-1.5" />
+                  <span>Popular</span>
+                </Button>
+
+                <Button
+                  onClick={() => setSortBy('new')}
+                  className={`flex items-center px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm whitespace-nowrap transition-all duration-200 ${
+                    sortBy === 'new'
+                      ? 'bg-yellow-500 text-black shadow-lg'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  <Calendar className="h-3 w-3 md:h-4 md:w-4 mr-1.5" />
+                  <span>New</span>
+                </Button>
+
+                <Button
+                  onClick={() => setSortBy('trending')}
+                  className={`flex items-center px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm whitespace-nowrap transition-all duration-200 ${
+                    sortBy === 'trending'
+                      ? 'bg-yellow-500 text-black shadow-lg'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  <TrendingUp className="h-3 w-3 md:h-4 md:w-4 mr-1.5" />
+                  <span>Trending</span>
+                </Button>
+              </div>
+
+              {/* View Toggle Button */}
+              <Button
+                onClick={() => setIsGridView(!isGridView)}
+                className="bg-gray-800 text-white p-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center"
+                title={isGridView ? 'Switch to List View' : 'Switch to Grid View'}
+              >
+                {isGridView ? (
+                  <List className="h-4 w-4 md:h-5 md:w-5" />
+                ) : (
+                  <Grid3X3 className="h-4 w-4 md:h-5 md:w-5" />
+                )}
+              </Button>
             </div>
-
-            {/* Sort Buttons */}
-            <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-              <Button
-                onClick={() => setSortBy('popular')}
-                className={`flex items-center px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm whitespace-nowrap transition-all duration-200 ${
-                  sortBy === 'popular'
-                    ? 'bg-yellow-500 text-black shadow-lg'
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                }`}
-              >
-                <Star className="h-3 w-3 md:h-4 md:w-4 mr-1.5" />
-                <span>Popular</span>
-              </Button>
-
-              <Button
-                onClick={() => setSortBy('new')}
-                className={`flex items-center px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm whitespace-nowrap transition-all duration-200 ${
-                  sortBy === 'new'
-                    ? 'bg-yellow-500 text-black shadow-lg'
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                }`}
-              >
-                <Calendar className="h-3 w-3 md:h-4 md:w-4 mr-1.5" />
-                <span>New</span>
-              </Button>
-
-              <Button
-                onClick={() => setSortBy('trending')}
-                className={`flex items-center px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm whitespace-nowrap transition-all duration-200 ${
-                  sortBy === 'trending'
-                    ? 'bg-yellow-500 text-black shadow-lg'
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                }`}
-              >
-                <TrendingUp className="h-3 w-3 md:h-4 md:w-4 mr-1.5" />
-                <span>Trending</span>
-              </Button>
-            </div>
-
-            {/* View Toggle Button */}
-            <Button
-              onClick={() => setIsGridView(!isGridView)}
-              className="bg-gray-800 text-white p-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center"
-              title={isGridView ? 'Switch to List View' : 'Switch to Grid View'}
-            >
-              {isGridView ? (
-                <List className="h-4 w-4 md:h-5 md:w-5" />
-              ) : (
-                <Grid3X3 className="h-4 w-4 md:h-5 md:w-5" />
-              )}
-            </Button>
           </div>
         </div>
-      </div>
-      {/* Create Club Button - Responsive, above categories */}
-      <div className="w-full flex justify-start px-3 md:px-2 mb-2">
-        <Button
-          className="bg-yellow-500 hover:bg-yellow-400 text-black rounded-full flex items-center justify-center shadow-lg transition-colors px-6 py-3 font-bold text-lg"
-          onClick={() => setIsCreateModalOpen(true)}
-          title="Create New Club"
-        >
-          <Plus className="w-5 h-5 md:w-6 md:h-6 mr-2" />
-          Create Your Club
-        </Button>
-      </div>
 
-      {/* Categories */}
-      <div className="py-3 md:py-4 overflow-x-auto -mx-4 md:-mx-6 px-4 md:px-6 mb-4">
-        <div className="max-w-none">
-          <div className="flex space-x-2 pb-1 md:pb-0 scrollbar-hide">
+        {/* Create Club Button */}
+        <div className="px-3 md:px-4 pb-2">
+          <Button
+            className="bg-yellow-500 hover:bg-yellow-400 text-black rounded-full flex items-center justify-center shadow-lg transition-colors px-6 py-3 font-bold text-lg"
+            onClick={() => setIsCreateModalOpen(true)}
+            title="Create New Club"
+          >
+            <Plus className="w-5 h-5 md:w-6 md:h-6 mr-2" />
+            Create Your Club
+          </Button>
+        </div>
+
+        {/* Categories */}
+        <div className="px-3 md:px-4 pb-3 md:pb-4">
+          <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
             {categories.map((type) => (
               <Button
                 key={type.id}
@@ -211,9 +213,10 @@ const ClubsPage = () => {
         </div>
       </div>
 
-      {/* Clubs Grid/List */}
-      <div className="w-full">
-        <div className="flex justify-between items-center mb-4 md:mb-6">
+      {/* Scrollable Content Area */}
+      <div className="flex-1 overflow-y-auto px-3 md:px-4 pb-4">
+        {/* Section Header */}
+        <div className="flex justify-between items-center py-4 sticky top-0 bg-black z-10 border-b border-gray-800 mb-4">
           <h2 className="text-xl md:text-2xl font-bold text-white">
             {activetype === 'all'
               ? 'All Clubs'
@@ -225,6 +228,7 @@ const ClubsPage = () => {
           </span>
         </div>
 
+        {/* Clubs Grid/List */}
         {clubData ? (
           filteredClubs.length > 0 ? (
             isGridView ? (
@@ -240,7 +244,7 @@ const ClubsPage = () => {
                         <Image
                           src={club.profilePicUrl}
                           alt={club.name}
-                          layout="fill"
+                          layout='fill'
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           priority={false}
                         />
@@ -411,26 +415,26 @@ const ClubsPage = () => {
             ))}
           </div>
         )}
-      </div>
 
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-8">
-          {Array.from({ length: totalPages }, (_, idx) => (
-            <Button
-              key={idx + 1}
-              onClick={() => setCurrentPage(idx + 1)}
-              className={`px-3 py-1 rounded ${
-                currentPage === idx + 1
-                  ? 'bg-yellow-500 text-black font-bold'
-                  : 'bg-gray-700 text-white'
-              }`}
-            >
-              {idx + 1}
-            </Button>
-          ))}
-        </div>
-      )}
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-8">
+            {Array.from({ length: totalPages }, (_, idx) => (
+              <Button
+                key={idx + 1}
+                onClick={() => setCurrentPage(idx + 1)}
+                className={`px-3 py-1 rounded ${
+                  currentPage === idx + 1
+                    ? 'bg-yellow-500 text-black font-bold'
+                    : 'bg-gray-700 text-white'
+                }`}
+              >
+                {idx + 1}
+              </Button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Create Club Modal */}
       <CreateClubModal
