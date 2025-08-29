@@ -13,18 +13,18 @@ export default function FeedbackForm() {
     description: '',
     improvements: '',
   });
-    const [token, setToken] = useState("")
+  const [token, setToken] = useState('');
 
-  useEffect(()=> {
-     if (typeof window !== 'undefined') {
-     const tok = localStorage.getItem("token")
-     if(tok) setToken(tok)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const tok = localStorage.getItem('token');
+      if (tok) setToken(tok);
       else {
-       toast("login please")
-       return;
+        toast('login please');
+        return;
       }
     }
-  }, [])
+  }, []);
 
   const backgroundImage =
     'https://i.pinimg.com/736x/0a/8a/54/0a8a54b3aa265248460da6a0e9eb7179.jpg';
@@ -61,7 +61,9 @@ export default function FeedbackForm() {
   ];
 
   // Handle form input changes - Fix type
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -96,8 +98,8 @@ export default function FeedbackForm() {
     setSubmitting(true);
 
     try {
-     if(!token) {
-        toast("login please");
+      if (!token) {
+        toast('login please');
         return;
       }
 
@@ -109,13 +111,13 @@ export default function FeedbackForm() {
         improvements: formData.improvements,
       };
 
-      const feedback = await axios.post<{msg: string}>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/contact/feedback`, 
-        emailData, 
+      const feedback = await axios.post<{ msg: string }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/contact/feedback`,
+        emailData,
         {
           headers: {
-            authorization: `Bearer ${token}`
-          }
+            authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -129,7 +131,7 @@ export default function FeedbackForm() {
           improvements: '',
         });
         setCurrentStep(1);
-        
+
         // Reset submitted state after 3 seconds
         setTimeout(() => {
           setSubmitted(false);

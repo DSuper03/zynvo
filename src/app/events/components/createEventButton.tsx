@@ -1,4 +1,4 @@
- // This can go in a component file like src/components/ui/create-event-button.tsx
+// This can go in a component file like src/components/ui/create-event-button.tsx
 import React from 'react';
 import { Plus, Calendar } from 'lucide-react';
 import Link from 'next/link';

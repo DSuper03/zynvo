@@ -2,21 +2,30 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Search, Plus, Users, Star, TrendingUp, Calendar, Grid3X3, List } from 'lucide-react';
+import {
+  Search,
+  Plus,
+  Users,
+  Star,
+  TrendingUp,
+  Calendar,
+  Grid3X3,
+  List,
+} from 'lucide-react';
 
 import Link from 'next/link';
 import CreateClubModal from './createclub';
 import JoinClubModal from './joinclub';
 import axios from 'axios';
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import { response } from '@/types/global-Interface';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import dotenv from "dotenv"
+import dotenv from 'dotenv';
 import './responsive.css';
 
-dotenv.config()
+dotenv.config();
 
 const categories = [
   { id: 'all', name: 'All Clubs' },
@@ -43,23 +52,22 @@ const ClubsPage = () => {
   const [clubData, setData] = useState<response['resp']>();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [token, setToken] = useState("")
+  const [token, setToken] = useState('');
 
-  useEffect(()=> {
-     if (typeof window !== 'undefined') {
-     const token = localStorage.getItem("token")
-     if(token) setToken(token)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) setToken(token);
       else {
-       toast("login please")
-       return;
+        toast('login please');
+        return;
       }
     }
-  }, [])
-
+  }, []);
 
   useEffect(() => {
     async function call() {
-      if(!token) {
+      if (!token) {
         return;
       }
       const response = await axios.get<response>(
@@ -71,11 +79,11 @@ const ClubsPage = () => {
         }
       );
       setData(response.data.resp);
-      setTotalPages(response.data.totalPages || 1); 
+      setTotalPages(response.data.totalPages || 1);
     }
 
     call();
-  }, [currentPage, token]); 
+  }, [currentPage, token]);
 
   const handleJoinClub = (club: response['resp'][0]) => {
     setSelectedClub({
@@ -86,13 +94,15 @@ const ClubsPage = () => {
     setIsJoinModalOpen(true);
   };
 
-
-  const filteredClubs = clubData?.filter(club => {
-    const matchesSearch = club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         club.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = activetype === 'all' || (String(club.type)).toLowerCase() === activetype;
-    return matchesSearch && matchesCategory;
-  }) || [];
+  const filteredClubs =
+    clubData?.filter((club) => {
+      const matchesSearch =
+        club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        club.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        activetype === 'all' || String(club.type).toLowerCase() === activetype;
+      return matchesSearch && matchesCategory;
+    }) || [];
 
   return (
     <div className="flex flex-col h-screen">
@@ -104,7 +114,7 @@ const ClubsPage = () => {
             <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:gap-4">
               {/* Search Input */}
               <div className="relative flex-grow">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" >
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Search className="h-4 w-4 md:h-5 md:w-5 text-gray-400" />
                 </div>
                 <input
@@ -213,7 +223,8 @@ const ClubsPage = () => {
               : categories.find((c) => c.id === activetype)?.name}
           </h2>
           <span className="text-gray-400 text-sm">
-            {filteredClubs.length} club{filteredClubs.length !== 1 ? 's' : ''} found
+            {filteredClubs.length} club{filteredClubs.length !== 1 ? 's' : ''}{' '}
+            found
           </span>
         </div>
 
@@ -268,12 +279,13 @@ const ClubsPage = () => {
                             ${club.type === 'Literature' || club.type === 'literary' ? 'bg-red-900/30 text-red-300 border border-red-500/20' : ''}
                             ${club.type === 'Design' || club.type === 'design' ? 'bg-pink-900/30 text-pink-300 border border-pink-500/20' : ''}`}
                           >
-                            {club.type.charAt(0).toUpperCase() + club.type.slice(1)}
+                            {club.type.charAt(0).toUpperCase() +
+                              club.type.slice(1)}
                           </span>
                         </div>
                       </div>
                     </Link>
-                    
+
                     <div className="p-3 pt-0">
                       <Button
                         className="w-full bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
@@ -296,11 +308,17 @@ const ClubsPage = () => {
                     className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-yellow-500/50 transition-all duration-300 group hover:shadow-xl hover:shadow-yellow-500/10"
                   >
                     <div className="flex flex-col xs:flex-row">
-                      <Link href={`/clubs/${club.id}`} className="flex flex-col xs:flex-row flex-1">
+                      <Link
+                        href={`/clubs/${club.id}`}
+                        className="flex flex-col xs:flex-row flex-1"
+                      >
                         <div className="w-full xs:w-24 sm:w-32 md:w-40 h-32 xs:h-24 sm:h-32 md:h-32 overflow-hidden relative flex-shrink-0">
                           <div className="absolute inset-0 bg-gradient-to-t xs:bg-gradient-to-r from-black/50 to-transparent z-10 group-hover:from-black/30 transition-all duration-300"></div>
                           <Image
-                            src={club.profilePicUrl || 'https://via.placeholder.com/150'}
+                            src={
+                              club.profilePicUrl ||
+                              'https://via.placeholder.com/150'
+                            }
                             alt={club.name}
                             width={200}
                             height={200}
@@ -344,12 +362,13 @@ const ClubsPage = () => {
                               ${club.type === 'Literature' || club.type === 'literary' ? 'bg-red-900/30 text-red-300 border border-red-500/20' : ''}
                               ${club.type === 'Design' || club.type === 'design' ? 'bg-pink-900/30 text-pink-300 border border-pink-500/20' : ''}`}
                             >
-                              {club.type.charAt(0).toUpperCase() + club.type.slice(1)}
+                              {club.type.charAt(0).toUpperCase() +
+                                club.type.slice(1)}
                             </span>
                           </div>
                         </div>
                       </Link>
-                      
+
                       <div className="p-3 sm:p-4 pt-0 xs:pt-3 sm:pt-4 flex xs:items-center">
                         <Button
                           className="w-full xs:w-auto bg-yellow-500 hover:bg-yellow-400 text-black text-xs sm:text-sm font-medium py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 whitespace-nowrap hover:scale-[1.02] hover:shadow-lg"
@@ -377,7 +396,10 @@ const ClubsPage = () => {
         ) : (
           <div className="grid grid-cols-1 xs:grid-cols-2 responsive-grid gap-4">
             {[...Array(8)].map((_, index) => (
-              <div key={index} className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 club-card w-full">
+              <div
+                key={index}
+                className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 club-card w-full"
+              >
                 <Skeleton className="h-32 w-full" />
                 <div className="p-3 space-y-2">
                   <Skeleton className="h-4 w-3/4" />

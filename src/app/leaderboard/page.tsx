@@ -2,21 +2,41 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Card, CardContent, CardHeader, CardTitle,
-} from '@/components/ui/card';
-import {
-  Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import {
-  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Trophy, Filter, Search, TrendingUp, Users, Calendar, MapPin } from 'lucide-react';
+import {
+  Trophy,
+  Filter,
+  Search,
+  TrendingUp,
+  Users,
+  Calendar,
+  MapPin,
+} from 'lucide-react';
 import Image from 'next/image';
 
 // Mock data for clubs (theme intact)
@@ -25,79 +45,364 @@ const clubsData = [
     id: 1,
     name: 'CodeCrafters',
     college: 'IIT Bombay',
-    events: { Jan: 3, Feb: 2, Mar: 4, Apr: 3, May: 5, Jun: 2, Jul: 3, Aug: 1, Sep: 4, Oct: 2, Nov: 3, Dec: 2 },
-    participants: { Jan: 120, Feb: 85, Mar: 150, Apr: 95, May: 210, Jun: 80, Jul: 130, Aug: 50, Sep: 175, Oct: 90, Nov: 140, Dec: 75 },
+    events: {
+      Jan: 3,
+      Feb: 2,
+      Mar: 4,
+      Apr: 3,
+      May: 5,
+      Jun: 2,
+      Jul: 3,
+      Aug: 1,
+      Sep: 4,
+      Oct: 2,
+      Nov: 3,
+      Dec: 2,
+    },
+    participants: {
+      Jan: 120,
+      Feb: 85,
+      Mar: 150,
+      Apr: 95,
+      May: 210,
+      Jun: 80,
+      Jul: 130,
+      Aug: 50,
+      Sep: 175,
+      Oct: 90,
+      Nov: 140,
+      Dec: 75,
+    },
   },
   {
     id: 2,
     name: 'RoboTech Club',
     college: 'IIT Delhi',
-    events: { Jan: 2, Feb: 3, Mar: 2, Apr: 4, May: 3, Jun: 1, Jul: 2, Aug: 2, Sep: 3, Oct: 4, Nov: 2, Dec: 1 },
-    participants: { Jan: 90, Feb: 120, Mar: 85, Apr: 180, May: 95, Jun: 40, Jul: 75, Aug: 90, Sep: 110, Oct: 160, Nov: 95, Dec: 60 },
+    events: {
+      Jan: 2,
+      Feb: 3,
+      Mar: 2,
+      Apr: 4,
+      May: 3,
+      Jun: 1,
+      Jul: 2,
+      Aug: 2,
+      Sep: 3,
+      Oct: 4,
+      Nov: 2,
+      Dec: 1,
+    },
+    participants: {
+      Jan: 90,
+      Feb: 120,
+      Mar: 85,
+      Apr: 180,
+      May: 95,
+      Jun: 40,
+      Jul: 75,
+      Aug: 90,
+      Sep: 110,
+      Oct: 160,
+      Nov: 95,
+      Dec: 60,
+    },
   },
   {
     id: 3,
     name: 'Entrepreneurship Cell',
     college: 'IIM Ahmedabad',
-    events: { Jan: 5, Feb: 4, Mar: 6, Apr: 4, May: 3, Jun: 5, Jul: 4, Aug: 3, Sep: 5, Oct: 6, Nov: 4, Dec: 3 },
-    participants: { Jan: 220, Feb: 180, Mar: 250, Apr: 190, May: 150, Jun: 210, Jul: 175, Aug: 130, Sep: 220, Oct: 260, Nov: 190, Dec: 140 },
+    events: {
+      Jan: 5,
+      Feb: 4,
+      Mar: 6,
+      Apr: 4,
+      May: 3,
+      Jun: 5,
+      Jul: 4,
+      Aug: 3,
+      Sep: 5,
+      Oct: 6,
+      Nov: 4,
+      Dec: 3,
+    },
+    participants: {
+      Jan: 220,
+      Feb: 180,
+      Mar: 250,
+      Apr: 190,
+      May: 150,
+      Jun: 210,
+      Jul: 175,
+      Aug: 130,
+      Sep: 220,
+      Oct: 260,
+      Nov: 190,
+      Dec: 140,
+    },
   },
   {
     id: 4,
     name: 'Cultural Society',
     college: 'Delhi University',
-    events: { Jan: 4, Feb: 6, Mar: 3, Apr: 5, May: 7, Jun: 4, Jul: 5, Aug: 4, Sep: 6, Oct: 5, Nov: 7, Dec: 5 },
-    participants: { Jan: 180, Feb: 250, Mar: 130, Apr: 220, May: 300, Jun: 190, Jul: 210, Aug: 170, Sep: 240, Oct: 210, Nov: 320, Dec: 230 },
+    events: {
+      Jan: 4,
+      Feb: 6,
+      Mar: 3,
+      Apr: 5,
+      May: 7,
+      Jun: 4,
+      Jul: 5,
+      Aug: 4,
+      Sep: 6,
+      Oct: 5,
+      Nov: 7,
+      Dec: 5,
+    },
+    participants: {
+      Jan: 180,
+      Feb: 250,
+      Mar: 130,
+      Apr: 220,
+      May: 300,
+      Jun: 190,
+      Jul: 210,
+      Aug: 170,
+      Sep: 240,
+      Oct: 210,
+      Nov: 320,
+      Dec: 230,
+    },
   },
   {
     id: 5,
     name: 'Literary Club',
     college: 'Jadavpur University',
-    events: { Jan: 3, Feb: 2, Mar: 4, Apr: 2, May: 3, Jun: 2, Jul: 3, Aug: 1, Sep: 2, Oct: 3, Nov: 2, Dec: 1 },
-    participants: { Jan: 100, Feb: 80, Mar: 150, Apr: 90, May: 120, Jun: 85, Jul: 110, Aug: 50, Sep: 95, Oct: 130, Nov: 90, Dec: 60 },
+    events: {
+      Jan: 3,
+      Feb: 2,
+      Mar: 4,
+      Apr: 2,
+      May: 3,
+      Jun: 2,
+      Jul: 3,
+      Aug: 1,
+      Sep: 2,
+      Oct: 3,
+      Nov: 2,
+      Dec: 1,
+    },
+    participants: {
+      Jan: 100,
+      Feb: 80,
+      Mar: 150,
+      Apr: 90,
+      May: 120,
+      Jun: 85,
+      Jul: 110,
+      Aug: 50,
+      Sep: 95,
+      Oct: 130,
+      Nov: 90,
+      Dec: 60,
+    },
   },
   {
     id: 6,
     name: 'Sports Federation',
     college: 'Punjab University',
-    events: { Jan: 6, Feb: 5, Mar: 7, Apr: 6, May: 8, Jun: 5, Jul: 6, Aug: 4, Sep: 7, Oct: 6, Nov: 5, Dec: 4 },
-    participants: { Jan: 300, Feb: 250, Mar: 350, Apr: 280, May: 400, Jun: 230, Jul: 290, Aug: 200, Sep: 360, Oct: 310, Nov: 270, Dec: 220 },
+    events: {
+      Jan: 6,
+      Feb: 5,
+      Mar: 7,
+      Apr: 6,
+      May: 8,
+      Jun: 5,
+      Jul: 6,
+      Aug: 4,
+      Sep: 7,
+      Oct: 6,
+      Nov: 5,
+      Dec: 4,
+    },
+    participants: {
+      Jan: 300,
+      Feb: 250,
+      Mar: 350,
+      Apr: 280,
+      May: 400,
+      Jun: 230,
+      Jul: 290,
+      Aug: 200,
+      Sep: 360,
+      Oct: 310,
+      Nov: 270,
+      Dec: 220,
+    },
   },
   {
     id: 7,
     name: 'Dance Crew',
     college: 'SRCC Delhi',
-    events: { Jan: 4, Feb: 3, Mar: 5, Apr: 4, May: 6, Jun: 3, Jul: 4, Aug: 2, Sep: 5, Oct: 4, Nov: 3, Dec: 2 },
-    participants: { Jan: 160, Feb: 130, Mar: 210, Apr: 170, May: 240, Jun: 120, Jul: 150, Aug: 90, Sep: 200, Oct: 160, Nov: 140, Dec: 100 },
+    events: {
+      Jan: 4,
+      Feb: 3,
+      Mar: 5,
+      Apr: 4,
+      May: 6,
+      Jun: 3,
+      Jul: 4,
+      Aug: 2,
+      Sep: 5,
+      Oct: 4,
+      Nov: 3,
+      Dec: 2,
+    },
+    participants: {
+      Jan: 160,
+      Feb: 130,
+      Mar: 210,
+      Apr: 170,
+      May: 240,
+      Jun: 120,
+      Jul: 150,
+      Aug: 90,
+      Sep: 200,
+      Oct: 160,
+      Nov: 140,
+      Dec: 100,
+    },
   },
   {
     id: 8,
     name: 'Photography Club',
     college: 'Symbiosis Pune',
-    events: { Jan: 2, Feb: 3, Mar: 2, Apr: 3, May: 4, Jun: 2, Jul: 3, Aug: 2, Sep: 3, Oct: 2, Nov: 3, Dec: 2 },
-    participants: { Jan: 80, Feb: 100, Mar: 75, Apr: 110, May: 140, Jun: 90, Jul: 120, Aug: 70, Sep: 110, Oct: 85, Nov: 100, Dec: 70 },
+    events: {
+      Jan: 2,
+      Feb: 3,
+      Mar: 2,
+      Apr: 3,
+      May: 4,
+      Jun: 2,
+      Jul: 3,
+      Aug: 2,
+      Sep: 3,
+      Oct: 2,
+      Nov: 3,
+      Dec: 2,
+    },
+    participants: {
+      Jan: 80,
+      Feb: 100,
+      Mar: 75,
+      Apr: 110,
+      May: 140,
+      Jun: 90,
+      Jul: 120,
+      Aug: 70,
+      Sep: 110,
+      Oct: 85,
+      Nov: 100,
+      Dec: 70,
+    },
   },
   {
     id: 9,
     name: 'Debating Society',
     college: "St. Stephen's College",
-    events: { Jan: 3, Feb: 2, Mar: 4, Apr: 3, May: 2, Jun: 3, Jul: 2, Aug: 1, Sep: 3, Oct: 2, Nov: 3, Dec: 2 },
-    participants: { Jan: 90, Feb: 70, Mar: 120, Apr: 100, May: 80, Jun: 90, Jul: 75, Aug: 40, Sep: 110, Oct: 80, Nov: 95, Dec: 70 },
+    events: {
+      Jan: 3,
+      Feb: 2,
+      Mar: 4,
+      Apr: 3,
+      May: 2,
+      Jun: 3,
+      Jul: 2,
+      Aug: 1,
+      Sep: 3,
+      Oct: 2,
+      Nov: 3,
+      Dec: 2,
+    },
+    participants: {
+      Jan: 90,
+      Feb: 70,
+      Mar: 120,
+      Apr: 100,
+      May: 80,
+      Jun: 90,
+      Jul: 75,
+      Aug: 40,
+      Sep: 110,
+      Oct: 80,
+      Nov: 95,
+      Dec: 70,
+    },
   },
   {
     id: 10,
     name: 'AI Research Group',
     college: 'BITS Pilani',
-    events: { Jan: 2, Feb: 1, Mar: 3, Apr: 2, May: 3, Jun: 1, Jul: 2, Aug: 1, Sep: 2, Oct: 3, Nov: 2, Dec: 1 },
-    participants: { Jan: 60, Feb: 40, Mar: 80, Apr: 65, May: 90, Jun: 35, Jul: 70, Aug: 30, Sep: 60, Oct: 85, Nov: 75, Dec: 40 },
+    events: {
+      Jan: 2,
+      Feb: 1,
+      Mar: 3,
+      Apr: 2,
+      May: 3,
+      Jun: 1,
+      Jul: 2,
+      Aug: 1,
+      Sep: 2,
+      Oct: 3,
+      Nov: 2,
+      Dec: 1,
+    },
+    participants: {
+      Jan: 60,
+      Feb: 40,
+      Mar: 80,
+      Apr: 65,
+      May: 90,
+      Jun: 35,
+      Jul: 70,
+      Aug: 30,
+      Sep: 60,
+      Oct: 85,
+      Nov: 75,
+      Dec: 40,
+    },
   },
 ];
 
 // Define Month type for type safety
-type Month = 'Jan' | 'Feb' | 'Mar' | 'Apr' | 'May' | 'Jun' | 'Jul' | 'Aug' | 'Sep' | 'Oct' | 'Nov' | 'Dec';
+type Month =
+  | 'Jan'
+  | 'Feb'
+  | 'Mar'
+  | 'Apr'
+  | 'May'
+  | 'Jun'
+  | 'Jul'
+  | 'Aug'
+  | 'Sep'
+  | 'Oct'
+  | 'Nov'
+  | 'Dec';
 
 // All months for filtering
-const months: Month[] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const months: Month[] = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
 
 // Lightweight avatar placeholders per club
 const avatars: Record<number, string> = {
@@ -144,9 +449,17 @@ export default function LeaderboardPage() {
       return { totalEvents: 0, totalParticipants: 0, avgScore: 0 };
     }
     const totalEvents = rankedClubs.reduce((sum, c) => sum + c.eventsCount, 0);
-    const totalParticipants = rankedClubs.reduce((sum, c) => sum + c.participantsCount, 0);
-    const avgScore = rankedClubs.reduce((sum, c) => sum + c.score, 0) / rankedClubs.length;
-    return { totalEvents, totalParticipants, avgScore: parseFloat(avgScore.toFixed(2)) };
+    const totalParticipants = rankedClubs.reduce(
+      (sum, c) => sum + c.participantsCount,
+      0
+    );
+    const avgScore =
+      rankedClubs.reduce((sum, c) => sum + c.score, 0) / rankedClubs.length;
+    return {
+      totalEvents,
+      totalParticipants,
+      avgScore: parseFloat(avgScore.toFixed(2)),
+    };
   }, [rankedClubs]);
 
   const topThree = rankedClubs.slice(0, 3);
@@ -177,7 +490,10 @@ export default function LeaderboardPage() {
             />
           </div>
           <div className="w-36 sm:w-44">
-            <Select value={selectedMonth} onValueChange={(v) => setSelectedMonth(v as Month)}>
+            <Select
+              value={selectedMonth}
+              onValueChange={(v) => setSelectedMonth(v as Month)}
+            >
               <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                 <SelectValue placeholder="Month" />
               </SelectTrigger>
@@ -265,13 +581,27 @@ export default function LeaderboardPage() {
                 {/* 2nd */}
                 <div className="flex flex-col items-center">
                   <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full ring-2 ring-yellow-500/40 overflow-hidden shadow-lg">
-                    <Image alt="2nd" width={500} height={500} className="w-full h-full object-cover" src={avatars[topThree[1]?.id ?? 0]} />
+                    <Image
+                      alt="2nd"
+                      width={500}
+                      height={500}
+                      className="w-full h-full object-cover"
+                      src={avatars[topThree[1]?.id ?? 0]}
+                    />
                   </div>
                   <div className="mt-2 text-center">
-                    <div className="text-xs sm:text-sm text-gray-300 line-clamp-1">{topThree[1]?.name || '-'}</div>
-                    <div className="text-[10px] sm:text-xs text-gray-500 line-clamp-1">{topThree[1]?.college || ''}</div>
-                    <Badge className="mt-1 bg-gray-400 text-black font-bold">2</Badge>
-                    <div className="text-xs text-purple-300 mt-1">{topThree[1]?.score ?? '--'}</div>
+                    <div className="text-xs sm:text-sm text-gray-300 line-clamp-1">
+                      {topThree[1]?.name || '-'}
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-gray-500 line-clamp-1">
+                      {topThree[1]?.college || ''}
+                    </div>
+                    <Badge className="mt-1 bg-gray-400 text-black font-bold">
+                      2
+                    </Badge>
+                    <div className="text-xs text-purple-300 mt-1">
+                      {topThree[1]?.score ?? '--'}
+                    </div>
                   </div>
                   <div className="mt-2 w-16 sm:w-24 h-10 sm:h-14 rounded-md bg-gray-800/80 border border-gray-700" />
                 </div>
@@ -279,16 +609,25 @@ export default function LeaderboardPage() {
                 {/* 1st */}
                 <div className="flex flex-col items-center">
                   <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full ring-4 ring-yellow-500 overflow-hidden shadow-yellow-500/30 shadow-[0_10px_25px]">
-                    <img alt="1st" className="w-full h-full object-cover" src={avatars[topThree[0]?.id ?? 0]} />
+                    <img
+                      alt="1st"
+                      className="w-full h-full object-cover"
+                      src={avatars[topThree[0]?.id ?? 0]}
+                    />
                   </div>
                   <div className="mt-2 text-center">
                     <div className="text-sm sm:text-base text-yellow-400 font-semibold line-clamp-1">
-                      {topThree[0]?.name || '-'
-                      }
+                      {topThree[0]?.name || '-'}
                     </div>
-                    <div className="text-[10px] sm:text-xs text-gray-500 line-clamp-1">{topThree[0]?.college || ''}</div>
-                    <Badge className="mt-1 bg-yellow-500 text-black font-bold">1</Badge>
-                    <div className="text-xs text-purple-300 mt-1">{topThree[0]?.score ?? '--'}</div>
+                    <div className="text-[10px] sm:text-xs text-gray-500 line-clamp-1">
+                      {topThree[0]?.college || ''}
+                    </div>
+                    <Badge className="mt-1 bg-yellow-500 text-black font-bold">
+                      1
+                    </Badge>
+                    <div className="text-xs text-purple-300 mt-1">
+                      {topThree[0]?.score ?? '--'}
+                    </div>
                   </div>
                   <div className="mt-2 w-20 sm:w-32 h-12 sm:h-20 rounded-md bg-gray-800 border border-yellow-500/40" />
                 </div>
@@ -296,13 +635,25 @@ export default function LeaderboardPage() {
                 {/* 3rd */}
                 <div className="flex flex-col items-center">
                   <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full ring-2 ring-amber-600/60 overflow-hidden shadow-lg">
-                    <img alt="3rd" className="w-full h-full object-cover" src={avatars[topThree[2]?.id ?? 0]} />
+                    <img
+                      alt="3rd"
+                      className="w-full h-full object-cover"
+                      src={avatars[topThree[2]?.id ?? 0]}
+                    />
                   </div>
                   <div className="mt-2 text-center">
-                    <div className="text-xs sm:text-sm text-gray-300 line-clamp-1">{topThree[2]?.name || '-'}</div>
-                    <div className="text-[10px] sm:text-xs text-gray-500 line-clamp-1">{topThree[2]?.college || ''}</div>
-                    <Badge className="mt-1 bg-amber-700 text-black font-bold">3</Badge>
-                    <div className="text-xs text-purple-300 mt-1">{topThree[2]?.score ?? '--'}</div>
+                    <div className="text-xs sm:text-sm text-gray-300 line-clamp-1">
+                      {topThree[2]?.name || '-'}
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-gray-500 line-clamp-1">
+                      {topThree[2]?.college || ''}
+                    </div>
+                    <Badge className="mt-1 bg-amber-700 text-black font-bold">
+                      3
+                    </Badge>
+                    <div className="text-xs text-purple-300 mt-1">
+                      {topThree[2]?.score ?? '--'}
+                    </div>
                   </div>
                   <div className="mt-2 w-14 sm:w-20 h-8 sm:h-12 rounded-md bg-gray-800/70 border border-gray-700" />
                 </div>
@@ -337,11 +688,20 @@ export default function LeaderboardPage() {
                 )}
               </div>
               <div className="w-10 h-10 rounded-full overflow-hidden ring-1 ring-yellow-500/30">
-                <Image alt={club.name} src={avatars[club.id]} layout="fill" className="object-cover" />
+                <Image
+                  alt={club.name}
+                  src={avatars[club.id]}
+                  layout="fill"
+                  className="object-cover"
+                />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold text-white truncate">{club.name}</div>
-                <div className="text-xs text-gray-400 truncate">{club.college}</div>
+                <div className="text-sm font-semibold text-white truncate">
+                  {club.name}
+                </div>
+                <div className="text-xs text-gray-400 truncate">
+                  {club.college}
+                </div>
               </div>
               <div className="text-right">
                 <div className="text-xs text-gray-400">Score</div>
@@ -362,17 +722,28 @@ export default function LeaderboardPage() {
             <Table>
               <TableHeader>
                 <TableRow className="border-gray-800 hover:bg-transparent">
-                  <TableHead className="text-gray-400 w-14 text-center">Rank</TableHead>
+                  <TableHead className="text-gray-400 w-14 text-center">
+                    Rank
+                  </TableHead>
                   <TableHead className="text-gray-400">Club</TableHead>
                   <TableHead className="text-gray-400">College</TableHead>
-                  <TableHead className="text-gray-400 text-center">Events</TableHead>
-                  <TableHead className="text-gray-400 text-center">Participants</TableHead>
-                  <TableHead className="text-gray-400 text-center">Score</TableHead>
+                  <TableHead className="text-gray-400 text-center">
+                    Events
+                  </TableHead>
+                  <TableHead className="text-gray-400 text-center">
+                    Participants
+                  </TableHead>
+                  <TableHead className="text-gray-400 text-center">
+                    Score
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rankedClubs.map((club, index) => (
-                  <TableRow key={club.id} className="border-gray-800 hover:bg-gray-800/40">
+                  <TableRow
+                    key={club.id}
+                    className="border-gray-800 hover:bg-gray-800/40"
+                  >
                     <TableCell className="font-medium text-center">
                       {index < 3 ? (
                         <Badge
@@ -380,8 +751,8 @@ export default function LeaderboardPage() {
                             index === 0
                               ? 'bg-yellow-500 text-black'
                               : index === 1
-                              ? 'bg-gray-400 text-black'
-                              : 'bg-amber-700 text-black'
+                                ? 'bg-gray-400 text-black'
+                                : 'bg-amber-700 text-black'
                           } font-bold`}
                         >
                           {index + 1}
@@ -393,14 +764,27 @@ export default function LeaderboardPage() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-yellow-500/30">
-                          <Image alt={club.name} src={avatars[club.id]} layout="fill" className="object-cover" />
+                          <Image
+                            alt={club.name}
+                            src={avatars[club.id]}
+                            layout="fill"
+                            className="object-cover"
+                          />
                         </div>
-                        <div className="font-medium text-white">{club.name}</div>
+                        <div className="font-medium text-white">
+                          {club.name}
+                        </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-gray-300">{club.college}</TableCell>
-                    <TableCell className="text-center text-white">{club.eventsCount}</TableCell>
-                    <TableCell className="text-center text-white">{club.participantsCount}</TableCell>
+                    <TableCell className="text-gray-300">
+                      {club.college}
+                    </TableCell>
+                    <TableCell className="text-center text-white">
+                      {club.eventsCount}
+                    </TableCell>
+                    <TableCell className="text-center text-white">
+                      {club.participantsCount}
+                    </TableCell>
                     <TableCell className="text-center">
                       <TooltipProvider>
                         <Tooltip>
@@ -419,7 +803,10 @@ export default function LeaderboardPage() {
                 ))}
                 {rankedClubs.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-400">
+                    <TableCell
+                      colSpan={6}
+                      className="text-center py-8 text-gray-400"
+                    >
                       No clubs found matching your search
                     </TableCell>
                   </TableRow>

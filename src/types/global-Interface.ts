@@ -191,7 +191,7 @@ export interface response {
     profilePicUrl: string | null;
     clubContact: string;
   }[];
-  totalPages : number
+  totalPages: number;
 }
 export interface ClubPageProps {
   params: {
@@ -362,13 +362,13 @@ export interface eventData {
 export interface respnseUseState {
   EventName: string;
   description: string;
-  EventMode : string;
-  startDate : any;
-  endDate : any;
-  contactEmail : string;
-  contactPhone : number;
-  university : string;
-  applicationStatus : string;
+  EventMode: string;
+  startDate: any;
+  endDate: any;
+  contactEmail: string;
+  contactPhone: number;
+  university: string;
+  applicationStatus: string;
 }
 export interface PostAuthor {
   id: string;

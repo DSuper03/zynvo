@@ -24,7 +24,6 @@ import { Button } from '@/components/ui/button';
 
 dotenv.config();
 
-
 export default function SignUp() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -43,8 +42,12 @@ export default function SignUp() {
   const isValidPassword = (pw: string) =>
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(pw);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target as HTMLInputElement | HTMLSelectElement;
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target as
+      | HTMLInputElement
+      | HTMLSelectElement;
 
     if (name === 'interests') {
       // Handle interest checkboxes
@@ -75,7 +78,9 @@ export default function SignUp() {
     e.preventDefault();
     // NEW: block next step if password invalid
     if (!isValidPassword(formData.password)) {
-      setPasswordError('Password must be 8+ chars and include uppercase, lowercase, and a number.');
+      setPasswordError(
+        'Password must be 8+ chars and include uppercase, lowercase, and a number.'
+      );
       toast('Please fix your password to continue');
       return;
     }
@@ -210,8 +215,6 @@ export default function SignUp() {
             {/* Step 1: Account Information */}
             {currentStep === 1 && (
               <>
-            
-
                 <div className="flex items-center justify-center mb-6">
                   <div className="h-px bg-gray-700 flex-1"></div>
                   <p className="mx-4 text-gray-400 text-sm">OR</p>
@@ -286,7 +289,9 @@ export default function SignUp() {
                         value={formData.password}
                         onChange={handleChange}
                         className={`bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 ${
-                          passwordError ? 'focus:ring-red-500' : 'focus:ring-yellow-500'
+                          passwordError
+                            ? 'focus:ring-red-500'
+                            : 'focus:ring-yellow-500'
                         }`}
                         placeholder="peterParkerisSpiderman@69"
                         required
@@ -304,11 +309,17 @@ export default function SignUp() {
                         {showPassword ? <FiEyeOff /> : <FiEye />}
                       </Button>
                     </div>
-                    <p id="password-help" className="text-gray-400 text-xs mt-2">
-                      Password must be at least 8 characters long and include uppercase, lowercase, and a number.
+                    <p
+                      id="password-help"
+                      className="text-gray-400 text-xs mt-2"
+                    >
+                      Password must be at least 8 characters long and include
+                      uppercase, lowercase, and a number.
                     </p>
                     {passwordError && (
-                      <p className="text-red-400 text-xs mt-2">{passwordError}</p>
+                      <p className="text-red-400 text-xs mt-2">
+                        {passwordError}
+                      </p>
                     )}
                   </div>
 
@@ -329,30 +340,32 @@ export default function SignUp() {
             {currentStep === 2 && (
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
- <div className="mb-4">
-  <label
-    htmlFor="collegeName"
-    className="block text-gray-300 text-sm font-medium mb-2"
-  >
-    College/University Name
-  </label>
-  <CollegeSearchSelect
-    colleges={collegesWithClubs}
-    value={formData.collegeName}
-    onChange={(value) => setFormData(prev => ({ ...prev, collegeName: value }))}
-    placeholder="Search and select your college/university"
-    required
-  />
-</div>
-</div>
+                  <div className="mb-4">
+                    <label
+                      htmlFor="collegeName"
+                      className="block text-gray-300 text-sm font-medium mb-2"
+                    >
+                      College/University Name
+                    </label>
+                    <CollegeSearchSelect
+                      colleges={collegesWithClubs}
+                      value={formData.collegeName}
+                      onChange={(value) =>
+                        setFormData((prev) => ({ ...prev, collegeName: value }))
+                      }
+                      placeholder="Search and select your college/university"
+                      required
+                    />
+                  </div>
+                </div>
 
-   <div className="flex items-center mb-6">
-        <input
-         type="checkbox"
-         id="agreeToTerms"
-         name="agreeToTerms"
-         checked={agreeToTerms}
-                        onChange={() => {
+                <div className="flex items-center mb-6">
+                  <input
+                    type="checkbox"
+                    id="agreeToTerms"
+                    name="agreeToTerms"
+                    checked={agreeToTerms}
+                    onChange={() => {
                       setAgree(true);
                     }}
                     className="h-4 w-4 rounded border-gray-700 bg-gray-800 text-yellow-500 focus:ring-yellow-500"

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { memo } from "react";
+import React, { memo } from 'react';
 
 interface AuroraTextProps {
   children: React.ReactNode;
@@ -12,16 +12,16 @@ interface AuroraTextProps {
 export const AuroraText = memo(
   ({
     children,
-    className = "",
-    colors = ["#be3a11", "#7928CA", "#0070F3", "#38bdf8"],
+    className = '',
+    colors = ['#be3a11', '#7928CA', '#0070F3', '#38bdf8'],
     speed = 1,
   }: AuroraTextProps) => {
     const gradientStyle = {
-      backgroundImage: `linear-gradient(135deg, ${colors.join(", ")}, ${
+      backgroundImage: `linear-gradient(135deg, ${colors.join(', ')}, ${
         colors[0]
       })`,
-      WebkitBackgroundClip: "text",
-      WebkitTextFillColor: "transparent",
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
       animationDuration: `${10 / speed}s`,
     };
 
@@ -37,7 +37,7 @@ export const AuroraText = memo(
         </span>
       </span>
     );
-  },
+  }
 );
 
-AuroraText.displayName = "AuroraText";
+AuroraText.displayName = 'AuroraText';

@@ -16,7 +16,6 @@ interface apiRespEvents {
   totalPages: number;
 }
 
-
 const EventCardSkeleton = () => {
   return (
     <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800 hover:border-gray-700 transition-all duration-200">
@@ -25,28 +24,28 @@ const EventCardSkeleton = () => {
           <div className="w-16 h-6 bg-gray-700 rounded animate-pulse" />
         </div>
       </div>
-      
+
       <div className="p-4 space-y-3">
         <div className="space-y-2">
           <div className="h-6 w-3/4 bg-gray-800 rounded animate-pulse" />
           <div className="h-4 w-full bg-gray-800 rounded animate-pulse" />
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <MapPin className="w-4 h-4 text-gray-600" />
           <div className="h-4 w-24 bg-gray-800 rounded animate-pulse" />
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <Clock className="w-4 h-4 text-gray-600" />
           <div className="h-4 w-32 bg-gray-800 rounded animate-pulse" />
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <Calendar className="w-4 h-4 text-gray-600" />
           <div className="h-4 w-28 bg-gray-800 rounded animate-pulse" />
         </div>
-        
+
         <div className="flex justify-between items-center pt-2">
           <div className="h-8 w-20 bg-gray-800 rounded animate-pulse" />
           <div className="h-8 w-24 bg-gray-700 rounded animate-pulse" />
@@ -55,7 +54,6 @@ const EventCardSkeleton = () => {
     </div>
   );
 };
-
 
 const EventsGridSkeleton = () => {
   return (
@@ -66,7 +64,6 @@ const EventsGridSkeleton = () => {
     </div>
   );
 };
-
 
 const SearchFilterSkeleton = () => {
   return (
@@ -98,19 +95,19 @@ export default function ZynvoEventsPage() {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         const response = await axios.get<apiRespEvents>(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/all?page=${currentPage}`,
           {
             timeout: 10000, // 10 second timeout
             headers: {
               'Content-Type': 'application/json',
-            }
+            },
           }
         );
-        
+
         if (!isMounted) return; // Prevent state update if component is unmounted
-        
+
         if (response.data && Array.isArray(response.data.response)) {
           setEvents(response.data.response);
           setTotalPages(response.data.totalPages || 1);
@@ -121,9 +118,9 @@ export default function ZynvoEventsPage() {
         }
       } catch (err) {
         if (!isMounted) return;
-        
+
         console.error('Error fetching events:', err);
-        
+
         setEvents([]);
       } finally {
         if (isMounted) {
@@ -155,14 +152,14 @@ export default function ZynvoEventsPage() {
     setError(null);
     setEvents(null);
     setIsLoading(true);
-   
-    setCurrentPage(prev => prev === 1 ? 1 : prev);
+
+    setCurrentPage((prev) => (prev === 1 ? 1 : prev));
   };
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
       setCurrentPage(newPage);
-     
+
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -209,7 +206,10 @@ export default function ZynvoEventsPage() {
         </div>
 
         {/* Create Event Modal */}
-        <CreateEventModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+        <CreateEventModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
 
         {/* Search and Filter Bar */}
         {isLoading ? (
@@ -235,7 +235,6 @@ export default function ZynvoEventsPage() {
         )}
 
         {/* Decorative banner strip above the events grid */}
-       
 
         {/* Events Grid - Main Content */}
         <div className="min-h-[400px]">
@@ -244,11 +243,23 @@ export default function ZynvoEventsPage() {
           ) : error ? (
             <div className="text-center py-12">
               <div className="text-red-400 mb-4">
-                <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-16 h-16 mx-auto mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-white mb-2">Error Loading Events</h3>
+              <h3 className="text-lg font-medium text-white mb-2">
+                Error Loading Events
+              </h3>
               <p className="text-gray-400 mb-4 max-w-md mx-auto">{error}</p>
               <Button
                 onClick={handleRetry}
@@ -265,7 +276,9 @@ export default function ZynvoEventsPage() {
               <div className="text-gray-400 mb-4">
                 <Calendar className="w-16 h-16 mx-auto mb-4" />
               </div>
-              <h3 className="text-lg font-medium text-white mb-2">No Events Found</h3>
+              <h3 className="text-lg font-medium text-white mb-2">
+                No Events Found
+              </h3>
               <p className="text-gray-400 max-w-md mx-auto">
                 {searchTerm
                   ? `No events match your search "${searchTerm}". Try different keywords.`
@@ -311,7 +324,7 @@ export default function ZynvoEventsPage() {
               } else {
                 pageNumber = currentPage - 2 + idx;
               }
-              
+
               return (
                 <Button
                   key={pageNumber}

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { FiSearch, FiChevronDown } from 'react-icons/fi';
 
 interface CollegeSearchSelectProps {
-  colleges: { college: string; State: string; }[];
+  colleges: { college: string; State: string }[];
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -15,8 +15,8 @@ export default function CollegeSearchSelect({
   colleges,
   value,
   onChange,
-  placeholder = "Select your college/university",
-  required = false
+  placeholder = 'Select your college/university',
+  required = false,
 }: CollegeSearchSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,14 +25,17 @@ export default function CollegeSearchSelect({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Filter colleges based on search term
-  const filteredColleges = colleges.filter(college =>
+  const filteredColleges = colleges.filter((college) =>
     college.college.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Handle clicking outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
         setSearchTerm('');
         setHighlightedIndex(-1);
@@ -56,19 +59,22 @@ export default function CollegeSearchSelect({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setHighlightedIndex(prev => 
+        setHighlightedIndex((prev) =>
           prev < filteredColleges.length - 1 ? prev + 1 : 0
         );
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setHighlightedIndex(prev => 
+        setHighlightedIndex((prev) =>
           prev > 0 ? prev - 1 : filteredColleges.length - 1
         );
         break;
       case 'Enter':
         e.preventDefault();
-        if (highlightedIndex >= 0 && highlightedIndex < filteredColleges.length) {
+        if (
+          highlightedIndex >= 0 &&
+          highlightedIndex < filteredColleges.length
+        ) {
           handleSelect(filteredColleges[highlightedIndex].college);
         }
         break;
@@ -97,7 +103,7 @@ export default function CollegeSearchSelect({
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Display Input */}
-      <div 
+      <div
         className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus-within:ring-2 focus-within:ring-yellow-500 cursor-pointer relative"
         onClick={handleInputClick}
       >
@@ -113,10 +119,10 @@ export default function CollegeSearchSelect({
           readOnly={!isOpen}
           required={required}
         />
-        <FiChevronDown 
+        <FiChevronDown
           className={`text-gray-500 absolute right-3 top-1/2 transform -translate-y-1/2 transition-transform ${
             isOpen ? 'rotate-180' : ''
-          }`} 
+          }`}
         />
       </div>
 

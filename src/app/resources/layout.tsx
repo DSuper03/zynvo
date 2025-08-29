@@ -13,7 +13,6 @@ export default function RootLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
 
- 
   useEffect(() => {
     const handleResize = () => {
       setIsMobileView(window.innerWidth < 768);
@@ -22,14 +21,12 @@ export default function RootLayout({
       }
     };
 
-    
     handleResize();
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
- 
   const handleMainContentClick = () => {
     if (isMobileMenuOpen) {
       setIsMobileMenuOpen(false);
@@ -50,14 +47,14 @@ export default function RootLayout({
       )}
 
       {/* Sidebar - hidden on mobile by default, shown when toggled */}
-      <div 
+      <div
         className={`
           ${isMobileMenuOpen ? 'fixed inset-0 z-40 bg-black/60 backdrop-blur-sm' : 'hidden'} 
           md:relative md:block md:bg-transparent
         `}
         onClick={() => isMobileView && setIsMobileMenuOpen(false)}
       >
-        <div 
+        <div
           className={`
             fixed left-0 top-0 bottom-0 w-64 bg-black z-40
             transform transition-transform duration-300 ease-in-out
@@ -66,12 +63,12 @@ export default function RootLayout({
           `}
           onClick={(e) => e.stopPropagation()}
         >
-          <Sidebar  />
+          <Sidebar />
         </div>
       </div>
 
       {/* Main content area - takes remaining width */}
-      <main 
+      <main
         className={`
           flex-1 overflow-auto p-4 md:p-6 
           bg-gradient-to-br from-black to-gray-900

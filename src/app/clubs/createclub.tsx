@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import { X, Upload, Camera, Plus, Trash2 } from 'lucide-react';
 import { CreateClubModalProps } from '@/types/global-Interface';
 import { toast } from 'sonner';
@@ -13,8 +13,8 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [img, setImg] = useState<File | null>(null)
-   const [clubData, setClubData] = useState({
+  const [img, setImg] = useState<File | null>(null);
+  const [clubData, setClubData] = useState({
     name: '',
     description: '',
     type: '',
@@ -22,24 +22,23 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     facultyEmail: '',
     requirements: '',
     clubContact: '',
-    logo : '',
-    wings: [] as string[]  
+    logo: '',
+    wings: [] as string[],
   });
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [token, setToken] = useState("")
+  const [token, setToken] = useState('');
   const [newWing, setNewWing] = useState('');
 
-    useEffect(()=> {
-       if (typeof window !== 'undefined') {
-      const tok = localStorage.getItem("token")
-     if(tok) setToken(tok)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const tok = localStorage.getItem('token');
+      if (tok) setToken(tok);
       else {
-       toast("login please")
-       return;
+        toast('login please');
+        return;
       }
     }
-
-    }, [])
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -56,7 +55,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImg(file)
+      setImg(file);
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewImage(reader.result as string);
@@ -65,28 +64,28 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     }
   };
 
-  async function uploadImg(img:File) {
-       const link =  await uploadImageToImageKit(await toBase64(img), img.name)
-       setClubData((prev) => ({
+  async function uploadImg(img: File) {
+    const link = await uploadImageToImageKit(await toBase64(img), img.name);
+    setClubData((prev) => ({
       ...prev,
-       logo : link,
-    }))
+      logo: link,
+    }));
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(img){
-      await uploadImg(img)
-    }else {
-      toast("please upload a logo for your club")
+    if (img) {
+      await uploadImg(img);
+    } else {
+      toast('please upload a logo for your club');
       return;
     }
 
-    if(!token) {
-      toast("login please")
+    if (!token) {
+      toast('login please');
       return;
     }
-   
+
     const upload = await axios.post<{
       msg: string;
       clubId: string;
@@ -105,23 +104,23 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     }
   };
 
-    const addWing = () => {
-    if(newWing.trim() !== ''){
+  const addWing = () => {
+    if (newWing.trim() !== '') {
       setClubData((prev) => ({
         ...prev,
-        wings: [...prev.wings, newWing.trim()]
+        wings: [...prev.wings, newWing.trim()],
       }));
       setNewWing('');
     }
-  }
+  };
 
   // ✅ Remove a wing
   const removeWing = (index: number) => {
     setClubData((prev) => ({
       ...prev,
-      wings: prev.wings.filter((_, i) => i !== index)
+      wings: prev.wings.filter((_, i) => i !== index),
     }));
-  }
+  };
 
   if (!isOpen) return null;
 
@@ -190,7 +189,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
             />
           </div>
 
-           {/* ✅ Wings Section */}
+          {/* ✅ Wings Section */}
           <div className="space-y-2">
             <label
               htmlFor="wings"
@@ -207,16 +206,27 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
                 onChange={(e) => setNewWing(e.target.value)}
                 className="flex-1 bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
               />
-              <Button type="button" onClick={addWing} className="bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg px-4">
-                <Plus size={18}/>
+              <Button
+                type="button"
+                onClick={addWing}
+                className="bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg px-4"
+              >
+                <Plus size={18} />
               </Button>
             </div>
             <div className="flex flex-wrap gap-2 mt-3">
               {clubData.wings.map((wing, index) => (
-                <span key={index} className="flex items-center bg-gray-800 text-yellow-400 px-3 py-1 rounded-lg">
+                <span
+                  key={index}
+                  className="flex items-center bg-gray-800 text-yellow-400 px-3 py-1 rounded-lg"
+                >
                   {wing}
-                  <button type="button" onClick={() => removeWing(index)} className="ml-2 text-red-500 hover:text-red-400">
-                    <Trash2 size={14}/>
+                  <button
+                    type="button"
+                    onClick={() => removeWing(index)}
+                    className="ml-2 text-red-500 hover:text-red-400"
+                  >
+                    <Trash2 size={14} />
                   </button>
                 </span>
               ))}
