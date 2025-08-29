@@ -65,12 +65,14 @@ function VerificationContent() {
 
   const handleResendVerification = async () => {
     try {
-     const resend = await axios.post<{msg : string}>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/ResendEmail?email=${email}`)
-     if(resend.status == 200) {
-      alert('Verification email has been resent!');
-     } else {
-      alert(resend.data.msg);
-     }
+      const resend = await axios.post<{ msg: string }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/ResendEmail?email=${email}`
+      );
+      if (resend.status == 200) {
+        alert('Verification email has been resent!');
+      } else {
+        alert(resend.data.msg);
+      }
     } catch (error) {
       alert('Failed to resend verification email. Please try again.');
     }

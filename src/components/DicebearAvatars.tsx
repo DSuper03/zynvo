@@ -39,7 +39,7 @@ const DiceBearAvatar = ({
   useEffect(() => {
     // Only proceed if we have a randomSeed (prevents initial render issues)
     if (!randomSeed && !name.trim()) return;
-    
+
     const seed = name.trim() || randomSeed;
     const url = `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${encodeURIComponent(seed)}`;
     setAvatarUrl(url);

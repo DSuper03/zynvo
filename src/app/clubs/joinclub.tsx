@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import { JoinClubModalProps } from '@/types/global-Interface';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -18,15 +18,14 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
   const [formData, setFormData] = useState({
     motivation: '',
   });
-  const [token, setToken] = useState<string | null>("")
+  const [token, setToken] = useState<string | null>('');
 
-  useEffect(()=> {
-     if (typeof window !== 'undefined') {
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
       setToken(storedToken);
     }
-  }, [])
-
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -42,12 +41,13 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(!token) {
-      toast("login please")
+    if (!token) {
+      toast('login please');
       return;
     }
     const res = await axios.post<{ msg: string }>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/joinClub/${clubId}`,{},
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/joinClub/${clubId}`,
+      {},
       {
         headers: {
           authorization: `Bearer ${token}`,
@@ -90,7 +90,6 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-
           {/* Motivation */}
           <div className="space-y-2">
             <label

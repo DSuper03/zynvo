@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import LandingHeader from './landingHeader';
@@ -182,7 +182,7 @@ const TeamSection = () => {
                   alt={founder.name}
                   width={10000}
                   height={10000}
-                  className='object-cover'
+                  className="object-cover"
                 />
                 <div className="absolute inset-0   group-hover:opacity-0 transition-opacity" />
                 <div className="absolute inset-0 ring-2 ring-yellow-500/20 group-hover:ring-yellow-500/50 transition-all" />

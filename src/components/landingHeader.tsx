@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import { Lens } from './magicui/lens';
 
 // Animation transition settings
@@ -44,7 +44,6 @@ const MenuItem = ({
         <motion.div
           initial={{ opacity: 0, scale: 0.85, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          
         >
           {active === item && children && (
             <>
@@ -53,7 +52,6 @@ const MenuItem = ({
 
               <div className="absolute top-[calc(100%_+_1.2rem)] left-1/2 transform -translate-x-1/2 z-50">
                 <motion.div
-                  
                   layoutId="active"
                   className="bg-black/90 backdrop-blur-sm rounded-2xl overflow-hidden border border-yellow-500/20 shadow-xl"
                 >
@@ -109,7 +107,9 @@ const LandingHeader = () => {
   // Lock body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isMobileMenuOpen]);
 
   return (
@@ -176,7 +176,7 @@ const LandingHeader = () => {
                     </div>
                   </div>
                 </HoveredLink>
-              
+
                 <HoveredLink href="/leaderboard">
                   <div className="flex items-center space-x-2">
                     <span className="text-yellow-400 text-lg">💡</span>
@@ -190,8 +190,6 @@ const LandingHeader = () => {
                 </HoveredLink>
               </div>
             </MenuItem>
-
-           
 
             <MenuItem
               setActive={setActiveItem}
@@ -260,11 +258,27 @@ const LandingHeader = () => {
             aria-expanded={isMobileMenuOpen}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
               {isMobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               )}
             </svg>
           </button>
@@ -292,7 +306,9 @@ const LandingHeader = () => {
             {/* Header row inside panel */}
             <div className="flex items-center justify-between px-6 pt-6">
               <div className="flex items-center gap-1">
-                <span className="text-yellow-400 font-extrabold text-3xl">Z</span>
+                <span className="text-yellow-400 font-extrabold text-3xl">
+                  Z
+                </span>
                 <span className="text-white font-semibold text-2xl">ynvo</span>
               </div>
               <button
@@ -300,7 +316,16 @@ const LandingHeader = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="h-10 w-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
@@ -309,19 +334,35 @@ const LandingHeader = () => {
 
             {/* Menu items */}
             <div className="px-6 py-6 space-y-6">
-              <Link href="/discover" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+              <Link
+                href="/discover"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-2xl text-gray-200 hover:text-white"
+              >
                 Discover
               </Link>
-              <Link href="/testimonials" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+              <Link
+                href="/testimonials"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-2xl text-gray-200 hover:text-white"
+              >
                 Testimonials
               </Link>
               {/* <Link href="/founders" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
                 Devs
               </Link> */}
-              <Link href="/faq" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+              <Link
+                href="/faq"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-2xl text-gray-200 hover:text-white"
+              >
                 FAQ
               </Link>
-              <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+              <Link
+                href="/contact"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-2xl text-gray-200 hover:text-white"
+              >
                 Contact
               </Link>
             </div>

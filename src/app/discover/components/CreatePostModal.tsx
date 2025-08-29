@@ -11,19 +11,19 @@ import {
   School,
   Search,
 } from 'lucide-react';
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import { MagicCard } from '@/components/magicui/magic-card';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import dotenv from "dotenv"
+import dotenv from 'dotenv';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
 
-dotenv.config()
+dotenv.config();
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -41,49 +41,53 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [clubs, setClubs] = useState<string[]>([""])
-  const [settingClubs, setSettingClubs] = useState<boolean>(false)
-  const [token, setToken] = useState<string | null>("");
-  const [imageLink, setImageLink] = useState<string>("");
+  const [clubs, setClubs] = useState<string[]>(['']);
+  const [settingClubs, setSettingClubs] = useState<boolean>(false);
+  const [token, setToken] = useState<string | null>('');
+  const [imageLink, setImageLink] = useState<string>('');
   const [title, setTitle] = useState('');
 
-
-  useEffect(()=> {
-       if (typeof window !== 'undefined') {
-      const tok = localStorage.getItem("token")
-     if(tok) setToken(tok)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const tok = localStorage.getItem('token');
+      if (tok) setToken(tok);
       else {
-       toast("login please")
-       return;
+        toast('login please');
+        return;
       }
     }
-    }, [])
+  }, []);
 
-
-  useEffect(()=> {
-    if(selectedCollege === '') {
+  useEffect(() => {
+    if (selectedCollege === '') {
       return;
-    } 
+    }
 
-    async function call(college : string) {
-      setSettingClubs(true)
-      const clubs = await axios.get<{resp : {
-        name : string
-      }[]}>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClubs/${college}`)
+    async function call(college: string) {
+      setSettingClubs(true);
+      const clubs = await axios.get<{
+        resp: {
+          name: string;
+        }[];
+      }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClubs/${college}`
+      );
       console.log(clubs);
-      if(clubs.status === 200 && clubs.data.resp.length > 0) {
-        alert(200)
-        const clArray = clubs.data.resp.map((club: {name: string})=> club.name )
+      if (clubs.status === 200 && clubs.data.resp.length > 0) {
+        alert(200);
+        const clArray = clubs.data.resp.map(
+          (club: { name: string }) => club.name
+        );
         setClubs(clArray);
       } else {
-        setClubs([""])
-        alert(404)
+        setClubs(['']);
+        alert(404);
       }
     }
 
     call(selectedCollege);
-    setSettingClubs(false)
-  }, [selectedCollege])
+    setSettingClubs(false);
+  }, [selectedCollege]);
 
   // College selection modal state
   const [isCollegeModalOpen, setIsCollegeModalOpen] = useState(false);
@@ -91,29 +95,29 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Image upload handler
-// Image upload handler
-const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (e.target.files) {
-    const filesArray = Array.from(e.target.files);
-    if (images.length + filesArray.length > 1) {
-      alert('You can only upload 1 image');
-      return;
-    }
-    
-    setImages((prevImages) => [...prevImages, ...filesArray]);
+  // Image upload handler
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      if (images.length + filesArray.length > 1) {
+        alert('You can only upload 1 image');
+        return;
+      }
 
-    // Create preview URLs for new images
-    const newPreviewUrls = filesArray.map((file) =>
-      URL.createObjectURL(file)
-    );
-    setPreviewUrls((prevUrls) => [...prevUrls, ...newPreviewUrls]);
+      setImages((prevImages) => [...prevImages, ...filesArray]);
+
+      // Create preview URLs for new images
+      const newPreviewUrls = filesArray.map((file) =>
+        URL.createObjectURL(file)
+      );
+      setPreviewUrls((prevUrls) => [...prevUrls, ...newPreviewUrls]);
+    }
+  };
+
+  async function uploadImg(img: File) {
+    const link = await uploadImageToImageKit(await toBase64(img), img.name);
+    setImageLink(link);
   }
-};
-
-    async function uploadImg(img:File) {
-         const link =  await uploadImageToImageKit(await toBase64(img), img.name)
-         setImageLink(link);
-    }
 
   // Remove an image
   const removeImage = (index: number) => {
@@ -128,44 +132,44 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
   const handleSubmit = async () => {
     if (!postText.trim()) return;
 
-    if(images.length > 1) uploadImg(images[0]);
+    if (images.length > 1) uploadImg(images[0]);
 
     setIsSubmitting(true);
 
     const payload = {
-    title,
-    description : postText,
-    collegeName : selectedCollege,
-    clubName : selectedClub,
-    image: imageLink || '',  // since max 1 image
-  };
-  
-    const submit = await axios.post<{
-      msg : string,
-      id : string
-    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/create`, payload, {
-      headers : {
-        authorization : `Bearer ${token}`
-      }
-    })
+      title,
+      description: postText,
+      collegeName: selectedCollege,
+      clubName: selectedClub,
+      image: imageLink || '', // since max 1 image
+    };
 
-    if(submit.status === 200 && submit.data.id) {
-      toast(`${submit.data.msg} & here is your post id : ${submit.data.id}`)
+    const submit = await axios.post<{
+      msg: string;
+      id: string;
+    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/create`, payload, {
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (submit.status === 200 && submit.data.id) {
+      toast(`${submit.data.msg} & here is your post id : ${submit.data.id}`);
     } else {
-      toast(submit.data.msg)
+      toast(submit.data.msg);
     }
 
-      setPostText('');
-      setSelectedClub('');
-      setSelectedCollege('');
-      setImages([]);
-      setPreviewUrls([]);
+    setPostText('');
+    setSelectedClub('');
+    setSelectedCollege('');
+    setImages([]);
+    setPreviewUrls([]);
   };
 
   // Filter colleges based on search
- const filteredColleges = collegesWithClubs.filter((college) =>
-  college.college.toLowerCase().includes(searchQuery.toLowerCase())
-);
+  const filteredColleges = collegesWithClubs.filter((college) =>
+    college.college.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Open college modal and focus search input
   const openCollegeModal = () => {
@@ -216,7 +220,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 
           {/* Modal Body */}
           <div className="p-4 max-h-[70vh] overflow-y-auto">
-
             <div className="mb-4">
               <Input
                 type="text"
@@ -332,23 +335,22 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                   disabled={!selectedCollege} // Disable if no college is selected
                 >
                   <option value="">Select a club</option>
-                    {selectedCollege && (
-                    settingClubs ? (
+                  {selectedCollege &&
+                    (settingClubs ? (
                       <option value="" disabled>
-                      Loading clubs...
+                        Loading clubs...
                       </option>
                     ) : clubs.length === 0 ? (
                       <option value="" disabled>
-                      No clubs associated
+                        No clubs associated
                       </option>
                     ) : (
                       clubs.map((clubName) => (
-                      <option key={clubName} value={clubName}>
-                        {clubName}
-                      </option>
+                        <option key={clubName} value={clubName}>
+                          {clubName}
+                        </option>
                       ))
-                    )
-                    )}
+                    ))}
                 </select>
               </div>
             </div>
@@ -410,13 +412,17 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               <div className="max-h-72 overflow-y-auto pr-1">
                 {filteredColleges.length > 0 ? (
                   <ul className="space-y-1">
-                    {filteredColleges.map((collegeWithClubs, ) => (
+                    {filteredColleges.map((collegeWithClubs) => (
                       <li key={collegeWithClubs.college}>
                         <Button
-                          onClick={() => selectCollege(collegeWithClubs.college)}
+                          onClick={() =>
+                            selectCollege(collegeWithClubs.college)
+                          }
                           className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors flex items-center"
                         >
-                          <span className="line-clamp-1">{collegeWithClubs.college}</span>
+                          <span className="line-clamp-1">
+                            {collegeWithClubs.college}
+                          </span>
                         </Button>
                       </li>
                     ))}

@@ -1,4 +1,4 @@
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import { Tablist } from '@/components/Tablist';
 import { EventLayoutProps } from '@/types/global-Interface';
 

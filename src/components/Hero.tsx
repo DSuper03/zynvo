@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import WrapButton from './ui/wrap-button';
 import Link from 'next/link';
 import HeroVideoDialog from './magicui/hero-video-dialog';
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 
 const Hero = () => {
   const heroRef = useRef(null);
@@ -43,7 +43,9 @@ const Hero = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-tight text-white"
           >
-            <span className="block">Surf, <span className="text-yellow-400">Connect,</span></span>
+            <span className="block">
+              Surf, <span className="text-yellow-400">Connect,</span>
+            </span>
             <span className="block">Explore</span>
           </motion.h1>
 
@@ -94,15 +96,22 @@ const Hero = () => {
         >
           {/* Animated floating elements - Responsive positioning */}
           <div className="absolute top-1/4 right-4 sm:right-10 w-16 h-16 sm:w-32 sm:h-32 bg-yellow-500/20 rounded-full blur-xl sm:blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/3 right-8 sm:right-20 w-12 h-12 sm:w-24 sm:h-24 bg-yellow-400/30 rounded-full blur-lg sm:blur-2xl animate-bounce" style={{animationDuration: '3s'}}></div>
+          <div
+            className="absolute bottom-1/3 right-8 sm:right-20 w-12 h-12 sm:w-24 sm:h-24 bg-yellow-400/30 rounded-full blur-lg sm:blur-2xl animate-bounce"
+            style={{ animationDuration: '3s' }}
+          ></div>
           <div className="absolute top-1/2 left-4 sm:left-10 w-8 h-8 sm:w-16 sm:h-16 bg-white/10 rounded-full blur-md sm:blur-xl"></div>
-          
+
           {/* Subtle grid pattern overlay - Hidden on very small screens */}
           <div className="absolute inset-0 opacity-5 hidden sm:block">
-            <div className="w-full h-full" style={{
-              backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-              backgroundSize: '50px 50px'
-            }}></div>
+            <div
+              className="w-full h-full"
+              style={{
+                backgroundImage:
+                  'radial-gradient(circle, white 1px, transparent 1px)',
+                backgroundSize: '50px 50px',
+              }}
+            ></div>
           </div>
         </motion.div>
       </div>

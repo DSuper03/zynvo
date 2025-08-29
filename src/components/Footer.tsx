@@ -1,17 +1,16 @@
 import React from 'react';
 
-import { 
-  Facebook, 
-  Twitter, 
-  Instagram, 
-  Linkedin, 
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
   Github,
   Mail,
   MapPin,
   ArrowRight,
-  Heart
+  Heart,
 } from 'lucide-react';
-
 
 function Footer() {
   const productLinks = [
@@ -21,7 +20,7 @@ function Footer() {
     'Club Directory',
     'Member Portal',
     'Analytics Dashboard',
-    'Mobile App'
+    'Mobile App',
   ];
 
   const resourceLinks = [
@@ -29,15 +28,16 @@ function Footer() {
     'Community Forum',
     'Video Tutorials',
     'Best Practices',
-    'Success Stories'
+    'Success Stories',
   ];
 
   const socialLinks = [
-   
-    { icon: <Twitter className="h-5 w-5" />, href: "https://x.com/Zynvonow" },
+    { icon: <Twitter className="size-5" />, href: 'https://x.com/Zynvonow' },
 
-    { icon: <Linkedin className="h-5 w-5" />, href: "https://www.linkedin.com/company/dsuper03" },
-   
+    {
+      icon: <Linkedin className="size-5" />,
+      href: 'https://www.linkedin.com/company/dsuper03',
+    },
   ];
 
   return (
@@ -47,7 +47,7 @@ function Footer() {
         <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-transparent"></div>
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(234,179,8,0.1),transparent_60%)]"></div>
       </div>
-      
+
       <div className="relative z-10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -58,7 +58,9 @@ function Footer() {
                   Zynvo
                 </h3>
                 <p className="mt-4 text-gray-400 text-base leading-relaxed">
-                  Empowering college students to connect, collaborate, and create lasting memories through dynamic club and society experiences.
+                  Empowering college students to connect, collaborate, and
+                  create lasting memories through dynamic club and society
+                  experiences.
                 </p>
                 <div className="mt-4 space-y-2 text-sm text-gray-400">
                   <div className="flex items-center space-x-2">
@@ -72,9 +74,12 @@ function Footer() {
                 </div>
               </div>
               <div className="bg-gray-800/70 rounded-xl p-6 border border-yellow-500/20">
-                <h4 className="text-xl font-semibold text-yellow-400">Stay Updated</h4>
+                <h4 className="text-xl font-semibold text-yellow-400">
+                  Stay Updated
+                </h4>
                 <p className="mt-2 text-gray-400 text-sm">
-                  Get the latest updates on events, clubs, and campus activities.
+                  Get the latest updates on events, clubs, and campus
+                  activities.
                 </p>
                 <div className="mt-4 flex flex-col sm:flex-row gap-3">
                   <input
@@ -88,20 +93,14 @@ function Footer() {
                 </div>
               </div>
             </div>
+
             
-            {/* Product Links */}
             <div className="space-y-6">
-         
-              
-              {/* SpinningText - Now properly placed and centered */}
               <div className="mt-8 flex items-center justify-center">
-                <div className="transform scale-75 sm:scale-90 md:scale-100">
-               
-                </div>
+                <div className="transform scale-75 sm:scale-90 md:scale-100"></div>
               </div>
             </div>
 
-            {/* Resources & Social */}
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold text-yellow-400 border-b border-yellow-500/30 pb-2">
@@ -122,7 +121,9 @@ function Footer() {
                 </ul>
               </div>
               <div className="mt-6">
-                <h4 className="text-lg font-medium text-yellow-400 mb-4">Connect With Us</h4>
+                <h4 className="text-lg font-medium text-yellow-400 mb-4">
+                  Connect With Us
+                </h4>
                 <div className="flex space-x-4">
                   {socialLinks.map((social, index) => (
                     <a
@@ -145,9 +146,15 @@ function Footer() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between text-sm text-gray-400">
             <p>© 2025 Zynvo. All rights reserved.</p>
             <div className="mt-2 sm:mt-0 flex space-x-4">
-              <a href="#" className="hover:text-yellow-400 transition">Privacy Policy</a>
-              <a href="#" className="hover:text-yellow-400 transition">Terms of Service</a>
-              <a href="#" className="hover:text-yellow-400 transition">Cookie Policy</a>
+              <a href="#" className="hover:text-yellow-400 transition">
+                Privacy Policy
+              </a>
+              <a href="#" className="hover:text-yellow-400 transition">
+                Terms of Service
+              </a>
+              <a href="#" className="hover:text-yellow-400 transition">
+                Cookie Policy
+              </a>
             </div>
           </div>
         </div>
@@ -164,4 +171,3 @@ function Footer() {
 }
 
 export default Footer;
-
