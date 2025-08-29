@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from 'next/image';
 
 type EventBadgeProps = {
   eventName: string;
@@ -25,8 +25,8 @@ const EventBadgeCard: React.FC<EventBadgeProps> = ({
   style = {},
 }) => {
   const {
-    backgroundColor = "black",
-    textColor = "white",
+    backgroundColor = 'black',
+    textColor = 'white',
     backgroundImage,
     overlayOpacity = 0.7,
   } = style;
@@ -52,8 +52,8 @@ const EventBadgeCard: React.FC<EventBadgeProps> = ({
             backgroundImage: backgroundImage
               ? `url(${backgroundImage})`
               : undefined,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             color: textColor,
           }}
         >

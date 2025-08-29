@@ -1,6 +1,14 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Calendar, BarChart2, User, X, BellDotIcon, Menu, School } from 'lucide-react';
+import {
+  Calendar,
+  BarChart2,
+  User,
+  X,
+  BellDotIcon,
+  Menu,
+  School,
+} from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -12,7 +20,7 @@ import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@/components/ui/hover-card"
+} from '@/components/ui/hover-card';
 import CollegeSearchSelect from '@/components/colleges/collegeSelect';
 import { FaSchool } from 'react-icons/fa';
 
@@ -36,9 +44,9 @@ export interface UserData {
   course: string;
   createdAt: Date;
   collegeName: string | null;
-  twitter : string | null;
-  instagram : string | null;
-  linkedin : string | null;
+  twitter: string | null;
+  instagram: string | null;
+  linkedin: string | null;
 }
 export interface ApiResponse {
   user: {
@@ -54,9 +62,9 @@ export interface ApiResponse {
     clubName: string | null;
     collegeName: string | null;
     profileAvatar: string;
-    twitter : string | null;
-  instagram : string | null;
-  linkedin : string | null;
+    twitter: string | null;
+    instagram: string | null;
+    linkedin: string | null;
     eventAttended: {
       event: {
         id: string;
@@ -74,18 +82,26 @@ export interface ApiResponse {
 // Add these new components and styles to your dashboard
 
 // LEGO-like Skills Component
-const LegoSkillBlock = ({ skill, index, onClick }: { skill: string, index: number, onClick: () => void }) => {
+const LegoSkillBlock = ({
+  skill,
+  index,
+  onClick,
+}: {
+  skill: string;
+  index: number;
+  onClick: () => void;
+}) => {
   const colors = [
     'bg-red-500 hover:bg-red-400',
-    'bg-blue-500 hover:bg-blue-400', 
+    'bg-blue-500 hover:bg-blue-400',
     'bg-green-500 hover:bg-green-400',
     'bg-yellow-500 hover:bg-yellow-400',
     'bg-purple-500 hover:bg-purple-400',
     'bg-pink-500 hover:bg-pink-400',
     'bg-indigo-500 hover:bg-indigo-400',
-    'bg-teal-500 hover:bg-teal-400'
+    'bg-teal-500 hover:bg-teal-400',
   ];
-  
+
   return (
     <div
       onClick={onClick}
@@ -99,7 +115,7 @@ const LegoSkillBlock = ({ skill, index, onClick }: { skill: string, index: numbe
     >
       <span className="relative z-10">{skill}</span>
       <div className="absolute inset-0 rounded-lg border-2   duration-300" />
-      
+
       {/* LEGO studs effect - hide on mobile */}
       <div className="hidden sm:flex absolute top-0 left-0 right-0 justify-center space-x-1 p-1">
         <div className="w-2 h-2 bg-white/20 rounded-full group-hover:bg-white/40 transition-all duration-300" />
@@ -110,28 +126,42 @@ const LegoSkillBlock = ({ skill, index, onClick }: { skill: string, index: numbe
 };
 
 // High-Five Button Component
-const HighFiveButton = ({ postId, isHighFived, onHighFive }: { postId: string, isHighFived: boolean, onHighFive: (id: string) => void }) => {
+const HighFiveButton = ({
+  postId,
+  isHighFived,
+  onHighFive,
+}: {
+  postId: string;
+  isHighFived: boolean;
+  onHighFive: (id: string) => void;
+}) => {
   return (
-    <Button 
+    <Button
       onClick={() => onHighFive(postId)}
       className={`
         flex items-center space-x-2 transition-all duration-300 transform
-        ${isHighFived 
-          ? 'text-yellow-400 scale-110' 
-          : 'text-gray-400 hover:text-yellow-400 hover:scale-105'
+        ${
+          isHighFived
+            ? 'text-yellow-400 scale-110'
+            : 'text-gray-400 hover:text-yellow-400 hover:scale-105'
         }
         group relative
       `}
     >
       <div className="relative">
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
           className={`h-5 w-5 transition-all duration-300 ${isHighFived ? 'animate-bounce' : 'group-hover:rotate-12'}`}
-          fill={isHighFived ? 'currentColor' : 'none'} 
-          viewBox="0 0 24 24" 
+          fill={isHighFived ? 'currentColor' : 'none'}
+          viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5T6.5 15a2 2 0 104 0m-3-2.5v-3a2 2 0 114 0v3M14 13.5V11m0-1V7.5" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5T6.5 15a2 2 0 104 0m-3-2.5v-3a2 2 0 114 0v3M14 13.5V11m0-1V7.5"
+          />
         </svg>
         {isHighFived && (
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping" />
@@ -140,7 +170,7 @@ const HighFiveButton = ({ postId, isHighFived, onHighFive }: { postId: string, i
       <span className="text-xs font-medium">
         {isHighFived ? 'High-Fived!' : 'High-Five'}
       </span>
-      
+
       {/* Sparkle effect on hover */}
       <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
@@ -150,14 +180,24 @@ const HighFiveButton = ({ postId, isHighFived, onHighFive }: { postId: string, i
 };
 
 // Skills Modal Component
-const SkillsModal = ({ skill, isOpen, onClose }: { skill: string, isOpen: boolean, onClose: () => void }) => {
+const SkillsModal = ({
+  skill,
+  isOpen,
+  onClose,
+}: {
+  skill: string;
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
   if (!isOpen) return null;
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-md mx-4">
         <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-700">
-          <h2 className="text-lg sm:text-xl font-bold text-white">Communities for "{skill}"</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-white">
+            Communities for "{skill}"
+          </h2>
           <Button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
@@ -165,37 +205,49 @@ const SkillsModal = ({ skill, isOpen, onClose }: { skill: string, isOpen: boolea
             <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </Button>
         </div>
-        
+
         <div className="p-4 sm:p-6">
           <div className="space-y-3 sm:space-y-4">
             <div className="bg-gray-800 p-3 sm:p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors">
-              <h3 className="font-bold text-white text-sm sm:text-base">{skill} Club</h3>
-              <p className="text-gray-400 text-xs sm:text-sm">Join fellow {skill} enthusiasts</p>
+              <h3 className="font-bold text-white text-sm sm:text-base">
+                {skill} Club
+              </h3>
+              <p className="text-gray-400 text-xs sm:text-sm">
+                Join fellow {skill} enthusiasts
+              </p>
               <div className="flex items-center mt-2 text-xs text-yellow-400">
                 <User className="w-3 h-3 mr-1" />
                 <span>142 members</span>
               </div>
             </div>
-            
+
             <div className="bg-gray-800 p-3 sm:p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors">
-              <h3 className="font-bold text-white text-sm sm:text-base">{skill} Study Group</h3>
-              <p className="text-gray-400 text-xs sm:text-sm">Collaborate and learn together</p>
+              <h3 className="font-bold text-white text-sm sm:text-base">
+                {skill} Study Group
+              </h3>
+              <p className="text-gray-400 text-xs sm:text-sm">
+                Collaborate and learn together
+              </p>
               <div className="flex items-center mt-2 text-xs text-yellow-400">
                 <User className="w-3 h-3 mr-1" />
                 <span>89 members</span>
               </div>
             </div>
-            
+
             <div className="bg-gray-800 p-3 sm:p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors">
-              <h3 className="font-bold text-white text-sm sm:text-base">Upcoming {skill} Workshop</h3>
-              <p className="text-gray-400 text-xs sm:text-sm">Hands-on session this Friday</p>
+              <h3 className="font-bold text-white text-sm sm:text-base">
+                Upcoming {skill} Workshop
+              </h3>
+              <p className="text-gray-400 text-xs sm:text-sm">
+                Hands-on session this Friday
+              </p>
               <div className="flex items-center mt-2 text-xs text-yellow-400">
                 <Calendar className="w-3 h-3 mr-1" />
                 <span>This Friday 3PM</span>
               </div>
             </div>
           </div>
-          
+
           <Button
             onClick={onClose}
             className="w-full mt-4 sm:mt-6 bg-yellow-400 text-gray-900 py-2 rounded-lg font-medium hover:bg-yellow-500 transition-colors text-sm sm:text-base"
@@ -209,88 +261,191 @@ const SkillsModal = ({ skill, isOpen, onClose }: { skill: string, isOpen: boolea
 };
 
 // Update the TagSelector component to fix the missing props
-const TagSelector = ({ 
-  selectedTags, 
+const TagSelector = ({
+  selectedTags,
   onTagsChange,
   profileForm,
-  handleProfileFormChange
-}: { 
-  selectedTags: string[], 
-  onTagsChange: (tags: string[]) => void,
-  profileForm: { tags: string },
-  handleProfileFormChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleProfileFormChange,
+}: {
+  selectedTags: string[];
+  onTagsChange: (tags: string[]) => void;
+  profileForm: { tags: string };
+  handleProfileFormChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   // Add the missing useState for searchTerm and showAll
   const [searchTerm, setSearchTerm] = useState('');
   const [showAll, setShowAll] = useState(false);
 
   const predefinedTags = [
-  // 🔥 Campus & Personality Vibes
-  'Maths-Champ 📐', 'CR 📝', 'Heroine 💅', 'Yapper 🎤', 'Kanyakumari 🌊',
-  'MuscleMommy 💪👩', 'OverAchiever 🏆', 'Natkhat 😏', 'Pookie 🐻', 
-  'Senorita 💃', 'Rust-Coder 🦀', 'Mini-CR 👶📝', 'Cutiepie 🌸', 
-  '9Gpa 📊🤓', 'Back Nhi Aii 🫡', 'LFG 🚀', 'Certified Rizzler 😎✨',
-  'Main Character 🎬', 'Lowkey Genius 🧠', 'Sleep Deprived 💤',
-  'Coffee Addict ☕🔥', 'Gym Rat 🐀🏋️', 'Anime Binger 🍥', 'Memer 😂📲',
-  'Delulu 😵‍💫', 'NPC 🕹️', 'Sigma 😤', 'Skibidi 🚽', 'Ohio Vibes 🌽',
-  'Broke but Happy 💸🙂', 'Canteen King 🍔👑', 'Hostel Survivor 🛏️',
-  
-  // 👨‍💻 Tech & Geek Energy
-  'AI 🤖', 'Web Dev 🌐', 'App Dev 📱', 'Backend Bro 💻', 'Frontend Girl ✨',
-  'Full Stack ⚡', 'DevOps ⚙️', 'Cloud ☁️', 'Docker 🐳', 'K8s 🚢',
-  'Bug Slayer 🐞🔪', 'Hackathon Addict ⏱️', 'LeetCode Grinder 🧩',
-  'CTF Player 🕵️', 'Open Source 🌍', 'Cybersecurity 🔒', 
-  'Robotics 🤖🔧', 'Blockchain ⛓️', 'Crypto Bro 📈', 'VR/AR 🥽',
-  
-  // 🎨 Creative & Artsy
-  'UI/UX ✏️', 'Aesthetic Queen 🌷', 'Figma Warrior 🎨', 'Canva Pro 🖼️',
-  'Photographer 📸', 'Video Editor ✂️🎞️', 'Digital Artist 🖌️',
-  'Animator 🕺', 'Content Creator 🎥', 'Reel Star 📱✨',
-  'Poet ✒️', 'Writer 📝', 'Podcaster 🎙️', 'Stand-up Comedian 🎭😂',
-  'Musician 🎶', 'Singer 🎤', 'Dancer 🕺', 'Theatre Kid 🎭', 'K-Pop Stan 💜',
-  
-  // 📚 Academics (but fun)
-  'Maths Nerd ➗', 'Physics Buff ⚛️', 'Bio Bae 🧬', 'Chem Geek ⚗️',
-  'Psych Major 🧠', 'Lawyer Loading ⚖️', 'Doctor Saap 🩺',
-  'Engg Survivor 🛠️', 'Eco Bro 📉', 'Political Junkie 🗳️',
-  
-  // 🏀 Sports & Fitness
-  'Football ⚽', 'Cricket 🏏', 'Hooper 🏀', 'Tennis 🎾', 
-  'Badminton 🏸', 'Runner 🏃', 'Cyclist 🚴', 'Yoga Girl 🧘',
-  'Boxer 🥊', 'Hiker 🏔️', 'Gym Rat 🐀', 'MMA Fighter 🐅',
-  
-  // 🌎 Languages (Spicy)
-  'English 🇬🇧', 'Hindi 🇮🇳', 'Spanish 🇪🇸', 'French 🥖', 
-  'Japanese 🍣', 'Korean 🇰🇷✨', 'Anime Subtitles Master 🈸',
-  'Multilingual Flex 🌍',
-  
-  // 🎮 Hobbies
-  'Gamer 🎮', 'Valorant Addict 🔫', 'BGMI Warrior 🪖', 'COD Mobile 🔥',
-  'Minecraft Builder ⛏️', 'Chess Nerd ♟️', 'Puzzle Solver 🧩',
-  'Netflix Binger 🍿', 'Manga Reader 📚', 'K-Drama Addict 💔',
-  'Fashion Icon 👗', 'Sneakerhead 👟', 'Pet Lover 🐾', 'Foodie 🍕',
-  'Traveller ✈️', 'Backpacker 🎒', 'Café Explorer ☕',
-  
-  // 🧑‍💼 Skills (with Gen-Z drip)
-  'Public Speaking 🎤', 'Leader 🫡', 'Team Player 🤝', 'Problem Solver 🔍',
-  'Networking Plug 🔗', 'Time Juggler ⏰', 'Critical Thinker 🤔',
-  'Research Wizard 🔮', 'Data Guy 📊', 'Excel Pro 📑',
-  
-  // 🌀 Misc Gen-Z Energy
-  'Manifesting ✨', 'Astro Girl 🔮', 'Vibe Curator 🎧', 'Zen Mode 🧘',
-  'Therapy Needed 🛋️', 'Mentally in Goa 🏝️', 'Future CEO 👔',
-  'Start-up Kid 🚀', 'Crypto is Life 📉📈', 'Side Hustler 💼',
-  'Based 🗿', 'No Cap 🧢', 'Bet 💯', 'Slay Queen 👑',
-];
+    // 🔥 Campus & Personality Vibes
+    'Maths-Champ 📐',
+    'CR 📝',
+    'Heroine 💅',
+    'Yapper 🎤',
+    'Kanyakumari 🌊',
+    'MuscleMommy 💪👩',
+    'OverAchiever 🏆',
+    'Natkhat 😏',
+    'Pookie 🐻',
+    'Senorita 💃',
+    'Rust-Coder 🦀',
+    'Mini-CR 👶📝',
+    'Cutiepie 🌸',
+    '9Gpa 📊🤓',
+    'Back Nhi Aii 🫡',
+    'LFG 🚀',
+    'Certified Rizzler 😎✨',
+    'Main Character 🎬',
+    'Lowkey Genius 🧠',
+    'Sleep Deprived 💤',
+    'Coffee Addict ☕🔥',
+    'Gym Rat 🐀🏋️',
+    'Anime Binger 🍥',
+    'Memer 😂📲',
+    'Delulu 😵‍💫',
+    'NPC 🕹️',
+    'Sigma 😤',
+    'Skibidi 🚽',
+    'Ohio Vibes 🌽',
+    'Broke but Happy 💸🙂',
+    'Canteen King 🍔👑',
+    'Hostel Survivor 🛏️',
+
+    // 👨‍💻 Tech & Geek Energy
+    'AI 🤖',
+    'Web Dev 🌐',
+    'App Dev 📱',
+    'Backend Bro 💻',
+    'Frontend Girl ✨',
+    'Full Stack ⚡',
+    'DevOps ⚙️',
+    'Cloud ☁️',
+    'Docker 🐳',
+    'K8s 🚢',
+    'Bug Slayer 🐞🔪',
+    'Hackathon Addict ⏱️',
+    'LeetCode Grinder 🧩',
+    'CTF Player 🕵️',
+    'Open Source 🌍',
+    'Cybersecurity 🔒',
+    'Robotics 🤖🔧',
+    'Blockchain ⛓️',
+    'Crypto Bro 📈',
+    'VR/AR 🥽',
+
+    // 🎨 Creative & Artsy
+    'UI/UX ✏️',
+    'Aesthetic Queen 🌷',
+    'Figma Warrior 🎨',
+    'Canva Pro 🖼️',
+    'Photographer 📸',
+    'Video Editor ✂️🎞️',
+    'Digital Artist 🖌️',
+    'Animator 🕺',
+    'Content Creator 🎥',
+    'Reel Star 📱✨',
+    'Poet ✒️',
+    'Writer 📝',
+    'Podcaster 🎙️',
+    'Stand-up Comedian 🎭😂',
+    'Musician 🎶',
+    'Singer 🎤',
+    'Dancer 🕺',
+    'Theatre Kid 🎭',
+    'K-Pop Stan 💜',
+
+    // 📚 Academics (but fun)
+    'Maths Nerd ➗',
+    'Physics Buff ⚛️',
+    'Bio Bae 🧬',
+    'Chem Geek ⚗️',
+    'Psych Major 🧠',
+    'Lawyer Loading ⚖️',
+    'Doctor Saap 🩺',
+    'Engg Survivor 🛠️',
+    'Eco Bro 📉',
+    'Political Junkie 🗳️',
+
+    // 🏀 Sports & Fitness
+    'Football ⚽',
+    'Cricket 🏏',
+    'Hooper 🏀',
+    'Tennis 🎾',
+    'Badminton 🏸',
+    'Runner 🏃',
+    'Cyclist 🚴',
+    'Yoga Girl 🧘',
+    'Boxer 🥊',
+    'Hiker 🏔️',
+    'Gym Rat 🐀',
+    'MMA Fighter 🐅',
+
+    // 🌎 Languages (Spicy)
+    'English 🇬🇧',
+    'Hindi 🇮🇳',
+    'Spanish 🇪🇸',
+    'French 🥖',
+    'Japanese 🍣',
+    'Korean 🇰🇷✨',
+    'Anime Subtitles Master 🈸',
+    'Multilingual Flex 🌍',
+
+    // 🎮 Hobbies
+    'Gamer 🎮',
+    'Valorant Addict 🔫',
+    'BGMI Warrior 🪖',
+    'COD Mobile 🔥',
+    'Minecraft Builder ⛏️',
+    'Chess Nerd ♟️',
+    'Puzzle Solver 🧩',
+    'Netflix Binger 🍿',
+    'Manga Reader 📚',
+    'K-Drama Addict 💔',
+    'Fashion Icon 👗',
+    'Sneakerhead 👟',
+    'Pet Lover 🐾',
+    'Foodie 🍕',
+    'Traveller ✈️',
+    'Backpacker 🎒',
+    'Café Explorer ☕',
+
+    // 🧑‍💼 Skills (with Gen-Z drip)
+    'Public Speaking 🎤',
+    'Leader 🫡',
+    'Team Player 🤝',
+    'Problem Solver 🔍',
+    'Networking Plug 🔗',
+    'Time Juggler ⏰',
+    'Critical Thinker 🤔',
+    'Research Wizard 🔮',
+    'Data Guy 📊',
+    'Excel Pro 📑',
+
+    // 🌀 Misc Gen-Z Energy
+    'Manifesting ✨',
+    'Astro Girl 🔮',
+    'Vibe Curator 🎧',
+    'Zen Mode 🧘',
+    'Therapy Needed 🛋️',
+    'Mentally in Goa 🏝️',
+    'Future CEO 👔',
+    'Start-up Kid 🚀',
+    'Crypto is Life 📉📈',
+    'Side Hustler 💼',
+    'Based 🗿',
+    'No Cap 🧢',
+    'Bet 💯',
+    'Slay Queen 👑',
+  ];
 
   const toggleTag = (tag: string) => {
     const updatedTags = selectedTags.includes(tag)
-      ? selectedTags.filter(t => t !== tag)
+      ? selectedTags.filter((t) => t !== tag)
       : [...selectedTags, tag];
     onTagsChange(updatedTags);
   };
 
-  const filteredTags = predefinedTags.filter(tag => 
+  const filteredTags = predefinedTags.filter((tag) =>
     tag.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -301,7 +456,7 @@ const TagSelector = ({
       <label className="block text-sm font-medium text-gray-300 mb-2">
         Skills & Interests
       </label>
-      
+
       {/* Search input */}
       <input
         type="text"
@@ -310,25 +465,26 @@ const TagSelector = ({
         onChange={(e) => setSearchTerm(e.target.value)}
         className="w-full px-3 py-2 mb-3 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm"
       />
-      
+
       {/* Selected tags count */}
       <div className="mb-3 text-xs text-gray-400">
         Selected: {selectedTags.length} tags
       </div>
-      
+
       {/* Tags grid */}
       <div className="max-h-60 overflow-y-auto bg-gray-800 rounded-lg p-3 border border-gray-700">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {displayTags.map(tag => (
+          {displayTags.map((tag) => (
             <Button
               key={tag}
               type="button"
               onClick={() => toggleTag(tag)}
               className={`
                 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
-                ${selectedTags.includes(tag)
-                  ? 'bg-yellow-400 text-gray-900 scale-105'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
+                ${
+                  selectedTags.includes(tag)
+                    ? 'bg-yellow-400 text-gray-900 scale-105'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
                 }
               `}
             >
@@ -336,7 +492,7 @@ const TagSelector = ({
             </Button>
           ))}
         </div>
-        
+
         {!showAll && filteredTags.length > 30 && (
           <Button
             type="button"
@@ -346,7 +502,7 @@ const TagSelector = ({
             Show {filteredTags.length - 30} more tags...
           </Button>
         )}
-        
+
         {showAll && (
           <Button
             type="button"
@@ -357,7 +513,7 @@ const TagSelector = ({
           </Button>
         )}
       </div>
-      
+
       {/* Manual input for custom tags */}
       <div className="mt-3">
         <input
@@ -380,8 +536,8 @@ export default function ZynvoDashboard() {
   const navigate = useRouter();
   // integration is not complete therefore used any
 
-  const [posts, setPosts] = useState<{id : string, description : string}[]>([])
-  const [id, setId] = useState<string>("")
+  const [posts, setPosts] = useState<{ id: string; description: string }[]>([]);
+  const [id, setId] = useState<string>('');
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -393,12 +549,14 @@ export default function ZynvoDashboard() {
     tags: '',
     collegeName: '',
   });
-  const [update, setUpdate] = useState<boolean>(false)
-   const [token, setToken] = useState("")
-   const [selectedSkill, setSelectedSkill] = useState<string>('');
-   const [showSkillsModal, setShowSkillsModal] = useState(false);
-   const [highFivedPosts, setHighFivedPosts] = useState<Set<string>>(new Set());
-   const [selectedPredefinedTags, setSelectedPredefinedTags] = useState<string[]>([]);
+  const [update, setUpdate] = useState<boolean>(false);
+  const [token, setToken] = useState('');
+  const [selectedSkill, setSelectedSkill] = useState<string>('');
+  const [showSkillsModal, setShowSkillsModal] = useState(false);
+  const [highFivedPosts, setHighFivedPosts] = useState<Set<string>>(new Set());
+  const [selectedPredefinedTags, setSelectedPredefinedTags] = useState<
+    string[]
+  >([]);
 
   // NEW: compact UI controls
   const [activePane, setActivePane] = useState<'posts' | 'events'>('posts');
@@ -406,31 +564,30 @@ export default function ZynvoDashboard() {
   const [viewAllEvents, setViewAllEvents] = useState(false);
   const [showAllProfileTags, setShowAllProfileTags] = useState(false);
 
-  useEffect(()=> {
-     if (typeof window !== 'undefined') {
-     const tok = localStorage.getItem("token")
-     if(tok) setToken(tok)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const tok = localStorage.getItem('token');
+      if (tok) setToken(tok);
       else {
-       toast("login please")
-       return;
+        toast('login please');
+        return;
       }
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
- 
   useEffect(() => {
     if (!isClient) return;
 
     const fetchUserData = async () => {
       setIsLoading(true);
       try {
-        if(!token) {
-        return;
-      }
+        if (!token) {
+          return;
+        }
 
         if (!token) {
           navigate.push('/auth/signup');
@@ -462,8 +619,8 @@ export default function ZynvoDashboard() {
               createdAt,
               collegeName,
               twitter,
-            instagram,
-            linkedin
+              instagram,
+              linkedin,
             } = response.data.user;
 
             const events =
@@ -483,16 +640,16 @@ export default function ZynvoDashboard() {
               tags,
               course,
               bio,
-              year, 
+              year,
               createdAt,
               collegeName,
               twitter,
-            instagram,
-            linkedin
+              instagram,
+              linkedin,
             });
-            setId(response.data.user.id)
-            setPosts(response.data.user.CreatePost)
-            setUpdate(false)
+            setId(response.data.user.id);
+            setPosts(response.data.user.CreatePost);
+            setUpdate(false);
             // Set form values with existing data
             setProfileForm({
               bio: bio || '',
@@ -501,17 +658,17 @@ export default function ZynvoDashboard() {
               tags: tags ? tags.join(', ') : '',
               collegeName: collegeName || '',
             });
-            
+
             // Set selected predefined tags
             setSelectedPredefinedTags(tags || []);
           } else {
-            alert("Error fetching in details")
-            navigate.push("/auth/signin")
+            alert('Error fetching in details');
+            navigate.push('/auth/signin');
           }
         } catch (error) {
           console.error('API Error:', error);
-            alert("Error fetching in details")
-            navigate.push("/auth/signin")
+          alert('Error fetching in details');
+          navigate.push('/auth/signin');
         }
       } catch (error) {
         console.error('Error:', error);
@@ -523,49 +680,52 @@ export default function ZynvoDashboard() {
     fetchUserData();
   }, [isClient, navigate, update]);
 
-  const handleProfileFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleProfileFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setProfileForm(prev => ({
+    setProfileForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleProfileFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(!token) {
-        toast("login please");
-        return;
+    if (!token) {
+      toast('login please');
+      return;
     }
-    
+
     // Combine predefined tags with manual tags
     const manualTags = profileForm.tags
       .split(',')
-      .map(tag => tag.trim())
-      .filter(tag => tag);
-    
+      .map((tag) => tag.trim())
+      .filter((tag) => tag);
+
     const allTags = [...new Set([...selectedPredefinedTags, ...manualTags])];
-    
+
     const data = {
       ...profileForm,
-      tags: allTags
+      tags: allTags,
     };
-    
+
     const update = await axios.put<{
-      msg : string
-    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/updateProfile`, 
-      data ,
+      msg: string;
+    }>(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/updateProfile`,
+      data,
       {
-        headers : {
-          authorization : `Bearer ${token}`
-        }
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
       }
     );
-    
-    if(update.status == 200) {
+
+    if (update.status == 200) {
       toast(update.data.msg);
     } else {
-      toast("Error on backend");
+      toast('Error on backend');
     }
     setShowProfileModal(false);
     setUpdate(true);
@@ -577,7 +737,7 @@ export default function ZynvoDashboard() {
   };
 
   const handleHighFive = (postId: string) => {
-    setHighFivedPosts(prev => {
+    setHighFivedPosts((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(postId)) {
         newSet.delete(postId);
@@ -590,7 +750,7 @@ export default function ZynvoDashboard() {
             background: '#FCD34D',
             color: '#1F2937',
             border: 'none',
-          }
+          },
         });
       }
       return newSet;
@@ -605,10 +765,8 @@ export default function ZynvoDashboard() {
     );
   }
 
-
   if (!userData) {
-
-    return null; 
+    return null;
   }
 
   return (
@@ -673,15 +831,21 @@ export default function ZynvoDashboard() {
               {/* Course / Year / College */}
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-5">
                 <p className="text-yellow-400 font-bold text-sm sm:text-base">
-                  Course: <span className="text-gray-300 font-normal">{userData.course || "complete profile"}</span>
+                  Course:{' '}
+                  <span className="text-gray-300 font-normal">
+                    {userData.course || 'complete profile'}
+                  </span>
                 </p>
                 <p className="text-yellow-400 font-bold text-sm sm:text-base">
-                  Year: <span className="text-gray-300 font-normal">{userData.year || "complete profile"}</span>
+                  Year:{' '}
+                  <span className="text-gray-300 font-normal">
+                    {userData.year || 'complete profile'}
+                  </span>
                 </p>
                 <div className="flex items-center bg-gray-800 text-gray-200 px-3 py-1 rounded-full text-xs sm:text-sm">
                   <FaSchool className="w-4 h-4 mr-2 text-yellow-400" />
                   <span className="truncate max-w-[220px] sm:max-w-none">
-                    {userData.collegeName || "College not set"}
+                    {userData.collegeName || 'College not set'}
                   </span>
                 </div>
               </div>
@@ -690,7 +854,9 @@ export default function ZynvoDashboard() {
               <div className="mb-4">
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {(userData.tags && userData.tags.length > 0
-                    ? (showAllProfileTags ? userData.tags : userData.tags.slice(0, 8))
+                    ? showAllProfileTags
+                      ? userData.tags
+                      : userData.tags.slice(0, 8)
                     : []
                   ).map((tag, idx) => (
                     <LegoSkillBlock
@@ -709,9 +875,11 @@ export default function ZynvoDashboard() {
                 {userData.tags && userData.tags.length > 8 && (
                   <button
                     className="mt-3 text-xs text-yellow-400 hover:text-yellow-300"
-                    onClick={() => setShowAllProfileTags(v => !v)}
+                    onClick={() => setShowAllProfileTags((v) => !v)}
                   >
-                    {showAllProfileTags ? 'Show less' : `Show ${userData.tags.length - 8} more`}
+                    {showAllProfileTags
+                      ? 'Show less'
+                      : `Show ${userData.tags.length - 8} more`}
                   </button>
                 )}
               </div>
@@ -721,7 +889,13 @@ export default function ZynvoDashboard() {
                 <div className="flex items-center">
                   <User className="w-4 h-4 mr-1 text-yellow-400" />
                   <span>
-                    Joined {userData.createdAt ? new Date(userData.createdAt).toLocaleString('default', { month: 'short', year: 'numeric' }) : '—'}
+                    Joined{' '}
+                    {userData.createdAt
+                      ? new Date(userData.createdAt).toLocaleString('default', {
+                          month: 'short',
+                          year: 'numeric',
+                        })
+                      : '—'}
                   </span>
                 </div>
                 <div className="flex items-center">
@@ -743,7 +917,9 @@ export default function ZynvoDashboard() {
             <button
               onClick={() => setActivePane('posts')}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
-                activePane === 'posts' ? 'bg-yellow-500 text-black' : 'text-gray-300 hover:text-white'
+                activePane === 'posts'
+                  ? 'bg-yellow-500 text-black'
+                  : 'text-gray-300 hover:text-white'
               }`}
             >
               Posts
@@ -751,7 +927,9 @@ export default function ZynvoDashboard() {
             <button
               onClick={() => setActivePane('events')}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
-                activePane === 'events' ? 'bg-yellow-500 text-black' : 'text-gray-300 hover:text-white'
+                activePane === 'events'
+                  ? 'bg-yellow-500 text-black'
+                  : 'text-gray-300 hover:text-white'
               }`}
             >
               Events
@@ -768,57 +946,78 @@ export default function ZynvoDashboard() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white">Your Posts</h3>
-                <p className="text-xl font-bold text-yellow-400">Total: {posts?.length || 0}</p>
+                <p className="text-xl font-bold text-yellow-400">
+                  Total: {posts?.length || 0}
+                </p>
               </div>
             </div>
 
             {posts && posts.length > 0 ? (
               <ul className="space-y-2">
-                {(viewAllPosts ? posts : posts.slice(0, 5)).map((post, index) => (
-                  <li key={post.id} className="py-2">
-                    <HoverCard>
-                      <HoverCardTrigger asChild>
-                        <div className="cursor-pointer hover:bg-gray-800 rounded-lg p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
-                          <div className="flex justify-between items-center">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-yellow-400 text-xs font-medium">#{index + 1}</span>
-                                <Badge variant="secondary" className="text-xs">Recent</Badge>
+                {(viewAllPosts ? posts : posts.slice(0, 5)).map(
+                  (post, index) => (
+                    <li key={post.id} className="py-2">
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <div className="cursor-pointer hover:bg-gray-800 rounded-lg p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
+                            <div className="flex justify-between items-center">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-yellow-400 text-xs font-medium">
+                                    #{index + 1}
+                                  </span>
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    Recent
+                                  </Badge>
+                                </div>
+                                <h4 className="text-gray-200 font-medium text-sm truncate">
+                                  {post.description?.length > 60
+                                    ? post.description.slice(0, 60) + '...'
+                                    : post.description || 'Untitled Post'}
+                                </h4>
                               </div>
-                              <h4 className="text-gray-200 font-medium text-sm truncate">
-                                {post.description?.length > 60 ? post.description.slice(0, 60) + '...' : post.description || 'Untitled Post'}
+                              <div className="ml-2 text-gray-500 text-xs">
+                                Hover →
+                              </div>
+                            </div>
+                          </div>
+                        </HoverCardTrigger>
+                        <HoverCardContent
+                          className="w-80 bg-gray-800 border-gray-700"
+                          side="right"
+                        >
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-sm font-semibold text-white">
+                                Post #{index + 1}
                               </h4>
                             </div>
-                            <div className="ml-2 text-gray-500 text-xs">Hover →</div>
-                          </div>
-                        </div>
-                      </HoverCardTrigger>
-                      <HoverCardContent className="w-80 bg-gray-800 border-gray-700" side="right">
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-semibold text-white">Post #{index + 1}</h4>
-                          </div>
-                          <div className="space-y-2">
-                            <p className="text-sm text-gray-300 leading-relaxed">
-                              {post.description || 'No description available for this post.'}
-                            </p>
-                          </div>
-                          <div className="flex items-center justify-between pt-2 border-t border-gray-700">
-                            <div className="flex items-center gap-2 text-xs text-gray-400">
-                              <Calendar className="w-3 h-3" />
-                              <span>{post.description}</span>
+                            <div className="space-y-2">
+                              <p className="text-sm text-gray-300 leading-relaxed">
+                                {post.description ||
+                                  'No description available for this post.'}
+                              </p>
                             </div>
-                            <HighFiveButton
-                              postId={post.id}
-                              isHighFived={highFivedPosts.has(post.id)}
-                              onHighFive={handleHighFive}
-                            />
+                            <div className="flex items-center justify-between pt-2 border-t border-gray-700">
+                              <div className="flex items-center gap-2 text-xs text-gray-400">
+                                <Calendar className="w-3 h-3" />
+                                <span>{post.description}</span>
+                              </div>
+                              <HighFiveButton
+                                postId={post.id}
+                                isHighFived={highFivedPosts.has(post.id)}
+                                onHighFive={handleHighFive}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      </HoverCardContent>
-                    </HoverCard>
-                  </li>
-                ))}
+                        </HoverCardContent>
+                      </HoverCard>
+                    </li>
+                  )
+                )}
               </ul>
             ) : (
               <div className="text-center py-6">
@@ -832,7 +1031,7 @@ export default function ZynvoDashboard() {
               <div className="mt-4 flex justify-center">
                 <Button
                   className="bg-white/10 hover:bg-white/15 text-gray-200"
-                  onClick={() => setViewAllPosts(v => !v)}
+                  onClick={() => setViewAllPosts((v) => !v)}
                 >
                   {viewAllPosts ? 'View less' : `View all (${posts.length})`}
                 </Button>
@@ -849,24 +1048,39 @@ export default function ZynvoDashboard() {
                 <Calendar className="w-5 h-5 text-gray-900" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Events Attended</h3>
-                <p className="text-xl font-bold text-yellow-400">Total: {userData.events?.length || 0}</p>
+                <h3 className="text-lg font-bold text-white">
+                  Events Attended
+                </h3>
+                <p className="text-xl font-bold text-yellow-400">
+                  Total: {userData.events?.length || 0}
+                </p>
               </div>
             </div>
 
             {userData.events && userData.events.length > 0 ? (
               <ul className="space-y-2">
-                {(viewAllEvents ? userData.events : userData.events.slice(0, 5)).map((event, index) => (
+                {(viewAllEvents
+                  ? userData.events
+                  : userData.events.slice(0, 5)
+                ).map((event, index) => (
                   <li key={event.id} className="py-2">
                     <div className="hover:bg-gray-800 rounded-lg p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-yellow-400 text-xs font-medium">#{index + 1}</span>
-                            <Badge variant="secondary" className="text-xs">Attended</Badge>
+                            <span className="text-yellow-400 text-xs font-medium">
+                              #{index + 1}
+                            </span>
+                            <Badge variant="secondary" className="text-xs">
+                              Attended
+                            </Badge>
                           </div>
-                          <h4 className="text-gray-200 font-medium text-sm truncate">{event.EventName}</h4>
-                          <p className="text-xs text-gray-400 mt-1">{new Date(event.startDate).toLocaleDateString()}</p>
+                          <h4 className="text-gray-200 font-medium text-sm truncate">
+                            {event.EventName}
+                          </h4>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {new Date(event.startDate).toLocaleDateString()}
+                          </p>
                         </div>
                         <div className="ml-2">
                           <Calendar className="w-4 h-4 text-yellow-400" />
@@ -888,9 +1102,11 @@ export default function ZynvoDashboard() {
               <div className="mt-4 flex justify-center">
                 <Button
                   className="bg-white/10 hover:bg-white/15 text-gray-200"
-                  onClick={() => setViewAllEvents(v => !v)}
+                  onClick={() => setViewAllEvents((v) => !v)}
                 >
-                  {viewAllEvents ? 'View less' : `View all (${userData.events.length})`}
+                  {viewAllEvents
+                    ? 'View less'
+                    : `View all (${userData.events.length})`}
                 </Button>
               </div>
             )}
@@ -903,7 +1119,9 @@ export default function ZynvoDashboard() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4">
             <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-700">
-              <h2 className="text-lg sm:text-xl font-bold text-white">Complete Your Profile</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-white">
+                Complete Your Profile
+              </h2>
               <Button
                 onClick={() => setShowProfileModal(false)}
                 className="text-gray-400 hover:text-white transition-colors"
@@ -911,7 +1129,7 @@ export default function ZynvoDashboard() {
                 <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </Button>
             </div>
-            
+
             <form onSubmit={handleProfileFormSubmit} className="p-4 sm:p-6">
               <div className="mb-4 sm:mb-6">
                 <label className="block text-sm font-medium text-gray-300 mb-2">

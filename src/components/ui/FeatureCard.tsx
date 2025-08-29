@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { features } from '@/constants/Features';
@@ -59,8 +59,13 @@ const PrimaryCard: React.FC<FeatureCardProps> = ({
   <CardBase className={`bg-gradient-to-br ${accentColor}`} height={height}>
     {background && (
       <div className="absolute inset-0 opacity-20">
-        <Image src={background} alt="" width={1920} height={1080}
-         className="object-cover" />
+        <Image
+          src={background}
+          alt=""
+          width={1920}
+          height={1080}
+          className="object-cover"
+        />
       </div>
     )}
     <CardContent className="z-10 relative">

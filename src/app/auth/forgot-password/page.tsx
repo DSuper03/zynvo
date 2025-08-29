@@ -1,4 +1,3 @@
-
 import { NextPage } from 'next';
 
 const ForgotPasswordPage: NextPage = () => {
@@ -8,7 +7,10 @@ const ForgotPasswordPage: NextPage = () => {
         <h1 className="text-2xl font-bold text-center">Forgot Password</h1>
         <form className="space-y-6">
           <div>
-            <label htmlFor="email" className="text-sm font-medium text-gray-300">
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-gray-300"
+            >
               Email address
             </label>
             <input

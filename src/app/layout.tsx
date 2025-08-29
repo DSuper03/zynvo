@@ -18,8 +18,57 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'Zynvo',
-  description: 'Build. Connect. Compete',
+  title: 'Zynvo - Agentic Social Media Platform for Campus Communities | Student Network',
+  description: 'Zynvo is the leading agentic social media platform connecting college students, clubs, and societies. Discover events, join communities, compete in challenges, and build meaningful campus connections through AI-powered networking.',
+  keywords: [
+    'agentic social media platform',
+    'college social network',
+    'campus community platform',
+    'student networking app',
+    'university clubs platform',
+    'college events discovery',
+    'AI-powered student connections',
+    'campus social media',
+    'student engagement platform',
+    'college societies network',
+    'academic social platform',
+    'intelligent campus networking'
+  ].join(', '),
+  authors: [{ name: 'Zynvo Team' }],
+  creator: 'Zynvo',
+  publisher: 'Zynvo',
+  robots: 'index, follow',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://zynvo.com',
+    siteName: 'Zynvo',
+    title: 'Zynvo - Agentic Social Media Platform for Campus Communities',
+    description: 'The intelligent social platform revolutionizing how college students connect, discover events, join clubs, and build meaningful campus relationships through AI-powered networking.',
+    images: [
+      {
+        url: '/landing page.png',
+        width: 1200,
+        height: 630,
+        alt: 'Zynvo - Agentic Social Media Platform for Students',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@zynvo',
+    creator: '@zynvo',
+    title: 'Zynvo - Agentic Social Media Platform for Campus Communities',
+    description: 'Join the intelligent social platform connecting college students, clubs, and societies. Discover events, build networks, and compete in challenges.',
+    images: ['/landing page.png'],
+  },
+  category: 'Social Media',
+  classification: 'Agentic Social Media Platform',
+  verification: {
+    google: 'your-google-verification-code',
+    yandex: 'your-yandex-verification-code',
+    yahoo: 'your-yahoo-verification-code',
+  },
 };
 
 export default function RootLayout({
@@ -32,9 +81,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <WarmupProvider>
-          {children}
-        </WarmupProvider>
+        <WarmupProvider>{children}</WarmupProvider>
         <Analytics />
         <SpeedInsights />
         <Toaster />

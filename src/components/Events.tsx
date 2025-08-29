@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import Link from 'next/link';
 import WrapButton from './ui/wrap-button';
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import { Button } from './ui/button';
 
 const Events = () => {
@@ -132,16 +132,17 @@ const Events = () => {
                       {event.attendees} attending
                     </span>
                     <Button className="text-yellow-400 text-sm font-medium hover:text-yellow-300 hover:underline">
-                      <Link href={`/events/${event.title.toLowerCase().replace(/\s+/g, '-')}`}>
+                      <Link
+                        href={`/events/${event.title.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
                         View Details
-                      </Link> 
+                      </Link>
                     </Button>
                   </div>
                 </div>
               </motion.div>
             ))}
           </div>
-
         </div>
       </section>
     </div>

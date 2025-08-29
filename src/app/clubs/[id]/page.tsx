@@ -3,7 +3,7 @@
 //need to add a leave club button
 
 import React, { useState, useEffect } from 'react';
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import Link from 'next/link';
 import {
   CalendarDays,
@@ -84,22 +84,22 @@ export default function ClubPage({}: ClubPageProps) {
   });
   const [event, setEvent] = useState<EventType[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
-  const [token, setToken] = useState("")
+  const [token, setToken] = useState('');
 
-  useEffect(()=> {
-     if (typeof window !== 'undefined') {
-     const tok = localStorage.getItem("token")
-     if(tok) setToken(tok)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const tok = localStorage.getItem('token');
+      if (tok) setToken(tok);
       else {
-       toast("login please")
-       return;
+        toast('login please');
+        return;
       }
     }
-  }, [])
+  }, []);
   useEffect(() => {
     async function call() {
-      if(!token) {
-        toast("login please");
+      if (!token) {
+        toast('login please');
         return;
       }
       const response = await axios.get<Response>(
@@ -176,7 +176,6 @@ export default function ClubPage({}: ClubPageProps) {
             <Image
               src={club.image || '/default-club-image.jpg'}
               alt={club.name}
-              
               width={1000}
               height={500}
               className="object-cover"
@@ -192,7 +191,6 @@ export default function ClubPage({}: ClubPageProps) {
             <Image
               src={club.image || 'default-club-image.jpg'}
               alt={club.name}
-              
               width={128}
               height={128}
               className="object-cover"
@@ -417,7 +415,6 @@ export default function ClubPage({}: ClubPageProps) {
                       <Image
                         src={event.image || '/default-event-image.jpg'}
                         alt={event.title || 'Event Image'}
-                        
                         width={100}
                         height={100}
                         className="object-cover"

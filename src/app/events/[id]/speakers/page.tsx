@@ -8,14 +8,14 @@ import {
   FaMicrophone,
   FaGavel,
 } from 'react-icons/fa';
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
-import dotenv from "dotenv"
+import dotenv from 'dotenv';
 import { Button } from '@/components/ui/button';
 
-dotenv.config()
+dotenv.config();
 
 interface speakers {
   id: number;
@@ -34,7 +34,7 @@ interface speakerResponse {
 const Speakers = () => {
   const params = useParams();
   const id = params.id as string;
-  
+
   console.log('Route params:', params); // Debug log to see what's available
   console.log('Extracted ID:', id); // Debug log to verify ID extraction
 
@@ -64,7 +64,7 @@ const Speakers = () => {
     email: '',
     about: '',
     profilePic: '',
-    eventId: id || ''
+    eventId: id || '',
   });
 
   // Get token on client side only
@@ -78,7 +78,7 @@ const Speakers = () => {
   // Update eventId when id changes
   useEffect(() => {
     if (id) {
-      setNewSpeaker(prev => ({ ...prev, eventId: id }));
+      setNewSpeaker((prev) => ({ ...prev, eventId: id }));
     }
   }, [id]);
 
@@ -88,7 +88,7 @@ const Speakers = () => {
     async function fetchData() {
       try {
         setIsLoading(true);
-        
+
         // Fetch speakers
         const res = await axios.get<speakerResponse>(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/getSpeakers?id=${id}`,
@@ -109,9 +109,12 @@ const Speakers = () => {
           }
         );
 
-        if (checkFounder.status === 200 && checkFounder.data.msg === "identified") {
+        if (
+          checkFounder.status === 200 &&
+          checkFounder.data.msg === 'identified'
+        ) {
           setFounder(true);
-          toast("welcome presidento")
+          toast('welcome presidento');
         } else if (checkFounder.status === 500) {
           toast('Internal server error checking founder status');
         }
@@ -140,7 +143,7 @@ const Speakers = () => {
 
     try {
       const add = await axios.post<{ msg: string }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL  }/api/v1/events/addSpeakers`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/addSpeakers`,
         newSpeaker,
         {
           headers: {
@@ -153,7 +156,7 @@ const Speakers = () => {
         toast(add.data.msg);
         // Refresh speakers list
         const res = await axios.get<speakerResponse>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL }/api/v1/events/getSpeakers?id=${id}`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/getSpeakers?id=${id}`,
           {
             headers: {
               authorization: `Bearer ${token}`,
@@ -171,13 +174,21 @@ const Speakers = () => {
       toast('Failed to add speaker');
     }
 
-    setNewSpeaker({ name: '', email: '', about: '', profilePic: '', eventId: id || '' });
+    setNewSpeaker({
+      name: '',
+      email: '',
+      about: '',
+      profilePic: '',
+      eventId: id || '',
+    });
     setIsModalOpen(false);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setNewSpeaker(prev => ({ ...prev, [name]: value }));
+    setNewSpeaker((prev) => ({ ...prev, [name]: value }));
   };
 
   if (isLoading) {
@@ -209,7 +220,8 @@ const Speakers = () => {
             Speakers & Judges
           </h1>
           <p className="text-gray-300 text-xl max-w-2xl mx-auto">
-            Learn from industry experts who will also be evaluating your projects.
+            Learn from industry experts who will also be evaluating your
+            projects.
           </p>
         </motion.div>
 
@@ -219,14 +231,18 @@ const Speakers = () => {
             <div className="h-10 w-10 rounded-full bg-yellow-400 flex items-center justify-center mr-4">
               <FaMicrophone className="text-black text-lg" />
             </div>
-            <h2 className="text-3xl font-bold text-white">Featured Speakers & Judges</h2>
+            <h2 className="text-3xl font-bold text-white">
+              Featured Speakers & Judges
+            </h2>
           </div>
 
           {speakers.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-400 text-lg">No speakers added yet.</p>
               {founder && (
-                <p className="text-gray-500 mt-2">Add the first speaker to get started!</p>
+                <p className="text-gray-500 mt-2">
+                  Add the first speaker to get started!
+                </p>
               )}
             </div>
           ) : (
@@ -245,7 +261,9 @@ const Speakers = () => {
                   <div className="h-56 relative overflow-hidden">
                     <div className="absolute inset-0 bg-yellow-400/20 group-hover:bg-yellow-400/10 transition-all duration-500"></div>
                     <Image
-                      src={speaker.profilePic || "https://i.pravatar.cc/300?img=11"}
+                      src={
+                        speaker.profilePic || 'https://i.pravatar.cc/300?img=11'
+                      }
                       width={400}
                       height={300}
                       alt={speaker.name}
@@ -311,7 +329,8 @@ const Speakers = () => {
               Manage Event Speakers
             </h2>
             <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-              Add new speakers to your event or manage existing ones. Build your expert panel to share knowledge with the community.
+              Add new speakers to your event or manage existing ones. Build your
+              expert panel to share knowledge with the community.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
@@ -337,20 +356,40 @@ const Speakers = () => {
               className="bg-gray-900 border-2 border-yellow-500/30 rounded-xl p-6 w-full max-w-md"
             >
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold text-white">Add New Speaker</h3>
+                <h3 className="text-2xl font-bold text-white">
+                  Add New Speaker
+                </h3>
                 <Button
                   onClick={() => setIsModalOpen(false)}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </Button>
               </div>
 
-              <form onSubmit={(e) => { e.preventDefault(); handleAddSpeaker(); }} className="space-y-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAddSpeaker();
+                }}
+                className="space-y-4"
+              >
                 <div>
-                  <label className="block text-white font-medium mb-2">Name</label>
+                  <label className="block text-white font-medium mb-2">
+                    Name
+                  </label>
                   <input
                     type="text"
                     name="name"
@@ -363,7 +402,9 @@ const Speakers = () => {
                 </div>
 
                 <div>
-                  <label className="block text-white font-medium mb-2">Email</label>
+                  <label className="block text-white font-medium mb-2">
+                    Email
+                  </label>
                   <input
                     type="email"
                     name="email"
@@ -376,7 +417,9 @@ const Speakers = () => {
                 </div>
 
                 <div>
-                  <label className="block text-white font-medium mb-2">Profile Picture URL</label>
+                  <label className="block text-white font-medium mb-2">
+                    Profile Picture URL
+                  </label>
                   <input
                     type="url"
                     name="profilePic"
@@ -388,7 +431,9 @@ const Speakers = () => {
                 </div>
 
                 <div>
-                  <label className="block text-white font-medium mb-2">About</label>
+                  <label className="block text-white font-medium mb-2">
+                    About
+                  </label>
                   <textarea
                     name="about"
                     value={newSpeaker.about}

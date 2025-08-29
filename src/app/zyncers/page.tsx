@@ -1,6 +1,13 @@
-"use client"
+'use client';
 import { useState, useEffect } from 'react';
-import { Search, User, ArrowLeft, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Search,
+  User,
+  ArrowLeft,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -30,17 +37,27 @@ const AnimatedBackground = () => {
   return (
     <div className="fixed inset-0 overflow-hidden">
       <div className="absolute -top-40 -right-40 w-80 h-80 bg-yellow-400/5 rounded-full blur-3xl animate-pulse-slow" />
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-yellow-400/3 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-yellow-400/2 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '4s' }} />
+      <div
+        className="absolute -bottom-40 -left-40 w-80 h-80 bg-yellow-400/3 rounded-full blur-3xl animate-pulse-slow"
+        style={{ animationDelay: '2s' }}
+      />
+      <div
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-yellow-400/2 rounded-full blur-3xl animate-pulse-slow"
+        style={{ animationDelay: '4s' }}
+      />
     </div>
   );
 };
 
 // Enhanced User card component with expand/collapse functionality
-const UserCard = ({ user, onClick, onNavigate }: { 
-  user: any, 
-  onClick: () => void,
-  onNavigate: () => void 
+const UserCard = ({
+  user,
+  onClick,
+  onNavigate,
+}: {
+  user: any;
+  onClick: () => void;
+  onNavigate: () => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -60,7 +77,7 @@ const UserCard = ({ user, onClick, onNavigate }: {
     >
       {/* Glow effect on hover */}
       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-yellow-400/0 via-yellow-400/5 to-yellow-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      
+
       {/* Main card content */}
       <div className="relative p-6">
         <div className="flex items-center space-x-4">
@@ -77,7 +94,7 @@ const UserCard = ({ user, onClick, onNavigate }: {
                 {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </div>
             )}
-            
+
             {/* Subtle glow around profile pic */}
             <div className="absolute inset-0 rounded-full bg-yellow-400/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           </div>
@@ -100,31 +117,37 @@ const UserCard = ({ user, onClick, onNavigate }: {
         </div>
 
         {/* Expanded content */}
-        <div className={`transition-all duration-500 overflow-hidden ${
-          isExpanded ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'
-        }`}>
+        <div
+          className={`transition-all duration-500 overflow-hidden ${
+            isExpanded ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'
+          }`}
+        >
           <div className="pt-4 border-t border-white/10">
             <div className="space-y-2">
               <p className="text-gray-400 text-sm">
-                <span className="text-white font-medium">College:</span> {user.collegeName || 'Not specified'}
+                <span className="text-white font-medium">College:</span>{' '}
+                {user.collegeName || 'Not specified'}
               </p>
               {user.clubName && (
                 <p className="text-gray-400 text-sm">
-                  <span className="text-white font-medium">club:</span> {user.clubName}
+                  <span className="text-white font-medium">club:</span>{' '}
+                  {user.clubName}
                 </p>
               )}
               {user.year && (
                 <p className="text-gray-400 text-sm">
-                  <span className="text-white font-medium">Year:</span> {user.email}
+                  <span className="text-white font-medium">Year:</span>{' '}
+                  {user.email}
                 </p>
               )}
               {user.course && (
                 <p className="text-gray-400 text-sm">
-                  <span className="text-white font-medium">Course:</span> {user.course}
+                  <span className="text-white font-medium">Course:</span>{' '}
+                  {user.course}
                 </p>
               )}
             </div>
-            
+
             <div className="mt-4 text-center">
               <p className="text-yellow-400 text-sm font-medium">
                 Click again to visit profile →
@@ -155,7 +178,7 @@ export default function UserSearchPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const tok = localStorage.getItem("token");
+      const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
     }
   }, []);
@@ -165,24 +188,24 @@ export default function UserSearchPage() {
     try {
       setIsLoadingUsers(true);
       const response = await axios.get<{
-        msg : string;
-        totalPages : number
-         users: {
-    id: string;
-    collegeName: string;
-    profileAvatar: string | null;
-    name: string | null;
-    clubName : string | null;
-    year : string | null;
-    course : string | null;
-}[]
+        msg: string;
+        totalPages: number;
+        users: {
+          id: string;
+          collegeName: string;
+          profileAvatar: string | null;
+          name: string | null;
+          clubName: string | null;
+          year: string | null;
+          course: string | null;
+        }[];
       }>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getAllUsers?page=${page}`
       );
 
       if (response.data) {
         const { users, totalPages: total } = response.data;
-        
+
         setAllUsers(users || []);
         setTotalPages(total || 1);
         setCurrentPage(page);
@@ -200,12 +223,15 @@ export default function UserSearchPage() {
   }, []);
 
   const handlePageChange = (page: number) => {
-    if (page !== currentPage && page >= 1 && page <= totalPages && !isLoadingUsers) {
+    if (
+      page !== currentPage &&
+      page >= 1 &&
+      page <= totalPages &&
+      !isLoadingUsers
+    ) {
       fetchAllUsers(page);
     }
   };
-
-
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
@@ -219,7 +245,7 @@ export default function UserSearchPage() {
       const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL as string;
       const url = new URL('/api/v1/user/SearchUser', baseUrl);
       url.searchParams.set('name', query);
-      
+
       const headers: HeadersInit = {};
       if (token) {
         headers.authorization = `Bearer ${token}`;
@@ -235,14 +261,14 @@ export default function UserSearchPage() {
         setSearchResults(data.users || []);
       } else if (response.status === 404) {
         setSearchResults([]);
-        console.log("No users found with that name");
+        console.log('No users found with that name');
       } else {
-        console.log("Error searching users");
+        console.log('Error searching users');
         setSearchResults([]);
       }
     } catch (error) {
       console.error('Search error:', error);
-      console.log("Network error occurred");
+      console.log('Network error occurred');
       setSearchResults([]);
     } finally {
       setIsSearching(false);
@@ -252,7 +278,7 @@ export default function UserSearchPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
-    
+
     // Debounced search
     const timeoutId = setTimeout(() => {
       handleSearch(query);
@@ -304,7 +330,7 @@ export default function UserSearchPage() {
             <div className="relative group">
               {/* Glow effect */}
               <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400/50 via-yellow-400/30 to-yellow-400/50 rounded-2xl blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-500" />
-              
+
               <div className="relative flex items-center">
                 <Search className="absolute left-8 w-8 h-8 text-gray-900 z-10" />
                 <input
@@ -314,7 +340,7 @@ export default function UserSearchPage() {
                   placeholder="Search for users by name..."
                   className="w-full pl-20 pr-8 py-6 bg-yellow-400 text-gray-900 placeholder-gray-700 rounded-2xl text-xl font-medium focus:outline-none focus:ring-4 focus:ring-yellow-400/30 transition-all duration-300 shadow-2xl backdrop-blur-sm"
                 />
-                
+
                 {/* Loading indicator */}
                 {isSearching && (
                   <div className="absolute right-8">
@@ -327,8 +353,8 @@ export default function UserSearchPage() {
 
           {/* Search hint */}
           <p className="text-center text-gray-500 text-sm mb-8">
-            {searchQuery.trim() 
-              ? `Showing ${displayUsers.length} search results` 
+            {searchQuery.trim()
+              ? `Showing ${displayUsers.length} search results`
               : 'Search above or browse all users below'}
           </p>
         </div>
@@ -343,9 +369,8 @@ export default function UserSearchPage() {
               </h2>
               <p className="text-gray-400">
                 {isSearching || isLoadingUsers
-                  ? 'Loading...' 
-                  : `${displayUsers.length} user${displayUsers.length !== 1 ? 's' : ''} found`
-                }
+                  ? 'Loading...'
+                  : `${displayUsers.length} user${displayUsers.length !== 1 ? 's' : ''} found`}
               </p>
             </div>
           </div>
@@ -393,7 +418,9 @@ export default function UserSearchPage() {
                           1
                         </button>
                         {currentPage > 4 && (
-                          <span className="flex items-center px-2 text-gray-400">...</span>
+                          <span className="flex items-center px-2 text-gray-400">
+                            ...
+                          </span>
                         )}
                       </>
                     )}
@@ -433,7 +460,9 @@ export default function UserSearchPage() {
                     {currentPage < totalPages - 2 && (
                       <>
                         {currentPage < totalPages - 3 && (
-                          <span className="flex items-center px-2 text-gray-400">...</span>
+                          <span className="flex items-center px-2 text-gray-400">
+                            ...
+                          </span>
                         )}
                         <button
                           onClick={() => handlePageChange(totalPages)}
@@ -470,10 +499,9 @@ export default function UserSearchPage() {
                 {searchQuery.trim() ? 'No users found' : 'No users available'}
               </h3>
               <p className="text-gray-500">
-                {searchQuery.trim() 
+                {searchQuery.trim()
                   ? 'Try searching with a different name or spelling'
-                  : 'Check back later for new users'
-                }
+                  : 'Check back later for new users'}
               </p>
             </div>
           )}
@@ -483,29 +511,47 @@ export default function UserSearchPage() {
       {/* Custom CSS for animations */}
       <style jsx>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          33% { transform: translateY(-20px) rotate(120deg); }
-          66% { transform: translateY(-10px) rotate(240deg); }
+          0%,
+          100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          33% {
+            transform: translateY(-20px) rotate(120deg);
+          }
+          66% {
+            transform: translateY(-10px) rotate(240deg);
+          }
         }
-        
+
         @keyframes pulse-slow {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.3;
+          }
         }
-        
+
         @keyframes fade-in-up {
-          from { opacity: 0; transform: translateY(40px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(40px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
-        
+
         .animate-float {
           animation: float linear infinite;
         }
-        
+
         .animate-pulse-slow {
           animation: pulse-slow 6s ease-in-out infinite;
         }
-        
+
         .animate-fade-in-up {
           animation: fade-in-up 0.6s ease-out forwards;
         }
