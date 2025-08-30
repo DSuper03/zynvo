@@ -36,7 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     { icon: <FaUsers size={22} />, label: 'Zyncers', href: '/zyncers' },
     { icon: <Calendar size={22} />, label: 'Events', href: '/events' },
     { icon: <Users size={22} />, label: 'Clubs', href: '/clubs' },
-    { icon: <Newspaper size={22} />, label: 'News', href: '/news' },
+    // { icon: <Newspaper size={22} />, label: 'News', href: '/news' },
     // @keku bhai agent banne ke ba dconnect karke uncomment kar dena🫡 good night
     { icon: <FaBahai />, label: 'AI', href: '/ai' },
     {

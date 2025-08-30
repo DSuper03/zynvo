@@ -370,8 +370,9 @@ export default function PublicUserProfile() {
             src="/banners/profilebanner.jpg"
             alt="Profile Banner"
             fill
-            className="object-cover"
+            className="object-cover size-5"
             priority
+            sizes='3'
           />
         </div>
 
