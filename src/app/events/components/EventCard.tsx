@@ -129,7 +129,7 @@ export default function EventCard() {
                 <div className="relative">
                   
                   <Image
-                    src="/logozynvo.jpg"
+                    src={event.eventHeaderImage || event.posterUrl ||"/logozynvo.jpg"}
                     alt={event.description || event.EventName}
                     width={600}
                     height={300}

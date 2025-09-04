@@ -357,6 +357,7 @@ export interface eventData {
   EventName: string;
   prizes: string;
   endDate: Date | null;
+  posterUrl?: string;
 }
 
 export interface respnseUseState {
@@ -369,6 +370,7 @@ export interface respnseUseState {
   contactPhone : number;
   university : string;
   applicationStatus : string;
+  posterUrl?: string;
 }
 export interface PostData {
   id: string;
