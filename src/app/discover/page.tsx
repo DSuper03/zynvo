@@ -22,7 +22,6 @@ import { Card } from '@/components/ui/card';
 import { AuroraText } from '@/components/magicui/aurora-text';
 import { toast } from 'sonner';
 
-
 interface ApiResponse {
   msg: string;
   posts: PostData[];
@@ -37,7 +36,7 @@ export default function Feed() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Infinite scroll state 
+  // Infinite scroll state
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -45,19 +44,19 @@ export default function Feed() {
   // Slider events data
   const sliderEvents = [
     {
-      img: "/posters/1.png",
-      title: "Tech Conference",
-      desc: "Join the latest in tech innovation.",
+      img: '/posters/1.png',
+      title: 'Tech Conference',
+      desc: 'Join the latest in tech innovation.',
     },
     {
-      img: "/posters/2.png",
-      title: "Music Festival",
-      desc: "Experience live music and fun.",
+      img: '/posters/2.png',
+      title: 'Music Festival',
+      desc: 'Experience live music and fun.',
     },
     {
-      img: "/posters/4.png",
-      title: "Art Expo",
-      desc: "Explore creative artworks.",
+      img: '/posters/4.png',
+      title: 'Art Expo',
+      desc: 'Explore creative artworks.',
     },
   ];
   const [slideIdx, setSlideIdx] = useState(0);
@@ -71,7 +70,7 @@ export default function Feed() {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -131,7 +130,8 @@ export default function Feed() {
   useEffect(() => {
     const handleScroll = () => {
       if (
-        window.innerHeight + window.scrollY >= document.body.offsetHeight - 200 &&
+        window.innerHeight + window.scrollY >=
+          document.body.offsetHeight - 200 &&
         hasMore &&
         !isLoading &&
         !isFetchingMore
@@ -154,7 +154,7 @@ export default function Feed() {
             </AuroraText>
           </h1>
         </header>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Column 1-2: Main Content */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
@@ -221,8 +221,10 @@ export default function Feed() {
             {/* Mobile slider: now placed above posts */}
             <div className="lg:hidden mt-2">
               <div className="relative w-full overflow-hidden" ref={sliderRef}>
-                <div className="flex transition-transform duration-700"
-                  style={{ transform: `translateX(-${slideIdx * 100}%)` }}>
+                <div
+                  className="flex transition-transform duration-700"
+                  style={{ transform: `translateX(-${slideIdx * 100}%)` }}
+                >
                   {sliderEvents.map((ev, i) => (
                     <div key={i} className="min-w-full px-2">
                       <Card className="group cursor-pointer">
@@ -231,15 +233,12 @@ export default function Feed() {
                             <Image
                               src={ev.img}
                               alt={ev.title}
-                           layout='fill'
+                              layout="fill"
                               className="object-cover transition-transform group-hover:scale-105"
                             />
                           </div>
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                          
-                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3"></div>
                         </div>
-                       
                       </Card>
                     </div>
                   ))}
@@ -260,21 +259,21 @@ export default function Feed() {
             <div className="space-y-4 sm:space-y-6">
               {isLoading ? (
                 // Loading state
-                (<div className="flex justify-center items-center py-8">
+                <div className="flex justify-center items-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
                   <span className="ml-3 text-yellow-400">Loading posts...</span>
-                </div>)
+                </div>
               ) : error ? (
                 // Error state
-                (<div className="bg-red-900/20 border border-red-500/30 rounded-md p-4">
+                <div className="bg-red-900/20 border border-red-500/30 rounded-md p-4">
                   <p className="text-red-400">{error}</p>
-                  <Button 
-                    onClick={() => window.location.reload()} 
+                  <Button
+                    onClick={() => window.location.reload()}
                     className="mt-2 text-sm text-red-300 hover:text-red-200 underline"
                   >
                     Try again
                   </Button>
-                </div>)
+                </div>
               ) : posts && posts.length > 0 ? (
                 posts.map((post) => (
                   <div
@@ -285,7 +284,11 @@ export default function Feed() {
                     <div className="flex items-center gap-3 mb-4">
                       <div className="relative w-10 h-10">
                         {post.author.profileAvatar ? (
-                          <img src={post.author.profileAvatar} alt={post.author.name || 'User'} className="rounded-full object-cover" />
+                          <img
+                            src={post.author.profileAvatar}
+                            alt={post.author.name || 'User'}
+                            className="rounded-full object-cover"
+                          />
                         ) : (
                           <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-400 rounded-full flex items-center justify-center">
                             <User className="w-5 h-5 text-black" />
@@ -321,7 +324,7 @@ export default function Feed() {
                       <p className="text-gray-300 leading-relaxed mb-4">
                         {post.description}
                       </p>
-                      
+
                       {/* Post Image */}
                       {post.image && (
                         <div className="relative w-full max-w-2xl mx-auto mb-4">
@@ -363,8 +366,8 @@ export default function Feed() {
                           variant="ghost"
                           size="sm"
                           className="text-gray-400 hover:text-yellow-400 hover:bg-black transition-colors"
-                          onClick={()=> {
-                            toast("share feature coming soon")
+                          onClick={() => {
+                            toast('share feature coming soon');
                           }}
                         >
                           <Share className="w-4 h-4 mr-1" />
@@ -383,9 +386,12 @@ export default function Feed() {
                 ))
               ) : (
                 // No posts state
-                (<div className="text-center py-12">
+                <div className="text-center py-12">
                   <div className="bg-gray-800 rounded-lg p-8 border border-yellow-500/20">
-                    <MessageCircle size={48} className="text-yellow-500 mx-auto mb-4" />
+                    <MessageCircle
+                      size={48}
+                      className="text-yellow-500 mx-auto mb-4"
+                    />
                     <h3 className="text-xl font-semibold text-yellow-400 mb-2">
                       No posts yet
                     </h3>
@@ -399,14 +405,16 @@ export default function Feed() {
                       Create Post
                     </Button>
                   </div>
-                </div>)
+                </div>
               )}
 
               {/* Loading more indicator */}
               {isFetchingMore && (
                 <div className="flex justify-center items-center py-4">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-500"></div>
-                  <span className="ml-2 text-yellow-400 text-sm">Loading more posts...</span>
+                  <span className="ml-2 text-yellow-400 text-sm">
+                    Loading more posts...
+                  </span>
                 </div>
               )}
             </div>
@@ -419,7 +427,9 @@ export default function Feed() {
               <div className="sticky top-4">
                 <div className="bg-gray-800 rounded-lg border border-yellow-500/20 overflow-hidden">
                   <div className="bg-gradient-to-r from-yellow-500 to-yellow-400 px-4 py-3">
-                    <h3 className="text-black font-semibold">Powered by Zynvo</h3>
+                    <h3 className="text-black font-semibold">
+                      Powered by Zynvo
+                    </h3>
                   </div>
                   <div className="space-y-4">
                     {sliderEvents.map((ev, i) => (
@@ -434,10 +444,11 @@ export default function Feed() {
                             />
                           </div>
                           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                            <span className="text-black text-xs font-medium px-2 py-1 rounded-full">{ev.title}</span>
+                            <span className="text-black text-xs font-medium px-2 py-1 rounded-full">
+                              {ev.title}
+                            </span>
                           </div>
                         </div>
-                       
                       </Card>
                     ))}
                     <Button className="w-full py-2 text-sm text-yellow-400 hover:text-yellow-300 transition-colors">
@@ -450,7 +461,7 @@ export default function Feed() {
           </div>
         </div>
       </div>
-      
+
       <CreatePostModal
         isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}

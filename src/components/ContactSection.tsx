@@ -8,6 +8,7 @@ import LandingHeader from './landingHeader';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Button } from './ui/button';
+import { FaInstagramSquare } from 'react-icons/fa';
 
 const ContactSection = () => {
   const [formState, setFormState] = useState({
@@ -26,11 +27,14 @@ const ContactSection = () => {
     setIsSubmitting(true);
 
     try {
-      const submit = await axios.post<{msg : string}>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/contact/contact`, formState)
-      if(submit.status == 200) {
-      setSubmitStatus('success');
-      setFormState({ name: '', email: '', subject: '', message: '' });
-      toast(submit.data.msg)
+      const submit = await axios.post<{ msg: string }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/contact/contact`,
+        formState
+      );
+      if (submit.status == 200) {
+        setSubmitStatus('success');
+        setFormState({ name: '', email: '', subject: '', message: '' });
+        toast(submit.data.msg);
       }
     } catch (error) {
       setSubmitStatus('error');
@@ -94,6 +98,10 @@ const ContactSection = () => {
                 <div className="flex items-center space-x-4 text-gray-300">
                   <Icons.Twitter />
                   <span>@zynvonow</span>
+                </div>
+                <div className="flex items-center space-x-4 text-gray-300">
+                  <FaInstagramSquare/>
+                  <span>Follow us on Instagram</span>
                 </div>
               </div>
 

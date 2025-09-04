@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 const Testimonials = () => {
   const heroRef = React.useRef(null);
   return (
@@ -38,28 +38,28 @@ const Testimonials = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-              name: 'Akash Sharma',
-              role: 'President, Tech Club',
-              university: 'IIT Delhi',
-              quote:
-                "Zynvo helped us increase our membership by 300% in just one semester. The platform's event management tools saved us countless hours of work.",
-              image: '/student1.png',
+                name: 'Akash Sharma',
+                role: 'President, Tech Club',
+                university: 'IIT Delhi',
+                quote:
+                  "Zynvo helped us increase our membership by 300% in just one semester. The platform's event management tools saved us countless hours of work.",
+                image: '/student1.png',
               },
               {
-              name: 'import  ',
-              role: 'Member, Cultural Society',
-              university: 'Delhi University',
-              quote:
-                'I found my passion for classical dance through Zynvo. The platform made it easy to discover events and connect with other cultural enthusiasts.',
-              image: '/student2.png',
+                name: 'import  ',
+                role: 'Member, Cultural Society',
+                university: 'Delhi University',
+                quote:
+                  'I found my passion for classical dance through Zynvo. The platform made it easy to discover events and connect with other cultural enthusiasts.',
+                image: '/student2.png',
               },
               {
-              name: 'Jay Verma',
-              role: 'Organizer, Debate Club',
-              university: 'BITS Pilani',
-              quote:
-                'Coordinating with other colleges for debate competitions was a nightmare before Zynvo. Now we can seamlessly organize inter-college events.',
-              image: '/student3.png',
+                name: 'Jay Verma',
+                role: 'Organizer, Debate Club',
+                university: 'BITS Pilani',
+                quote:
+                  'Coordinating with other colleges for debate competitions was a nightmare before Zynvo. Now we can seamlessly organize inter-college events.',
+                image: '/student3.png',
               },
             ].map((testimonial, index) => (
               <motion.div

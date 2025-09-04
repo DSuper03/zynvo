@@ -5,10 +5,10 @@ import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
-import dotenv from "dotenv"
+import dotenv from 'dotenv';
 import Image from 'next/image';
 
-dotenv.config()
+dotenv.config();
 
 const Eventid = () => {
   const params = useParams();
@@ -32,7 +32,6 @@ const Eventid = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
- 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
@@ -96,7 +95,7 @@ const Eventid = () => {
         msg: string;
         ForkedUpId: string;
       }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/v1/events/registerEvent`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/registerEvent`,
         bodyData,
         {
           headers: {
@@ -160,11 +159,13 @@ const Eventid = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-black">Applications are</span>
-                    <span className={`font-extrabold px-2 py-1 rounded ${
-                      data.applicationStatus === 'open' 
-                        ? 'text-green-800 bg-green-300' 
-                        : 'text-red-800 bg-red-300'
-                    }`}>
+                    <span
+                      className={`font-extrabold px-2 py-1 rounded ${
+                        data.applicationStatus === 'open'
+                          ? 'text-green-800 bg-green-300'
+                          : 'text-red-800 bg-red-300'
+                      }`}
+                    >
                       {data.applicationStatus}
                     </span>
                   </div>
@@ -182,17 +183,20 @@ const Eventid = () => {
               </h2>
               <div className="mb-6 flex-grow">
                 <div className="text-gray-200 bg-black/60 p-4 rounded-lg text-justify mb-4">
-                  {data.description || 'Event description will be available soon...'}
+                  {data.description ||
+                    'Event description will be available soon...'}
                 </div>
-                
+
                 {(data.contactEmail || data.contactPhone) && (
                   <div className="p-4 bg-gray-800/50 rounded-lg">
-                    <p className="text-yellow-400 font-semibold mb-2">Contact Information:</p>
+                    <p className="text-yellow-400 font-semibold mb-2">
+                      Contact Information:
+                    </p>
                     <div className="flex flex-col gap-1 text-gray-300">
                       {data.contactEmail && (
                         <div className="flex items-center gap-2">
                           <span>Email:</span>
-                          <a 
+                          <a
                             href={`mailto:${data.contactEmail}`}
                             className="text-yellow-400 hover:text-yellow-300 transition-colors"
                           >
@@ -203,7 +207,7 @@ const Eventid = () => {
                       {data.contactPhone !== 0 && (
                         <div className="flex items-center gap-2">
                           <span>Phone:</span>
-                          <a 
+                          <a
                             href={`tel:${data.contactPhone}`}
                             className="text-yellow-400 hover:text-yellow-300 transition-colors"
                           >
@@ -242,9 +246,9 @@ const Eventid = () => {
                         rel="noopener noreferrer"
                         className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
                       >
-                        Zynced It 
+                        Zynced It
                       </a>{' '}
-                       Without this you'll not be allowed to take part.
+                      Without this you'll not be allowed to take part.
                     </p>
                   </div>
                 )}

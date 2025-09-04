@@ -4,7 +4,14 @@ import { useState, ChangeEvent } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
-import { FiArrowRight, FiUser, FiLock, FiEye, FiEyeOff, FiLoader } from 'react-icons/fi';
+import {
+  FiArrowRight,
+  FiUser,
+  FiLock,
+  FiEye,
+  FiEyeOff,
+  FiLoader,
+} from 'react-icons/fi';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
 import dotenv from 'dotenv';
 import axios from 'axios';
@@ -199,9 +206,7 @@ export default function SignIn() {
                   <Link
                     href="/auth/forgot-password"
                     className="text-sm text-yellow-500 hover:text-yellow-400 transition"
-                  >
-                    
-                  </Link>
+                  ></Link>
                 </div>
                 <div className="relative">
                   <FiLock className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
@@ -273,12 +278,6 @@ export default function SignIn() {
                 Terms of Service
               </Link>{' '}
               and acknowledge you&lsquo;ve read our{' '}
-              <Link
-                href="/privacy"
-                className="text-yellow-500 hover:text-yellow-400"
-              >
-                Privacy Policy
-              </Link>
             </p>
           </div>
         </div>

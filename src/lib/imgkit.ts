@@ -1,5 +1,5 @@
-import ImageKit from "imagekit";
-import fs from "fs";
+import ImageKit from 'imagekit';
+import fs from 'fs';
 
 const imagekit = new ImageKit({
   publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY as string,
@@ -16,17 +16,19 @@ export function toBase64(file: File): Promise<string> {
   });
 }
 
-
-export async function uploadImageToImageKit(file: string, fileName: string): Promise<string> {
+export async function uploadImageToImageKit(
+  file: string,
+  fileName: string
+): Promise<string> {
   try {
     const uploadResponse = await imagekit.upload({
-      file, 
+      file,
       fileName,
     });
 
-    return uploadResponse.url; 
+    return uploadResponse.url;
   } catch (error: any) {
-    console.error("ImageKit upload failed:", error.message);
-    throw new Error("Failed to upload image");
+    console.error('ImageKit upload failed:', error.message);
+    throw new Error('Failed to upload image');
   }
 }

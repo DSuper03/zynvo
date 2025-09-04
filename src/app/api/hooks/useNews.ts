@@ -30,16 +30,16 @@ export function useNews() {
             'Content-Type': 'application/json',
           },
         });
-        
+
         console.log('Response status:', res.status);
-        
+
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
-        
+
         const data = await res.json();
         console.log('Raw API response:', data);
-        
+
         if (data && data.news && Array.isArray(data.news)) {
           setNewsData(data.news);
           console.log('News data set:', data.news);
@@ -50,7 +50,9 @@ export function useNews() {
         }
       } catch (err) {
         console.error('Error fetching news:', err);
-        setError(`Failed to load news: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        setError(
+          `Failed to load news: ${err instanceof Error ? err.message : 'Unknown error'}`
+        );
         setNewsData([]);
       } finally {
         setLoading(false);

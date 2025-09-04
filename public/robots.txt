@@ -1,0 +1,76 @@
+# Robots.txt for Zynvo - Agentic Social Media Platform
+# Optimized for search engine discovery of our intelligent campus networking platform
+
+User-agent: *
+Allow: /
+Allow: /auth/signup
+Allow: /auth/signin
+Allow: /discover
+Allow: /events
+Allow: /clubs
+Allow: /news
+Allow: /founders
+Allow: /testimonials
+Allow: /faq
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /verification-mail
+Disallow: /verify-event/
+Disallow: /ticket/
+Disallow: /_next/
+Disallow: /node_modules/
+
+# Allow important static assets
+Allow: /public/
+Allow: /*.css
+Allow: /*.js
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.webp
+Allow: /*.svg
+
+# Crawl delay to be respectful
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://zynvo.social/sitemap.xml
+
+# Special directives for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+# Block AI training bots while allowing indexing bots
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+# Performance optimization
+User-agent: *
+Request-rate: 1/5
+
+# Important: This is an agentic social media platform for campus communities
+# Keywords: agentic social media platform, intelligent campus networking, AI-powered student connections

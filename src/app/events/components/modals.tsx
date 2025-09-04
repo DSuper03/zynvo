@@ -14,7 +14,7 @@ import {
   Mail,
   Phone,
 } from 'lucide-react';
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import { MagicCard } from '@/components/magicui/magic-card';
 import { Card } from '@/components/ui/card';
 import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
@@ -42,8 +42,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [token, setToken] = useState("")
-  const [img, setImg] = useState<File | null>(null)
+  const [token, setToken] = useState('');
+  const [img, setImg] = useState<File | null>(null);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<EventFormData>({
     eventMode: '',
@@ -71,14 +71,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
 
-  useEffect(()=> {
-   const tok = localStorage.getItem("token")
-   if(tok) setToken(tok)
+  useEffect(() => {
+    const tok = localStorage.getItem('token');
+    if (tok) setToken(tok);
     else {
-     toast("login please")
-     return;
+      toast('login please');
+      return;
     }
-  }, [])
+  }, []);
 
   // Handler for input changes
   const handleChange = (
@@ -173,39 +173,38 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   };
 
   // Submit the form
-  const handleSubmit = async() => {
-    if(!token){
-      toast("please login or signup")
+  const handleSubmit = async () => {
+    if (!token) {
+      toast('please login or signup');
       return;
     }
     if (!validateStep()) return;
     if (!img) {
-      toast("you are required to upload a poster")
+      toast('you are required to upload a poster');
     } else {
-      const link = await uploadImageToImageKit(await toBase64(img), (img.name))
-    setFormData((prev: any) => ({ ...prev, image: link }));
-    setImg(null)
-    toast("Image uploaded")
+      const link = await uploadImageToImageKit(await toBase64(img), img.name);
+      setFormData((prev: any) => ({ ...prev, image: link }));
+      setImg(null);
+      toast('Image uploaded');
     }
-    
+
     setIsSubmitting(true);
 
     const createEvent = await axios.post<{
-      msg : string,
-      id : string
-    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event`, formData ,{
-      headers : {
-        authorization : `Bearer ${token}`
-      }
-    } )
+      msg: string;
+      id: string;
+    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event`, formData, {
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    });
 
-    if(createEvent.status === 200){
-      toast("Event registered , start marketing now!!!")
-      setIsSubmitting(false)
-      
+    if (createEvent.status === 200) {
+      toast('Event registered , start marketing now!!!');
+      setIsSubmitting(false);
     } else {
-      toast(createEvent.data.msg)
-      setIsSubmitting(false)
+      toast(createEvent.data.msg);
+      setIsSubmitting(false);
       return;
     }
   };

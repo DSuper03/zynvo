@@ -1,7 +1,12 @@
-
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -30,7 +35,10 @@ interface WarmupProviderProps {
 }
 
 export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
-  const [userData, setUserData] = useState<UserData>({ name: null, profileAvatar: null });
+  const [userData, setUserData] = useState<UserData>({
+    name: null,
+    profileAvatar: null,
+  });
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
 
@@ -49,7 +57,10 @@ export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
 
     const fetchUserData = async () => {
       try {
-        const response = await axios.get<{ msg: string; data: { name: string; profileAvatar: string } }>(
+        const response = await axios.get<{
+          msg: string;
+          data: { name: string; profileAvatar: string };
+        }>(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getSidebarUser`,
           {
             headers: {
@@ -65,8 +76,8 @@ export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
           });
         }
       } catch (error) {
-        console.error("Failed to fetch user data", error);
-        toast.error("Session expired, please log in again.");
+        console.error('Failed to fetch user data', error);
+        toast.error('Session expired, please log in again.');
       } finally {
         setLoading(false);
       }
@@ -80,5 +91,7 @@ export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
     loading,
   };
 
-  return <WarmupContext.Provider value={value}>{children}</WarmupContext.Provider>;
+  return (
+    <WarmupContext.Provider value={value}>{children}</WarmupContext.Provider>
+  );
 };

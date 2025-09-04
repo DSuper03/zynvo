@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -12,7 +11,7 @@ import {
 } from 'lucide-react';
 import { Modal, ModalTrigger } from '@/components/ui/animated-modal';
 import { eventData } from '@/types/global-Interface';
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import axios from 'axios';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
@@ -24,13 +23,13 @@ interface apiRespEvents {
 
 export default function EventCard() {
   const [activeFilter, setActiveFilter] = useState('all');
-  const [events, setEvents] = useState<eventData[] | null >(null);
+  const [events, setEvents] = useState<eventData[] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchEvents() {
@@ -53,10 +52,11 @@ export default function EventCard() {
   }, []);
 
   // Filter events based on active filter and search term
-  const filteredEvents = events?.filter(event => {
-    const matchesSearch = event.EventName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
+  const filteredEvents = events?.filter((event) => {
+    const matchesSearch =
+      event.EventName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.description.toLowerCase().includes(searchTerm.toLowerCase());
+
     if (activeFilter === 'all') return matchesSearch;
     if (activeFilter === 'registered') {
       // Add logic to check if user is registered for this event
@@ -66,7 +66,7 @@ export default function EventCard() {
       // Add logic to check if user is NOT registered for this event
       return matchesSearch; // Placeholder - implement actual logic
     }
-    
+
     return matchesSearch;
   });
 
@@ -76,10 +76,9 @@ export default function EventCard() {
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
-
 
   return (
     <div>
@@ -145,57 +144,60 @@ export default function EventCard() {
                     {event.description || 'No description available'}
                   </p>
 
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-gray-300 text-sm">
-                      <Calendar className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
-                      <span className="truncate">
-                        Deadline: {
-                        event.endDate ? formatDate(event.endDate) : ""
-                        }
-                      </span>
-                    </div>
-                    <div className="flex items-center text-gray-300 text-sm">
-                      <MapPin className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
-                      <span className="truncate">
-                        {event.clubName ? `${event.clubName}'s College` : 'Location TBD'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400 text-xs md:text-sm">
-                      {event.attendees?.length || 0} attending
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center text-gray-300 text-sm">
+                    <Calendar className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
+                    <span className="truncate">
+                      Deadline: {event.endDate ? formatDate(event.endDate) : ''}
                     </span>
-                    <Button className="px-3 md:px-2 py-2 text-sm rounded-md font-medium bg-yellow-400 text-gray-900 hover:bg-yellow-500 transition-colors">
-                      Register
-                    </Button>
-                    <Button className='bg-black text-white font-bold  rounded-2xl'
-                    onClick={()=> {
-                      router.push(`events/${event.id}`)
-                    }}
-                    >
-                        Check
-                    </Button>
+                  </div>
+                  <div className="flex items-center text-gray-300 text-sm">
+                    <MapPin className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
+                    <span className="truncate">
+                      {event.clubName
+                        ? `${event.clubName}'s College`
+                        : 'Location TBD'}
+                    </span>
                   </div>
                 </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-xs md:text-sm">
+                    {event.attendees?.length || 0} attending
+                  </span>
+                  <Button className="px-3 md:px-2 py-2 text-sm rounded-md font-medium bg-yellow-400 text-gray-900 hover:bg-yellow-500 transition-colors">
+                    Register
+                  </Button>
+                  <Button
+                    className="bg-black text-white font-bold  rounded-2xl"
+                    onClick={() => {
+                      router.push(`events/${event.id}`);
+                    }}
+                  >
+                    Check
+                  </Button>
+                </div>
               </div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-10">
-              <p className="text-gray-400 text-lg">
-                {searchTerm ? 'No events found matching your search' : 'No events found'}
-              </p>
-              {searchTerm && (
-                <button 
-                  className="mt-4 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                  onClick={() => setSearchTerm('')}
-                >
-                  Clear Search
-                </button>
-              )}
             </div>
-          )}
-        </div>
+          ))
+        ) : (
+          <div className="col-span-full text-center py-10">
+            <p className="text-gray-400 text-lg">
+              {searchTerm
+                ? 'No events found matching your search'
+                : 'No events found'}
+            </p>
+            {searchTerm && (
+              <button
+                className="mt-4 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                onClick={() => setSearchTerm('')}
+              >
+                Clear Search
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
-  )
+  );
 }
