@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import dotenv from 'dotenv';
+import Image from 'next/image';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ const Eventid = () => {
     contactPhone: 0,
     university: '',
     applicationStatus: 'open',
+    posterUrl : "",
   });
 
   const [forkedUpId, setForkedUpId] = useState<string | null>(null);
@@ -63,6 +65,7 @@ const Eventid = () => {
             contactEmail: res.data.response.contactEmail || '',
             contactPhone: res.data.response.contactPhone || 0,
             applicationStatus: res.data.response.applicationStatus || 'open',
+            posterUrl : res.data.response.posterUrl || res.data.response.eventHeaderImage || ''
           });
         }
       } catch (error) {
@@ -258,7 +261,11 @@ const Eventid = () => {
         <div className="lg:col-span-5 flex items-center justify-center">
           <div className="w-full max-w-md aspect-[3/4] rounded-2xl bg-gradient-to-br from-yellow-500/80 to-yellow-700/90 border-4 border-yellow-400 shadow-2xl flex items-center justify-center overflow-hidden relative">
             {/* Placeholder for event poster image */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-black/60">
+            { 
+            data.posterUrl ? (
+               <Image src={data.posterUrl} alt="Event Poster" fill className="object-cover" />
+            ) : (
+               <div className="absolute inset-0 flex flex-col items-center justify-center text-black/60">
               <svg
                 className="w-24 h-24 mb-4 opacity-30"
                 fill="none"
@@ -282,10 +289,8 @@ const Eventid = () => {
                 Event Poster
               </span>
             </div>
-            {/* 
-              To use a real image, replace the above <div> with:
-              <Image src="/your-poster.jpg" alt="Event Poster" fill className="object-cover" />
-            */}
+            )
+            }
           </div>
         </div>
       </div>

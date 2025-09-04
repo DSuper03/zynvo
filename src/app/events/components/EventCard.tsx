@@ -82,68 +82,67 @@ export default function EventCard() {
 
   return (
     <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {isLoading ? (
-          [...Array(6)].map((_, index) => (
-            <div
-              key={index}
-              className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-md"
-            >
-              <Skeleton className="w-full h-48 sm:h-40 rounded-none bg-gray-700" />
-              <div className="p-4 md:p-5 space-y-3">
-                <Skeleton className="h-6 w-3/4 rounded-md bg-gray-700" />
-                <Skeleton className="h-4 w-full rounded-md bg-gray-700" />
-                <Skeleton className="h-4 w-5/6 rounded-md bg-gray-700" />
-                <div className="space-y-2">
-                  <div className="flex items-center">
-                    <Skeleton className="h-4 w-4 rounded-full mr-2 bg-gray-700" />
-                    <Skeleton className="h-4 w-32 rounded-md bg-gray-700" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {isLoading ? (
+          
+            [...Array(6)].map((_, index) => (
+              <div key={index} className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-md">
+                <Skeleton className="w-full h-48 sm:h-40 rounded-none bg-gray-700" />
+                <div className="p-4 md:p-5 space-y-3">
+                  <Skeleton className="h-6 w-3/4 rounded-md bg-gray-700" />
+                  <Skeleton className="h-4 w-full rounded-md bg-gray-700" />
+                  <Skeleton className="h-4 w-5/6 rounded-md bg-gray-700" />
+                  <div className="space-y-2">
+                    <div className="flex items-center">
+                      <Skeleton className="h-4 w-4 rounded-full mr-2 bg-gray-700" />
+                      <Skeleton className="h-4 w-32 rounded-md bg-gray-700" />
+                    </div>
+                    <div className="flex items-center">
+                      <Skeleton className="h-4 w-4 rounded-full mr-2 bg-gray-700" />
+                      <Skeleton className="h-4 w-40 rounded-md bg-gray-700" />
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <Skeleton className="h-4 w-4 rounded-full mr-2 bg-gray-700" />
-                    <Skeleton className="h-4 w-40 rounded-md bg-gray-700" />
+                  <div className="flex justify-between items-center pt-2">
+                    <Skeleton className="h-4 w-20 rounded-md bg-gray-700" />
+                    <Skeleton className="h-8 w-24 rounded-md bg-gray-700" />
                   </div>
-                </div>
-                <div className="flex justify-between items-center pt-2">
-                  <Skeleton className="h-4 w-20 rounded-md bg-gray-700" />
-                  <Skeleton className="h-8 w-24 rounded-md bg-gray-700" />
                 </div>
               </div>
+            ))
+          ) : error ? (
+            <div className="col-span-full text-center py-10">
+              <p className="text-red-400 text-lg">{error}</p>
+              <button 
+                className="mt-4 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition-colors"
+                onClick={() => window.location.reload()}
+              >
+                Retry
+              </button>
             </div>
-          ))
-        ) : error ? (
-          <div className="col-span-full text-center py-10">
-            <p className="text-red-400 text-lg">{error}</p>
-            <button
-              className="mt-4 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition-colors"
-              onClick={() => window.location.reload()}
-            >
-              Retry
-            </button>
-          </div>
-        ) : filteredEvents && filteredEvents.length > 0 ? (
-          filteredEvents.map((event) => (
-            <div
-              key={event.id}
-              className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-            >
-              <div className="relative">
-                <Image
-                  src="/logozynvo.jpg"
-                  alt={event.description || event.EventName}
-                  width={600}
-                  height={300}
-                  className="w-full h-48 sm:h-40 object-cover"
-                  priority={false}
-                />
-              </div>
-              <div className="p-4 md:p-5">
-                <h3 className="text-lg md:text-xl font-bold text-white mb-2">
-                  {event.EventName}
-                </h3>
-                <p className="text-sm text-gray-400 mb-4 line-clamp-2">
-                  {event.description || 'No description available'}
-                </p>
+          ) : filteredEvents && filteredEvents.length > 0 ? (
+            filteredEvents.map((event) => (
+              <div
+                key={event.id}
+                className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+              >
+                <div className="relative">
+                  
+                  <Image
+                    src={event.eventHeaderImage || event.posterUrl ||"/logozynvo.jpg"}
+                    alt={event.description || event.EventName}
+                    width={600}
+                    height={300}
+                    className="w-full h-48 sm:h-40 object-cover"
+                    priority={false}
+                  />
+                </div>
+                <div className="p-4 md:p-5">
+                  <h3 className="text-lg md:text-xl font-bold text-white mb-2">
+                    {event.EventName}
+                  </h3>
+                  <p className="text-sm text-gray-400 mb-4 line-clamp-2">
+                    {event.description || 'No description available'}
+                  </p>
 
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-gray-300 text-sm">
