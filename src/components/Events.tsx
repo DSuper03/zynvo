@@ -20,10 +20,10 @@ const Events = () => {
           <Image
             src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/20250524_1536_LEGO%20College%20Life_remix_01jw0w1w0jfv9am8a3bxcg8erg.png?updatedAt=1748081232078"
             alt="Hero Background"
-            width={1920}
-            height={1080}
+            layout="fill"
+            objectFit="cover"
+            className="!w-full !h-full"
             priority
-            className="object-cover"
             sizes="100vw"
           />
           {/* Overlay to improve text readability */}

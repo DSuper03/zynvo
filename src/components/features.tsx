@@ -284,7 +284,16 @@ const Features = () => {
     <section
       ref={heroRef}
       className="relative min-h-screen py-10 sm:py-16 md:py-24 overflow-hidden bg-black"
+      style={{
+  backgroundImage: 'url(/featureLanding.jpg)',
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundAttachment: 'fixed'
+}}
     >
+      {/* Background overlay */}
+      <div className="absolute inset-0 bg-black/70 z-0"></div>
+
       {/* Background elements */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 to-transparent"></div>
