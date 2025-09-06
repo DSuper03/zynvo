@@ -23,6 +23,10 @@ export default function FeedbackForm() {
         toast('login please');
         return;
       }
+      if( sessionStorage.getItem('activeSession') != 'true'){
+        toast('login please');
+        return;
+      }
     }
   }, []);
 

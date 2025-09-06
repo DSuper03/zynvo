@@ -55,6 +55,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
         toast('login please');
         return;
       }
+      if( sessionStorage.getItem('activeSession') != 'true'){
+        toast('login please');
+        return;
+      }
     }
   }, []);
 

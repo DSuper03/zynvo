@@ -174,6 +174,10 @@ export default function PublicUserProfile() {
     if (typeof window !== 'undefined') {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
+      if( sessionStorage.getItem('activeSession') != 'true'){
+        toast('login please');
+        return;
+      }
     }
   }, []);
 

@@ -21,6 +21,7 @@ import {
   Menu,
   Sparkles,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 dotenv.config();
 
@@ -51,6 +52,10 @@ const Eventid = () => {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
       setToken(storedToken);
+      if( sessionStorage.getItem('activeSession') != 'true'){
+        toast('login please');
+        return;
+      }
     }
   }, []);
 
