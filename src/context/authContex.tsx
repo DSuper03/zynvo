@@ -18,10 +18,6 @@ export function useAuth() {
       if (typeof window !== 'undefined') {
         const tok = localStorage.getItem('token');
         if (tok) setToken(tok);
-        else {
-          toast('login please');
-          return;
-        }
       }
  }, []);
 
@@ -47,21 +43,20 @@ export function useAuth() {
     loadUser();
   }, [loadUser]);
 
-  // Soft logout - ends session but keeps token
+  
   const softLogout = () => {
     sessionStorage.removeItem("activeSession");
     setUser(null);
   };
 
-  // Hard logout - clears everything
+  
   const hardLogout = () => {
     localStorage.removeItem("token");
     sessionStorage.removeItem("activeSession");
     setUser(null);
-    toast("logged out, refresh page")
+    toast("logged out")
   };
 
-  // Call this after successful login
   const login = () => {
     if(!token) {
         toast("Please login manually");

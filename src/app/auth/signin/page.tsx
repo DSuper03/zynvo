@@ -69,7 +69,7 @@ export default function SignIn() {
         toast('login success');
         router.push('/dashboard');
       }
-    }, 5000); // 5 seconds delay
+    }, 5000);
   };
 
   return (
