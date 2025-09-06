@@ -65,6 +65,7 @@ export default function SignIn() {
       }
       if (msg.data.msg == 'login success') {
         localStorage.setItem('token', msg.data.token);
+        sessionStorage.setItem('activeSession', 'true')
         toast('login success');
         router.push('/dashboard');
       }

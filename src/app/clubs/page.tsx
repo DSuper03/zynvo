@@ -57,8 +57,13 @@ const ClubsPage = () => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
+      const session = sessionStorage.getItem('activeSession');
       if (token) setToken(token);
       else {
+        toast('login please');
+        return;
+      }
+      if(session != 'true'){
         toast('login please');
         return;
       }

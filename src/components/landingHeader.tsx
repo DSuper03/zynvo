@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Image from 'next/legacy/image';
 import { Lens } from './magicui/lens';
+import { useAuth } from '@/context/authContex';
 
 // Animation transition settings
 const transition = {
@@ -93,6 +94,8 @@ const LandingHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeItem, setActiveItem] = useState<string | null>(null);
+
+  const { user, softLogout, hardLogout, login } = useAuth();
 
   // Handle scroll events to change header appearance
   useEffect(() => {
@@ -193,38 +196,6 @@ const LandingHeader = () => {
 
            
 
-            {/* <MenuItem
-              setActive={setActiveItem}
-              active={activeItem}
-              item="Devs"
-              href="/founders"
-            >
-              <div className="p-2 w-[300px]">
-                <HoveredLink href="/founders">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <span className="text-yellow-400 text-lg">👨‍💻</span>
-                    <div>
-                      <p className="font-medium text-white">Our Team</p>
-                      <p className="text-xs text-gray-400">
-                        Meet the developers behind Zynvo
-                      </p>
-                    </div>
-                  </div>
-                </HoveredLink>
-                <HoveredLink href="/founders/story">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-yellow-400 text-lg">📖</span>
-                    <div>
-                      <p className="font-medium text-white">Our Story</p>
-                      <p className="text-xs text-gray-400">
-                        The journey of building Zynvo
-                      </p>
-                    </div>
-                  </div>
-                </HoveredLink>
-              </div>
-            </MenuItem> */}
-
             <MenuItem
               setActive={setActiveItem}
               active={activeItem}
@@ -239,7 +210,21 @@ const LandingHeader = () => {
               href="/contact"
             />
 
-            <Link
+            {user ? (
+        <div className="flex items-center gap-4">
+          <button onClick={login} 
+           className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
+          >
+            <span>Signed in as <strong>{user.email ? user.email : user.id}</strong></span>
+          </button>
+          <button onClick={hardLogout} 
+          className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"          >
+            Logout
+          </button>
+        </div>
+      ) : (
+        <div className="flex gap-4">
+           <Link
               href="/auth/signup"
               className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
             >
@@ -251,6 +236,9 @@ const LandingHeader = () => {
             >
               Sign In
             </Link>
+        </div>
+      )}
+           
           </nav>
 
           {/* Mobile menu button */}
