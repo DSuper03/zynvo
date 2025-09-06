@@ -285,11 +285,11 @@ const Features = () => {
       ref={heroRef}
       className="relative min-h-screen py-10 sm:py-16 md:py-24 overflow-hidden bg-black"
       style={{
-  backgroundImage: 'url(/featureLanding.jpg)',
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-  backgroundAttachment: 'fixed'
-}}
+        backgroundImage: 'url(/featureLanding.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
     >
       {/* Background overlay */}
       <div className="absolute inset-0 bg-black/70 z-0"></div>

@@ -1,12 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
- 
-  MapPin,
-  
-  Calendar,
-} from 'lucide-react';
+import { MapPin, Calendar } from 'lucide-react';
 import { Modal, ModalTrigger } from '@/components/ui/animated-modal';
 import { eventData } from '@/types/global-Interface';
 import Image from 'next/legacy/image';
@@ -111,7 +106,10 @@ export default function EventCard() {
       >
         {isLoading ? (
           [...Array(6)].map((_, index) => (
-            <div key={index} className="bg-black border rounded-lg overflow-hidden shadow-md">
+            <div
+              key={index}
+              className="bg-black border rounded-lg overflow-hidden shadow-md"
+            >
               <Skeleton className="w-full h-48 sm:h-40 rounded-none bg-gray-700" />
               <div className="p-4 md:p-5 space-y-3">
                 <Skeleton className="h-6 w-3/4 rounded-md bg-gray-700" />
@@ -137,7 +135,7 @@ export default function EventCard() {
         ) : error ? (
           <div className="col-span-full text-center py-10">
             <p className="text-red-400 text-lg">{error}</p>
-            <button 
+            <button
               className="mt-4 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition-colors"
               onClick={() => window.location.reload()}
             >
@@ -149,7 +147,6 @@ export default function EventCard() {
             {filteredEvents.map((event) => (
               <motion.article
                 key={event.id}
-               
                 exit="exit"
                 layout
                 whileHover={{ y: -6 }}
@@ -162,7 +159,11 @@ export default function EventCard() {
                   transition={{ type: 'spring', stiffness: 300, damping: 24 }}
                 >
                   <Image
-                    src={event.eventHeaderImage || event.posterUrl || '/logozynvo.jpg'}
+                    src={
+                      event.eventHeaderImage ||
+                      event.posterUrl ||
+                      '/logozynvo.jpg'
+                    }
                     alt={event.description || event.EventName}
                     width={600}
                     height={300}
@@ -176,7 +177,9 @@ export default function EventCard() {
                     initial={{ opacity: 0 }}
                     whileHover={{ opacity: 1 }}
                     transition={{ duration: 0.2 }}
-                    style={{ boxShadow: 'inset 0 0 0 1px rgba(250, 204, 21, 0.25)' }}
+                    style={{
+                      boxShadow: 'inset 0 0 0 1px rgba(250, 204, 21, 0.25)',
+                    }}
                   />
                 </motion.div>
                 <div className="p-4 md:p-5">
@@ -190,13 +193,16 @@ export default function EventCard() {
                     <div className="flex items-center text-gray-300 text-sm">
                       <Calendar className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
                       <span className="truncate">
-                        Deadline: {event.endDate ? formatDate(event.endDate) : ''}
+                        Deadline:{' '}
+                        {event.endDate ? formatDate(event.endDate) : ''}
                       </span>
                     </div>
                     <div className="flex items-center text-gray-300 text-sm">
                       <MapPin className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
                       <span className="truncate">
-                        {event.clubName ? `${event.clubName}'s College` : 'Location TBD'}
+                        {event.clubName
+                          ? `${event.clubName}'s College`
+                          : 'Location TBD'}
                       </span>
                     </div>
                   </div>
@@ -204,7 +210,10 @@ export default function EventCard() {
                     <span className="text-gray-400 text-xs md:text-sm">
                       {event.attendees?.length || 0} attending
                     </span>
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
                       <Button
                         className="bg-black text-white font-bold rounded-2xl border border-yellow-400"
                         onClick={() => router.push(`events/${event.id}`)}

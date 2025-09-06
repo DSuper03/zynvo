@@ -46,13 +46,15 @@ const Eventid = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRegistering, setIsRegistering] = useState(false);
   const [token, setToken] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'speakers' | 'schedule' | 'gallery'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'speakers' | 'schedule' | 'gallery'
+  >('overview');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
       setToken(storedToken);
-      if( sessionStorage.getItem('activeSession') != 'true'){
+      if (sessionStorage.getItem('activeSession') != 'true') {
         toast('login please');
         return;
       }
@@ -85,7 +87,10 @@ const Eventid = () => {
             contactEmail: res.data.response.contactEmail || '',
             contactPhone: res.data.response.contactPhone || 0,
             applicationStatus: res.data.response.applicationStatus || 'open',
-            posterUrl: res.data.response.posterUrl || res.data.response.eventHeaderImage || '',
+            posterUrl:
+              res.data.response.posterUrl ||
+              res.data.response.eventHeaderImage ||
+              '',
           });
         }
       } catch (error) {
@@ -138,7 +143,11 @@ const Eventid = () => {
     const s = start ? new Date(start) : null;
     const e = end ? new Date(end) : null;
     const fmt = (d: Date) =>
-      d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+      d.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
     if (s && e) return `${fmt(s)} → ${fmt(e)}`;
     if (s) return fmt(s);
     return fmt(e as Date);
@@ -177,7 +186,14 @@ const Eventid = () => {
       params.set('dates', `${start}/${end}`);
     }
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
-  }, [data.EventName, data.description, data.university, data.startDate, data.endDate, isOnline]);
+  }, [
+    data.EventName,
+    data.description,
+    data.university,
+    data.startDate,
+    data.endDate,
+    isOnline,
+  ]);
 
   if (isLoading) {
     return (
@@ -190,7 +206,6 @@ const Eventid = () => {
   return (
     <div className="min-h-screen  text-white">
       {/* Top App Bar */}
-     
 
       {/* Hero Section */}
       <div className="max-w-6xl mx-auto px-4 mt-6">
@@ -223,8 +238,14 @@ const Eventid = () => {
                   <span className="text-sm">{data.university || 'TBD'}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  {isOnline ? <Globe className="w-4 h-4" /> : <Square className="w-4 h-4" />}
-                  <span className="text-sm">{isOnline ? 'Online' : data.EventMode || 'Mode TBD'}</span>
+                  {isOnline ? (
+                    <Globe className="w-4 h-4" />
+                  ) : (
+                    <Square className="w-4 h-4" />
+                  )}
+                  <span className="text-sm">
+                    {isOnline ? 'Online' : data.EventMode || 'Mode TBD'}
+                  </span>
                 </div>
               </div>
 
@@ -257,7 +278,12 @@ const Eventid = () => {
             <div className="lg:col-span-5">
               <div className="relative w-full aspect-[4/3] md:aspect-[3/2] rounded-2xl bg-gradient-to-br from-yellow-500/15 to-transparent border border-gray-800 overflow-hidden">
                 {data.posterUrl ? (
-                  <Image src={data.posterUrl} alt="Event Poster" fill className="object-cover" />
+                  <Image
+                    src={data.posterUrl}
+                    alt="Event Poster"
+                    fill
+                    className="object-cover"
+                  />
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-yellow-200/70">
                     <CalendarIcon className="w-16 h-16 mb-2 opacity-60" />
@@ -272,12 +298,14 @@ const Eventid = () => {
         {/* Tabs */}
         <div className="mt-6">
           <div className="flex flex-wrap gap-2">
-            {([
-              { id: 'overview', label: 'Overview' },
-              { id: 'speakers', label: 'Speakers & Judges' },
-              { id: 'schedule', label: 'Schedule' },
-              { id: 'gallery', label: 'Gallery' },
-            ] as const).map((t) => (
+            {(
+              [
+                { id: 'overview', label: 'Overview' },
+                { id: 'speakers', label: 'Speakers & Judges' },
+                { id: 'schedule', label: 'Schedule' },
+                { id: 'gallery', label: 'Gallery' },
+              ] as const
+            ).map((t) => (
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
@@ -297,37 +325,47 @@ const Eventid = () => {
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left column */}
           <div className="lg:col-span-8 space-y-6">
-           
             {activeTab === 'overview' && (
               <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-6">
-                <h2 className="text-2xl font-bold text-yellow-400 mb-3">Design Thinking Workshop</h2>
+                <h2 className="text-2xl font-bold text-yellow-400 mb-3">
+                  Design Thinking Workshop
+                </h2>
                 <p className="text-gray-300 leading-relaxed">
-                  {data.description || 'Event description will be available soon...'}
+                  {data.description ||
+                    'Event description will be available soon...'}
                 </p>
 
                 <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2 text-gray-300">
                     <MapPin className="w-4 h-4 text-yellow-400" />
                     <span>University</span>
-                    <span className="ml-auto text-white">{data.university || 'TBD'}</span>
+                    <span className="ml-auto text-white">
+                      {data.university || 'TBD'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-300">
                     <Globe className="w-4 h-4 text-yellow-400" />
                     <span>Mode</span>
-                    <span className="ml-auto text-white">{data.EventMode || 'TBD'}</span>
+                    <span className="ml-auto text-white">
+                      {data.EventMode || 'TBD'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-300">
                     <AlarmClock className="w-4 h-4 text-yellow-400" />
                     <span>Starts</span>
                     <span className="ml-auto text-white">
-                      {data.startDate ? new Date(data.startDate).toLocaleString() : 'TBD'}
+                      {data.startDate
+                        ? new Date(data.startDate).toLocaleString()
+                        : 'TBD'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-300">
                     <AlarmClock className="w-4 h-4 text-yellow-400" />
                     <span>Ends</span>
                     <span className="ml-auto text-white">
-                      {data.endDate ? new Date(data.endDate).toLocaleString() : 'TBD'}
+                      {data.endDate
+                        ? new Date(data.endDate).toLocaleString()
+                        : 'TBD'}
                     </span>
                   </div>
                 </div>
@@ -348,22 +386,34 @@ const Eventid = () => {
 
             {activeTab === 'schedule' && (
               <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-6">
-                <h2 className="text-xl font-bold text-yellow-400 mb-2">Schedule</h2>
-                <p className="text-gray-400">Schedule details will be announced soon.</p>
+                <h2 className="text-xl font-bold text-yellow-400 mb-2">
+                  Schedule
+                </h2>
+                <p className="text-gray-400">
+                  Schedule details will be announced soon.
+                </p>
               </div>
             )}
 
             {activeTab === 'speakers' && (
               <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-6">
-                <h2 className="text-xl font-bold text-yellow-400 mb-2">Speakers & Judges</h2>
-                <p className="text-gray-400">Speakers will be revealed closer to the event.</p>
+                <h2 className="text-xl font-bold text-yellow-400 mb-2">
+                  Speakers & Judges
+                </h2>
+                <p className="text-gray-400">
+                  Speakers will be revealed closer to the event.
+                </p>
               </div>
             )}
 
             {activeTab === 'gallery' && (
               <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-6">
-                <h2 className="text-xl font-bold text-yellow-400 mb-2">Gallery</h2>
-                <p className="text-gray-400">Photos and videos will appear here after the event.</p>
+                <h2 className="text-xl font-bold text-yellow-400 mb-2">
+                  Gallery
+                </h2>
+                <p className="text-gray-400">
+                  Photos and videos will appear here after the event.
+                </p>
               </div>
             )}
 
@@ -389,7 +439,12 @@ const Eventid = () => {
             <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-3">
               <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-yellow-500/10">
                 {data.posterUrl ? (
-                  <Image src={data.posterUrl} alt="Event Poster" fill className="object-cover" />
+                  <Image
+                    src={data.posterUrl}
+                    alt="Event Poster"
+                    fill
+                    className="object-cover"
+                  />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-yellow-200/70">
                     <CalendarIcon className="w-12 h-12 opacity-60" />
@@ -451,7 +506,9 @@ const Eventid = () => {
         {/* Success notice (unchanged logic) */}
         {forkedUpId && (
           <div className="mt-6 p-4 bg-green-900/30 border border-green-500/30 rounded-2xl">
-            <p className="text-green-400 font-medium mb-1">Registration Successful! 🎉</p>
+            <p className="text-green-400 font-medium mb-1">
+              Registration Successful! 🎉
+            </p>
             <p className="text-gray-300">
               Get your pass for this event on{' '}
               <a

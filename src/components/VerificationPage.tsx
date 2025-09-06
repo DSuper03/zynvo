@@ -35,7 +35,7 @@ function VerificationContent() {
         if (response.status == 200) {
           setStatus('success');
           localStorage.setItem('token', response.data.token);
-          sessionStorage.setItem('activeSession', 'true')
+          sessionStorage.setItem('activeSession', 'true');
           // Start countdown for redirect
           const timer = setInterval(() => {
             setCountdown((prev) => {

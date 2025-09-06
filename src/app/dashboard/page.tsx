@@ -573,10 +573,10 @@ export default function ZynvoDashboard() {
         return;
       }
 
-      if( sessionStorage.getItem('activeSession') != 'true'){
-              toast('login please');
-              return;
-            }
+      if (sessionStorage.getItem('activeSession') != 'true') {
+        toast('login please');
+        return;
+      }
     }
   }, []);
 
@@ -808,7 +808,7 @@ export default function ZynvoDashboard() {
               fill
               className="object-cover size-5"
               priority
-              sizes='6'
+              sizes="6"
             />
           </div>
           <div className="relative px-4 sm:px-6 pb-6">

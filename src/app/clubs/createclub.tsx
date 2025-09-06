@@ -37,7 +37,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
         toast('login please');
         return;
       }
-      if( sessionStorage.getItem('activeSession') != 'true'){
+      if (sessionStorage.getItem('activeSession') != 'true') {
         toast('login please');
         return;
       }

@@ -94,7 +94,6 @@ function Footer() {
               </div>
             </div>
 
-            
             <div className="space-y-6">
               <div className="mt-8 flex items-center justify-center">
                 <div className="transform scale-75 sm:scale-90 md:scale-100"></div>

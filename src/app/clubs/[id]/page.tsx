@@ -94,7 +94,7 @@ export default function ClubPage({}: ClubPageProps) {
         toast('login please');
         return;
       }
-      if( sessionStorage.getItem('activeSession') != 'true'){
+      if (sessionStorage.getItem('activeSession') != 'true') {
         toast('login please');
         return;
       }

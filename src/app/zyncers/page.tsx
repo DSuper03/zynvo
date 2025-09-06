@@ -50,7 +50,6 @@ const AnimatedBackground = () => {
   );
 };
 
-
 const UserCard = ({
   user,
   onClick,

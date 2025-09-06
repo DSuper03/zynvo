@@ -8,7 +8,9 @@ const securityHeaders = [
       img-src 'self' data: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://via.placeholder.com https://api.dicebear.com https://example.com;
       connect-src 'self' https://backend.zynvo.social;
       font-src 'self' data:;
-    `.replace(/\s{2,}/g, ' ').trim(),
+    `
+      .replace(/\s{2,}/g, ' ')
+      .trim(),
   },
   {
     key: 'X-Frame-Options',
@@ -160,7 +162,5 @@ const nextConfig = {
     ];
   },
 };
-
-
 
 export default nextConfig;

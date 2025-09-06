@@ -24,7 +24,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
       setToken(storedToken);
-      if( sessionStorage.getItem('activeSession') != 'true'){
+      if (sessionStorage.getItem('activeSession') != 'true') {
         toast('login please');
         return;
       }

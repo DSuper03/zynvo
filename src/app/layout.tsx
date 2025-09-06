@@ -18,8 +18,10 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'Zynvo - Agentic Social Media Platform for Campus Communities | Student Network',
-  description: 'Zynvo is the leading agentic social media platform connecting college students, clubs, and societies. Discover events, join communities, compete in challenges, and build meaningful campus connections through AI-powered networking.',
+  title:
+    'Zynvo - Agentic Social Media Platform for Campus Communities | Student Network',
+  description:
+    'Zynvo is the leading agentic social media platform connecting college students, clubs, and societies. Discover events, join communities, compete in challenges, and build meaningful campus connections through AI-powered networking.',
   keywords: [
     'agentic social media platform',
     'college social network',
@@ -32,7 +34,7 @@ export const metadata: Metadata = {
     'student engagement platform',
     'college societies network',
     'academic social platform',
-    'intelligent campus networking'
+    'intelligent campus networking',
   ].join(', '),
   authors: [{ name: 'Zynvo Team' }],
   creator: 'Zynvo',
@@ -44,7 +46,8 @@ export const metadata: Metadata = {
     url: 'https://zynvo.com',
     siteName: 'Zynvo',
     title: 'Zynvo - Agentic Social Media Platform for Campus Communities',
-    description: 'The intelligent social platform revolutionizing how college students connect, discover events, join clubs, and build meaningful campus relationships through AI-powered networking.',
+    description:
+      'The intelligent social platform revolutionizing how college students connect, discover events, join clubs, and build meaningful campus relationships through AI-powered networking.',
     images: [
       {
         url: '/landing page.png',
@@ -59,7 +62,8 @@ export const metadata: Metadata = {
     site: '@zynvo',
     creator: '@zynvo',
     title: 'Zynvo - Agentic Social Media Platform for Campus Communities',
-    description: 'Join the intelligent social platform connecting college students, clubs, and societies. Discover events, build networks, and compete in challenges.',
+    description:
+      'Join the intelligent social platform connecting college students, clubs, and societies. Discover events, build networks, and compete in challenges.',
     images: ['/landing page.png'],
   },
   category: 'Social Media',

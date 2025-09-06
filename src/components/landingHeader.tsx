@@ -194,8 +194,6 @@ const LandingHeader = () => {
               </div>
             </MenuItem>
 
-           
-
             <MenuItem
               setActive={setActiveItem}
               active={activeItem}
@@ -211,34 +209,39 @@ const LandingHeader = () => {
             />
 
             {user ? (
-        <div className="flex items-center gap-4">
-          <button onClick={login} 
-           className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
-          >
-            <span>Signed in as <strong>{user.email ? user.email : user.id}</strong></span>
-          </button>
-          <button onClick={hardLogout} 
-          className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"          >
-            Logout
-          </button>
-        </div>
-      ) : (
-        <div className="flex gap-4">
-           <Link
-              href="/auth/signup"
-              className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
-            >
-              Sign Up
-            </Link>
-            <Link
-              href="/auth/signin"
-              className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
-            >
-              Sign In
-            </Link>
-        </div>
-      )}
-           
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={login}
+                  className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
+                >
+                  <span>
+                    Signed in as{' '}
+                    <strong>{user.email ? user.email : user.id}</strong>
+                  </span>
+                </button>
+                <button
+                  onClick={hardLogout}
+                  className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-4">
+                <Link
+                  href="/auth/signup"
+                  className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
+                >
+                  Sign Up
+                </Link>
+                <Link
+                  href="/auth/signin"
+                  className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
+                >
+                  Sign In
+                </Link>
+              </div>
+            )}
           </nav>
 
           {/* Mobile menu button */}
@@ -331,13 +334,21 @@ const LandingHeader = () => {
               >
                 Discover
               </Link>
-              <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+              <Link
+                href="/"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-2xl text-gray-200 hover:text-white"
+              >
                 Testimonials
               </Link>
               {/* <Link href="/founders" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
                 Devs
               </Link> */}
-              <Link href="/clubs" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+              <Link
+                href="/clubs"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-2xl text-gray-200 hover:text-white"
+              >
                 Clubs
               </Link>
               <Link
