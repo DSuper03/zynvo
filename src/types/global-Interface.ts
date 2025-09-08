@@ -371,6 +371,7 @@ export interface respnseUseState {
   university: string;
   applicationStatus: string;
   posterUrl?: string;
+  eventHeader?: string;
 }
 export interface PostData {
   id: string;

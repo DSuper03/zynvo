@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/legacy/image';
 import { Lens } from './magicui/lens';
 import { useAuth } from '@/context/authContex';
+import { Button } from './ui/button';
 
 // Animation transition settings
 const transition = {
@@ -209,6 +210,7 @@ const LandingHeader = () => {
             />
 
             {user ? (
+              
               <div className="flex items-center gap-4">
                 <button
                   onClick={login}
@@ -245,7 +247,9 @@ const LandingHeader = () => {
           </nav>
 
           {/* Mobile menu button */}
-          <button
+
+       
+          <Button
             className="md:hidden text-white"
             aria-label="Open menu"
             aria-expanded={isMobileMenuOpen}
@@ -274,7 +278,7 @@ const LandingHeader = () => {
                 />
               )}
             </svg>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -361,22 +365,43 @@ const LandingHeader = () => {
             </div>
 
             {/* Actions */}
-            <div className="px-6 pb-6 pt-2 grid grid-cols-2 gap-3">
-              <Link
-                href="/auth/signin"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="rounded-2xl bg-white/5 text-yellow-300 hover:bg-white/10 text-center py-3 font-medium"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/auth/signup"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="rounded-2xl bg-yellow-500 text-black hover:bg-yellow-400 text-center py-3 font-semibold"
-              >
-                Sign Up
-              </Link>
-            </div>
+
+            {user ? (
+              <div className="px-6 pb-6 pt-2 flex flex-col items-center gap-4 bg-black/60 rounded-2xl shadow-lg">
+                <div className="flex items-center gap-3 w-full justify-center">
+                  <div className="flex-shrink-0 bg-yellow-500 text-black rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
+                    {user.email ? user.email.charAt(0).toUpperCase() : (user.id ? user.id.charAt(0).toUpperCase() : '?')}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-400">Signed in as</span>
+                    <span className="font-semibold text-white truncate max-w-[120px]">{user.email ?? (user.id ?? '')}</span>
+                  </div>
+                </div>
+                <Button
+                  onClick={hardLogout}
+                  className="w-full rounded-xl bg-yellow-500 text-black hover:bg-yellow-400 py-3 font-semibold transition-colors"
+                >
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <div className="px-6 pb-6 pt-2 flex flex-col gap-3">
+                <Link
+                  href="/auth/signin"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full rounded-xl bg-white/10 text-yellow-300 hover:bg-white/20 text-center py-3 font-medium transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full rounded-xl bg-yellow-500 text-black hover:bg-yellow-400 text-center py-3 font-semibold transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </motion.div>
         </div>
       )}

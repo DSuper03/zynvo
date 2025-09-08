@@ -11,7 +11,7 @@ interface DecodedToken {
 
 export function useAuth() {
   const router = useRouter();
-  const [user, setUser] = useState<{ id?: string; email?: string } | null>(
+  const [user, setUser] = useState<{ id?: string; email?: string; name?: string } | null>(
     null
   );
   const [token, setToken] = useState('');
@@ -31,7 +31,7 @@ export function useAuth() {
         const decoded: DecodedToken = jwtDecode(token);
         if (decoded.id) {
           setUser({ id: decoded.id, email: decoded.email });
-          alert(decoded.id);
+         // alert(decoded.id);
         }
       } catch {
         setUser(null);

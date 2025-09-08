@@ -40,6 +40,7 @@ const Eventid = () => {
     university: '',
     applicationStatus: 'open',
     posterUrl: '',
+    eventHeader:'',
   });
 
   const [forkedUpId, setForkedUpId] = useState<string | null>(null);
@@ -277,9 +278,9 @@ const Eventid = () => {
             {/* Right: Poster */}
             <div className="lg:col-span-5">
               <div className="relative w-full aspect-[4/3] md:aspect-[3/2] rounded-2xl bg-gradient-to-br from-yellow-500/15 to-transparent border border-gray-800 overflow-hidden">
-                {data.posterUrl ? (
+                {data.posterUrl && data.eventHeader ? (
                   <Image
-                    src={data.posterUrl}
+                    src={data.eventHeader}
                     alt="Event Poster"
                     fill
                     className="object-cover"
