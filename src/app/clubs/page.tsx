@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import dotenv from 'dotenv';
 import './responsive.css';
+import { useDisclosure } from '@heroui/modal';
 
 dotenv.config();
 
@@ -53,6 +54,9 @@ const ClubsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [token, setToken] = useState('');
+ const {isOpen, onOpen, onClose, onOpenChange} = useDisclosure();
+ 
+
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

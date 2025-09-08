@@ -210,7 +210,7 @@ const LandingHeader = () => {
             />
 
             {user ? (
-              
+              (console.log(user)),
               <div className="flex items-center gap-4">
                 <button
                   onClick={login}
@@ -218,7 +218,7 @@ const LandingHeader = () => {
                 >
                   <span>
                     Signed in as{' '}
-                    <strong>{user.email ? user.email : user.id}</strong>
+                    <strong>{user.email ?? ''}</strong>
                   </span>
                 </button>
                 <button

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import {  useState } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, Search, Repeat, Sparkles, Send } from 'lucide-react';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/react';
+import { useEffect } from 'react';
 
 const quickPrompts = [
   'Looking for the most relevant answers?',
@@ -21,6 +23,16 @@ export default function AIHome() {
   const [loading, setLoading] = useState(false);
   const [answer, setAnswer] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const tok = localStorage.getItem('token');
+      if (!tok) {
+        onOpen();
+      }
+    }
+  }, [onOpen]);
 
   // Read the key once; if missing, show a warning and disable calls
   const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY as
@@ -67,6 +79,7 @@ export default function AIHome() {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-black text-white">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 pt-10 pb-20">
         {/* Top bar mock */}
@@ -176,5 +189,21 @@ export default function AIHome() {
         )}
       </div>
     </div>
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur" className='bg-white'>
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader className="flex flex-col gap-1">Reminder</ModalHeader>
+            <ModalBody>
+              <p>Please review your settings.</p>
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={onClose} className="bg-yellow-500 text-black hover:bg-yellow-400">Close</Button>
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
+    </>
   );
 }
