@@ -10,6 +10,8 @@ import { Separator } from '@/components/ui/separator';
 import { Loader2, Search, Repeat, Sparkles, Send } from 'lucide-react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/react';
 import { useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 const quickPrompts = [
   'Looking for the most relevant answers?',
@@ -189,16 +191,73 @@ export default function AIHome() {
         )}
       </div>
     </div>
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur" className='bg-white'>
+    <Modal 
+    isDismissable={false}
+      isOpen={isOpen} 
+      onOpenChange={onOpenChange} 
+      backdrop="blur" 
+      placement="center"
+      hideCloseButton
+      classNames={{
+        base: "bg-neutral-300 border border-gray-200 border-2 rounded-2xl",
+        header: "border-b border-gray-200",
+        footer: "border-t border-gray-200",
+      }}
+    >
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="flex flex-col gap-1">Reminder</ModalHeader>
-            <ModalBody>
-              <p>Please review your settings.</p>
+            <ModalHeader className="flex flex-col gap-1 text-center">
+              <div className="flex justify-center mb-4">
+                <Image 
+                  src="/modal/legomodalreminder.png" 
+                  alt="Welcome to Zynvo AI" 
+                  width={220} 
+                  height={220}
+                  className="rounded-full"
+                />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800">Welcome to Zynvo 🚀</h2>
+            </ModalHeader>
+            <ModalBody className="text-center">
+              <p className="text-gray-900 mb-4 text-mono">
+                Hey there! We're excited to have you try our AI features. 
+                To get started and unlock personalized answers, please sign up or sign in.
+              </p>
+              <p className="text-sm text-gray-500">
+                Don't worry, it only takes a minute! 😊
+              </p>
             </ModalBody>
-            <ModalFooter>
-              <Button onClick={onClose} className="bg-yellow-500 text-black hover:bg-yellow-400">Close</Button>
+            <ModalFooter className="flex flex-col gap-3">
+              <div className="flex gap-3 w-full">
+                <Link href="/auth/signin" className="flex-1">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
+                    onClick={onClose}
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/auth/signup" className="flex-1">
+                  <Button 
+                    className="w-full bg-yellow-500 text-black hover:bg-yellow-400"
+                    onClick={onClose}
+                  >
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+              <Button 
+                variant="ghost" 
+                onClick={() => {
+                  onClose();
+                  window.location.href = '/auth/signup';
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                Maybe later
+              </Button>
             </ModalFooter>
           </>
         )}
