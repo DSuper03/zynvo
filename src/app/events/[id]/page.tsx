@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios from 'axios';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useState } from 'react';
 import dotenv from 'dotenv';
 import Image from 'next/image';
@@ -43,6 +43,8 @@ const Eventid = () => {
     eventHeader:'',
   });
 
+  const router = useRouter()
+
   const [forkedUpId, setForkedUpId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRegistering, setIsRegistering] = useState(false);
@@ -50,14 +52,17 @@ const Eventid = () => {
   const [activeTab, setActiveTab] = useState<
     'overview' | 'speakers' | 'schedule' | 'gallery'
   >('overview');
+  const [signedin , setSignedin] = useState<boolean>(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
       setToken(storedToken);
-      if (sessionStorage.getItem('activeSession') != 'true') {
+      if (sessionStorage.getItem('activeSession') !== 'true') {
         toast('login please');
         return;
+      } else {
+        setSignedin(true)
       }
     }
   }, []);
@@ -251,7 +256,8 @@ const Eventid = () => {
               </div>
 
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                <Button
+                {signedin ? (
+                  <Button
                   onClick={handleRegistration}
                   disabled={isRegistering || data.applicationStatus !== 'open'}
                   className={`rounded-xl px-5 py-3 font-semibold ${
@@ -262,6 +268,18 @@ const Eventid = () => {
                 >
                   {isRegistering ? 'Registering...' : 'Register Now'}
                 </Button>
+                ) : (
+                    <Button
+                  onClick={()=> {
+                    router.push('/auth/signup')
+                  }}
+                  className={`rounded-xl px-5 py-3 font-semibold bg-yellow-400 hover:bg-yellow-500 text-black
+                  `}
+                >
+                  Sign Up to Regester
+                </Button>
+                )}
+                
 
                 <a
                   href={googleCalendarHref}

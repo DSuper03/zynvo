@@ -7,11 +7,13 @@ import { useRouter } from 'next/navigation';
 interface DecodedToken {
   id?: string;
   email?: string;
+  name? : string;
+  pfp? : string;
 }
 
 export function useAuth() {
   const router = useRouter();
-  const [user, setUser] = useState<{ id?: string; email?: string; name?: string } | null>(
+  const [user, setUser] = useState<{ id?: string; email?: string; name?: string; pfp? : string } | null>(
     null
   );
   const [token, setToken] = useState('');
@@ -30,8 +32,7 @@ export function useAuth() {
       try {
         const decoded: DecodedToken = jwtDecode(token);
         if (decoded.id) {
-          setUser({ id: decoded.id, email: decoded.email });
-         // alert(decoded.id);
+          setUser({ id: decoded.id, email: decoded.email, name : decoded.name, pfp : decoded.pfp });
         }
       } catch {
         setUser(null);
