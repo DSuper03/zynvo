@@ -33,6 +33,7 @@ import { EventFormData } from '@/types/global-Interface';
 import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
 import { toast } from 'sonner';
 import axios from 'axios';
+import NoTokenModal from '@/components/modals/remindModal';
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -70,12 +71,19 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     const tok = localStorage.getItem('token');
     if (tok) setToken(tok);
     else {
       toast('login please');
+      setIsModalOpen(true);
+      return;
+    }
+    const session = sessionStorage.getItem('activeSession');
+    if(!session) {
+      setIsModalOpen(true);
       return;
     }
   }, []);
@@ -969,6 +977,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
         </MagicCard>
       </Card>
+       <NoTokenModal
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+      />
     </div>
   );
 };

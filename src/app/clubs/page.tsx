@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import dotenv from 'dotenv';
 import './responsive.css';
+import NoTokenModal from '@/components/modals/remindModal';
 
 dotenv.config();
 
@@ -53,6 +54,9 @@ const ClubsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [token, setToken] = useState('');
+  const [isOpen, setIsOpen] = useState(false)
+ 
+
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -63,8 +67,9 @@ const ClubsPage = () => {
         toast('login please');
         return;
       }
-      if (session != 'true') {
+      if (session !== 'true') {
         toast('login please');
+        setIsOpen(true);
         return;
       }
     }
@@ -442,6 +447,11 @@ const ClubsPage = () => {
           </div>
         )}
       </div>
+
+       <NoTokenModal
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
+      />
 
       {/* Create Club Modal */}
       <CreateClubModal

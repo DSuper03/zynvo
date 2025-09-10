@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import {  useState } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, Search, Repeat, Sparkles, Send } from 'lucide-react';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/react';
+import { useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 const quickPrompts = [
   'Looking for the most relevant answers?',
@@ -21,6 +25,16 @@ export default function AIHome() {
   const [loading, setLoading] = useState(false);
   const [answer, setAnswer] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const tok = localStorage.getItem('token');
+      if (!tok) {
+        onOpen();
+      }
+    }
+  }, [onOpen]);
 
   // Read the key once; if missing, show a warning and disable calls
   const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY as
@@ -67,6 +81,7 @@ export default function AIHome() {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-black text-white">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 pt-10 pb-20">
         {/* Top bar mock */}
@@ -176,5 +191,78 @@ export default function AIHome() {
         )}
       </div>
     </div>
+    <Modal 
+    isDismissable={false}
+      isOpen={isOpen} 
+      onOpenChange={onOpenChange} 
+      backdrop="blur" 
+      placement="center"
+      hideCloseButton
+      classNames={{
+        base: "bg-neutral-300 border border-gray-200 border-2 rounded-2xl",
+        header: "border-b border-gray-200",
+        footer: "border-t border-gray-200",
+      }}
+    >
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader className="flex flex-col gap-1 text-center">
+              <div className="flex justify-center mb-4">
+                <Image 
+                  src="/modal/legomodalreminder.png" 
+                  alt="Welcome to Zynvo AI" 
+                  width={220} 
+                  height={220}
+                  className="rounded-full"
+                />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800">Welcome to Zynvo 🚀</h2>
+            </ModalHeader>
+            <ModalBody className="text-center">
+              <p className="text-gray-900 mb-4 text-mono">
+                Hey there! We're excited to have you try our AI features. 
+                To get started and unlock personalized answers, please sign up or sign in.
+              </p>
+              <p className="text-sm text-gray-500">
+                Don't worry, it only takes a minute! 😊
+              </p>
+            </ModalBody>
+            <ModalFooter className="flex flex-col gap-3">
+              <div className="flex gap-3 w-full">
+                <Link href="/auth/signin" className="flex-1">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
+                    onClick={onClose}
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/auth/signup" className="flex-1">
+                  <Button 
+                    className="w-full bg-yellow-500 text-black hover:bg-yellow-400"
+                    onClick={onClose}
+                  >
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+              <Button 
+                variant="ghost" 
+                onClick={() => {
+                  onClose();
+                  window.location.href = '/auth/signup';
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                Maybe later
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
+    </>
   );
 }
