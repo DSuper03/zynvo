@@ -65,6 +65,7 @@ const ClubsPage = () => {
       if (token) setToken(token);
       else {
         toast('login please');
+        setIsOpen(true);
         return;
       }
       if (session !== 'true') {
