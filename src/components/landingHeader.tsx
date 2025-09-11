@@ -191,8 +191,6 @@ const LandingHeader = () => {
               </div>
             </MenuItem>
 
-           
-
             {/* <MenuItem
               setActive={setActiveItem}
               active={activeItem}
@@ -343,13 +341,21 @@ const LandingHeader = () => {
               >
                 Discover
               </Link>
-              <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+              <Link
+                href="/"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-2xl text-gray-200 hover:text-white"
+              >
                 Testimonials
               </Link>
               {/* <Link href="/founders" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
                 Devs
               </Link> */}
-              <Link href="/clubs" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+              <Link
+                href="/clubs"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-2xl text-gray-200 hover:text-white"
+              >
                 Clubs
               </Link>
               <Link

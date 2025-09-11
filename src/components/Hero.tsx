@@ -43,7 +43,8 @@ const Hero = () => {
                 transition={{ duration: 0.6, delay: 0.1 }}
                 className="mt-5 text-lg sm:text-xl text-gray-700 max-w-xl"
               >
-                Connecting students through activities that spark creativity, collaboration, and fun
+                Connecting students through activities that spark creativity,
+                collaboration, and fun
               </motion.p>
 
               <motion.div
@@ -61,7 +62,12 @@ const Hero = () => {
                 <Link href="/stories" className="inline-flex">
                   <span className="inline-flex items-center gap-3 rounded-xl bg-gray-900 text-white px-5 py-3 text-base font-semibold shadow-sm hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
                     <span className="relative inline-flex h-7 w-7 overflow-hidden rounded-full bg-yellow-200">
-                      <Image src="/student1.png" alt="avatar" layout="fill" objectFit="cover" />
+                      <Image
+                        src="/student1.png"
+                        alt="avatar"
+                        layout="fill"
+                        objectFit="cover"
+                      />
                     </span>
                     Check student stories
                   </span>
@@ -71,43 +77,53 @@ const Hero = () => {
 
             {/* Right: Illustration, floating blocks, stats card */}
             <div className="relative h-[420px] sm:h-[480px] lg:h-[560px] overflow-visible">
-  {/* Character illustration placeholder */}
-  <div className="absolute bottom-0 right-0 left-0 mx-auto w-[100%] sm:w-[95%] lg:w-[90%] z-0 pb-16 scale-125">
+              {/* Character illustration placeholder */}
+              <div className="absolute bottom-0 right-0 left-0 mx-auto w-[100%] sm:w-[95%] lg:w-[90%] z-0 pb-16 scale-125">
+                <Image
+                  src="/cutouts/landingPagecutout.png"
+                  alt="Lego style character"
+                  layout="responsive"
+                  width={1400}
+                  height={1400}
+                  priority
+                />
+              </div>
 
-    <Image
-      src="/cutouts/landingPagecutout.png"
-      alt="Lego style character"
-      layout="responsive"
-      width={1400}
-      height={1400}
-      priority
-    />
-  </div>
+              {/* Floating colorful blocks */}
+              <div className="absolute -top-2 right-6 sm:right-12 w-12 h-12 sm:w-16 sm:h-16 bg-yellow-600 rounded-lg shadow-md grid place-items-center rotate-6">
+                <span className="text-white text-xl">💡</span>
+              </div>
+              <div className="absolute top-16 left-2 sm:left-6 w-12 h-12 sm:w-16 sm:h-16 bg-blue-500 rounded-lg shadow-md grid place-items-center -rotate-6">
+                <span className="text-white text-xl">💬</span>
+              </div>
+              <div className="absolute top-36 right-24 w-10 h-10 sm:w-14 sm:h-14 bg-red-500 rounded-lg shadow-md grid place-items-center rotate-3">
+                <span className="text-white text-lg">👥</span>
+              </div>
+              <div className="absolute top-48 left-12 w-10 h-10 sm:w-14 sm:h-14 bg-green-500 rounded-lg shadow-md grid place-items-center -rotate-3">
+                <span className="text-white text-lg">🎯</span>
+              </div>
 
-  {/* Floating colorful blocks */}
-  <div className="absolute -top-2 right-6 sm:right-12 w-12 h-12 sm:w-16 sm:h-16 bg-yellow-600 rounded-lg shadow-md grid place-items-center rotate-6">
-    <span className="text-white text-xl">💡</span>
-  </div>
-  <div className="absolute top-16 left-2 sm:left-6 w-12 h-12 sm:w-16 sm:h-16 bg-blue-500 rounded-lg shadow-md grid place-items-center -rotate-6">
-    <span className="text-white text-xl">💬</span>
-  </div>
-  <div className="absolute top-36 right-24 w-10 h-10 sm:w-14 sm:h-14 bg-red-500 rounded-lg shadow-md grid place-items-center rotate-3">
-    <span className="text-white text-lg">👥</span>
-  </div>
-  <div className="absolute top-48 left-12 w-10 h-10 sm:w-14 sm:h-14 bg-green-500 rounded-lg shadow-md grid place-items-center -rotate-3">
-    <span className="text-white text-lg">🎯</span>
-  </div>
-
-  {/* Stats Card */}
-  <div className="absolute right-0 sm:right-2 lg:right-4 bottom-4 sm:bottom-6 w-[64%] sm:w-[52%] lg:w-[46%] bg-gray-900 text-white rounded-2xl p-5 sm:p-6 shadow-xl z-20">
-    <p className="text-sm sm:text-base text-gray-200">Campus Clubs Thriving – Zynvo in Action</p>
-    <div className="mt-3">
-      <p className="text-2xl sm:text-3xl font-extrabold">500+ <span className="font-semibold text-gray-200">Clubs Connected</span></p>
-      <p className="mt-2 text-2xl sm:text-3xl font-extrabold">800+ <span className="font-semibold text-gray-200">Successful Collaborations</span></p>
-    </div>
-  </div>
-</div>
-
+              {/* Stats Card */}
+              <div className="absolute right-0 sm:right-2 lg:right-4 bottom-4 sm:bottom-6 w-[64%] sm:w-[52%] lg:w-[46%] bg-gray-900 text-white rounded-2xl p-5 sm:p-6 shadow-xl z-20">
+                <p className="text-sm sm:text-base text-gray-200">
+                  Campus Clubs Thriving – Zynvo in Action
+                </p>
+                <div className="mt-3">
+                  <p className="text-2xl sm:text-3xl font-extrabold">
+                    500+{' '}
+                    <span className="font-semibold text-gray-200">
+                      Clubs Connected
+                    </span>
+                  </p>
+                  <p className="mt-2 text-2xl sm:text-3xl font-extrabold">
+                    800+{' '}
+                    <span className="font-semibold text-gray-200">
+                      Successful Collaborations
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

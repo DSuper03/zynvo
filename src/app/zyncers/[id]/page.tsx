@@ -372,7 +372,7 @@ export default function PublicUserProfile() {
             fill
             className="object-cover size-5"
             priority
-            sizes='3'
+            sizes="3"
           />
         </div>
 

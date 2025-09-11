@@ -169,7 +169,9 @@ const ClubsPage = () => {
               <Button
                 onClick={() => setIsGridView(!isGridView)}
                 className="bg-gray-800 text-white p-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center"
-                title={isGridView ? 'Switch to List View' : 'Switch to Grid View'}
+                title={
+                  isGridView ? 'Switch to List View' : 'Switch to Grid View'
+                }
               >
                 {isGridView ? (
                   <List className="h-4 w-4 md:h-5 md:w-5" />
@@ -244,7 +246,7 @@ const ClubsPage = () => {
                         <Image
                           src={club.profilePicUrl}
                           alt={club.name}
-                          layout='fill'
+                          layout="fill"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           priority={false}
                         />

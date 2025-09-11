@@ -85,7 +85,8 @@ const Features = () => {
             Explore What Zynvo Offers
           </h1>
           <p className="text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto">
-            Tools that empower students, clubs, and colleges to connect, collaborate, and grow
+            Tools that empower students, clubs, and colleges to connect,
+            collaborate, and grow
           </p>
         </motion.div>
 
@@ -124,10 +125,10 @@ const Features = () => {
               whileHover={{ y: -5, scale: 1.02 }}
               className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <div className={`w-12 h-12 sm:w-14 sm:h-14 ${feature.color} rounded-lg flex items-center justify-center mb-4`}>
-                <div className="text-white">
-                  {feature.icon}
-                </div>
+              <div
+                className={`w-12 h-12 sm:w-14 sm:h-14 ${feature.color} rounded-lg flex items-center justify-center mb-4`}
+              >
+                <div className="text-white">{feature.icon}</div>
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
                 {feature.title}
