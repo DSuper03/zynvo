@@ -1,8 +1,6 @@
 import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
-import WrapButton from './ui/wrap-button';
 import Link from 'next/link';
-import HeroVideoDialog from './magicui/hero-video-dialog';
 import Image from 'next/legacy/image';
 
 const Hero = () => {
@@ -11,109 +9,107 @@ const Hero = () => {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center py-10 sm:py-16 md:py-32 overflow-hidden"
+      className="relative min-h-screen w-full bg-yellow-400/90 flex items-center justify-center py-18 sm:py-16 md:py-24 overflow-hidden"
     >
-      {/* Background Image - Fixed Correctly */}
-      <div className="absolute inset-0 z-0 w-full h-full">
-        <Image
-          src="/landing page.png"
-          alt="Hero Background"
-          layout="fill"
-          objectFit="cover"
-          priority
-          className="object-cover"
-          sizes="100vw"
+      {/* Lego-like dotted pattern background */}
+      <div className="absolute inset-0 -z-10 opacity-30">
+        <div
+          className="w-full h-full"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle, rgba(0,0,0,0.25) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
         />
-        {/* Enhanced gradient overlay for better text contrast */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
       </div>
 
-      {/* Content */}
-      <div className="w-full max-w-6xl px-4 sm:px-6 md:px-8 lg:px-16 text-center relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="space-y-4 sm:space-y-6 md:space-y-8"
-        >
-          {/* Enhanced Title with bigger text and better typography */}
-          <motion.h1
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-tight text-white"
-          >
-            <span className="block">
-              Surf, <span className="text-yellow-400">Connect,</span>
-            </span>
-            <span className="block">Explore</span>
-          </motion.h1>
+      {/* Card Container */}
+      <div className="relative w-full max-w-7xl px-4 sm:px-6 md:px-8">
+        <div className="rounded-3xl bg-yellow-200 shadow-xl border border-amber-500/60 p-6 sm:p-8 lg:p-12 overflow-visible">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Left: Text and CTAs */}
+            <div>
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900"
+              >
+                Build, Bond, Belong – Zynvo for Campus Connections
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="mt-5 text-lg sm:text-xl text-gray-700 max-w-xl"
+              >
+                Connecting students through activities that spark creativity, collaboration, and fun
+              </motion.p>
 
-          {/* Subtitle with enhanced styling */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="space-y-2"
-          >
-            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-yellow-400">
-              Zynvo for campus connection
-            </h2>
-          </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4"
+              >
+                <Link href="/auth/signup" className="inline-flex">
+                  <span className="inline-flex items-center justify-center rounded-xl bg-black text-white px-6 py-3 text-base font-semibold shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+                    Get Started
+                  </span>
+                </Link>
 
-          {/* Enhanced description */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-base sm:text-lg md:text-xl lg:text-2xl max-w-4xl mx-auto text-gray-200 leading-relaxed px-2"
-          >
-            Bridge the gap between college clubs and societies, creating a
-            vibrant network for students across institutions.
-          </motion.p>
+                <Link href="/stories" className="inline-flex">
+                  <span className="inline-flex items-center gap-3 rounded-xl bg-gray-900 text-white px-5 py-3 text-base font-semibold shadow-sm hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+                    <span className="relative inline-flex h-7 w-7 overflow-hidden rounded-full bg-yellow-200">
+                      <Image src="/student1.png" alt="avatar" layout="fill" objectFit="cover" />
+                    </span>
+                    Check student stories
+                  </span>
+                </Link>
+              </motion.div>
+            </div>
 
-          {/* Enhanced CTA Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="pt-4 sm:pt-6"
-          >
-            <Link href="/auth/signup" className="inline-block">
-              <WrapButton className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 shadow-lg hover:shadow-yellow-500/25">
-                Zync It Now
-              </WrapButton>
-            </Link>
-          </motion.div>
-        </motion.div>
+            {/* Right: Illustration, floating blocks, stats card */}
+            <div className="relative h-[420px] sm:h-[480px] lg:h-[560px] overflow-visible">
+  {/* Character illustration placeholder */}
+  <div className="absolute bottom-0 right-0 left-0 mx-auto w-[100%] sm:w-[95%] lg:w-[90%] z-0 pb-16 scale-125">
 
-        {/* Enhanced Decorative Elements - Mobile Optimized */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1 }}
-          className="absolute inset-0 pointer-events-none"
-        >
-          {/* Animated floating elements - Responsive positioning */}
-          <div className="absolute top-1/4 right-4 sm:right-10 w-16 h-16 sm:w-32 sm:h-32 bg-yellow-500/20 rounded-full blur-xl sm:blur-3xl animate-pulse"></div>
-          <div
-            className="absolute bottom-1/3 right-8 sm:right-20 w-12 h-12 sm:w-24 sm:h-24 bg-yellow-400/30 rounded-full blur-lg sm:blur-2xl animate-bounce"
-            style={{ animationDuration: '3s' }}
-          ></div>
-          <div className="absolute top-1/2 left-4 sm:left-10 w-8 h-8 sm:w-16 sm:h-16 bg-white/10 rounded-full blur-md sm:blur-xl"></div>
+    <Image
+      src="/cutouts/landingPagecutout.png"
+      alt="Lego style character"
+      layout="responsive"
+      width={1400}
+      height={1400}
+      priority
+    />
+  </div>
 
-          {/* Subtle grid pattern overlay - Hidden on very small screens */}
-          <div className="absolute inset-0 opacity-5 hidden sm:block">
-            <div
-              className="w-full h-full"
-              style={{
-                backgroundImage:
-                  'radial-gradient(circle, white 1px, transparent 1px)',
-                backgroundSize: '50px 50px',
-              }}
-            ></div>
+  {/* Floating colorful blocks */}
+  <div className="absolute -top-2 right-6 sm:right-12 w-12 h-12 sm:w-16 sm:h-16 bg-yellow-600 rounded-lg shadow-md grid place-items-center rotate-6">
+    <span className="text-white text-xl">💡</span>
+  </div>
+  <div className="absolute top-16 left-2 sm:left-6 w-12 h-12 sm:w-16 sm:h-16 bg-blue-500 rounded-lg shadow-md grid place-items-center -rotate-6">
+    <span className="text-white text-xl">💬</span>
+  </div>
+  <div className="absolute top-36 right-24 w-10 h-10 sm:w-14 sm:h-14 bg-red-500 rounded-lg shadow-md grid place-items-center rotate-3">
+    <span className="text-white text-lg">👥</span>
+  </div>
+  <div className="absolute top-48 left-12 w-10 h-10 sm:w-14 sm:h-14 bg-green-500 rounded-lg shadow-md grid place-items-center -rotate-3">
+    <span className="text-white text-lg">🎯</span>
+  </div>
+
+  {/* Stats Card */}
+  <div className="absolute right-0 sm:right-2 lg:right-4 bottom-4 sm:bottom-6 w-[64%] sm:w-[52%] lg:w-[46%] bg-gray-900 text-white rounded-2xl p-5 sm:p-6 shadow-xl z-20">
+    <p className="text-sm sm:text-base text-gray-200">Campus Clubs Thriving – Zynvo in Action</p>
+    <div className="mt-3">
+      <p className="text-2xl sm:text-3xl font-extrabold">500+ <span className="font-semibold text-gray-200">Clubs Connected</span></p>
+      <p className="mt-2 text-2xl sm:text-3xl font-extrabold">800+ <span className="font-semibold text-gray-200">Successful Collaborations</span></p>
+    </div>
+  </div>
+</div>
+
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
