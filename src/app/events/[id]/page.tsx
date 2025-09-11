@@ -40,10 +40,10 @@ const Eventid = () => {
     university: '',
     applicationStatus: 'open',
     posterUrl: '',
-    eventHeader:'',
+    eventHeader: '',
   });
 
-  const router = useRouter()
+  const router = useRouter();
 
   const [forkedUpId, setForkedUpId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,7 +52,7 @@ const Eventid = () => {
   const [activeTab, setActiveTab] = useState<
     'overview' | 'speakers' | 'schedule' | 'gallery'
   >('overview');
-  const [signedin , setSignedin] = useState<boolean>(false)
+  const [signedin, setSignedin] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -62,7 +62,7 @@ const Eventid = () => {
         toast('login please');
         return;
       } else {
-        setSignedin(true)
+        setSignedin(true);
       }
     }
   }, []);
@@ -258,28 +258,29 @@ const Eventid = () => {
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
                 {signedin ? (
                   <Button
-                  onClick={handleRegistration}
-                  disabled={isRegistering || data.applicationStatus !== 'open'}
-                  className={`rounded-xl px-5 py-3 font-semibold ${
-                    isRegistering || data.applicationStatus !== 'open'
-                      ? 'bg-gray-700 text-gray-300 cursor-not-allowed'
-                      : 'bg-yellow-400 hover:bg-yellow-500 text-black'
-                  }`}
-                >
-                  {isRegistering ? 'Registering...' : 'Register Now'}
-                </Button>
+                    onClick={handleRegistration}
+                    disabled={
+                      isRegistering || data.applicationStatus !== 'open'
+                    }
+                    className={`rounded-xl px-5 py-3 font-semibold ${
+                      isRegistering || data.applicationStatus !== 'open'
+                        ? 'bg-gray-700 text-gray-300 cursor-not-allowed'
+                        : 'bg-yellow-400 hover:bg-yellow-500 text-black'
+                    }`}
+                  >
+                    {isRegistering ? 'Registering...' : 'Register Now'}
+                  </Button>
                 ) : (
-                    <Button
-                  onClick={()=> {
-                    router.push('/auth/signup')
-                  }}
-                  className={`rounded-xl px-5 py-3 font-semibold bg-yellow-400 hover:bg-yellow-500 text-black
+                  <Button
+                    onClick={() => {
+                      router.push('/auth/signup');
+                    }}
+                    className={`rounded-xl px-5 py-3 font-semibold bg-yellow-400 hover:bg-yellow-500 text-black
                   `}
-                >
-                  Sign Up to Regester
-                </Button>
+                  >
+                    Sign Up to Regester
+                  </Button>
                 )}
-                
 
                 <a
                   href={googleCalendarHref}

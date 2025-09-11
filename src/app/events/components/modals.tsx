@@ -71,7 +71,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const tok = localStorage.getItem('token');
@@ -82,7 +82,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       return;
     }
     const session = sessionStorage.getItem('activeSession');
-    if(!session) {
+    if (!session) {
       setIsModalOpen(true);
       return;
     }
@@ -977,10 +977,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
         </MagicCard>
       </Card>
-       <NoTokenModal
-        isOpen={isModalOpen}
-        onOpenChange={setIsModalOpen}
-      />
+      <NoTokenModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} />
     </div>
   );
 };

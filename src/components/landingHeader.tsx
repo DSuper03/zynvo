@@ -210,26 +210,32 @@ const LandingHeader = () => {
             />
 
             {user ? (
-              (console.log(user)),
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={login}
-                  className="bg-yellow-500 text-black hover:bg-yellow-400 px-4 py-1 rounded-full font-medium transition-colors"
-                >
-                  <span className='flex gap-1 justify-center items-center'>
-                   <span>
-                    <img src={user.pfp} alt="pfp" className="flex-shrink-0 bg-yellow-500 text-black rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg"/>
-                    </span> 
-                    <strong>{user.name}</strong>
-                  </span>
-                </button>
-                <button
-                  onClick={hardLogout}
-                  className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
+              (console.log(user),
+              (
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={login}
+                    className="bg-yellow-500 text-black hover:bg-yellow-400 px-4 py-1 rounded-full font-medium transition-colors"
+                  >
+                    <span className="flex gap-1 justify-center items-center">
+                      <span>
+                        <img
+                          src={user.pfp}
+                          alt="pfp"
+                          className="flex-shrink-0 bg-yellow-500 text-black rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg"
+                        />
+                      </span>
+                      <strong>{user.name}</strong>
+                    </span>
+                  </button>
+                  <button
+                    onClick={hardLogout}
+                    className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ))
             ) : (
               <div className="flex gap-4">
                 <Link
@@ -250,7 +256,6 @@ const LandingHeader = () => {
 
           {/* Mobile menu button */}
 
-       
           <Button
             className="md:hidden text-white"
             aria-label="Open menu"
@@ -373,13 +378,13 @@ const LandingHeader = () => {
                 <div className="flex items-center gap-3 w-full justify-center">
                   <div className="flex-shrink-0 bg-yellow-500 text-black rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
                     {/* {user.email ? user.email.charAt(0).toUpperCase() : (user.id ? user.id.charAt(0).toUpperCase() : '?')} */}
-                    {user.pfp && 
-                    <img src={user.pfp} alt="" />
-                  }
+                    {user.pfp && <img src={user.pfp} alt="" />}
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-400">Signed in as</span>
-                    <span className="font-semibold text-white truncate max-w-[120px]">{user.name ?? (user.email ?? '')}</span>
+                    <span className="font-semibold text-white truncate max-w-[120px]">
+                      {user.name ?? user.email ?? ''}
+                    </span>
                   </div>
                 </div>
                 <Button

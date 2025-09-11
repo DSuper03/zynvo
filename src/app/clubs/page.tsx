@@ -54,9 +54,7 @@ const ClubsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [token, setToken] = useState('');
-  const [isOpen, setIsOpen] = useState(false)
- 
-
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -448,10 +446,7 @@ const ClubsPage = () => {
         )}
       </div>
 
-       <NoTokenModal
-        isOpen={isOpen}
-        onOpenChange={setIsOpen}
-      />
+      <NoTokenModal isOpen={isOpen} onOpenChange={setIsOpen} />
 
       {/* Create Club Modal */}
       <CreateClubModal
