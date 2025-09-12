@@ -130,6 +130,7 @@ export default function ClubPage({}: ClubPageProps) {
           collegeName: response.data.response.collegeName,
           description: response.data.response.description,
           members: response.data.response.members,
+          profileAvatar: response.data.response.members.profileAvatar,
           founderEmail: response.data.response.founderEmail,
           facultyEmail: response.data.response.facultyEmail,
           image: '/default-club-image.jpg',
@@ -622,7 +623,7 @@ export default function ClubPage({}: ClubPageProps) {
                 <div className="flex items-center">
                   <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
                     <Image
-                      src="https://i.pravatar.cc/150?img=11"
+                      src={club.members?.[0]?.profileAvatar || '/default-avatar.jpg'}
                       alt="President"
                       width={40}
                       height={40}
