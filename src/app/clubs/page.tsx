@@ -62,7 +62,7 @@ const ClubsPage = () => {
       const session = sessionStorage.getItem('activeSession');
       if (token) setToken(token);
       else {
-        toast('login please');
+      
         setIsOpen(true);
         return;
       }

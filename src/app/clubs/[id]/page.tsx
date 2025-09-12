@@ -85,13 +85,13 @@ export default function ClubPage({}: ClubPageProps) {
   const [event, setEvent] = useState<EventType[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [token, setToken] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       else {
-        toast('login please');
         return;
       }
       if (sessionStorage.getItem('activeSession') != 'true') {
@@ -100,64 +100,100 @@ export default function ClubPage({}: ClubPageProps) {
       }
     }
   }, []);
+
   useEffect(() => {
     async function call() {
       if (!token) {
         toast('login please');
         return;
       }
-      const response = await axios.get<Response>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClub?id=${id}`,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
+      
+      try {
+        setLoading(true);
+        
+        // Fetch club data
+        const response = await axios.get<Response>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClub?id=${id}`,
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        
+        console.log('Club data:', response.data.response);
+        
+        // Set club data
+        setClub({
+          id: response.data.response.id,
+          name: response.data.response.name,
+          collegeName: response.data.response.collegeName,
+          description: response.data.response.description,
+          members: response.data.response.members,
+          founderEmail: response.data.response.founderEmail,
+          facultyEmail: response.data.response.facultyEmail,
+          image: '/default-club-image.jpg',
+          category: 'tech',
+        });
+
+        // Fetch events data - Fixed the API endpoint
+        try {
+          const response2 = await axios.get<EventResponse>(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/eventByClub/${id}`,
+            {
+              headers: {
+                authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          const events = response2.data.event;
+
+          const filteredEvents = events.map((e) => ({
+            id: e.id,
+            EventName: e.EventName,
+            description: e.description,
+            clubName: e.clubName,
+            createdAt: new Date(e.createdAt), // Convert string to Date
+            image: e.eventHeaderImage || '/default-event-image.jpg',
+            title: e.EventName,
+          }));
+
+          setEvent(filteredEvents);
+        } catch (eventError) {
+          console.error('Error fetching events:', eventError);
+          // Set empty events array if events fetch fails
+          setEvent([]);
         }
-      );
-
-      const response2 = await axios.get<EventResponse>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/events/eventByClub/${id}`,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const events = response2.data.event;
-
-      const filteredEvents = events.map((e) => ({
-        id: e.id,
-        EventName: e.EventName,
-        description: e.description,
-        clubName: e.clubName,
-        createdAt: e.createdAt,
-        image: e.eventHeaderImage || '/default-event-image.jpg',
-        title: e.EventName,
-      }));
-
-      setEvent(filteredEvents);
-
-      setClub({
-        id: response.data.response.id,
-        name: response.data.response.name,
-        collegeName: response.data.response.collegeName,
-        description: response.data.response.description,
-        members: response.data.response.members,
-        founderEmail: response.data.response.founderEmail,
-        facultyEmail: response.data.response.facultyEmail,
-        image: '/default-club-image.jpg',
-        category: 'tech',
-      });
+        
+      } catch (error) {
+        console.error('Error fetching club data:', error);
+        toast('Failed to load club data');
+      } finally {
+        setLoading(false);
+      }
     }
 
-    call();
+    if (token && id) {
+      call();
+    }
   }, [id, token]);
 
-  if (!club) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
+      </div>
+    );
+  }
+
+  if (!club || !club.id) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-center">
+          <h1 className="text-2xl font-bold mb-4">Club not found</h1>
+          <p className="text-gray-400">The club you're looking for doesn't exist or has been removed.</p>
+        </div>
       </div>
     );
   }
@@ -192,13 +228,13 @@ export default function ClubPage({}: ClubPageProps) {
         {/* Floating Club Logo */}
         <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-10">
           <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-yellow-500 shadow-lg shadow-black/50">
-            <Image
-              src={club.image || 'default-club-image.jpg'}
+            <img
+              src={club.image || '/banners/banner'}
               alt={club.name}
               width={128}
               height={128}
               className="object-cover"
-              priority
+             
             />
           </div>
         </div>
@@ -223,13 +259,9 @@ export default function ClubPage({}: ClubPageProps) {
           </h1>
 
           <div className="flex items-center justify-center gap-3 mb-4">
-            {/* <span className={`px-3 py-1 rounded-full text-sm ${getCategoryStyle(club.category)}`}>
-              {club.category.charAt(0).toUpperCase() + club.category.slice(1)}
-            </span> */}
-
             <div className="flex items-center text-gray-300">
               <Users size={16} className="mr-1" />
-              <span>{club.members} members</span>
+              <span>{Array.isArray(club.members) ? club.members.length : 0} members</span>
             </div>
 
             {club.isPopular && (
@@ -410,58 +442,64 @@ export default function ClubPage({}: ClubPageProps) {
                   Upcoming Events
                 </h2>
 
-                {event.map((event: EventType) => (
-                  <div
-                    key={event.id}
-                    className="bg-gray-800 rounded-lg overflow-hidden hover:border hover:border-yellow-500/30 transition-all duration-300 shadow-md"
-                  >
-                    <div className="relative h-48 w-full">
-                      <Image
-                        src={event.image || '/default-event-image.jpg'}
-                        alt={event.title || 'Event Image'}
-                        width={100}
-                        height={100}
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-
-                      <div className="absolute bottom-0 left-0 p-4 w-full">
-                        <h3 className="text-xl font-bold text-white">
-                          {event.EventName}
-                        </h3>
-                        <div className="flex items-center text-yellow-400 mt-1">
-                          <CalendarDays size={16} className="mr-1" />
-                          <span className="text-sm">
-                            {event.createdAt.toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-4">
-                      <div className="flex items-center text-gray-300 mb-2">
-                        <Clock size={16} className="mr-1" />
-                        <span className="text-sm">{event.time}</span>
-                      </div>
-
-                      <div className="flex items-center text-gray-300 mb-4">
-                        <MapPin size={16} className="mr-1" />
-                        <span className="text-sm">{club.collegeName}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center text-gray-400">
-                          <Users size={16} className="mr-1" />
-                          <span className="text-sm">{100} going</span>
-                        </div>
-
-                        <Button className="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg text-sm font-medium transition-colors">
-                          RSVP
-                        </Button>
-                      </div>
-                    </div>
+                {event.length === 0 ? (
+                  <div className="bg-gray-800 rounded-lg p-6 text-center">
+                    <p className="text-gray-300">No events found for this club.</p>
                   </div>
-                ))}
+                ) : (
+                  event.map((eventItem: EventType) => (
+                    <div
+                      key={eventItem.id}
+                      className="bg-gray-800 rounded-lg overflow-hidden hover:border hover:border-yellow-500/30 transition-all duration-300 shadow-md"
+                    >
+                      <div className="relative h-48 w-full">
+                        <Image
+                          src={eventItem.image || '/default-event-image.jpg'}
+                          alt={eventItem.title || 'Event Image'}
+                          width={100}
+                          height={100}
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+
+                        <div className="absolute bottom-0 left-0 p-4 w-full">
+                          <h3 className="text-xl font-bold text-white">
+                            {eventItem.EventName}
+                          </h3>
+                          <div className="flex items-center text-yellow-400 mt-1">
+                            <CalendarDays size={16} className="mr-1" />
+                            <span className="text-sm">
+                              {eventItem.createdAt.toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4">
+                        <div className="flex items-center text-gray-300 mb-2">
+                          <Clock size={16} className="mr-1" />
+                          <span className="text-sm">{eventItem.time || 'TBA'}</span>
+                        </div>
+
+                        <div className="flex items-center text-gray-300 mb-4">
+                          <MapPin size={16} className="mr-1" />
+                          <span className="text-sm">{club.collegeName}</span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center text-gray-400">
+                            <Users size={16} className="mr-1" />
+                            <span className="text-sm">{100} going</span>
+                          </div>
+
+                          <Button className="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg text-sm font-medium transition-colors">
+                            RSVP
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
 
                 <Link
                   href="#"
@@ -558,12 +596,12 @@ export default function ClubPage({}: ClubPageProps) {
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div className="bg-gray-900 rounded-lg p-3">
                   <p className="text-yellow-400 text-xl font-bold">
-                    {club.members}
+                    {Array.isArray(club.members) ? club.members.length : 0}
                   </p>
                   <p className="text-gray-300 text-sm">Members</p>
                 </div>
                 <div className="bg-gray-900 rounded-lg p-3">
-                  <p className="text-yellow-400 text-xl font-bold">15</p>
+                  <p className="text-yellow-400 text-xl font-bold">{event.length}</p>
                   <p className="text-gray-300 text-sm">Events</p>
                 </div>
                 <div className="bg-gray-900 rounded-lg p-3">
@@ -616,38 +654,6 @@ export default function ClubPage({}: ClubPageProps) {
                     <p className="text-gray-400 text-xs">Faculty</p>
                   </div>
                 </div>
-
-                {/* <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                    <Image
-                      src="https://i.pravatar.cc/150?img=21"
-                      alt="Secretary"
-                      width={40}
-                      height={40}
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-medium">Dev Patel</h4>
-                    <p className="text-gray-400 text-xs">Secretary</p>
-                  </div>
-                </div> */}
-
-                {/* <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                    <Image
-                      src="https://i.pravatar.cc/150?img=32"
-                      alt="Treasurer"
-                      width={40}
-                      height={40}
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-medium">Neha Kapoor</h4>
-                    <p className="text-gray-400 text-xs">Treasurer</p>
-                  </div>
-                </div> */}
               </div>
             </div>
 
