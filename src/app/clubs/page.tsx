@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import dotenv from 'dotenv';
 import './responsive.css';
+import NoTokenModal from '@/components/modals/remindModal';
 
 dotenv.config();
 
@@ -53,13 +54,21 @@ const ClubsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [token, setToken] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
+      const session = sessionStorage.getItem('activeSession');
       if (token) setToken(token);
       else {
         toast('login please');
+        setIsOpen(true);
+        return;
+      }
+      if (session !== 'true') {
+        toast('login please');
+        setIsOpen(true);
         return;
       }
     }
@@ -169,7 +178,9 @@ const ClubsPage = () => {
               <Button
                 onClick={() => setIsGridView(!isGridView)}
                 className="bg-gray-800 text-white p-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center"
-                title={isGridView ? 'Switch to List View' : 'Switch to Grid View'}
+                title={
+                  isGridView ? 'Switch to List View' : 'Switch to Grid View'
+                }
               >
                 {isGridView ? (
                   <List className="h-4 w-4 md:h-5 md:w-5" />
@@ -244,7 +255,7 @@ const ClubsPage = () => {
                         <Image
                           src={club.profilePicUrl}
                           alt={club.name}
-                          layout='fill'
+                          layout="fill"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           priority={false}
                         />
@@ -435,6 +446,8 @@ const ClubsPage = () => {
           </div>
         )}
       </div>
+
+      <NoTokenModal isOpen={isOpen} onOpenChange={setIsOpen} />
 
       {/* Create Club Modal */}
       <CreateClubModal

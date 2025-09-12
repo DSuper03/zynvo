@@ -140,6 +140,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
               ${pathname === item.href ? 'bg-gray-800' : 'hover:bg-gray-700'}
               ${!isOpen ? 'justify-center' : ''}
             `}
+            onClick={() => {
+              sessionStorage.removeItem('activeSession');
+            }}
           >
             <div className="flex-shrink-0">{item.icon}</div>
             {showText && (

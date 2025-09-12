@@ -3227,6 +3227,12 @@ export const collegesWithClubs = [
     State: 'West Bengal',
   },
   {
+    college: 'NIT Rourkela',
+    State: 'Odisha',
+  },
+  { college: 'Bhawanipur Education Society College', State: 'West Bengal' },
+
+  {
     college: 'Bangabasi College, Kolkata',
     State: 'West Bengal',
   },

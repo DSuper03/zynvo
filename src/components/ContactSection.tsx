@@ -100,7 +100,7 @@ const ContactSection = () => {
                   <span>@zynvonow</span>
                 </div>
                 <div className="flex items-center space-x-4 text-gray-300">
-                  <FaInstagramSquare/>
+                  <FaInstagramSquare />
                   <span>Follow us on Instagram</span>
                 </div>
               </div>

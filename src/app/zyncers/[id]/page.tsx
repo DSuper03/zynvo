@@ -174,6 +174,10 @@ export default function PublicUserProfile() {
     if (typeof window !== 'undefined') {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
+      if (sessionStorage.getItem('activeSession') != 'true') {
+        toast('login please');
+        return;
+      }
     }
   }, []);
 
@@ -372,7 +376,7 @@ export default function PublicUserProfile() {
             fill
             className="object-cover size-5"
             priority
-            sizes='3'
+            sizes="3"
           />
         </div>
 

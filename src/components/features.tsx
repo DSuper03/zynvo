@@ -154,16 +154,169 @@ const Features = () => {
               <span className="text-white text-lg sm:text-xl">👋</span>
             </div>
           </div>
-          <Link href="/auth/signup">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-black text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-900 transition-colors duration-300 shadow-lg"
-            >
-              Get Started Today
-            </motion.button>
-          </Link>
-        </motion.div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const CtaSkeleton = () => {
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-yellow-500/20 to-black rounded-lg p-6"
+    >
+      <h3 className="text-white font-bold text-xl mb-3">Ready to join?</h3>
+      <Button className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-md">
+        <Link href="/auth/signup">Sign Up Today</Link>
+      </Button>
+    </motion.div>
+  );
+};
+
+const Features = () => {
+  const heroRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+
+    if (heroRef.current) {
+      observer.observe(heroRef.current);
+    }
+
+    return () => {
+      if (heroRef.current) {
+        observer.unobserve(heroRef.current);
+      }
+    };
+  }, []);
+
+  // Define BentoGrid items
+  const items = [
+    {
+      title: 'Welcome to Zynvo',
+      description: (
+        <span className="text-sm text-neutral-50">
+          Your ultimate campus connection platform
+        </span>
+      ),
+      header: <HeroSkeleton />,
+      className: 'md:col-span-2',
+      icon: <Sparkles className="h-5 w-5 text-neutral-50" />,
+    },
+    {
+      title: 'Platform Stats',
+      description: (
+        <span className="text-sm text-neutral-50">
+          Growing network of students and colleges
+        </span>
+      ),
+      header: <StatsSkeleton />,
+      className: 'md:col-span-1',
+      icon: <Activity className="h-5 w-5 text-neutral-50" />,
+    },
+    {
+      title: 'Tech Fest 2025',
+      description: (
+        <span className="text-sm">
+          Join the upcoming campus-wide tech festival
+        </span>
+      ),
+      header: <EventSkeleton />,
+      className: 'md:col-span-1',
+      icon: <Calendar className="h-5 w-5 text-neutral-50" />,
+    },
+    {
+      title: 'Create Club Rooms',
+      description: (
+        <span className="text-sm">
+          Host virtual meetings and discussions instantly
+        </span>
+      ),
+      header: <ClubRoomSkeleton />,
+      className: 'md:col-span-1',
+      icon: <MessageCircle className="h-5 w-5 text-neutral-50" />,
+    },
+    {
+      title: 'Key Features',
+      description: (
+        <span className="text-sm text-neutral-50 ">
+          Tools designed for campus networking
+        </span>
+      ),
+      header: <FeaturesSkeleton />,
+      className: 'md:col-span-1',
+      icon: <BookOpen className="h-5 w-5 text-neutral-50" />,
+    },
+  ];
+
+  return (
+    <section
+      ref={heroRef}
+      className="relative min-h-screen py-10 sm:py-16 md:py-24 overflow-hidden bg-black"
+      style={{
+        backgroundImage: 'url(/featureLanding.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* Background overlay */}
+      <div className="absolute inset-0 bg-black/70 z-0"></div>
+
+      {/* Background elements */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 to-transparent"></div>
+        <div className="absolute bottom-0 right-0 w-full h-1 bg-gradient-to-l from-yellow-500 to-transparent"></div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+        <div className="text-center mb-8 sm:mb-12">
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="flex items-center justify-center gap-2 mb-4"
+          >
+            <span className="text-xl font-semibold text-yellow-500">Zynvo</span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white"
+          >
+            Your Campus{' '}
+            <span className=" text-yellow-500  to-yellow-900">
+              Connection Hub
+            </span>
+          </motion.h1>
+        </div>
+
+        {/* Responsive BentoGrid */}
+        <BentoGrid className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto md:auto-rows-[20rem] text-neutral-100">
+          {items.map((item, i) => (
+            <BentoGridItem
+              key={i}
+              title={item.title}
+              description={item.description}
+              header={item.header}
+              className={cn(
+                '[&>p:text-base] sm:[&>p:text-lg] rounded-lg text-neutral-100',
+                item.className
+              )}
+              icon={item.icon}
+            />
+          ))}
+        </BentoGrid>
       </div>
     </section>
   );

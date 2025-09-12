@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import {
   Search,
   User,
@@ -35,7 +36,7 @@ const FloatingParticles = () => {
 // Animated gradient background - FIXED Z-INDEX
 const AnimatedBackground = () => {
   return (
-    <div className="fixed inset-0 overflow-hidden z-0">
+    <div className="fixed inset-0 overflow-hidden -z-10 pointer-events-none">
       <div className="absolute -top-40 -right-40 w-80 h-80 bg-yellow-400/5 rounded-full blur-3xl animate-pulse-slow" />
       <div
         className="absolute -bottom-40 -left-40 w-80 h-80 bg-yellow-400/3 rounded-full blur-3xl animate-pulse-slow"
@@ -49,7 +50,6 @@ const AnimatedBackground = () => {
   );
 };
 
-// Enhanced User card component with expand/collapse functionality
 const UserCard = ({
   user,
   onClick,

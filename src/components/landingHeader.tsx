@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Image from 'next/legacy/image';
 import { Lens } from './magicui/lens';
+import { useAuth } from '@/context/authContex';
+import { Button } from './ui/button';
 
 // Animation transition settings
 const transition = {
@@ -93,6 +95,8 @@ const LandingHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeItem, setActiveItem] = useState<string | null>(null);
+
+  const { user, softLogout, hardLogout, login } = useAuth();
 
   // Handle scroll events to change header appearance
   useEffect(() => {
@@ -191,40 +195,6 @@ const LandingHeader = () => {
               </div>
             </MenuItem>
 
-           
-
-            {/* <MenuItem
-              setActive={setActiveItem}
-              active={activeItem}
-              item="Devs"
-              href="/founders"
-            >
-              <div className="p-2 w-[300px]">
-                <HoveredLink href="/founders">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <span className="text-yellow-400 text-lg">👨‍💻</span>
-                    <div>
-                      <p className="font-medium text-white">Our Team</p>
-                      <p className="text-xs text-gray-400">
-                        Meet the developers behind Zynvo
-                      </p>
-                    </div>
-                  </div>
-                </HoveredLink>
-                <HoveredLink href="/founders/story">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-yellow-400 text-lg">📖</span>
-                    <div>
-                      <p className="font-medium text-white">Our Story</p>
-                      <p className="text-xs text-gray-400">
-                        The journey of building Zynvo
-                      </p>
-                    </div>
-                  </div>
-                </HoveredLink>
-              </div>
-            </MenuItem> */}
-
             <MenuItem
               setActive={setActiveItem}
               active={activeItem}
@@ -239,22 +209,54 @@ const LandingHeader = () => {
               href="/contact"
             />
 
-            <Link
-              href="/auth/signup"
-              className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
-            >
-              Sign Up
-            </Link>
-            <Link
-              href="/auth/signin"
-              className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
-            >
-              Sign In
-            </Link>
+            {user ? (
+              (console.log(user),
+              (
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={login}
+                    className="bg-yellow-500 text-black hover:bg-yellow-400 px-4 py-1 rounded-full font-medium transition-colors"
+                  >
+                    <span className="flex gap-1 justify-center items-center">
+                      <span>
+                        <img
+                          src={user.pfp}
+                          alt="pfp"
+                          className="flex-shrink-0 bg-yellow-500 text-black rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg"
+                        />
+                      </span>
+                      <strong>{user.name}</strong>
+                    </span>
+                  </button>
+                  <button
+                    onClick={hardLogout}
+                    className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="flex gap-4">
+                <Link
+                  href="/auth/signup"
+                  className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
+                >
+                  Sign Up
+                </Link>
+                <Link
+                  href="/auth/signin"
+                  className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
+                >
+                  Sign In
+                </Link>
+              </div>
+            )}
           </nav>
 
           {/* Mobile menu button */}
-          <button
+
+          <Button
             className="md:hidden text-white"
             aria-label="Open menu"
             aria-expanded={isMobileMenuOpen}
@@ -283,7 +285,7 @@ const LandingHeader = () => {
                 />
               )}
             </svg>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -343,13 +345,21 @@ const LandingHeader = () => {
               >
                 Discover
               </Link>
-              <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+              <Link
+                href="/"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-2xl text-gray-200 hover:text-white"
+              >
                 Testimonials
               </Link>
               {/* <Link href="/founders" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
                 Devs
               </Link> */}
-              <Link href="/clubs" onClick={() => setIsMobileMenuOpen(false)} className="block text-2xl text-gray-200 hover:text-white">
+              <Link
+                href="/clubs"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-2xl text-gray-200 hover:text-white"
+              >
                 Clubs
               </Link>
               <Link
@@ -362,22 +372,46 @@ const LandingHeader = () => {
             </div>
 
             {/* Actions */}
-            <div className="px-6 pb-6 pt-2 grid grid-cols-2 gap-3">
-              <Link
-                href="/auth/signin"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="rounded-2xl bg-white/5 text-yellow-300 hover:bg-white/10 text-center py-3 font-medium"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/auth/signup"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="rounded-2xl bg-yellow-500 text-black hover:bg-yellow-400 text-center py-3 font-semibold"
-              >
-                Sign Up
-              </Link>
-            </div>
+
+            {user ? (
+              <div className="px-6 pb-6 pt-2 flex flex-col items-center gap-4 bg-black/60 rounded-2xl shadow-lg">
+                <div className="flex items-center gap-3 w-full justify-center">
+                  <div className="flex-shrink-0 bg-yellow-500 text-black rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
+                    {/* {user.email ? user.email.charAt(0).toUpperCase() : (user.id ? user.id.charAt(0).toUpperCase() : '?')} */}
+                    {user.pfp && <img src={user.pfp} alt="" />}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-400">Signed in as</span>
+                    <span className="font-semibold text-white truncate max-w-[120px]">
+                      {user.name ?? user.email ?? ''}
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  onClick={hardLogout}
+                  className="w-full rounded-xl bg-yellow-500 text-black hover:bg-yellow-400 py-3 font-semibold transition-colors"
+                >
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <div className="px-6 pb-6 pt-2 flex flex-col gap-3">
+                <Link
+                  href="/auth/signin"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full rounded-xl bg-white/10 text-yellow-300 hover:bg-white/20 text-center py-3 font-medium transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full rounded-xl bg-yellow-500 text-black hover:bg-yellow-400 text-center py-3 font-semibold transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </motion.div>
         </div>
       )}

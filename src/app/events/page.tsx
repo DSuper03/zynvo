@@ -9,6 +9,7 @@ import CreateEventButton from './components/createEventButton';
 import CreateEventModal from './components/modals';
 import EventCard from './components/EventCard';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 interface apiRespEvents {
   msg: string;

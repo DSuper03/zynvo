@@ -357,6 +357,7 @@ export interface eventData {
   EventName: string;
   prizes: string;
   endDate: Date | null;
+  posterUrl?: string;
 }
 
 export interface respnseUseState {
@@ -369,29 +370,26 @@ export interface respnseUseState {
   contactPhone: number;
   university: string;
   applicationStatus: string;
+  posterUrl?: string;
+  eventHeader?: string;
 }
-export interface PostAuthor {
-  id: string;
-  name: string | null;
-  email: string;
-  profileAvatar: string | null; // Add this property
-  collegeName: string | null;
-  clubName: string | null;
-}
-
 export interface PostData {
   id: string;
   title: string;
   description: string;
   image: string | null;
+  createdAt: Date;
+  updatedAt: Date;
   published: boolean;
-  createdAt: string;
-  updatedAt: string;
-  collegeName: string | null;
-  clubName: string | null;
-  author: PostAuthor; // Make sure this includes profileAvatar
+  collegeId: string | null;
+  authorId: string;
+  collegeName: string;
+  clubName: string;
+  author: {
+    profileAvatar: string | null;
+    name: string | null;
+  };
 }
-
 export interface EventByIdResponse {
   msg: string;
   response: {

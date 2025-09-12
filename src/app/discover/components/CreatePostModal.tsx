@@ -55,6 +55,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
         toast('login please');
         return;
       }
+      if (sessionStorage.getItem('activeSession') != 'true') {
+        toast('login please');
+        return;
+      }
     }
   }, []);
 
@@ -305,21 +309,17 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   <School size={16} className="mr-1" />
                   Select a College
                 </Label>
-                <select
-                  value={selectedCollege}
-                  onChange={(e) => {
-                    setSelectedCollege(e.target.value);
-                    setSelectedClub(''); // Reset club selection when college changes
-                  }}
-                  className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
+                <Button
+                  onClick={openCollegeModal}
+                  className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none flex justify-between items-center"
                 >
-                  <option value="">Select a college</option>
-                  {collegesWithClubs.map((college) => (
-                    <option key={college.college} value={college.college}>
-                      {college.college}
-                    </option>
-                  ))}
-                </select>
+                  {selectedCollege ? (
+                    <span>{selectedCollege}</span>
+                  ) : (
+                    <span className="text-gray-400">Select a college</span>
+                  )}
+                  <Search size={18} className="ml-2 text-yellow-400" />
+                </Button>
               </div>
 
               {/* Club Selection */}

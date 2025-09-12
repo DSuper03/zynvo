@@ -39,8 +39,11 @@ export default function SignUp() {
 
   // NEW: password error + validator
   const [passwordError, setPasswordError] = useState<string>('');
+  // Password must be at least 8 chars, contain uppercase, lowercase, number, and special char
   const isValidPassword = (pw: string) =>
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(pw);
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/.test(
+      pw
+    );
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
