@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, Search, Repeat, Sparkles, Send } from 'lucide-react';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import NoTokenModal from '@/components/modals/remindModal';

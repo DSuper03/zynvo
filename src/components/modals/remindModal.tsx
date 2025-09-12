@@ -1,32 +1,35 @@
-import Link from "next/link";
-import { ShieldAlert } from "lucide-react";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+import Link from 'next/link';
+import { ShieldAlert } from 'lucide-react';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 type NoTokenModalProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export default function NoTokenModal({ isOpen, onOpenChange }: NoTokenModalProps) {
+export default function NoTokenModal({
+  isOpen,
+  onOpenChange,
+}: NoTokenModalProps) {
   const router = useRouter();
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === 'Escape' && isOpen) {
         onOpenChange(false);
       }
     };
 
     if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden";
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
     }
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "unset";
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
     };
   }, [isOpen, onOpenChange]);
 
@@ -40,22 +43,24 @@ export default function NoTokenModal({ isOpen, onOpenChange }: NoTokenModalProps
 
   const handleClose = () => {
     onOpenChange(false);
-    router.push("/");
+    router.push('/');
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
       onClick={handleBackdropClick}
     >
-      <div 
+      <div
         className="bg-slate-900 border border-yellow-400 rounded-xl shadow-lg max-w-md w-full mx-4 animate-in fade-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center gap-2 px-6 py-4 border-b border-gray-200">
           <ShieldAlert className="h-5 w-5 text-yellow-400" />
-          <h3 className="text-lg font-semibold text-yellow-400">Sign in required</h3>
+          <h3 className="text-lg font-semibold text-yellow-400">
+            Sign in required
+          </h3>
         </div>
 
         {/* Body with image */}
@@ -63,7 +68,8 @@ export default function NoTokenModal({ isOpen, onOpenChange }: NoTokenModalProps
           {/* Info Section */}
           <div className="flex-1">
             <p className="text-white mb-4">
-              You need to be signed in to use AI features. Please sign in to continue.
+              You need to be signed in to use AI features. Please sign in to
+              continue.
             </p>
             <ul className="list-disc pl-5 space-y-1 text-sm text-white">
               <li>Access personalized answers</li>
@@ -77,7 +83,6 @@ export default function NoTokenModal({ isOpen, onOpenChange }: NoTokenModalProps
             alt="Sign in illustration"
             className="w-40 h-40 object-contain"
           />
-         
         </div>
 
         {/* Footer */}
@@ -107,7 +112,7 @@ export default function NoTokenModal({ isOpen, onOpenChange }: NoTokenModalProps
             transform: scale(1);
           }
         }
-        
+
         .animate-in {
           animation: fade-in 0.2s ease-out;
         }
