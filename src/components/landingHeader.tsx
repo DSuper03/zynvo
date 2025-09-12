@@ -195,6 +195,38 @@ const LandingHeader = () => {
               </div>
             </MenuItem>
 
+            {/* <MenuItem
+              setActive={setActiveItem}
+              active={activeItem}
+              item="Devs"
+              href="/founders"
+            >
+              <div className="p-2 w-[300px]">
+                <HoveredLink href="/founders">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <span className="text-yellow-400 text-lg">👨‍💻</span>
+                    <div>
+                      <p className="font-medium text-white">Our Team</p>
+                      <p className="text-xs text-gray-400">
+                        Meet the developers behind Zynvo
+                      </p>
+                    </div>
+                  </div>
+                </HoveredLink>
+                <HoveredLink href="/founders/story">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-yellow-400 text-lg">📖</span>
+                    <div>
+                      <p className="font-medium text-white">Our Story</p>
+                      <p className="text-xs text-gray-400">
+                        The journey of building Zynvo
+                      </p>
+                    </div>
+                  </div>
+                </HoveredLink>
+              </div>
+            </MenuItem> */}
+
             <MenuItem
               setActive={setActiveItem}
               active={activeItem}
