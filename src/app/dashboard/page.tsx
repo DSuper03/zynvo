@@ -830,7 +830,7 @@ export default function ZynvoDashboard() {
               <h2 className="text-xl sm:text-2xl font-extrabold text-white mb-1">
                 {userData.name || 'User'}
               </h2>
-              <p className="text-gray-400 mb-3 text-sm sm:text-base line-clamp-2">
+              <p className="text-gray-100 mb-3 text-lhg font-serif line-clamp-2">
                 {userData.bio}
               </p>
 

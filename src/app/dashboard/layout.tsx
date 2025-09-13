@@ -35,23 +35,23 @@ export default function RootLayout({
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-black">
+    <div className="flex flex-col md:flex-row h-screen ">
       {/* Mobile Menu Toggle Button */}
       {isMobileView && (
-        <Button
+        <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="fixed top-4 left-4 z-50 p-2 bg-gray-800 rounded-md text-white"
+          className="fixed  left-4 z-50 p-3 rounded-full text-white"
           aria-label="Toggle menu"
         >
-          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-        </Button>
+          {isMobileMenuOpen ? <X size={20} /> : <div className='bg-yellow-500 text-black hover:bg-yellow-400 p-0 rounded-full w-12 h-12 flex items-center justify-center'><Menu size={20} /></div>}
+        </button>
       )}
 
       {/* Sidebar - hidden on mobile by default, shown when toggled */}
       <div
         className={`
           ${isMobileMenuOpen ? 'fixed inset-0 z-40 bg-black/60 backdrop-blur-sm' : 'hidden'} 
-          md:relative md:block md:bg-transparent
+          md:relative md:block 
         `}
         onClick={() => isMobileView && setIsMobileMenuOpen(false)}
       >
