@@ -783,7 +783,7 @@ export default function ZynvoDashboard() {
           <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
             <Button
               onClick={() => setShowProfileModal(true)}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-4 py-2 rounded-full text-sm"
+              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium pt-3 rounded-full text-sm"
             >
               Complete Profile
             </Button>
@@ -827,7 +827,7 @@ export default function ZynvoDashboard() {
             </div>
 
             <div className="pt-12 sm:pt-14 md:pt-16">
-              <h2 className="text-xl sm:text-2xl font-extrabold text-white mb-1">
+              <h2 className="text-xl sm:text-2xl font-mono text-white mb-1">
                 {userData.name || 'User'}
               </h2>
               <p className="text-gray-100 mb-3 text-lhg font-serif line-clamp-2">
@@ -986,7 +986,7 @@ export default function ZynvoDashboard() {
                                 </h4>
                               </div>
                               <div className="ml-2 text-gray-500 text-xs">
-                                Hover →
+                               
                               </div>
                             </div>
                           </div>
