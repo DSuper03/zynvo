@@ -79,6 +79,7 @@ export default function ClubPage({}: ClubPageProps) {
     members: [],
     image: '/default-club-image.jpg',
     category: 'tech',
+    profileAvatar: '',
     founderEmail: '',
     facultyEmail: '',
   });
@@ -130,7 +131,7 @@ export default function ClubPage({}: ClubPageProps) {
           collegeName: response.data.response.collegeName,
           description: response.data.response.description,
           members: response.data.response.members,
-          profileAvatar: response.data.response.members.profileAvatar,
+          profileAvatar: response.data.response.members?.[0]?.profileAvatar,
           founderEmail: response.data.response.founderEmail,
           facultyEmail: response.data.response.facultyEmail,
           image: '/default-club-image.jpg',
@@ -229,13 +230,12 @@ export default function ClubPage({}: ClubPageProps) {
         {/* Floating Club Logo */}
         <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-10">
           <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-yellow-500 shadow-lg shadow-black/50">
-            <img
+            <Image
               src={club.image || '/banners/banner'}
               alt={club.name}
               width={128}
               height={128}
               className="object-cover"
-             
             />
           </div>
         </div>
