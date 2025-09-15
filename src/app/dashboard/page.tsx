@@ -684,7 +684,7 @@ export default function ZynvoDashboard() {
     };
 
     fetchUserData();
-  }, [isClient, navigate, update]);
+  }, [isClient, navigate, update,token]);
 
   const handleProfileFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
