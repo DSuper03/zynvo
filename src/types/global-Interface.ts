@@ -235,6 +235,7 @@ export interface ClubTypeProps {
   description: string;
   image?: string;
   members?: any[];
+  profileAvatar?: string;
   founderEmail: string;
   facultyEmail: string;
   isPopular?: boolean;

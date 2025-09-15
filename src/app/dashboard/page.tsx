@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/hover-card';
 import CollegeSearchSelect from '@/components/colleges/collegeSelect';
 import { FaSchool } from 'react-icons/fa';
+import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 
 // Define interfaces for better type checking
 interface Event {
@@ -106,20 +107,20 @@ const LegoSkillBlock = ({
     <div
       onClick={onClick}
       className={`
-        relative cursor-pointer transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 sm:hover:-translate-y-2
+        relative cursor-pointer transition-all duration-300 transform hover:scale-105 sm:hover:scale-110 hover:-translate-y-0.5 sm:hover:-translate-y-1
         ${colors[index % colors.length]}
-        rounded-lg px-2 py-1 sm:px-4 sm:py-2 text-white font-bold text-xs sm:text-sm shadow-lg
-        hover:shadow-xl hover:shadow-yellow-500/30
-        group
+        rounded-md sm:rounded-lg px-2 py-1 sm:px-3 md:px-4 sm:py-1.5 md:py-2 text-white font-bold text-xs sm:text-sm shadow-md sm:shadow-lg
+        hover:shadow-lg sm:hover:shadow-xl hover:shadow-yellow-500/30
+        group max-w-[120px] sm:max-w-none
       `}
     >
-      <span className="relative z-10">{skill}</span>
-      <div className="absolute inset-0 rounded-lg border-2   duration-300" />
+      <span className="relative z-10 truncate block">{skill}</span>
+      <div className="absolute inset-0 rounded-md sm:rounded-lg border-2 duration-300" />
 
       {/* LEGO studs effect - hide on mobile */}
       <div className="hidden sm:flex absolute top-0 left-0 right-0 justify-center space-x-1 p-1">
-        <div className="w-2 h-2 bg-white/20 rounded-full group-hover:bg-white/40 transition-all duration-300" />
-        <div className="w-2 h-2 bg-white/20 rounded-full group-hover:bg-white/40 transition-all duration-300" />
+        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/20 rounded-full group-hover:bg-white/40 transition-all duration-300" />
+        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/20 rounded-full group-hover:bg-white/40 transition-all duration-300" />
       </div>
     </div>
   );
@@ -683,7 +684,7 @@ export default function ZynvoDashboard() {
     };
 
     fetchUserData();
-  }, [isClient, navigate, update]);
+  }, [isClient, navigate, update,token]);
 
   const handleProfileFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -779,90 +780,102 @@ export default function ZynvoDashboard() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto pt-12 sm:pt-16 md:pt-20 pb-10 px-4 sm:px-6">
         {/* Dashboard Header - Mobile Responsive */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3 sm:gap-4">
           <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
             <Button
               onClick={() => setShowProfileModal(true)}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-4 py-2 rounded-full text-sm"
+              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm flex-1 sm:flex-none min-w-0"
             >
-              Complete Profile
+              <span className="truncate">Complete Profile</span>
             </Button>
             <Button
               onClick={() => navigate.push('/feedback')}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-4 py-2 rounded-full text-sm"
+              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm flex-1 sm:flex-none min-w-0"
             >
-              Feature Request
+              <span className="truncate">Feature Request</span>
             </Button>
-            <Button className="bg-yellow-500 h-10 w-10 rounded-full grid place-items-center">
-              <BellDotIcon className="text-black w-5 h-5" />
+            <Button className="bg-yellow-500 h-8 w-8 sm:h-10 sm:w-10 rounded-full grid place-items-center flex-shrink-0">
+              <BellDotIcon className="text-black w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </div>
         </div>
 
         {/* Profile Card - Mobile Responsive */}
-        <div className="bg-gray-900 rounded-2xl shadow-lg mb-10 overflow-hidden">
-          <div className="h-28 sm:h-36 relative overflow-hidden">
+        <div className="bg-gray-900 rounded-2xl shadow-lg mb-8 sm:mb-10 overflow-hidden">
+          <div className="h-24 sm:h-28 md:h-36 relative overflow-hidden">
             <Image
               src="/banners/profilebanner.jpg"
               alt="Profile Banner"
               fill
-              className="object-cover size-5"
+              className="object-cover"
               priority
-              sizes="6"
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, 100vw"
             />
           </div>
-          <div className="relative px-4 sm:px-6 pb-6">
-            <div className="absolute -top-8 sm:-top-12 left-4 sm:left-6">
+          <div className="relative px-3 sm:px-4 md:px-6 pb-4 sm:pb-6">
+            <div className="absolute -top-6 sm:-top-8 md:-top-12 left-3 sm:left-4 md:left-6">
               {userData.profileAvatar ? (
                 <img
                   src={userData.profileAvatar}
-                  className="w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-4 border-gray-900 bg-yellow-400 object-cover"
+                  className="w-12 h-12 sm:w-16 md:w-20 lg:w-24 h-12 sm:h-16 md:h-20 lg:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 object-cover"
                   alt="user pfp"
                 />
               ) : (
-                <div className="w-16 h-16 sm:w-20 md:w-24 sm:h-20 md:h-24 rounded-full border-4 border-gray-900 bg-yellow-400 flex items-center justify-center text-gray-900 text-2xl sm:text-3xl md:text-4xl font-bold">
+                <div className="w-12 h-12 sm:w-16 md:w-20 lg:w-24 h-12 sm:h-16 md:h-20 lg:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 flex items-center justify-center text-gray-900 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
                   {userData.name ? userData.name.charAt(0) : 'Z'}
                 </div>
               )}
             </div>
 
-            <div className="pt-12 sm:pt-14 md:pt-16">
-              <h2 className="text-xl sm:text-2xl font-extrabold text-white mb-1">
-                {userData.name || 'User'}
-              </h2>
-              <p className="text-gray-400 mb-3 text-sm sm:text-base line-clamp-2">
+            <div className="pt-8 sm:pt-10 md:pt-12 lg:pt-14 xl:pt-16">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 sm:mb-1 gap-2 sm:gap-0">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-sans bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent leading-tight">
+                  {userData.name}
+                </h1>
+
+                <HoverBorderGradient
+                  containerClassName="rounded-full"
+                  as="button"
+                  className="dark:bg-black bg-yellow-400 text-black dark:text-white flex items-center space-x-2 px-3 py-1 text-xs sm:text-sm self-start sm:self-auto"
+                >
+                  <p className="truncate max-w-[120px] sm:max-w-none"> {userData.clubName} </p>
+                </HoverBorderGradient>
+              </div>
+              <p className="text-gray-100 mb-3 text-sm sm:text-base font-serif line-clamp-2 leading-relaxed">
                 {userData.bio}
               </p>
 
               {/* Course / Year / College */}
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-5">
-                <p className="text-yellow-400 font-bold text-sm sm:text-base">
-                  Course:{' '}
-                  <span className="text-gray-300 font-normal">
-                    {userData.course || 'complete profile'}
-                  </span>
-                </p>
-                <p className="text-yellow-400 font-bold text-sm sm:text-base">
-                  Year:{' '}
-                  <span className="text-gray-300 font-normal">
-                    {userData.year || 'complete profile'}
-                  </span>
-                </p>
-                <div className="flex items-center bg-gray-800 text-gray-200 px-3 py-1 rounded-full text-xs sm:text-sm">
-                  <FaSchool className="w-4 h-4 mr-2 text-yellow-400" />
-                  <span className="truncate max-w-[220px] sm:max-w-none">
+              <div className="flex flex-col gap-2 sm:gap-3 mb-4 sm:mb-5">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                  <p className="text-yellow-400 font-bold text-xs sm:text-sm">
+                    Course:{' '}
+                    <span className="text-gray-300 font-normal">
+                      {userData.course || 'complete profile'}
+                    </span>
+                  </p>
+                  <p className="text-yellow-400 font-bold text-xs sm:text-sm">
+                    Year:{' '}
+                    <span className="text-gray-300 font-normal">
+                      {userData.year || 'complete profile'}
+                    </span>
+                  </p>
+                </div>
+                <div className="flex items-center bg-gray-800 text-gray-200 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm w-fit">
+                  <FaSchool className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-yellow-400 flex-shrink-0" />
+                  <span className="truncate max-w-[200px] sm:max-w-[300px] md:max-w-none">
                     {userData.collegeName || 'College not set'}
                   </span>
                 </div>
               </div>
 
               {/* Tags (limited) */}
-              <div className="mb-4">
-                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+              <div className="mb-3 sm:mb-4">
+                <div className="flex flex-wrap gap-1 sm:gap-1.5">
                   {(userData.tags && userData.tags.length > 0
                     ? showAllProfileTags
                       ? userData.tags
-                      : userData.tags.slice(0, 8)
+                      : userData.tags.slice(0, 6)
                     : []
                   ).map((tag, idx) => (
                     <LegoSkillBlock
@@ -873,28 +886,28 @@ export default function ZynvoDashboard() {
                     />
                   ))}
                   {(!userData.tags || userData.tags.length === 0) && (
-                    <span className="text-yellow-400 px-2 py-1 rounded-full text-xs sm:text-sm">
+                    <span className="text-yellow-400 px-2 py-1 rounded-full text-xs">
                       complete your profile
                     </span>
                   )}
                 </div>
-                {userData.tags && userData.tags.length > 8 && (
+                {userData.tags && userData.tags.length > 6 && (
                   <button
-                    className="mt-3 text-xs text-yellow-400 hover:text-yellow-300"
+                    className="mt-2 text-xs text-yellow-400 hover:text-yellow-300 transition-colors"
                     onClick={() => setShowAllProfileTags((v) => !v)}
                   >
                     {showAllProfileTags
                       ? 'Show less'
-                      : `Show ${userData.tags.length - 8} more`}
+                      : `Show ${userData.tags.length - 6} more`}
                   </button>
                 )}
               </div>
 
               {/* Stats */}
-              <div className="flex flex-wrap gap-4 text-xs sm:text-sm text-gray-400">
+              <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm text-gray-400">
                 <div className="flex items-center">
-                  <User className="w-4 h-4 mr-1 text-yellow-400" />
-                  <span>
+                  <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-yellow-400 flex-shrink-0" />
+                  <span className="truncate">
                     Joined{' '}
                     {userData.createdAt
                       ? new Date(userData.createdAt).toLocaleString('default', {
@@ -905,11 +918,11 @@ export default function ZynvoDashboard() {
                   </span>
                 </div>
                 <div className="flex items-center">
-                  <BarChart2 className="w-4 h-4 mr-1 text-yellow-400" />
+                  <BarChart2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-yellow-400 flex-shrink-0" />
                   <span>{posts?.length || 0} Posts</span>
                 </div>
                 <div className="flex items-center">
-                  <Calendar className="w-4 h-4 mr-1 text-yellow-400" />
+                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-yellow-400 flex-shrink-0" />
                   <span>{userData.events?.length || 0} Events</span>
                 </div>
               </div>
@@ -918,11 +931,11 @@ export default function ZynvoDashboard() {
         </div>
 
         {/* Segmented control: Posts | Events */}
-        <div className="flex items-center justify-center mb-6">
-          <div className="inline-flex rounded-full bg-gray-800 border border-gray-700 p-1">
+        <div className="flex items-center justify-center mb-4 sm:mb-6">
+          <div className="inline-flex rounded-full bg-gray-800 border border-gray-700 p-0.5 sm:p-1">
             <button
               onClick={() => setActivePane('posts')}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+              className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition ${
                 activePane === 'posts'
                   ? 'bg-yellow-500 text-black'
                   : 'text-gray-300 hover:text-white'
@@ -932,7 +945,7 @@ export default function ZynvoDashboard() {
             </button>
             <button
               onClick={() => setActivePane('events')}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+              className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition ${
                 activePane === 'events'
                   ? 'bg-yellow-500 text-black'
                   : 'text-gray-300 hover:text-white'
@@ -945,64 +958,61 @@ export default function ZynvoDashboard() {
 
         {/* Posts */}
         {activePane === 'posts' && (
-          <div className="bg-gray-900 p-5 rounded-2xl shadow-md border-l-4 border-yellow-400 mb-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-yellow-400 p-2 rounded-full">
-                <BarChart2 className="w-5 h-5 text-gray-900" />
+          <div className="bg-gray-900 p-3 sm:p-4 md:p-5 rounded-xl sm:rounded-2xl shadow-md border-l-2 sm:border-l-4 border-yellow-400 mb-8 sm:mb-10">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <div className="bg-yellow-400 p-1.5 sm:p-2 rounded-full">
+                <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Your Posts</h3>
-                <p className="text-xl font-bold text-yellow-400">
+                <h3 className="text-base sm:text-lg font-bold text-white">Your Posts</h3>
+                <p className="text-lg sm:text-xl font-bold text-yellow-400">
                   Total: {posts?.length || 0}
                 </p>
               </div>
             </div>
 
             {posts && posts.length > 0 ? (
-              <ul className="space-y-2">
+              <ul className="space-y-1.5 sm:space-y-2">
                 {(viewAllPosts ? posts : posts.slice(0, 5)).map(
                   (post, index) => (
-                    <li key={post.id} className="py-2">
+                    <li key={post.id} className="py-1 sm:py-2">
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <div className="cursor-pointer hover:bg-gray-800 rounded-lg p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
-                            <div className="flex justify-between items-center">
+                          <div className="cursor-pointer hover:bg-gray-800 rounded-lg p-2 sm:p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
+                            <div className="flex justify-between items-start sm:items-center">
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
+                                <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                                   <span className="text-yellow-400 text-xs font-medium">
                                     #{index + 1}
                                   </span>
                                   <Badge
                                     variant="secondary"
-                                    className="text-xs"
+                                    className="text-xs px-1.5 py-0.5"
                                   >
                                     Recent
                                   </Badge>
                                 </div>
-                                <h4 className="text-gray-200 font-medium text-sm truncate">
-                                  {post.description?.length > 60
-                                    ? post.description.slice(0, 60) + '...'
+                                <h4 className="text-gray-200 font-medium text-xs sm:text-sm truncate leading-relaxed">
+                                  {post.description?.length > 50
+                                    ? post.description.slice(0, 50) + '...'
                                     : post.description || 'Untitled Post'}
                                 </h4>
-                              </div>
-                              <div className="ml-2 text-gray-500 text-xs">
-                                Hover →
                               </div>
                             </div>
                           </div>
                         </HoverCardTrigger>
                         <HoverCardContent
-                          className="w-80 bg-gray-800 border-gray-700"
+                          className="w-72 sm:w-80 bg-gray-800 border-gray-700"
                           side="right"
                         >
-                          <div className="space-y-3">
+                          <div className="space-y-2 sm:space-y-3">
                             <div className="flex items-center justify-between">
                               <h4 className="text-sm font-semibold text-white">
                                 Post #{index + 1}
                               </h4>
                             </div>
                             <div className="space-y-2">
-                              <p className="text-sm text-gray-300 leading-relaxed">
+                              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
                                 {post.description ||
                                   'No description available for this post.'}
                               </p>
@@ -1010,7 +1020,7 @@ export default function ZynvoDashboard() {
                             <div className="flex items-center justify-between pt-2 border-t border-gray-700">
                               <div className="flex items-center gap-2 text-xs text-gray-400">
                                 <Calendar className="w-3 h-3" />
-                                <span>{post.description}</span>
+                                <span className="truncate">{post.description}</span>
                               </div>
                               <HighFiveButton
                                 postId={post.id}
@@ -1026,17 +1036,17 @@ export default function ZynvoDashboard() {
                 )}
               </ul>
             ) : (
-              <div className="text-center py-6">
-                <BarChart2 className="w-10 h-10 mx-auto mb-2 text-gray-500 opacity-50" />
-                <p className="text-gray-400 text-sm">No posts yet</p>
+              <div className="text-center py-4 sm:py-6">
+                <BarChart2 className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 text-gray-500 opacity-50" />
+                <p className="text-gray-400 text-xs sm:text-sm">No posts yet</p>
                 <p className="text-gray-500 text-xs">Start sharing!</p>
               </div>
             )}
 
             {posts && posts.length > 5 && (
-              <div className="mt-4 flex justify-center">
+              <div className="mt-3 sm:mt-4 flex justify-center">
                 <Button
-                  className="bg-white/10 hover:bg-white/15 text-gray-200"
+                  className="bg-white/10 hover:bg-white/15 text-gray-200 text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2"
                   onClick={() => setViewAllPosts((v) => !v)}
                 >
                   {viewAllPosts ? 'View less' : `View all (${posts.length})`}
@@ -1048,48 +1058,48 @@ export default function ZynvoDashboard() {
 
         {/* Events */}
         {activePane === 'events' && (
-          <div className="bg-gray-900 p-5 rounded-2xl shadow-md border-l-4 border-yellow-400 mb-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-yellow-400 p-2 rounded-full">
-                <Calendar className="w-5 h-5 text-gray-900" />
+          <div className="bg-gray-900 p-3 sm:p-4 md:p-5 rounded-xl sm:rounded-2xl shadow-md border-l-2 sm:border-l-4 border-yellow-400 mb-8 sm:mb-10">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <div className="bg-yellow-400 p-1.5 sm:p-2 rounded-full">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">
+                <h3 className="text-base sm:text-lg font-bold text-white">
                   Events Attended
                 </h3>
-                <p className="text-xl font-bold text-yellow-400">
+                <p className="text-lg sm:text-xl font-bold text-yellow-400">
                   Total: {userData.events?.length || 0}
                 </p>
               </div>
             </div>
 
             {userData.events && userData.events.length > 0 ? (
-              <ul className="space-y-2">
+              <ul className="space-y-1.5 sm:space-y-2">
                 {(viewAllEvents
                   ? userData.events
                   : userData.events.slice(0, 5)
                 ).map((event, index) => (
-                  <li key={event.id} className="py-2">
-                    <div className="hover:bg-gray-800 rounded-lg p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
+                  <li key={event.id} className="py-1 sm:py-2">
+                    <div className="hover:bg-gray-800 rounded-lg p-2 sm:p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                             <span className="text-yellow-400 text-xs font-medium">
                               #{index + 1}
                             </span>
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
                               Attended
                             </Badge>
                           </div>
-                          <h4 className="text-gray-200 font-medium text-sm truncate">
+                          <h4 className="text-gray-200 font-medium text-xs sm:text-sm truncate leading-relaxed">
                             {event.EventName}
                           </h4>
                           <p className="text-xs text-gray-400 mt-1">
                             {new Date(event.startDate).toLocaleDateString()}
                           </p>
                         </div>
-                        <div className="ml-2">
-                          <Calendar className="w-4 h-4 text-yellow-400" />
+                        <div className="ml-2 flex-shrink-0">
+                          <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
                         </div>
                       </div>
                     </div>
@@ -1097,17 +1107,17 @@ export default function ZynvoDashboard() {
                 ))}
               </ul>
             ) : (
-              <div className="text-center py-6">
-                <Calendar className="w-10 h-10 mx-auto mb-2 text-gray-500 opacity-50" />
-                <p className="text-gray-400 text-sm">No events yet</p>
+              <div className="text-center py-4 sm:py-6">
+                <Calendar className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 text-gray-500 opacity-50" />
+                <p className="text-gray-400 text-xs sm:text-sm">No events yet</p>
                 <p className="text-gray-500 text-xs">Join some events!</p>
               </div>
             )}
 
             {userData.events && userData.events.length > 5 && (
-              <div className="mt-4 flex justify-center">
+              <div className="mt-3 sm:mt-4 flex justify-center">
                 <Button
-                  className="bg-white/10 hover:bg-white/15 text-gray-200"
+                  className="bg-white/10 hover:bg-white/15 text-gray-200 text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2"
                   onClick={() => setViewAllEvents((v) => !v)}
                 >
                   {viewAllEvents
@@ -1122,17 +1132,17 @@ export default function ZynvoDashboard() {
 
       {/* Complete Profile Modal - Mobile Responsive */}
       {showProfileModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4">
-            <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-700">
-              <h2 className="text-lg sm:text-xl font-bold text-white">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto mx-2 sm:mx-4">
+            <div className="flex justify-between items-center p-3 sm:p-4 md:p-6 border-b border-gray-700 sticky top-0 bg-gray-900 z-10">
+              <h2 className="text-base sm:text-lg md:text-xl font-bold text-white">
                 Complete Your Profile
               </h2>
               <Button
                 onClick={() => setShowProfileModal(false)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-gray-400 hover:text-white transition-colors p-1 sm:p-2"
               >
-                <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
               </Button>
             </div>
 

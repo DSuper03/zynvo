@@ -34,6 +34,7 @@ import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
 import { toast } from 'sonner';
 import axios from 'axios';
 import NoTokenModal from '@/components/modals/remindModal';
+import { collegesWithClubs } from '@/components/colleges/college';
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -363,15 +364,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
                     >
                       <option value="">Select university/club</option>
-                      <option value="university-1">
-                        University A - Photography Club
+                     {collegesWithClubs
+                     .sort((a, b) => a.college.localeCompare(b.college))
+                     .map((college) => (
+                      <option key={college.college} value={college.college}>
+                        {college.college}
                       </option>
-                      <option value="university-2">
-                        University B - Coding Club
-                      </option>
-                      <option value="university-3">
-                        University C - Dance Club
-                      </option>
+                     ))}
                     </select>
                     {errors.university && (
                       <p className="mt-1 text-sm text-red-500">

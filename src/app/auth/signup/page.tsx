@@ -351,7 +351,7 @@ export default function SignUp() {
                       College/University Name
                     </label>
                     <CollegeSearchSelect
-                      colleges={collegesWithClubs}
+                      colleges={collegesWithClubs.sort((a, b) => a.college.localeCompare(b.college))}
                       value={formData.collegeName}
                       onChange={(value) =>
                         setFormData((prev) => ({ ...prev, collegeName: value }))

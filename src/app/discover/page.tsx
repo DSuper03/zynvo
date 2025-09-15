@@ -354,9 +354,7 @@ export default function Feed() {
                           {post.clubName}
                         </span>
                       )}
-                      <span className="text-sm text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
-                        Post #{post.id.slice(-6)}
-                      </span>
+                      
                     </div>
 
                     {/* Post Actions */}

@@ -6,7 +6,7 @@ const securityHeaders = [
       script-src 'self' 'unsafe-eval' 'unsafe-inline';
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://via.placeholder.com https://api.dicebear.com https://example.com;
-      connect-src 'self' https://backend.zynvo.social;
+      connect-src 'self' https://backend.zynvo.social https://upload.imagekit.io;
       font-src 'self' data:;
     `
       .replace(/\s{2,}/g, ' ')
@@ -25,6 +25,7 @@ const securityHeaders = [
     value: 'strict-origin-when-cross-origin',
   },
 ];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {

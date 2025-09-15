@@ -120,15 +120,15 @@ const LandingHeader = () => {
     <header
       className={`fixed w-full space-x-10 px-10 top-0 left-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-black/90 backdrop-blur-md py-2 shadow-lg'
-          : 'bg-black/50 backdrop-blur-sm py-4'
+          ? ' backdrop-blur-md py-2 shadow-lg'
+          : ' backdrop-blur-sm py-4'
       }`}
     >
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo section */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center">
+            {/* <Link href="/" className="flex items-center">
               <Lens
                 zoomFactor={2}
                 lensSize={150}
@@ -143,7 +143,7 @@ const LandingHeader = () => {
                   className="transition-transform duration-300 group-hover:scale-125"
                 />
               </Lens>
-            </Link>
+            </Link> */}
           </div>
 
           {/* Desktop menu */}
@@ -210,24 +210,19 @@ const LandingHeader = () => {
             />
 
             {user ? (
-              (console.log(user),
+              
               (
                 <div className="flex items-center gap-4">
-                  <button
+                  <Button
                     onClick={login}
-                    className="bg-yellow-500 text-black hover:bg-yellow-400 px-4 py-1 rounded-full font-medium transition-colors"
+                    className="bg-yellow-500 text-black hover:bg-yellow-400 p-0 rounded-full w-12 h-12 flex items-center justify-center"
                   >
-                    <span className="flex gap-1 justify-center items-center">
-                      <span>
-                        <img
-                          src={user.pfp}
-                          alt="pfp"
-                          className="flex-shrink-0 bg-yellow-500 text-black rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg"
-                        />
-                      </span>
-                      <strong>{user.name}</strong>
-                    </span>
-                  </button>
+                    <img
+                      src={user.pfp}
+                      alt="pfp"
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  </Button>
                   <button
                     onClick={hardLogout}
                     className="bg-yellow-500 text-black hover:bg-yellow-400 px-5 py-2 rounded-md font-medium transition-colors"
@@ -235,7 +230,7 @@ const LandingHeader = () => {
                     Logout
                   </button>
                 </div>
-              ))
+              )
             ) : (
               <div className="flex gap-4">
                 <Link
