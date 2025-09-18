@@ -67,7 +67,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     prizes: '',
     contactEmail: '',
     contactPhone: '',
-    image: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -188,25 +187,32 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       return;
     }
     if (!validateStep()) return;
-    if (!img) {
-      toast('you are required to upload a poster');
-    } else {
-      const link = await uploadImageToImageKit(await toBase64(img), img.name);
-      setFormData((prev: any) => ({ ...prev, image: link }));
-      setImg(null);
-      toast('Image uploaded');
-    }
 
     setIsSubmitting(true);
 
+    let imageLink;
+    if (!img) {
+      toast('you are required to upload a poster');
+      setIsSubmitting(false);
+      return;
+    } else {
+      imageLink = await uploadImageToImageKit(await toBase64(img), img.name);
+      toast('Image uploaded');
+    }
+
+    // Submit with the correct image link
     const createEvent = await axios.post<{
       msg: string;
       id: string;
-    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event`, formData, {
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
-    });
+    }>(
+      `http://localhost:8000/api/v1/events/event`,
+      { ...formData, image: imageLink },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (createEvent.status === 200) {
       toast('Event registered , start marketing now!!!');

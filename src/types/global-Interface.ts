@@ -34,7 +34,7 @@ export interface EventFormData {
   prizes: string;
   contactEmail: string;
   contactPhone: string;
-  image: string;
+  // image: string;
 }
 
 // this is used in clubs/id/page.tsx where events of colleges are listed
@@ -359,6 +359,7 @@ export interface eventData {
   prizes: string;
   endDate: Date | null;
   posterUrl?: string;
+  univerisity : string;
 }
 
 export interface respnseUseState {
