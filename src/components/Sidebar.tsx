@@ -15,7 +15,6 @@ import {
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { toast } from 'sonner';
 import { FaBahai, FaUsers } from 'react-icons/fa';
 import { useWarmup } from './WarmupProvider';
 

@@ -776,21 +776,21 @@ export default function ZynvoDashboard() {
   }
 
   return (
-    <div className="min-h-screen h-full bg-black text-gray-100 ">
+    <div className="min-h-screen h-full bg-black text-gray-100 top-3 ">
       {/* Main Content */}
       <main className="max-w-4xl mx-auto pt-12 sm:pt-16 md:pt-20 pb-10 px-4 sm:px-6">
         {/* Dashboard Header - Mobile Responsive */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3 sm:gap-4">
-          <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="flex flex-wrap justify-end gap-2 sm:gap-3 w-full sm:w-auto self-end sm:self-auto">
             <Button
               onClick={() => setShowProfileModal(true)}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm flex-1 sm:flex-none min-w-0"
+              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm flex-none min-w-0"
             >
               <span className="truncate">Complete Profile</span>
             </Button>
             <Button
               onClick={() => navigate.push('/feedback')}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm flex-1 sm:flex-none min-w-0"
+              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm flex-none min-w-0"
             >
               <span className="truncate">Feature Request</span>
             </Button>
@@ -1134,8 +1134,8 @@ export default function ZynvoDashboard() {
       {showProfileModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
           <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto mx-2 sm:mx-4">
-            <div className="flex justify-between items-center p-3 sm:p-4 md:p-6 border-b border-gray-700 sticky top-0 bg-gray-900 z-10">
-              <h2 className="text-base sm:text-lg md:text-xl font-bold text-white">
+            <div className="flex justify-between items-center p-8 sm:p-4 md:p-6 border-b border-gray-700 sticky top-0 bg-gray-900 z-10">
+              <h2 className="text-base sm:text-lg md:text-xl font-bold text-white  top-20">
                 Complete Your Profile
               </h2>
               <Button

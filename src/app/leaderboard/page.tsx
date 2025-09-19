@@ -688,12 +688,7 @@ export default function LeaderboardPage() {
                 )}
               </div>
               <div className="w-10 h-10 rounded-full overflow-hidden ring-1 ring-yellow-500/30">
-                <Image
-                  alt={club.name}
-                  src={avatars[club.id]}
-                  layout="fill"
-                  className="object-cover"
-                />
+              
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-white truncate">
@@ -764,12 +759,7 @@ export default function LeaderboardPage() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-yellow-500/30">
-                          <Image
-                            alt={club.name}
-                            src={avatars[club.id]}
-                            layout="fill"
-                            className="object-cover"
-                          />
+                          
                         </div>
                         <div className="font-medium text-white">
                           {club.name}

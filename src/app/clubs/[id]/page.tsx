@@ -695,3 +695,4 @@ export default function ClubPage({}: ClubPageProps) {
     </div>
   );
 }
+ 
