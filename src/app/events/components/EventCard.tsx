@@ -159,11 +159,7 @@ export default function EventCard() {
                   transition={{ type: 'spring', stiffness: 300, damping: 24 }}
                 >
                   <Image
-                    src={
-                      event.eventHeaderImage ||
-                      event.posterUrl ||
-                      '/logozynvo.jpg'
-                    }
+                    src={ event.posterUrl || '/logozynvo.jpg' }
                     alt={event.description || event.EventName}
                     width={600}
                     height={300}
@@ -200,9 +196,9 @@ export default function EventCard() {
                     <div className="flex items-center text-gray-300 text-sm">
                       <MapPin className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
                       <span className="truncate">
-                        {event.clubName
-                          ? `${event.clubName}'s College`
-                          : 'Location TBD'}
+                        {event.univerisity
+                          ? event.univerisity
+                          : `${event.clubName}'s College`}
                       </span>
                     </div>
                   </div>
