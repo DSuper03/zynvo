@@ -43,7 +43,7 @@ export default function RootLayout({
           className="fixed  left-4 z-50 p-3 rounded-full text-white"
           aria-label="Toggle menu"
         >
-          {isMobileMenuOpen ? <X size={20} /> : <div className='bg-yellow-500 text-black hover:bg-yellow-400 p-0 rounded-full w-12 h-12 flex items-center justify-center'><Menu size={20} /></div>}
+          {isMobileMenuOpen ? <X size={20} /> : <div className='bg-yellow-500 text-black hover:bg-yellow-400 p-0 rounded-full w-10 h-10 flex items-center justify-center'><div></div><Menu size={20} /></div>}
         </button>
       )}
 
