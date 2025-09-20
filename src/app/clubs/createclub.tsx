@@ -22,12 +22,12 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     facultyEmail: '',
     requirements: '',
     clubContact: '',
-    logo: '',
     wings: [] as string[],
   });
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [token, setToken] = useState('');
   const [newWing, setNewWing] = useState('');
+  let image: string;
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -69,11 +69,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   };
 
   async function uploadImg(img: File) {
-    const link = await uploadImageToImageKit(await toBase64(img), img.name);
-    setClubData((prev) => ({
-      ...prev,
-      logo: link,
-    }));
+    image = await uploadImageToImageKit(await toBase64(img), img.name);
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -93,7 +89,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     const upload = await axios.post<{
       msg: string;
       clubId: string;
-    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/club`, clubData, {
+    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/club`, {...clubData , image}, {
       headers: {
         authorization: `Bearer ${token}`,
       },
@@ -103,7 +99,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     if (upload.status == 200) {
       toast(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
       onClose();
-    } else {
+    } else if(upload.status !== 200) {
       toast(msg.msg);
     }
   };
@@ -118,7 +114,6 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     }
   };
 
-  // ✅ Remove a wing
   const removeWing = (index: number) => {
     setClubData((prev) => ({
       ...prev,
