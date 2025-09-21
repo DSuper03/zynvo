@@ -1,20 +1,18 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   X,
   Calendar,
   Globe,
   MapPin,
-  Image as ImageIcon,
-  Users,
-  ChevronRight,
-  ChevronLeft,
   Upload,
   Mail,
   Phone,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
-import Image from 'next/legacy/image';
+import Image from 'next/image';
 import { MagicCard } from '@/components/magicui/magic-card';
 import { Card } from '@/components/ui/card';
 import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
@@ -88,8 +86,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     }
   }, []);
 
-  // Handler for input changes
-  const handleChange = (
+  // Memoized handler for input changes
+  const handleChange = useCallback((
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
@@ -105,13 +103,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         return newErrors;
       });
     }
-  };
+  }, [errors]);
 
-  // Handler for checkbox changes
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Memoized handler for checkbox changes
+  const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setFormData((prev: any) => ({ ...prev, [name]: checked }));
-  };
+  }, []);
 
   // Handle file upload
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -262,11 +260,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
               {[1, 2, 3, 4].map((stepNumber) => (
                 <div key={stepNumber} className="flex flex-col items-center">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      step >= stepNumber
-                        ? 'bg-yellow-500 text-black'
-                        : 'bg-gray-800 text-gray-400'
-                    }`}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= stepNumber
+                      ? 'bg-yellow-500 text-black'
+                      : 'bg-gray-800 text-gray-400'
+                      }`}
                   >
                     {stepNumber}
                   </div>
@@ -301,10 +298,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                           key={mode}
                           className={`
                             cursor-pointer border rounded-lg p-3 flex items-center justify-center
-                            ${
-                              formData.eventMode === mode.toLowerCase()
-                                ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400'
-                                : 'border-gray-700 text-gray-300 hover:border-gray-600'
+                            ${formData.eventMode === mode.toLowerCase()
+                              ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400'
+                              : 'border-gray-700 text-gray-300 hover:border-gray-600'
                             }
                           `}
                           onClick={() => {
@@ -370,13 +366,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
                     >
                       <option value="">Select university/club</option>
-                     {collegesWithClubs
-                     .sort((a, b) => a.college.localeCompare(b.college))
-                     .map((college) => (
-                      <option key={college.college} value={college.college}>
-                        {college.college}
-                      </option>
-                     ))}
+                      {collegesWithClubs
+                        .sort((a, b) => a.college.localeCompare(b.college))
+                        .map((college) => (
+                          <option key={college.college} value={college.college}>
+                            {college.college}
+                          </option>
+                        ))}
                     </select>
                     {errors.university && (
                       <p className="mt-1 text-sm text-red-500">
@@ -972,9 +968,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className={`px-6 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 transition-colors ${
-                  isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
+                className={`px-6 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 transition-colors ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
+                  }`}
               >
                 {isSubmitting ? 'Creating...' : 'Create Event'}
               </Button>

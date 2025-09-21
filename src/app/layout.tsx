@@ -5,6 +5,9 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@/components/ui/sonner';
 import { WarmupProvider } from '@/components/WarmupProvider';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import PerformanceMonitor from '@/components/PerformanceMonitor';
+import { QueryProvider } from '@/providers/QueryProvider';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -85,10 +88,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <WarmupProvider>{children}</WarmupProvider>
-        <Analytics />
-        <SpeedInsights />
-        <Toaster />
+        <ErrorBoundary>
+          <QueryProvider>
+            <WarmupProvider>
+              {children}
+            </WarmupProvider>
+          </QueryProvider>
+          <Analytics />
+          <SpeedInsights />
+          <PerformanceMonitor />
+          <Toaster />
+        </ErrorBoundary>
       </body>
     </html>
   );

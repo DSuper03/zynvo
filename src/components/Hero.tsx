@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import WrapButton from './ui/wrap-button';
 import Link from 'next/link';
 import HeroVideoDialog from './magicui/hero-video-dialog';
-import Image from 'next/legacy/image';
+import Image from 'next/image';
 
 const Hero = () => {
   const heroRef = useRef(null);
@@ -18,11 +18,12 @@ const Hero = () => {
         <Image
           src="/landing page.png"
           alt="Hero Background"
-          layout="fill"
-          objectFit="cover"
+          fill
           priority
           className="object-cover"
           sizes="100vw"
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
         />
         {/* Enhanced gradient overlay for better text contrast */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
