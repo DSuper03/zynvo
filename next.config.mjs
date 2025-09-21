@@ -5,8 +5,8 @@ const securityHeaders = [
       default-src 'self';
       script-src 'self' 'unsafe-eval' 'unsafe-inline';
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://via.placeholder.com https://api.dicebear.com https://example.com;
-      connect-src 'self' https://backend.zynvo.social https://upload.imagekit.io;
+      img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://via.placeholder.com https://api.dicebear.com https://example.com;
+      connect-src 'self' data: https://backend.zynvo.social https://upload.imagekit.io;
       font-src 'self' data:;
     `
       .replace(/\s{2,}/g, ' ')
