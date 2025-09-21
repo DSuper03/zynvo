@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Users, Search, Filter } from 'lucide-react';
-import { useEvents } from '@/hooks/useEvents';
+import { useEvents, type Event } from '@/hooks/useEvents';
 import { CreateEventModal } from '@/components/DynamicComponents';
 import OptimizedImage from '@/components/OptimizedImage';
 import { Button } from '@/components/ui/button';
@@ -29,19 +29,6 @@ const EventsLoading = () => (
     ))}
   </div>
 );
-
-// Event types
-interface Event {
-  id: string;
-  eventName: string;
-  description: string;
-  eventStartDate: string;
-  eventEndDate: string;
-  venue: string;
-  image?: string;
-  university: string;
-  eventType: string;
-}
 
 // Event card component
 const EventCard = React.memo(({ event }: { event: Event }) => (
