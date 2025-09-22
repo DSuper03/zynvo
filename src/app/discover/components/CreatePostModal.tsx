@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import Image from 'next/legacy/image';
 import { MagicCard } from '@/components/magicui/magic-card';
-
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -22,6 +21,7 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { uploadImageDirectly } from '@/lib/imgkit';
+import { fetchClubsByCollege } from '@/app/api/hooks/useClubs';
 
 dotenv.config();
 
@@ -41,12 +41,38 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [clubs, setClubs] = useState<string[]>(['']);
+  const [clubs, setClubs] = useState<string[]>([]);
   const [settingClubs, setSettingClubs] = useState<boolean>(false);
   const [token, setToken] = useState<string | null>('');
   const [imageLink, setImageLink] = useState<string>('');
   const [title, setTitle] = useState('');
-
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+  
+    async function load() {
+      if (!selectedCollege) {
+        setClubs([]);
+        return;
+      }
+      try {
+        setSettingClubs(true);
+        setSelectedClub('');
+        const list = await fetchClubsByCollege(selectedCollege, controller.signal);
+        if (!cancelled) setClubs(list);
+      } catch {
+        if (!cancelled) setClubs([]);
+      } finally {
+        if (!cancelled) setSettingClubs(false);
+      }
+    }
+  
+    load();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [selectedCollege]);
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const tok = localStorage.getItem('token');
@@ -63,34 +89,34 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   }, []);
 
   useEffect(() => {
-    if (selectedCollege === '') {
-      return;
-    }
+    let cancelled = false;
+    const controller = new AbortController();
 
-    async function call(college: string) {
-      setSettingClubs(true);
-      const clubs = await axios.get<{
-        resp: {
-          name: string;
-        }[];
-      }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClubs/${college}`
-      );
-      console.log(clubs);
-      if (clubs.status === 200 && clubs.data.resp.length > 0) {
-        alert(200);
-        const clArray = clubs.data.resp.map(
-          (club: { name: string }) => club.name
+    async function loadClubs() {
+      try {
+        if (!selectedCollege) {
+          setClubs([]);
+          return;
+        }
+        setSettingClubs(true);
+        setSelectedClub('');
+        const list = await fetchClubsByCollege(
+          selectedCollege,
+          controller.signal
         );
-        setClubs(clArray);
-      } else {
-        setClubs(['']);
-        alert(404);
+        if (!cancelled) setClubs(list);
+      } catch {
+        if (!cancelled) setClubs([]);
+      } finally {
+        if (!cancelled) setSettingClubs(false);
       }
     }
 
-    call(selectedCollege);
-    setSettingClubs(false);
+    loadClubs();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [selectedCollege]);
 
   // College selection modal state
@@ -359,24 +385,17 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   value={selectedClub}
                   onChange={(e) => setSelectedClub(e.target.value)}
                   className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
-                  disabled={!selectedCollege} // Disable if no college is selected
+                  disabled={!selectedCollege}
                 >
-                  <option value="">Select a club</option>
-                  {selectedCollege &&
-                    (settingClubs ? (
-                      <option value="" disabled>
-                        Loading clubs...
+                  <option value="">{settingClubs ? 'Loading clubs...' : 'Post without a club'}</option>
+                  {!settingClubs && selectedCollege && clubs.length === 0 && (
+                    <option value="" disabled>No clubs associated</option>
+                  )}
+                  {!settingClubs &&
+                    clubs.map((name) => (
+                      <option key={name} value={name}>
+                        {name}
                       </option>
-                    ) : clubs.length === 0 ? (
-                      <option value="" disabled>
-                        No clubs associated
-                      </option>
-                    ) : (
-                      clubs.map((clubName) => (
-                        <option key={clubName} value={clubName}>
-                          {clubName}
-                        </option>
-                      ))
                     ))}
                 </select>
               </div>
