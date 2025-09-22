@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/legacy/image';
 import { MagicCard } from '@/components/magicui/magic-card';
-import { Card } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
+import { uploadImageDirectly } from '@/lib/imgkit';
 
 dotenv.config();
 
@@ -118,9 +118,22 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     }
   };
 
-  async function uploadImg(img: File) {
-    const link = await uploadImageToImageKit(await toBase64(img), img.name);
-    setImageLink(link);
+  async function uploadImg(img: File): Promise<string> {
+    try {
+      console.log('Starting image upload for:', img.name);
+      toast('Uploading image...');
+      
+      const link = await uploadImageDirectly(img);
+      console.log('Image uploaded successfully:', link);
+      
+      setImageLink(link);
+      toast('Image uploaded successfully!');
+      return link;
+    } catch (error) {
+      console.error('Image upload failed:', error);
+      toast(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw error;
+    }
   }
 
   // Remove an image
@@ -136,38 +149,52 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const handleSubmit = async () => {
     if (!postText.trim()) return;
 
-    if (images.length > 1) uploadImg(images[0]);
-
     setIsSubmitting(true);
 
-    const payload = {
-      title,
-      description: postText,
-      collegeName: selectedCollege,
-      clubName: selectedClub,
-      image: imageLink || '', // since max 1 image
-    };
+    try {
+      // Upload image if exists
+      let uploadedImageUrl = '';
+      if (images.length > 0) {
+        uploadedImageUrl = await uploadImg(images[0]);
+      }
 
-    const submit = await axios.post<{
-      msg: string;
-      id: string;
-    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/create`, payload, {
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
-    });
+      const payload = {
+        title,
+        description: postText,
+        collegeName: selectedCollege,
+        clubName: selectedClub,
+        image: uploadedImageUrl || imageLink || '', // Use uploaded URL or existing imageLink
+      };
 
-    if (submit.status === 200 && submit.data.id) {
-      toast(`${submit.data.msg} & here is your post id : ${submit.data.id}`);
-    } else {
-      toast(submit.data.msg);
+      const submit = await axios.post<{
+        msg: string;
+        id: string;
+      }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/create`, payload, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (submit.status === 200 && submit.data.id) {
+        toast(`${submit.data.msg} & here is your post id : ${submit.data.id}`);
+        // Reset form on success
+        setPostText('');
+        setTitle('');
+        setSelectedClub('');
+        setSelectedCollege('');
+        setImages([]);
+        setPreviewUrls([]);
+        setImageLink('');
+        onClose(); // Close modal on success
+      } else {
+        toast(submit.data.msg);
+      }
+    } catch (error) {
+      console.error('Post creation failed:', error);
+      toast('Failed to create post. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setPostText('');
-    setSelectedClub('');
-    setSelectedCollege('');
-    setImages([]);
-    setPreviewUrls([]);
   };
 
   // Filter colleges based on search

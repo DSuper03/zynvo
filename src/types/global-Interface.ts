@@ -11,7 +11,8 @@ export type Eventtype =
   | 'competition'
   | 'cultural'
   | 'sports'
-  | 'technical';
+  | 'technical'
+  | 'others'
 
 export interface EventFormData {
   eventMode: EventMode | '';
