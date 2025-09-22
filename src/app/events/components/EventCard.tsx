@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapPin, Calendar } from 'lucide-react';
+import { MapPin, Calendar, Share2 } from 'lucide-react';
 import { Modal, ModalTrigger } from '@/components/ui/animated-modal';
 import { eventData } from '@/types/global-Interface';
 import Image from 'next/legacy/image';
@@ -25,6 +25,34 @@ export default function EventCard() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const router = useRouter();
+
+  const handleShare = async (eventId: string, eventName?: string) => {
+    try {
+      const shareUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/events/${eventId}`
+        : `/events/${eventId}`;
+
+      if (navigator.share) {
+        await navigator.share({
+          title: eventName || 'Check out this event',
+          text: `Join me at ${eventName || 'this event'}! ID: ${eventId}`,
+          url: shareUrl,
+        });
+        return;
+      }
+
+      await navigator.clipboard.writeText(shareUrl);
+      alert('Event link copied to clipboard');
+    } catch (err) {
+      try {
+        await navigator.clipboard.writeText(`${eventName || 'Event'} - ID: ${eventId}`);
+        alert('Event ID copied to clipboard');
+      } catch (copyErr) {
+        console.error(copyErr);
+        alert('Unable to share. Please copy the URL from the address bar.');
+      }
+    }
+  };
 
   useEffect(() => {
     async function fetchEvents() {
@@ -206,17 +234,27 @@ export default function EventCard() {
                     <span className="text-gray-400 text-xs md:text-sm">
                       {event.attendees?.length || 0} attending
                     </span>
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Button
-                        className="bg-black text-white font-bold rounded-2xl border border-yellow-400"
-                        onClick={() => router.push(`events/${event.id}`)}
-                      >
-                        Check
-                      </Button>
-                    </motion.div>
+                    <div className="flex items-center gap-2">
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button
+                          variant="outline"
+                          className="bg-black text-white font-bold rounded-2xl border border-yellow-400 flex items-center gap-2"
+                          onClick={() => handleShare(event.id, event.EventName)}
+                          aria-label="Share event"
+                        >
+                          <Share2 className="w-4 h-4" />
+                          Share
+                        </Button>
+                      </motion.div>
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button
+                          className="bg-black text-white font-bold rounded-2xl border border-yellow-400"
+                          onClick={() => router.push(`events/${event.id}`)}
+                        >
+                          Check
+                        </Button>
+                      </motion.div>
+                    </div>
                   </div>
                 </div>
                 {/* highlight ring */}

@@ -3,10 +3,8 @@ import axios from 'axios';
 import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import {
-  Heart,
   MessageCircle,
   Share,
-  Home,
   MoreHorizontal,
   Plus,
   Calendar,
@@ -88,6 +86,42 @@ export default function Feed() {
     return formatDate(date);
   };
 
+  // Function to handle post sharing
+  const handleSharePost = async (postId: string, postTitle: string) => {
+    try {
+      const postUrl = `${window.location.origin}/post/${postId}`;
+
+      // Check if Web Share API is supported (mobile devices)
+      if (navigator.share) {
+        await navigator.share({
+          title: postTitle,
+          text: `Check out this post: ${postTitle}`,
+          url: postUrl,
+        });
+        toast('Post shared successfully!');
+      } else {
+        // Fallback to clipboard copy
+        await navigator.clipboard.writeText(postUrl);
+        toast('Post link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing post:', error);
+      // Fallback method for older browsers
+      try {
+        const postUrl = `${window.location.origin}/post/${postId}`;
+        const textArea = document.createElement('textarea');
+        textArea.value = postUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        toast('Post link copied to clipboard!');
+      } catch (fallbackError) {
+        toast('Unable to copy link. Please try again.');
+      }
+    }
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       setSlideIdx((idx) => (idx + 1) % sliderEvents.length);
@@ -131,7 +165,7 @@ export default function Feed() {
     const handleScroll = () => {
       if (
         window.innerHeight + window.scrollY >=
-          document.body.offsetHeight - 200 &&
+        document.body.offsetHeight - 200 &&
         hasMore &&
         !isLoading &&
         !isFetchingMore
@@ -186,31 +220,28 @@ export default function Feed() {
                 <div className="flex space-x-2 min-w-max">
                   <Button
                     onClick={() => setActiveTab('recents')}
-                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
-                      activeTab === 'recents'
+                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${activeTab === 'recents'
                         ? 'bg-yellow-500 text-black'
                         : 'text-yellow-400 hover:bg-yellow-500/10'
-                    }`}
+                      }`}
                   >
                     Recents
                   </Button>
                   <Button
                     onClick={() => setActiveTab('friends')}
-                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
-                      activeTab === 'friends'
+                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${activeTab === 'friends'
                         ? 'bg-yellow-500 text-black'
                         : 'text-yellow-400 hover:bg-yellow-500/10'
-                    }`}
+                      }`}
                   >
                     Friends
                   </Button>
                   <Button
                     onClick={() => setActiveTab('popular')}
-                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
-                      activeTab === 'popular'
+                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${activeTab === 'popular'
                         ? 'bg-yellow-500 text-black'
                         : 'text-yellow-400 hover:bg-yellow-500/10'
-                    }`}
+                      }`}
                   >
                     Popular
                   </Button>
@@ -354,7 +385,7 @@ export default function Feed() {
                           {post.clubName}
                         </span>
                       )}
-                      
+
                     </div>
 
                     {/* Post Actions */}
@@ -364,9 +395,7 @@ export default function Feed() {
                           variant="ghost"
                           size="sm"
                           className="text-gray-400 hover:text-yellow-400 hover:bg-black transition-colors"
-                          onClick={() => {
-                            toast('share feature coming soon');
-                          }}
+                          onClick={() => handleSharePost(post.id, post.title)}
                         >
                           <Share className="w-4 h-4 mr-1" />
                           <span className="text-sm">Share</span>
