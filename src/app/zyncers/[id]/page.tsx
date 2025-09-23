@@ -454,6 +454,50 @@ export default function PublicUserProfile() {
             </div>
           )}
 
+                {/* Socials: Twitter/X, LinkedIn, Instagram */}
+                <div className="flex flex-wrap gap-2 mt-2">
+                {userData.twitter && (
+                  <a
+                  href={userData.twitter.startsWith('http') ? userData.twitter : `https://x.com/${userData.twitter.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center px-3 py-1 rounded-full bg-black text-white text-xs sm:text-sm font-medium hover:bg-gray-900 transition-colors"
+                  >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white" className="mr-1">
+                    <path d="M22.46 6c-.77.35-1.6.59-2.47.7a4.3 4.3 0 0 0 1.88-2.37c-.83.5-1.75.87-2.72 1.07A4.28 4.28 0 0 0 12 8.75c0 .34.04.67.1.99C8.09 9.6 4.83 7.88 2.67 5.15c-.37.64-.58 1.38-.58 2.17 0 1.5.76 2.83 1.92 3.61-.71-.02-1.38-.22-1.97-.54v.05c0 2.1 1.49 3.85 3.47 4.25-.36.1-.74.16-1.13.16-.28 0-.54-.03-.8-.07.54 1.68 2.11 2.9 3.97 2.93A8.6 8.6 0 0 1 2 19.54c-.32 0-.64-.02-.95-.06A12.13 12.13 0 0 0 8.29 21.5c7.55 0 11.69-6.26 11.69-11.69 0-.18-.01-.36-.02-.54A8.18 8.18 0 0 0 24 4.59a8.19 8.19 0 0 1-2.36.65z"/>
+                  </svg>
+                  <span className="truncate max-w-[100px]">{userData.twitter.replace('https://x.com/', '').replace('@', '')}</span>
+                  </a>
+                )}
+                {userData.linkedin && (
+                  <a
+                  href={userData.linkedin.startsWith('http') ? userData.linkedin : `https://linkedin.com/in/${userData.linkedin.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center px-3 py-1 rounded-full bg-blue-600 text-white text-xs sm:text-sm font-medium hover:bg-blue-700 transition-colors"
+                  >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white" className="mr-1">
+                    <path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.25c-.97 0-1.75-.78-1.75-1.75s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.75-1.75 1.75zm13.5 11.25h-3v-5.5c0-1.1-.9-2-2-2s-2 .9-2 2v5.5h-3v-10h3v1.5c.41-.77 1.36-1.5 2.5-1.5 1.93 0 3.5 1.57 3.5 3.5v6.5z"/>
+                  </svg>
+                  <span className="truncate max-w-[100px]">{userData.linkedin.replace('https://linkedin.com/in/', '').replace('@', '')}</span>
+                  </a>
+                )}
+                {userData.instagram && (
+                  <a
+                  href={userData.instagram.startsWith('http') ? userData.instagram : `https://instagram.com/${userData.instagram.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center px-3 py-1 rounded-full bg-pink-500 text-white text-xs sm:text-sm font-medium hover:bg-pink-600 transition-colors"
+                  >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white" className="mr-1">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.974.974 1.246 2.241 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.334 2.633-1.308 3.608-.974.974-2.241 1.246-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.334-3.608-1.308-.974-.974-1.246-2.241-1.308-3.608-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608.974-.974 2.241-1.246 3.608-1.308 1.266-.058 1.646-.07 4.85-.07zm0-2.163c-3.259 0-3.667.013-4.947.072-1.276.059-2.555.334-3.535 1.314-.98.98-1.255 2.259-1.314 3.535-.059 1.28-.072 1.688-.072 4.947s.013 3.667.072 4.947c.059 1.276.334 2.555 1.314 3.535.98.98 2.259 1.255 3.535 1.314 1.28.059 1.688.072 4.947.072s3.667-.013 4.947-.072c1.276-.059 2.555-.334 3.535-1.314.98-.98 1.255-2.259 1.314-3.535.059-1.28.072-1.688.072-4.947s-.013-3.667-.072-4.947c-.059-1.276-.334-2.555-1.314-3.535-.98-.98-2.259-1.255-3.535-1.314-1.28-.059-1.688-.072-4.947-.072zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a3.999 3.999 0 1 1 0-7.998 3.999 3.999 0 0 1 0 7.998zm6.406-11.845a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0z"/>
+                  </svg>
+                  <span className="truncate max-w-[100px]">{userData.instagram.replace('https://instagram.com/', '').replace('@', '')}</span>
+                  </a>
+                )}
+                </div>
+
+
           {/* Stats Row */}
           <div className="flex justify-around py-3 border-t border-gray-800">
             <div className="text-center">
