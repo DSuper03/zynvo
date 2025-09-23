@@ -1,3 +1,9 @@
+import bundleAnalyzer from '@next/bundle-analyzer';
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const securityHeaders = [
   {
     key: 'Content-Security-Policy',
@@ -5,8 +11,8 @@ const securityHeaders = [
       default-src 'self';
       script-src 'self' 'unsafe-eval' 'unsafe-inline';
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://via.placeholder.com https://api.dicebear.com https://example.com;
-      connect-src 'self' data: https://backend.zynvo.social https://upload.imagekit.io;
+      img-src 'self' data: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://via.placeholder.com https://api.dicebear.com https://example.com;
+      connect-src 'self' https://backend.zynvo.social https://upload.imagekit.io;
       font-src 'self' data:;
     `
       .replace(/\s{2,}/g, ' ')
@@ -25,12 +31,6 @@ const securityHeaders = [
     value: 'strict-origin-when-cross-origin',
   },
 ];
-
-import bundleAnalyzer from '@next/bundle-analyzer';
-
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -85,17 +85,72 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  reactStrictMode: false,
+  reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: false,
   },
   experimental: {
     optimizeCss: true,
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
+  
+  // Performance optimizations
+  swcMinify: true,
+  
+  // Webpack optimizations
+  webpack: (config, { dev, isServer }) => {
+    // Optimize bundle splitting
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          // Vendor chunk
+          vendor: {
+            name: 'vendor',
+            chunks: 'all',
+            test: /node_modules/,
+            priority: 20,
+          },
+          // Common chunk
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 10,
+            reuseExistingChunk: true,
+            enforce: true,
+          },
+          // Framework chunk (React, Next.js)
+          framework: {
+            chunks: 'all',
+            name: 'framework',
+            test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+            priority: 40,
+            enforce: true,
+          },
+          // UI libraries chunk
+          ui: {
+            name: 'ui',
+            chunks: 'all',
+            test: /[\\/]node_modules[\\/](@radix-ui|lucide-react|framer-motion)[\\/]/,
+            priority: 30,
+          },
+        },
+      };
+    }
+
+    return config;
+  },
+
   async headers() {
     return [
       {
@@ -118,6 +173,25 @@ const nextConfig = {
             value: 'Intelligent Social Media Platform',
           },
           ...securityHeaders,
+        ],
+      },
+      // Static assets caching
+      {
+        source: '/images/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/fonts/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
         ],
       },
       {

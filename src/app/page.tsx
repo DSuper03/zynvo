@@ -10,12 +10,13 @@ import {
 } from 'react-icons/fa';
 
 import LandingHeader from '@/components/landingHeader';
-import HowItWorks from '@/components/working';
-
-import Events from '@/components/Events';
-import Hero from '@/components/Hero';
-import Footer from '@/components/Footer';
-import Features from '@/components/features';
+import { 
+  Hero, 
+  Features, 
+  HowItWorks, 
+  Events, 
+  Footer 
+} from '@/components/DynamicComponents';
 export default function Home() {
   const heroRef = useRef(null);
 
@@ -163,7 +164,7 @@ export default function Home() {
             name: 'Zynvo',
             alternateName: 'Zynvo - Agentic Social Media Platform',
             url: 'https://zynvo.social',
-            logo: 'https://zynvo.social/logozynvo.jpg',
+            logo: '/hdlogozynvo.jpg',
             description:
               'The leading agentic social media platform revolutionizing campus communities through intelligent networking and AI-powered connections',
             foundingDate: '2024',
