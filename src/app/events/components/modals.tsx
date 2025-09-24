@@ -70,6 +70,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [lockedUniversity, setLockedUniversity] = useState('');
 
   useEffect(() => {
     const tok = localStorage.getItem('token');
@@ -85,6 +86,29 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       return;
     }
   }, []);
+
+  // Auto-fill and lock university to the founder's collegeName
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        if (!token) return;
+        const res = await axios.get<{ user: { collegeName: string } }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          {
+            headers: { authorization: `Bearer ${token}` },
+          }
+        );
+        const collegeName = res.data?.user?.collegeName || '';
+        if (collegeName) {
+          setLockedUniversity(collegeName);
+          setFormData((prev: any) => ({ ...prev, university: collegeName }));
+        }
+      } catch (e) {
+        // ignore; backend will still validate
+      }
+    };
+    fetchUser();
+  }, [token]);
 
   // Memoized handler for input changes
   const handleChange = useCallback((
@@ -188,37 +212,120 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
     setIsSubmitting(true);
 
-    let imageLink;
+    let imageLink = '';
     if (!img) {
       toast('you are required to upload a poster');
       setIsSubmitting(false);
       return;
     } else {
-      imageLink = await uploadImageToImageKit(await toBase64(img), img.name);
-      toast('Image uploaded');
-    }
-
-    // Submit with the correct image link
-    const createEvent = await axios.post<{
-      msg: string;
-      id: string;
-    }>(
-      `http://localhost:8000/api/v1/events/event`,
-      { ...formData, image: imageLink },
-      {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
+      try {
+        imageLink = await uploadImageToImageKit(await toBase64(img), img.name);
+        toast('Image uploaded successfully');
+      } catch (error) {
+        console.error('Image upload failed:', error);
+        toast('Image upload failed. Creating event without image...');
+        imageLink = ''; // Continue without image
       }
-    );
+    }
+    try {
+      const toIsoOrEmpty = (value: string) => {
+        if (!value) return '';
+        const d = new Date(value);
+        return isNaN(d.getTime()) ? '' : d.toISOString();
+      };
 
-    if (createEvent.status === 200) {
-      toast('Event registered , start marketing now!!!');
+      const contactPhoneDigits = String(formData.contactPhone || '').replace(/\D/g, '');
+      if (!contactPhoneDigits) {
+        toast('Please enter a valid contact phone number');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!formData.university) {
+        toast('Please select your university/college');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (formData.eventStartDate && formData.eventEndDate) {
+        const sd = new Date(formData.eventStartDate).getTime();
+        const ed = new Date(formData.eventEndDate).getTime();
+        if (!isNaN(sd) && !isNaN(ed) && sd > ed) {
+          toast('End date must be after start date');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Ensure university is set from locked value if formData.university is empty
+      const finalUniversity = formData.university || lockedUniversity;
+      
+      // Final validation - ensure university is not empty
+      if (!finalUniversity || finalUniversity.trim() === '') {
+        toast('University/College is required. Please refresh the page and try again.');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const payload = {
+        eventName: (formData.eventName || '').trim(),
+        description: (formData.description || '').trim(),
+        eventStartDate: toIsoOrEmpty(formData.eventStartDate),
+        eventEndDate: toIsoOrEmpty(formData.eventEndDate),
+        eventMode: formData.eventMode,
+        eventType: formData.eventType,
+        maxTeamSize: Number(formData.maxTeamSize) || 1,
+        venue: (formData.venue || '').trim(),
+        eventWebsite: formData.eventWebsite || '',
+        university: finalUniversity,
+        collegeStudentsOnly: !!formData.collegeStudentsOnly,
+        contactEmail: (formData.contactEmail || '').trim(),
+        contactPhone: contactPhoneDigits,
+        noParticipationFee: !!formData.noParticipationFee,
+        prizes: formData.prizes || '',
+        image: imageLink,
+      };
+
+      console.log('create-event payload', payload);
+      console.log('formData.university:', formData.university);
+      console.log('lockedUniversity:', lockedUniversity);
+      console.log('finalUniversity:', finalUniversity);
+      console.log('Payload field by field:');
+      Object.entries(payload).forEach(([key, value]) => {
+        console.log(`  ${key}:`, value, `(type: ${typeof value})`);
+      });
+
+      console.log('Sending request to:', `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event`);
+      console.log('Authorization header:', `Bearer ${token ? token.substring(0, 20) + '...' : 'NO_TOKEN'}`);
+      
+      const createEvent = await axios.post<{
+        msg: string;
+        id: string;
+      }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event`,
+        payload,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (createEvent.status === 200) {
+        toast('Event registered , start marketing now!!!');
+      } else {
+        toast(createEvent.data.msg || 'Failed to create event');
+      }
+    } catch (err: any) {
+      if (err?.response) {
+        console.error('create-event error response', err.response.status, err.response.data);
+      } else {
+        console.error('create-event error', err);
+      }
+      const message = err?.response?.data?.msg || err?.message || 'Failed to create event';
+      toast(message);
+    } finally {
       setIsSubmitting(false);
-    } else {
-      toast(createEvent.data.msg);
-      setIsSubmitting(false);
-      return;
     }
   };
 
@@ -356,24 +463,16 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       htmlFor="university"
                       className="block text-sm font-medium text-yellow-400 mb-1"
                     >
-                      University/Club*
+                      University/College* (locked to your club)
                     </label>
-                    <select
+                    <input
                       id="university"
                       name="university"
-                      value={formData.university}
-                      onChange={handleChange}
-                      className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
-                    >
-                      <option value="">Select university/club</option>
-                      {collegesWithClubs
-                        .sort((a, b) => a.college.localeCompare(b.college))
-                        .map((college) => (
-                          <option key={college.college} value={college.college}>
-                            {college.college}
-                          </option>
-                        ))}
-                    </select>
+                      type="text"
+                      value={lockedUniversity || formData.university}
+                      readOnly
+                      className="w-full bg-gray-800 border border-gray-700 text-white px-4 py-2 rounded-lg opacity-80 cursor-not-allowed"
+                    />
                     {errors.university && (
                       <p className="mt-1 text-sm text-red-500">
                         {errors.university}
