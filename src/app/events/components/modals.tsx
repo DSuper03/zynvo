@@ -203,7 +203,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       msg: string;
       id: string;
     }>(
-      `http://localhost:8000/api/v1/events/event`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event`,
       { ...formData, image: imageLink },
       {
         headers: {
