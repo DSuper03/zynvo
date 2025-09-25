@@ -382,7 +382,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                     )}
                   </div>
 
-                  <div>
+                { /* <div>
                     <label
                       htmlFor="university"
                       className="block text-sm font-medium text-yellow-400 mb-1"
@@ -403,6 +403,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       </p>
                     )}
                   </div>
+                  */}
 
                   <div>
                     <label
@@ -885,6 +886,17 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       <h4 className="text-xl font-bold text-white mb-2">
                         {formData.eventName || 'Event Name'}
                       </h4>
+                        <div className="grid grid-cols-2 gap-y-2 text-sm">
+                        <div className="flex items-center text-gray-300">
+                          <span className="font-medium text-yellow-400 mr-2">
+                            Event University
+                          </span>
+                          <span className="capitalize">
+                            {formData.university || 'Not specified'}
+                          </span>
+                        </div>
+                      </div>
+                      
                       <p className="text-gray-400 text-sm mb-1">
                         {formData.tagline || 'Event tagline'}
                       </p>
