@@ -218,98 +218,23 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       setIsSubmitting(false);
       return;
     } else {
-      try {
-        imageLink = await uploadImageToImageKit(await toBase64(img), img.name);
-        toast('Image uploaded successfully');
-      } catch (error) {
-        console.error('Image upload failed:', error);
-        toast('Image upload failed. Creating event without image...');
-        imageLink = ''; // Continue without image
-      }
+      imageLink = await uploadImageToImageKit(await toBase64(img), img.name);
+      toast('Image uploaded');
     }
-    try {
-      const toIsoOrEmpty = (value: string) => {
-        if (!value) return '';
-        const d = new Date(value);
-        return isNaN(d.getTime()) ? '' : d.toISOString();
-      };
 
-      const contactPhoneDigits = String(formData.contactPhone || '').replace(/\D/g, '');
-      if (!contactPhoneDigits) {
-        toast('Please enter a valid contact phone number');
-        setIsSubmitting(false);
-        return;
+    // Submit with the correct image link
+    const createEvent = await axios.post<{
+      msg: string;
+      id: string;
+    }>(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event`,
+      { ...formData, image: imageLink },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
       }
-
-      if (!formData.university) {
-        toast('Please select your university/college');
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (formData.eventStartDate && formData.eventEndDate) {
-        const sd = new Date(formData.eventStartDate).getTime();
-        const ed = new Date(formData.eventEndDate).getTime();
-        if (!isNaN(sd) && !isNaN(ed) && sd > ed) {
-          toast('End date must be after start date');
-          setIsSubmitting(false);
-          return;
-        }
-      }
-
-      // Ensure university is set from locked value if formData.university is empty
-      const finalUniversity = formData.university || lockedUniversity;
-      
-      // Final validation - ensure university is not empty
-      if (!finalUniversity || finalUniversity.trim() === '') {
-        toast('University/College is required. Please refresh the page and try again.');
-        setIsSubmitting(false);
-        return;
-      }
-      
-      const payload = {
-        eventName: (formData.eventName || '').trim(),
-        description: (formData.description || '').trim(),
-        eventStartDate: toIsoOrEmpty(formData.eventStartDate),
-        eventEndDate: toIsoOrEmpty(formData.eventEndDate),
-        eventMode: formData.eventMode,
-        eventType: formData.eventType,
-        maxTeamSize: Number(formData.maxTeamSize) || 1,
-        venue: (formData.venue || '').trim(),
-        eventWebsite: formData.eventWebsite || '',
-        university: finalUniversity,
-        collegeStudentsOnly: !!formData.collegeStudentsOnly,
-        contactEmail: (formData.contactEmail || '').trim(),
-        contactPhone: contactPhoneDigits,
-        noParticipationFee: !!formData.noParticipationFee,
-        prizes: formData.prizes || '',
-        image: imageLink,
-      };
-
-      console.log('create-event payload', payload);
-      console.log('formData.university:', formData.university);
-      console.log('lockedUniversity:', lockedUniversity);
-      console.log('finalUniversity:', finalUniversity);
-      console.log('Payload field by field:');
-      Object.entries(payload).forEach(([key, value]) => {
-        console.log(`  ${key}:`, value, `(type: ${typeof value})`);
-      });
-
-      console.log('Sending request to:', `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event`);
-      console.log('Authorization header:', `Bearer ${token ? token.substring(0, 20) + '...' : 'NO_TOKEN'}`);
-      
-      const createEvent = await axios.post<{
-        msg: string;
-        id: string;
-      }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event`,
-        payload,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    );
 
       if (createEvent.status === 200) {
         toast('Event registered , start marketing now!!!');
