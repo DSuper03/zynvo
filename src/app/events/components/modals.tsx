@@ -69,7 +69,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const tok = localStorage.getItem('token');
@@ -212,13 +212,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       }
     );
 
-    if (createEvent.status === 200) {
+    if (createEvent.status === 201 || createEvent.status === 200  ) {
       toast('Event registered , start marketing now!!!');
       setIsSubmitting(false);
+      setIsModalOpen(false)
     } else {
       toast(createEvent.data.msg);
       setIsSubmitting(false);
-      return;
+      setIsModalOpen(false)
     }
   };
 
