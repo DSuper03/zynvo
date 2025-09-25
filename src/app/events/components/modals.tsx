@@ -33,6 +33,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
+import { stringify } from 'querystring';
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -69,9 +70,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [lockedUniversity, setLockedUniversity] = useState('');
-
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+ const [lockedUniversity, setLockedUniversity] = useState<string>('');
+ const [clubName, setClubName] = useState<string>('');
   useEffect(() => {
     const tok = localStorage.getItem('token');
     if (tok) setToken(tok);
@@ -92,7 +93,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     const fetchUser = async () => {
       try {
         if (!token) return;
-        const res = await axios.get<{ user: { collegeName: string } }>(
+        const res = await axios.get<{ user: { collegeName: string , clubName: string} }>(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
           {
             headers: { authorization: `Bearer ${token}` },
@@ -102,6 +103,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         if (collegeName) {
           setLockedUniversity(collegeName);
           setFormData((prev: any) => ({ ...prev, university: collegeName }));
+        }
+        const clubName = res?.data?.user?.clubName || '';
+        if (clubName) {
+        setClubName(clubName);
+         
         }
       } catch (e) {
         // ignore; backend will still validate
@@ -211,7 +217,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     if (!validateStep()) return;
 
     setIsSubmitting(true);
-
+  const userUniAndClub = `${lockedUniversity}-${clubName}`;
     let imageLink = '';
     if (!img) {
       toast('you are required to upload a poster');
@@ -236,24 +242,17 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       }
     );
 
-      if (createEvent.status === 200) {
-        toast('Event registered , start marketing now!!!');
-      } else {
-        toast(createEvent.data.msg || 'Failed to create event');
-      }
-    } catch (err: any) {
-      if (err?.response) {
-        console.error('create-event error response', err.response.status, err.response.data);
-      } else {
-        console.error('create-event error', err);
-      }
-      const message = err?.response?.data?.msg || err?.message || 'Failed to create event';
-      toast(message);
-    } finally {
+    if (createEvent.status === 201 || createEvent.status === 200  ) {
+      toast('Event registered , start marketing now!!!');
       setIsSubmitting(false);
+      setIsModalOpen(false)
+    } else {
+      toast(createEvent.data.msg);
+      setIsSubmitting(false);
+      setIsModalOpen(false)
     }
   };
-
+ 
   if (!isOpen) return null;
 
   return (
@@ -394,7 +393,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       id="university"
                       name="university"
                       type="text"
-                      value={lockedUniversity || formData.university}
+                      value={`${lockedUniversity}${clubName ? `-${clubName}` : ''}` || formData.university}
                       readOnly
                       className="w-full bg-gray-800 border border-gray-700 text-white px-4 py-2 rounded-lg opacity-80 cursor-not-allowed"
                     />

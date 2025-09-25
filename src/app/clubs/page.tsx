@@ -32,28 +32,25 @@ dotenv.config();
 
 const getTypeClasses = (rawType: string) => {
   const type = String(rawType || '').toLowerCase();
-  if (type === 'technology' || type === 'tech') {
-    return 'bg-blue-900/30 text-blue-300 border border-blue-500/20';
+  switch (type) {
+    case 'tech':
+    case 'technology':
+      return 'bg-blue-900/30 text-blue-300 border border-blue-500/20';
+    case 'cultural':
+      return 'bg-purple-900/30 text-purple-300 border border-purple-500/20';
+    case 'business':
+      return 'bg-green-900/30 text-green-300 border border-green-500/20';
+    case 'social':
+      return 'bg-yellow-900/30 text-yellow-300 border border-yellow-500/20';
+    case 'literature':
+    case 'literary':    
+      return 'bg-amber-900/30 text-amber-300 border border-amber-500/20';
+    case 'design':
+      return 'bg-pink-900/30 text-pink-300 border border-pink-500/20';
+    case 'general':
+    default:  
+      return 'bg-gray-900/30 text-gray-300 border border-gray-500/20';
   }
-  if (type === 'cultural') {
-    return 'bg-purple-900/30 text-purple-300 border border-purple-500/20';
-  }
-  if (type === 'business') {
-    return 'bg-green-900/30 text-green-300 border border-green-500/20';
-  }
-  if (type === 'social') {
-    return 'bg-amber-900/30 text-amber-300 border border-amber-500/20';
-  }
-  if (type === 'literature' || type === 'literary') {
-    return 'bg-red-900/30 text-red-300 border border-red-500/20';
-  }
-  if (type === 'design') {
-    return 'bg-pink-900/30 text-pink-300 border border-pink-500/20';
-  }
-  if (type === 'general' || type === 'common') {
-    return 'bg-emerald-900/30 text-emerald-300 border border-emerald-500/20 ring-1 ring-emerald-500/20';
-  }
-  return 'bg-gray-900/30 text-gray-300 border border-gray-600/20';
 };
 
 const getFounderOrFirstMember = (club: any): { label: string; value: string } | null => {

@@ -27,7 +27,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [token, setToken] = useState('');
   const [newWing, setNewWing] = useState('');
-  let image: string;
+
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -68,14 +68,11 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     }
   };
 
-  async function uploadImg(img: File) {
-    image = await uploadImageToImageKit(await toBase64(img), img.name);
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
+    let image: string;
     e.preventDefault();
     if (img) {
-      await uploadImg(img);
+      image = await uploadImageToImageKit(await toBase64(img), img.name);
     } else {
       toast('please upload a logo for your club');
       return;
@@ -89,7 +86,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     const upload = await axios.post<{
       msg: string;
       clubId: string;
-    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/club`, {...clubData , image}, {
+    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/club`, {...clubData , logo: image}, {
       headers: {
         authorization: `Bearer ${token}`,
       },
