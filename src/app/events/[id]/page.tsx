@@ -282,6 +282,27 @@ const Eventid = () => {
                   </Button>
                 )}
 
+                     {/* Success notice (unchanged logic) */}
+                      {forkedUpId && (
+                        <div className="mt-6 p-4 bg-green-900/30 border border-green-500/30 rounded-2xl">
+                          <p className="text-green-400 font-medium mb-1">
+                            Registration Successful! 🎉
+                          </p>
+                          <p className="text-gray-300">
+                            Get your pass for this event on{' '}
+                            <a
+                              href={`https://zynvo.social/ticket/${forkedUpId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-yellow-400 hover:text-yellow-300 underline font-semibold transition-colors"
+                            >
+                              Zynced It
+                            </a>
+                            . Without this you&apos;ll not be allowed to take part.
+                          </p>
+                        </div>
+                      )}
+
                 <a
                   href={googleCalendarHref}
                   target="_blank"
@@ -297,9 +318,9 @@ const Eventid = () => {
             {/* Right: Poster */}
             <div className="lg:col-span-5">
               <div className="relative w-full aspect-[4/3] md:aspect-[3/2] rounded-2xl bg-gradient-to-br from-yellow-500/15 to-transparent border border-gray-800 overflow-hidden">
-                {data.posterUrl && data.eventHeader ? (
+                {data.posterUrl || data.eventHeader ? (
                   <Image
-                    src={data.eventHeader}
+                    src={data.posterUrl || '/poster/2.png'}
                     alt="Event Poster"
                     fill
                     className="object-cover"
@@ -523,26 +544,7 @@ const Eventid = () => {
           </div>
         </div>
 
-        {/* Success notice (unchanged logic) */}
-        {forkedUpId && (
-          <div className="mt-6 p-4 bg-green-900/30 border border-green-500/30 rounded-2xl">
-            <p className="text-green-400 font-medium mb-1">
-              Registration Successful! 🎉
-            </p>
-            <p className="text-gray-300">
-              Get your pass for this event on{' '}
-              <a
-                href={`https://zynvo.social/ticket/${forkedUpId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-yellow-400 hover:text-yellow-300 font-semibold transition-colors"
-              >
-                Zynced It
-              </a>
-              . Without this you&apos;ll not be allowed to take part.
-            </p>
-          </div>
-        )}
+   
 
         <div className="h-8" />
       </div>
