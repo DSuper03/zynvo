@@ -47,10 +47,16 @@ export async function uploadImageToImageKit(
       try {
         console.log(`Trying upload to: ${url}`);
         
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        
         const uploadResponse = await fetch(url, {
           method: 'POST',
           body: formData,
+          signal: controller.signal,
         });
+        
+        clearTimeout(timeoutId);
 
         console.log(`Upload response status for ${url}:`, uploadResponse.status);
 
@@ -98,10 +104,16 @@ export async function uploadImageDirectly(file: File): Promise<string> {
       try {
         console.log(`Trying upload to: ${url}`);
         
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        
         const uploadResponse = await fetch(url, {
           method: 'POST',
           body: formData,
+          signal: controller.signal,
         });
+        
+        clearTimeout(timeoutId);
 
         console.log(`Upload response status for ${url}:`, uploadResponse.status);
 

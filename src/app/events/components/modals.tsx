@@ -33,6 +33,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
+import { stringify } from 'querystring';
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -70,7 +71,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
+ const [lockedUniversity, setLockedUniversity] = useState<string>('');
+ const [clubName, setClubName] = useState<string>('');
   useEffect(() => {
     const tok = localStorage.getItem('token');
     if (tok) setToken(tok);
@@ -85,6 +87,34 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       return;
     }
   }, []);
+
+  // Auto-fill and lock university to the founder's collegeName
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        if (!token) return;
+        const res = await axios.get<{ user: { collegeName: string , clubName: string} }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          {
+            headers: { authorization: `Bearer ${token}` },
+          }
+        );
+        const collegeName = res.data?.user?.collegeName || '';
+        if (collegeName) {
+          setLockedUniversity(collegeName);
+          setFormData((prev: any) => ({ ...prev, university: collegeName }));
+        }
+        const clubName = res?.data?.user?.clubName || '';
+        if (clubName) {
+        setClubName(clubName);
+         
+        }
+      } catch (e) {
+        // ignore; backend will still validate
+      }
+    };
+    fetchUser();
+  }, [token]);
 
   // Memoized handler for input changes
   const handleChange = useCallback((
@@ -187,8 +217,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     if (!validateStep()) return;
 
     setIsSubmitting(true);
-
-    let imageLink;
+  const userUniAndClub = `${lockedUniversity}-${clubName}`;
+    let imageLink = '';
     if (!img) {
       toast('you are required to upload a poster');
       setIsSubmitting(false);
@@ -222,7 +252,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       setIsModalOpen(false)
     }
   };
-
+ 
   if (!isOpen) return null;
 
   return (
@@ -352,35 +382,28 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                     )}
                   </div>
 
-                  <div>
+                { /* <div>
                     <label
                       htmlFor="university"
                       className="block text-sm font-medium text-yellow-400 mb-1"
                     >
-                      University/Club*
+                      University/College* (locked to your club)
                     </label>
-                    <select
+                    <input
                       id="university"
                       name="university"
-                      value={formData.university}
-                      onChange={handleChange}
-                      className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
-                    >
-                      <option value="">Select university/club</option>
-                      {collegesWithClubs
-                        .sort((a, b) => a.college.localeCompare(b.college))
-                        .map((college) => (
-                          <option key={college.college} value={college.college}>
-                            {college.college}
-                          </option>
-                        ))}
-                    </select>
+                      type="text"
+                      value={`${lockedUniversity}${clubName ? `-${clubName}` : ''}` || formData.university}
+                      readOnly
+                      className="w-full bg-gray-800 border border-gray-700 text-white px-4 py-2 rounded-lg opacity-80 cursor-not-allowed"
+                    />
                     {errors.university && (
                       <p className="mt-1 text-sm text-red-500">
                         {errors.university}
                       </p>
                     )}
                   </div>
+                  */}
 
                   <div>
                     <label
@@ -863,6 +886,17 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       <h4 className="text-xl font-bold text-white mb-2">
                         {formData.eventName || 'Event Name'}
                       </h4>
+                        <div className="grid grid-cols-2 gap-y-2 text-sm">
+                        <div className="flex items-center text-gray-300">
+                          <span className="font-medium text-yellow-400 mr-2">
+                            Event University
+                          </span>
+                          <span className="capitalize">
+                            {formData.university || 'Not specified'}
+                          </span>
+                        </div>
+                      </div>
+                      
                       <p className="text-gray-400 text-sm mb-1">
                         {formData.tagline || 'Event tagline'}
                       </p>

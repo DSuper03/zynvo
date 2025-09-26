@@ -821,11 +821,11 @@ export default function ZynvoDashboard() {
               {userData.profileAvatar ? (
                 <img
                   src={userData.profileAvatar}
-                  className="w-12 h-12 sm:w-16 md:w-20 lg:w-24 sm:h-16 md:h-20 lg:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 object-cover"
+                  className="w-12 h-12 sm:w-16 md:w-20 lg:w-24  sm:h-16 md:h-20 lg:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 object-cover"
                   alt="user pfp"
                 />
               ) : (
-                <div className="w-12 h-12 sm:w-16 md:w-20 lg:w-24 sm:h-16 md:h-20 lg:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 flex items-center justify-center text-gray-900 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
+                <div className="w-12 h-12 sm:w-16 md:w-20 lg:w-24  sm:h-16 md:h-20 lg:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 flex items-center justify-center text-gray-900 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
                   {userData.name ? userData.name.charAt(0) : 'Z'}
                 </div>
               )}

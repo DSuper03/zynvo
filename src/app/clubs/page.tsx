@@ -11,6 +11,8 @@ import {
   Calendar,
   Grid3X3,
   List,
+  Share2,
+  User,
 } from 'lucide-react';
 
 import Link from 'next/link';
@@ -27,6 +29,38 @@ import './responsive.css';
 import NoTokenModal from '@/components/modals/remindModal';
 
 dotenv.config();
+
+const getTypeClasses = (rawType: string) => {
+  const type = String(rawType || '').toLowerCase();
+  switch (type) {
+    case 'tech':
+    case 'technology':
+      return 'bg-blue-900/30 text-blue-300 border border-blue-500/20';
+    case 'cultural':
+      return 'bg-purple-900/30 text-purple-300 border border-purple-500/20';
+    case 'business':
+      return 'bg-green-900/30 text-green-300 border border-green-500/20';
+    case 'social':
+      return 'bg-yellow-900/30 text-yellow-300 border border-yellow-500/20';
+    case 'literature':
+    case 'literary':    
+      return 'bg-amber-900/30 text-amber-300 border border-amber-500/20';
+    case 'design':
+      return 'bg-pink-900/30 text-pink-300 border border-pink-500/20';
+    case 'general':
+    default:  
+      return 'bg-gray-900/30 text-gray-300 border border-gray-500/20';
+  }
+};
+
+const getFounderOrFirstMember = (club: any): { label: string; value: string } | null => {
+  const firstMember = club?.members?.[0];
+  const memberName = firstMember?.name || firstMember?.fullName || firstMember?.username || firstMember?.email;
+  if (memberName) return { label: 'Member', value: String(memberName) };
+  if (club?.founderEmail) return { label: 'Founder', value: String(club.founderEmail) };
+  return null;
+};
+
 
 const categories = [
   { id: 'all', name: 'All Clubs' },
@@ -55,6 +89,33 @@ const ClubsPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [token, setToken] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleShareClub = async (club: { id: string; name: string; description?: string }) => {
+    try {
+      const url = typeof window !== 'undefined' ? `${window.location.origin}/clubs/${club.id}` : `https://zynvo.com/clubs/${club.id}`;
+      const text = `Check out ${club.name}${club.description ? ` - ${club.description}` : ''}. Club ID: ${club.id}`;
+
+      if (navigator.share) {
+        await navigator.share({
+          title: club.name,
+          text,
+          url,
+        });
+        toast.success('Shared successfully');
+        return;
+      }
+
+      await navigator.clipboard.writeText(url);
+      toast.success('Link copied to clipboard');
+    } catch (error) {
+      try {
+        await navigator.clipboard.writeText(`${club.id}`);
+        toast.success('Club ID copied to clipboard');
+      } catch {
+        toast.error('Unable to share. Please try manually.');
+      }
+    }
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -275,38 +336,54 @@ const ClubsPage = () => {
                             {club.collegeName || club.college}
                           </p>
 
-                          <p className="text-gray-300 text-xs line-clamp-2 mb-3 leading-relaxed">
+                          <p className="text-gray-300 text-xs line-clamp-2 mb-2 leading-relaxed">
                             {club.description}
                           </p>
+                          {getFounderOrFirstMember(club) && (
+                            <div className="flex items-center text-[11px] text-gray-400 mb-2">
+                              <User className="h-3 w-3 mr-1.5" />
+                              <span className="truncate">
+                                {getFounderOrFirstMember(club)?.label}: {getFounderOrFirstMember(club)?.value}
+                              </span>
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex items-center justify-between mt-auto">
                           <span
-                            className={`text-xs px-2 py-1 rounded-md font-medium
-                            ${club.type === 'Technology' || club.type === 'tech' ? 'bg-blue-900/30 text-blue-300 border border-blue-500/20' : ''}
-                            ${club.type === 'Cultural' || club.type === 'cultural' ? 'bg-purple-900/30 text-purple-300 border border-purple-500/20' : ''}
-                            ${club.type === 'Business' || club.type === 'business' ? 'bg-green-900/30 text-green-300 border border-green-500/20' : ''}
-                            ${club.type === 'Social' || club.type === 'social' ? 'bg-amber-900/30 text-amber-300 border border-amber-500/20' : ''}
-                            ${club.type === 'Literature' || club.type === 'literary' ? 'bg-red-900/30 text-red-300 border border-red-500/20' : ''}
-                            ${club.type === 'Design' || club.type === 'design' ? 'bg-pink-900/30 text-pink-300 border border-pink-500/20' : ''}`}
+                            className={`text-[10px] px-2 py-1 rounded-md font-semibold ${getTypeClasses(club.type)}`}
                           >
-                            {club.type.charAt(0).toUpperCase() +
-                              club.type.slice(1)}
+                            {(String(club.type || '')
+                              .charAt(0)
+                              .toUpperCase() + String(club.type || '').slice(1)) || 'General'}
                           </span>
                         </div>
                       </div>
                     </Link>
 
                     <div className="p-3 pt-0">
-                      <Button
-                        className="w-full bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleJoinClub(club);
-                        }}
-                      >
-                        Join Club
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          className="flex-1 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-medium h-9 px-4 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleJoinClub(club);
+                          }}
+                        >
+                          Join Club
+                        </Button>
+                        <Button
+                          className="bg-gray-700 hover:bg-gray-600 text-white text-xs font-medium h-9 w-9 p-0 rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleShareClub({ id: club.id, name: club.name, description: club.description });
+                          }}
+                          title="Share"
+                          aria-label="Share club"
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -359,36 +436,50 @@ const ClubsPage = () => {
                             </div>
                           </div>
 
-                          <p className="text-gray-300 text-xs sm:text-sm line-clamp-2 sm:line-clamp-3 mb-3 leading-relaxed">
+                          <p className="text-gray-300 text-xs sm:text-sm line-clamp-2 sm:line-clamp-3 mb-2 leading-relaxed">
                             {club.description}
                           </p>
+                          {getFounderOrFirstMember(club) && (
+                            <div className="flex items-center text-[11px] sm:text-xs text-gray-400 mb-2">
+                              <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5" />
+                              <span className="truncate">
+                                {getFounderOrFirstMember(club)?.label}: {getFounderOrFirstMember(club)?.value}
+                              </span>
+                            </div>
+                          )}
 
                           <div className="flex items-center justify-between">
-                            <span
-                              className={`text-xs px-2 py-1 rounded-md font-medium
-                              ${club.type === 'Technology' || club.type === 'tech' ? 'bg-blue-900/30 text-blue-300 border border-blue-500/20' : ''}
-                              ${club.type === 'Cultural' || club.type === 'cultural' ? 'bg-purple-900/30 text-purple-300 border border-purple-500/20' : ''}
-                              ${club.type === 'Business' || club.type === 'business' ? 'bg-green-900/30 text-green-300 border border-green-500/20' : ''}
-                              ${club.type === 'Social' || club.type === 'social' ? 'bg-amber-900/30 text-amber-300 border border-amber-500/20' : ''}
-                              ${club.type === 'Literature' || club.type === 'literary' ? 'bg-red-900/30 text-red-300 border border-red-500/20' : ''}
-                              ${club.type === 'Design' || club.type === 'design' ? 'bg-pink-900/30 text-pink-300 border border-pink-500/20' : ''}`}
-                            >
-                              {club.type.charAt(0).toUpperCase() +
-                                club.type.slice(1)}
-                            </span>
+                          <span
+                            className={`text-[10px] px-2 py-1 rounded-md font-semibold ${getTypeClasses(club.type)}`}
+                          >
+                            {(String(club.type || '')
+                              .charAt(0)
+                              .toUpperCase() + String(club.type || '').slice(1)) || 'General'}
+                          </span>
                           </div>
                         </div>
                       </Link>
 
-                      <div className="p-3 sm:p-4 pt-0 xs:pt-3 sm:pt-4 flex xs:items-center">
+                      <div className="p-3 sm:p-4 pt-0 xs:pt-3 sm:pt-4 flex xs:items-center gap-2">
                         <Button
-                          className="w-full xs:w-auto bg-yellow-500 hover:bg-yellow-400 text-black text-xs sm:text-sm font-medium py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 whitespace-nowrap hover:scale-[1.02] hover:shadow-lg"
+                          className="w-full xs:w-auto bg-yellow-500 hover:bg-yellow-400 text-black text-xs sm:text-sm font-medium h-9 px-3 sm:px-4 rounded-lg transition-all duration-200 whitespace-nowrap hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400"
                           onClick={(e) => {
                             e.preventDefault();
                             handleJoinClub(club);
                           }}
                         >
                           Join Club
+                        </Button>
+                        <Button
+                          className="bg-gray-700 hover:bg-gray-600 text-white text-xs sm:text-sm font-medium h-9 w-9 p-0 rounded-lg transition-all duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleShareClub({ id: club.id, name: club.name, description: club.description });
+                          }}
+                          title="Share"
+                          aria-label="Share club"
+                        >
+                          <Share2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
