@@ -94,14 +94,14 @@ const EventBadgeCard: React.FC<EventBadgeProps> = ({
               {/* QR */}
               {qrCodeImage && (
                 <div>
-                  <img src={qrCodeImage} alt="QR Code" />
+                  <img src={qrCodeImage} alt="QR Code" crossOrigin="anonymous" />
                 </div>
               )}
 
               {/* Profile */}
               {profileImage && (
                 <div className="relative h-16 w-16 rounded-full ring-2 ring-white shadow-xl overflow-hidden">
-                  <img src={profileImage} alt="" />
+                  <img src={profileImage} alt="" crossOrigin="anonymous" />
                 </div>
               )}
             </div>

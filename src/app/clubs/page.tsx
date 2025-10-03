@@ -61,6 +61,14 @@ const getFounderOrFirstMember = (club: any): { label: string; value: string } | 
   return null;
 };
 
+const getMemberCount = (club: any): number => {
+  if (typeof club?.members === 'number') return club.members as number;
+  if (Array.isArray(club?.members)) return club.members.length as number;
+  if (typeof club?.memberCount === 'number') return club.memberCount as number;
+  if (typeof club?.membersCount === 'number') return club.membersCount as number;
+  return 0;
+};
+
 
 const categories = [
   { id: 'all', name: 'All Clubs' },
@@ -323,7 +331,7 @@ const ClubsPage = () => {
                         {/* Member count overlay */}
                         <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center z-20">
                           <Users className="h-3 w-3 mr-1" />
-                          <span>{club.members || 100}</span>
+                          <span>{getMemberCount(club) || 0}</span>
                         </div>
                       </div>
 
@@ -415,7 +423,7 @@ const ClubsPage = () => {
                           {/* Member count overlay for mobile */}
                           <div className="absolute top-2 right-2 xs:hidden bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center z-20">
                             <Users className="h-3 w-3 mr-1" />
-                            <span>{club.members || 100}</span>
+                            <span>{getMemberCount(club) || 0}</span>
                           </div>
                         </div>
 
@@ -432,7 +440,7 @@ const ClubsPage = () => {
                             {/* Member count for larger screens */}
                             <div className="hidden xs:flex items-center text-gray-400 text-xs sm:text-sm ml-2">
                               <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                              <span>{club.members || 100}</span>
+                              <span>{getMemberCount(club) || 0}</span>
                             </div>
                           </div>
 

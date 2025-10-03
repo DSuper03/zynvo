@@ -186,11 +186,17 @@ export interface response {
     description: string;
     founderEmail: string;
     facultyEmail: string;
-    collegeId: string;
+    collegeId?: string;
     type: clubType;
     requirements: string | null;
     profilePicUrl: string | null;
     clubContact: string;
+    members?: {
+      id: string;
+      name: string;
+      email: string;
+      profileAvatar: string;
+    }[];
   }[];
   totalPages: number;
 }
@@ -211,6 +217,7 @@ export interface Response {
     founderEmail: string;
     facultyEmail: string;
     members: any[];
+    profilePicUrl?: string;
   };
 }
 
@@ -242,6 +249,11 @@ export interface ClubTypeProps {
   isPopular?: boolean;
   isNew?: boolean;
   category?: string;
+  type?: string;
+  profilePicUrl?: string;
+  clubContact?: string;
+  requirements?: string;
+  wings?: string;
 }
 
 export interface Event {

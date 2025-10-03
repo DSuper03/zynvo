@@ -1,10 +1,12 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Calendar, BarChart2, User, ArrowLeft, Share2 } from 'lucide-react';
 import axios from 'axios';
 import { useRouter, useParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import EventBadgeCard from '@/components/ticket';
+import * as htmlToImage from 'html-to-image';
 import Image from 'next/image';
 import { AuroraText } from '@/components/magicui/aurora-text';
 import { Badge } from '@/components/ui/badge';
@@ -169,6 +171,10 @@ export default function PublicUserProfile() {
   const [token, setToken] = useState('');
   const [highFivedPosts, setHighFivedPosts] = useState<Set<string>>(new Set());
   const [isNotFound, setIsNotFound] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [ticketData, setTicketData] = useState<any>({});
+  const badgeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -304,6 +310,52 @@ export default function PublicUserProfile() {
       // Fallback to copying URL
       navigator.clipboard.writeText(window.location.href);
       toast('Profile URL copied to clipboard!');
+    }
+  };
+
+  const openTicketModal = async (eventId: string) => {
+    try {
+      setSelectedEventId(eventId);
+      const safeId = encodeURIComponent(eventId);
+      const url = `/api/proxy/events/event-details?id=${safeId}`;
+      const headers: Record<string, string> = {};
+      if (typeof window !== 'undefined') {
+        const tok = localStorage.getItem('token');
+        if (tok) headers['authorization'] = `Bearer ${tok}`;
+      }
+      const resp = await axios.get<{
+        data: {
+          eventName: string;
+          clubName: string;
+          collegeName: string;
+          startDate: Date;
+          profilePic: string;
+        };
+      }>(url, { headers });
+      if (resp && resp.data && resp.data.data) {
+        const d = resp.data.data;
+        setTicketData({
+          ...d,
+          startDate: new Date(d.startDate).toLocaleString(),
+        });
+        setShowTicketModal(true);
+      }
+    } catch (e: any) {
+      console.error('Ticket fetch failed', e);
+      toast(e?.response?.data?.msg || e?.message || 'Unable to load ticket');
+    }
+  };
+
+  const downloadTicket = async () => {
+    if (badgeRef.current) {
+      const dataUrl = await htmlToImage.toPng(badgeRef.current, {
+        cacheBust: true,
+        skipFonts: false,
+      });
+      const link = document.createElement('a');
+      link.download = `${ticketData.eventName || 'event-badge'}.png`;
+      link.href = dataUrl;
+      link.click();
     }
   };
 
@@ -614,7 +666,7 @@ export default function PublicUserProfile() {
                   key={event.id}
                   className="border border-gray-800 rounded-lg p-3 hover:border-yellow-500/30 transition-colors"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div className="bg-yellow-400 p-2 rounded-full">
                         <Calendar className="w-4 h-4 text-gray-900" />
@@ -635,9 +687,17 @@ export default function PublicUserProfile() {
                         </p>
                       </div>
                     </div>
-                    <Badge variant="secondary" className="text-xs">
-                      Attended
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        Attended
+                      </Badge>
+                      <button
+                        onClick={() => openTicketModal(event.id)}
+                        className="text-xs px-2 py-1 rounded-md bg-yellow-400 text-gray-900 hover:bg-yellow-300"
+                      >
+                        View Ticket
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -654,6 +714,40 @@ export default function PublicUserProfile() {
 
       {/* Bottom spacing */}
       <div className="h-8"></div>
+
+      {showTicketModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white dark:bg-neutral-950 rounded-2xl w-full max-w-md border border-neutral-800 shadow-xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800">
+              <div className="text-sm font-semibold text-gray-900 dark:text-white">Your Ticket</div>
+              <button
+                onClick={() => setShowTicketModal(false)}
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-4">
+              <div ref={badgeRef}>
+                <EventBadgeCard
+                  eventName={ticketData.eventName || 'Event'}
+                  eventTimings={ticketData.startDate || ''}
+                  collegeName={ticketData.collegeName || ''}
+                  clubName={ticketData.clubName || ''}
+                  profileImage={ticketData.profilePic || ''}
+                  qrCodeImage={selectedEventId ? `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://zynvo.social/verify-event/${selectedEventId}` : undefined}
+                  style={{ backgroundColor: '#1e293b', textColor: 'white', overlayOpacity: 0.6 }}
+                />
+              </div>
+              <div className="mt-3 flex justify-end">
+                <Button onClick={downloadTicket} className="bg-yellow-500 hover:bg-yellow-400 text-black">
+                  Download
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
