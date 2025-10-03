@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   Calendar,
   BarChart2,
@@ -24,6 +24,8 @@ import {
 import CollegeSearchSelect from '@/components/colleges/collegeSelect';
 import { FaSchool } from 'react-icons/fa';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
+import EventBadgeCard from '@/components/ticket';
+import * as htmlToImage from 'html-to-image';
 
 // Define interfaces for better type checking
 interface Event {
@@ -559,6 +561,10 @@ export default function ZynvoDashboard() {
   const [selectedPredefinedTags, setSelectedPredefinedTags] = useState<
     string[]
   >([]);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [ticketData, setTicketData] = useState<any>({});
+  const badgeRef = useRef<HTMLDivElement>(null);
 
   // NEW: compact UI controls
   const [activePane, setActivePane] = useState<'posts' | 'events'>('posts');
@@ -739,6 +745,52 @@ export default function ZynvoDashboard() {
     }
     setShowProfileModal(false);
     setUpdate(true);
+  };
+
+  const openTicketModal = async (eventId: string) => {
+    try {
+      setSelectedEventId(eventId);
+      const safeId = encodeURIComponent(eventId);
+      const url = `/api/proxy/events/event-details?id=${safeId}`;
+      const headers: Record<string, string> = {};
+      if (typeof window !== 'undefined') {
+        const tok = localStorage.getItem('token');
+        if (tok) headers['authorization'] = `Bearer ${tok}`;
+      }
+      const resp = await axios.get<{
+        data: {
+          eventName: string;
+          clubName: string;
+          collegeName: string;
+          startDate: Date;
+          profilePic: string;
+        };
+      }>(url, { headers });
+      if (resp && resp.data && resp.data.data) {
+        const d = resp.data.data;
+        setTicketData({
+          ...d,
+          startDate: new Date(d.startDate).toLocaleString(),
+        });
+        setShowTicketModal(true);
+      }
+    } catch (e: any) {
+      console.error('Ticket fetch failed', e);
+      toast(e?.response?.data?.msg || e?.message || 'Unable to load ticket');
+    }
+  };
+
+  const downloadTicket = async () => {
+    if (badgeRef.current) {
+      const dataUrl = await htmlToImage.toPng(badgeRef.current, {
+        cacheBust: true,
+        skipFonts: false,
+      });
+      const link = document.createElement('a');
+      link.download = `${ticketData.eventName || 'event-badge'}.png`;
+      link.href = dataUrl;
+      link.click();
+    }
   };
 
   const handleSkillClick = (skill: string) => {
@@ -1128,7 +1180,7 @@ export default function ZynvoDashboard() {
                 ).map((event, index) => (
                   <li key={event.id} className="py-1 sm:py-2">
                     <div className="hover:bg-gray-800 rounded-lg p-2 sm:p-3 transition-colors border border-gray-800 hover:border-yellow-500/30">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                             <span className="text-yellow-400 text-xs font-medium">
@@ -1145,7 +1197,13 @@ export default function ZynvoDashboard() {
                             {new Date(event.startDate).toLocaleDateString()}
                           </p>
                         </div>
-                        <div className="ml-2 flex-shrink-0">
+                        <div className="ml-2 flex-shrink-0 flex items-center gap-2">
+                          <button
+                            onClick={() => openTicketModal(event.id)}
+                            className="text-[10px] sm:text-xs px-2 py-1 rounded-md bg-yellow-400 text-gray-900 hover:bg-yellow-300"
+                          >
+                            View Ticket
+                          </button>
                           <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
                         </div>
                       </div>
@@ -1176,6 +1234,40 @@ export default function ZynvoDashboard() {
           </div>
         )}
       </main>
+
+      {showTicketModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white dark:bg-neutral-950 rounded-2xl w-full max-w-md border border-neutral-800 shadow-xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800">
+              <div className="text-sm font-semibold text-gray-900 dark:text-white">Your Ticket</div>
+              <button
+                onClick={() => setShowTicketModal(false)}
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-4">
+              <div ref={badgeRef}>
+                <EventBadgeCard
+                  eventName={ticketData.eventName || 'Event'}
+                  eventTimings={ticketData.startDate || ''}
+                  collegeName={ticketData.collegeName || ''}
+                  clubName={ticketData.clubName || ''}
+                  profileImage={ticketData.profilePic || ''}
+                  qrCodeImage={selectedEventId ? `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://zynvo.social/verify-event/${selectedEventId}` : undefined}
+                  style={{ backgroundColor: '#1e293b', textColor: 'white', overlayOpacity: 0.6 }}
+                />
+              </div>
+              <div className="mt-3 flex justify-end">
+                <Button onClick={downloadTicket} className="bg-yellow-500 hover:bg-yellow-400 text-black">
+                  Download
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Complete Profile Modal - Mobile Responsive */}
       {showProfileModal && (

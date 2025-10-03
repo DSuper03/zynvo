@@ -9,7 +9,8 @@ import * as htmlToImage from 'html-to-image';
 
 export default function Page() {
   const params = useParams();
-  const id = params.id;
+  const rawId = (params as Record<string, string | string[]>).id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
   const [bgColor, setBgColor] = useState('#1e293b');
   const [bgImage, setBgImage] = useState(
     'https://images.unsplash.com/photo-1522202176988-66273c2fd55f'
@@ -48,7 +49,10 @@ export default function Page() {
   // Download badge as PNG
   const handleDownload = async () => {
     if (badgeRef.current) {
-      const dataUrl = await htmlToImage.toPng(badgeRef.current);
+      const dataUrl = await htmlToImage.toPng(badgeRef.current, {
+        cacheBust: true,
+        skipFonts: false,
+      });
       const link = document.createElement('a');
       link.download = `${data.eventName || 'event-badge'}.png`;
       link.href = dataUrl;

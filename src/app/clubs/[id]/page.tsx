@@ -12,11 +12,8 @@ import {
   Globe,
   Instagram,
   Twitter,
-  Heart,
-  MessageCircle,
   Share2,
   Clock,
-  ChevronRight,
   Flag,
 } from 'lucide-react';
 import JoinClubModal from '../joinclub';
@@ -29,47 +26,41 @@ import {
   EventType,
   Response,
 } from '@/types/global-Interface';
+
+interface ClubApiResponse {
+  msg: string;
+  club: {
+    id: string;
+    name: string;
+    collegeName: string;
+    description: string;
+    type: string;
+    founderEmail: string;
+    clubContact: string;
+    requirements: string;
+    facultyEmail: string;
+    profilePicUrl: string;
+    wings: string;
+    members: {
+      id: string;
+      name: string;
+      email: string;
+      profileAvatar: string;
+      course: string;
+      year: string;
+    }[];
+  };
+}
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 
-// Mock upcoming events
-
-// Mock announcements/posts
-const clubPosts = [
-  {
-    id: 1,
-    content:
-      'Applications for the Core Team 2025-26 are now open! Apply through the link in bio.',
-    timestamp: '2 days ago',
-    likes: 45,
-    comments: 12,
-  },
-  {
-    id: 2,
-    content:
-      'Congratulations to our members who won the National Coding Championship! Proud moment for our club. 🏆',
-    timestamp: '1 week ago',
-    likes: 89,
-    comments: 24,
-    image: '/pic1.jpg',
-  },
-  {
-    id: 3,
-    content:
-      "Weekly meeting reminder: Thursday at 7 PM in the Central Hall. We'll be discussing the upcoming hackathon preparations.",
-    timestamp: '2 weeks ago',
-    likes: 32,
-    comments: 8,
-  },
-];
+// All dynamic content is driven by backend data; no hardcoded demo content
 
 export default function ClubPage({}: ClubPageProps) {
   const param = useParams();
   const id = param.id as string;
 
-  const [activeTab, setActiveTab] = useState<'about' | 'events' | 'posts'>(
-    'about'
-  );
+  const [activeTab, setActiveTab] = useState<'about' | 'events'>('about');
   const [isJoined, setIsJoined] = useState(false);
   const [club, setClub] = useState<ClubTypeProps>({
     id: '',
@@ -82,11 +73,24 @@ export default function ClubPage({}: ClubPageProps) {
     profileAvatar: '',
     founderEmail: '',
     facultyEmail: '',
+    type: 'tech',
+    profilePicUrl: '',
+    clubContact: '',
+    requirements: '',
+    wings: '',
   });
   const [event, setEvent] = useState<EventType[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const getMemberCount = (c: { members?: unknown; memberCount?: number; membersCount?: number }): number => {
+    if (typeof c?.members === 'number') return c.members as number;
+    if (Array.isArray(c?.members)) return c.members.length;
+    if (typeof c?.memberCount === 'number') return c.memberCount;
+    if (typeof c?.membersCount === 'number') return c.membersCount;
+    return 0;
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -113,8 +117,8 @@ export default function ClubPage({}: ClubPageProps) {
         setLoading(true);
         
         // Fetch club data
-        const response = await axios.get<Response>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClub?id=${id}`,
+        const response = await axios.get<ClubApiResponse>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/${id}`,
           {
             headers: {
               authorization: `Bearer ${token}`,
@@ -122,20 +126,21 @@ export default function ClubPage({}: ClubPageProps) {
           }
         );
         
-        console.log('Club data:', response.data.response);
+        console.log('Club data:', response.data.club);
         
         // Set club data
+        const clubData = response.data.club;
         setClub({
-          id: response.data.response.id,
-          name: response.data.response.name,
-          collegeName: response.data.response.collegeName,
-          description: response.data.response.description,
-          members: response.data.response.members,
-          profileAvatar: response.data.response.members?.[0]?.profileAvatar,
-          founderEmail: response.data.response.founderEmail,
-          facultyEmail: response.data.response.facultyEmail,
-          image: '/default-club-image.jpg',
-          category: 'tech',
+          id: clubData.id,
+          name: clubData.name,
+          collegeName: clubData.collegeName,
+          description: clubData.description,
+          members: clubData.members || [],
+          profileAvatar: clubData.members?.[0]?.profileAvatar,
+          founderEmail: clubData.founderEmail,
+          facultyEmail: clubData.facultyEmail,
+          image: clubData.profilePicUrl || '/logozynvo.jpg',
+          category: clubData.type || 'tech',
         });
 
         // Fetch events data - Fixed the API endpoint
@@ -168,9 +173,13 @@ export default function ClubPage({}: ClubPageProps) {
           setEvent([]);
         }
         
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching club data:', error);
-        toast('Failed to load club data');
+        if (error.response?.status === 404) {
+          toast('Club not found');
+        } else {
+          toast('Failed to load club data');
+        }
       } finally {
         setLoading(false);
       }
@@ -209,33 +218,34 @@ export default function ClubPage({}: ClubPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 pb-16">
+    <div className="min-h-screen bg-gray-950 pb-16">
       {/* Club Header Section with Hero Image */}
-      <div className="relative h-64 md:h-80 w-full">
+      <div className="relative h-72 md:h-96 w-full pb-6">
         {/* Background image with gradient overlay */}
         <div className="absolute inset-0 z-0">
           <div className="relative w-full h-full">
             <Image
-              src={club.image || '/default-club-image.jpg'}
+              src={club.image || '/banners/profilebanner.jpg'}
               alt={club.name}
-              width={1000}
-              height={500}
-              className="object-cover"
+              width={1600}
+              height={900}
+              className="object-cover w-full h-full"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-gray-900"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-gray-950"></div>
           </div>
         </div>
 
-        {/* Floating Club Logo */}
-        <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-10">
-          <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-yellow-500 shadow-lg shadow-black/50">
+        {/* Centered Club Image */}
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="relative h-40 w-40 md:h-56 md:w-56 rounded-xl overflow-hidden border-4 border-yellow-500 shadow-2xl shadow-black/60 bg-gray-900/60">
             <Image
-              src={club.image || '/banners/banner'}
+              src={club.image || '/logozynvo.jpg'}
               alt={club.name}
-              width={128}
-              height={128}
-              className="object-cover"
+              width={224}
+              height={224}
+              className="object-cover w-full h-full"
+              priority
             />
           </div>
         </div>
@@ -252,7 +262,7 @@ export default function ClubPage({}: ClubPageProps) {
       </div>
 
       {/* Club Details */}
-      <div className="max-w-6xl mx-auto px-4 pt-20">
+      <div className="max-w-7xl mx-auto px-4 pt-20">
         {/* Club Name and Basic Info */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
@@ -262,8 +272,12 @@ export default function ClubPage({}: ClubPageProps) {
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="flex items-center text-gray-300">
               <Users size={16} className="mr-1" />
-              <span>{Array.isArray(club.members) ? club.members.length : 0} members</span>
+              <span>{getMemberCount(club)} members</span>
             </div>
+
+            <span className="bg-gray-800 text-gray-200 px-3 py-1 rounded-full text-sm border border-gray-700">
+              {String(club.category || club.type || 'general').toString()}
+            </span>
 
             {club.isPopular && (
               <span className="bg-gray-800 text-yellow-400 px-3 py-1 rounded-full text-sm border border-yellow-400/30">
@@ -282,7 +296,7 @@ export default function ClubPage({}: ClubPageProps) {
             {club.description}
           </p>
 
-          <div className="flex justify-center gap-3">
+          <div className="flex justify-center gap-3 mt-4">
             <button
               onClick={handleJoinClick}
               className={`px-6 py-2 rounded-lg font-medium ${
@@ -305,7 +319,7 @@ export default function ClubPage({}: ClubPageProps) {
         </div>
 
         {/* Tabs Navigation */}
-        <div className="flex border-b border-gray-700 mb-6">
+        <div className="flex border-b border-gray-800 mb-6 overflow-x-auto">
           <button
             onClick={() => setActiveTab('about')}
             className={`px-4 py-3 font-medium text-sm ${
@@ -328,16 +342,7 @@ export default function ClubPage({}: ClubPageProps) {
             Events
           </button>
 
-          <button
-            onClick={() => setActiveTab('posts')}
-            className={`px-4 py-3 font-medium text-sm ${
-              activeTab === 'posts'
-                ? 'text-yellow-400 border-b-2 border-yellow-400'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Announcements
-          </button>
+          {/* Announcements tab removed until backed by real data */}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -345,80 +350,63 @@ export default function ClubPage({}: ClubPageProps) {
           <div className="lg:col-span-2">
             {/* About Tab Content */}
             {activeTab === 'about' && (
-              <div className="bg-gray-800 rounded-lg p-6 space-y-6">
+              <div className="bg-gray-900/60 rounded-lg p-6 space-y-6 border border-gray-800">
                 <div>
                   <h2 className="text-xl font-bold text-white mb-3">
                     About {club.name}
                   </h2>
-                  <p className="text-gray-300">
-                    {club.name} is a dynamic student club at {club.collegeName}{' '}
-                    focused on{' '}
-                    {club.category === 'tech'
-                      ? 'technology and innovation'
-                      : club.category === 'cultural'
-                        ? 'arts and cultural activities'
-                        : club.category === 'business'
-                          ? 'entrepreneurship and business skills'
-                          : club.category === 'social'
-                            ? 'community service and social impact'
-                            : club.category === 'literary'
-                              ? 'literature, debate, and academic pursuits'
-                              : 'creativity and design'}
-                    . Our mission is to provide students with opportunities to
-                    enhance their skills, network with like-minded peers, and
-                    gain practical experience through various events, workshops,
-                    and projects.
-                  </p>
+                  <p className="text-gray-300 whitespace-pre-wrap break-words">{club.description}</p>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Club Achievements
-                  </h3>
-                  <ul className="list-disc list-inside text-gray-300 space-y-1">
-                    <li>
-                      Winner of the National Intercollegiate Competition 2024
-                    </li>
-                    <li>
-                      Organized over 15 successful workshops and events in the
-                      past year
-                    </li>
-                    <li>
-                      Collaborated with industry professionals for mentorship
-                      programs
-                    </li>
-                    <li>
-                      Featured in the Campus Annual Magazine for outstanding
-                      contributions
-                    </li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Contact Information
-                  </h3>
+                  <h3 className="text-lg font-bold text-white mb-2">Contact Information</h3>
                   <div className="space-y-2 text-gray-300">
-                    <p className="flex items-center">
-                      <Globe size={18} className="mr-2" />
-                      <a href="#" className="text-yellow-400 hover:underline">
-                        www.{club.name}.org
-                      </a>
-                    </p>
-                    <p className="flex items-center">
-                      <Instagram size={18} className="mr-2" />
-                      <a href="#" className="text-yellow-400 hover:underline">
-                        @{club.name}
-                      </a>
-                    </p>
-                    <p className="flex items-center">
-                      <Twitter size={18} className="mr-2" />
-                      <a href="#" className="text-yellow-400 hover:underline">
-                        @{club.name}
-                      </a>
-                    </p>
+                    {club.clubContact && (
+                      <p className="flex items-center">
+                        <Globe size={18} className="mr-2" />
+                        {/^\+?\d[\d\s-]{3,}$/.test(String(club.clubContact)) ? (
+                          <a href={`tel:${club.clubContact}`} className="text-yellow-400 hover:underline break-all">
+                            {club.clubContact}
+                          </a>
+                        ) : (
+                          <span className="break-all">{club.clubContact}</span>
+                        )}
+                      </p>
+                    )}
+                    {club.founderEmail && (
+                      <p className="flex items-center">
+                        <Instagram size={18} className="mr-2" />
+                        <span className="text-gray-300"><span className="text-gray-400 mr-1">Founder:</span>{club.founderEmail}</span>
+                      </p>
+                    )}
+                    {club.facultyEmail && (
+                      <p className="flex items-center">
+                        <Twitter size={18} className="mr-2" />
+                        <span className="text-gray-300"><span className="text-gray-400 mr-1">Faculty:</span>{club.facultyEmail}</span>
+                      </p>
+                    )}
                   </div>
                 </div>
+
+                {club.requirements && (
+                  <div>
+                    <h3 className="text-lg font-bold text-white mb-2">Requirements</h3>
+                    <p className="text-gray-300 whitespace-pre-wrap break-words">{club.requirements}</p>
+                  </div>
+                )}
+
+                {Array.isArray((club as any).wings) && (club as any).wings.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-bold text-white mb-2">Wings</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {(club as any).wings.map((w: any, idx: number) => (
+                        <span key={w?.id || w?.name || idx} className="px-3 py-1 text-sm rounded-full bg-gray-800 text-gray-200 border border-gray-700">
+                          {w?.name || String(w)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <h3 className="text-lg font-bold text-white mb-2">
@@ -444,22 +432,22 @@ export default function ClubPage({}: ClubPageProps) {
                 </h2>
 
                 {event.length === 0 ? (
-                  <div className="bg-gray-800 rounded-lg p-6 text-center">
+                  <div className="bg-gray-900/60 rounded-lg p-6 text-center border border-gray-800">
                     <p className="text-gray-300">No events found for this club.</p>
                   </div>
                 ) : (
                   event.map((eventItem: EventType) => (
                     <div
                       key={eventItem.id}
-                      className="bg-gray-800 rounded-lg overflow-hidden hover:border hover:border-yellow-500/30 transition-all duration-300 shadow-md"
+                      className="bg-gray-900/60 border border-gray-800 rounded-lg overflow-hidden hover:border-yellow-500/30 transition-all duration-300 shadow-md"
                     >
                       <div className="relative h-48 w-full">
                         <Image
-                          src={eventItem.image || '/default-event-image.jpg'}
+                          src={eventItem.image || '/pic1.jpg'}
                           alt={eventItem.title || 'Event Image'}
-                          width={100}
-                          height={100}
-                          className="object-cover"
+                          width={400}
+                          height={200}
+                          className="object-cover w-full h-full"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
 
@@ -487,12 +475,7 @@ export default function ClubPage({}: ClubPageProps) {
                           <span className="text-sm">{club.collegeName}</span>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center text-gray-400">
-                            <Users size={16} className="mr-1" />
-                            <span className="text-sm">{100} going</span>
-                          </div>
-
+                        <div className="flex items-center justify-end">
                           <Button className="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg text-sm font-medium transition-colors">
                             RSVP
                           </Button>
@@ -501,103 +484,19 @@ export default function ClubPage({}: ClubPageProps) {
                     </div>
                   ))
                 )}
-
-                <Link
-                  href="#"
-                  className="flex items-center justify-center text-yellow-400 hover:text-yellow-300 py-3"
-                >
-                  <span className="mr-1">View all events</span>
-                  <ChevronRight size={16} />
-                </Link>
-              </div>
-            )}
-
-            {/* Posts Tab Content */}
-            {activeTab === 'posts' && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-bold text-white">
-                  Club Announcements
-                </h2>
-
-                {clubPosts.map((post) => (
-                  <div
-                    key={post.id}
-                    className="bg-gray-800 rounded-lg overflow-hidden p-4 shadow-md"
-                  >
-                    <div className="flex items-center mb-3">
-                      <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                        <Image
-                          src={club.image || ''}
-                          alt={club.name}
-                          width={40}
-                          height={40}
-                          className="object-cover"
-                        />
-                      </div>
-
-                      <div>
-                        <h4 className="font-bold text-white">{club.name}</h4>
-                        <p className="text-gray-400 text-xs">
-                          {post.timestamp}
-                        </p>
-                      </div>
-                    </div>
-
-                    <p className="text-gray-300 mb-4">{post.content}</p>
-
-                    {post.image && (
-                      <div className="rounded-lg overflow-hidden mb-4">
-                        <div className="relative h-60 w-full">
-                          <Image
-                            src={post.image}
-                            alt="Post image"
-                            width={100}
-                            height={100}
-                            className="object-cover"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between text-gray-400 border-t border-gray-700 pt-3">
-                      <Button className="flex items-center hover:text-yellow-400">
-                        <Heart size={18} className="mr-1" />
-                        <span>{post.likes}</span>
-                      </Button>
-
-                      <Button className="flex items-center hover:text-yellow-400">
-                        <MessageCircle size={18} className="mr-1" />
-                        <span>{post.comments}</span>
-                      </Button>
-
-                      <Button className="flex items-center hover:text-yellow-400">
-                        <Share2 size={18} className="mr-1" />
-                        <span>Share</span>
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-
-                <Link
-                  href="#"
-                  className="flex items-center justify-center text-yellow-400 hover:text-yellow-300 py-3"
-                >
-                  <span className="mr-1">View all announcements</span>
-                  <ChevronRight size={16} />
-                </Link>
               </div>
             )}
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-6 lg:sticky lg:top-24 h-fit">
             {/* Quick Stats */}
-            <div className="bg-gray-800 rounded-lg p-4">
+            <div className="bg-gray-900/60 rounded-lg p-4 border border-gray-800">
               <h3 className="text-lg font-bold text-white mb-3">Club Stats</h3>
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div className="bg-gray-900 rounded-lg p-3">
                   <p className="text-yellow-400 text-xl font-bold">
-                    {Array.isArray(club.members) ? club.members.length : 0}
+                    {getMemberCount(club)}
                   </p>
                   <p className="text-gray-300 text-sm">Members</p>
                 </div>
@@ -616,46 +515,24 @@ export default function ClubPage({}: ClubPageProps) {
               </div>
             </div>
 
-            {/* Core Team */}
-            <div className="bg-gray-800 rounded-lg p-4">
-              <h3 className="text-lg font-bold text-white mb-3">Core Team</h3>
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                    <Image
-                      src={club.members?.[0]?.profileAvatar || '/default-avatar.jpg'}
-                      alt="President"
-                      width={40}
-                      height={40}
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-medium">
-                      {club.founderEmail}
-                    </h4>
-                    <p className="text-gray-400 text-xs">President</p>
-                  </div>
+            {/* Members - names only */}
+            <div className="bg-gray-900/60 rounded-lg p-4 border border-gray-800">
+              <h3 className="text-lg font-bold text-white mb-3">Members</h3>
+              {Array.isArray(club.members) && club.members.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {club.members.map((m: any) => (
+                    <span
+                      key={m.id || m.email}
+                      className="px-3 py-1 text-sm rounded-full bg-gray-800 text-gray-200 border border-gray-700"
+                      title={m.email}
+                    >
+                      {m.name || m.fullName || m.username || m.email}
+                    </span>
+                  ))}
                 </div>
-
-                <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                    <Image
-                      src="https://i.pravatar.cc/150?img=20"
-                      alt="Vice President"
-                      width={40}
-                      height={40}
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-medium">
-                      {club.facultyEmail}
-                    </h4>
-                    <p className="text-gray-400 text-xs">Faculty</p>
-                  </div>
-                </div>
-              </div>
+              ) : (
+                <p className="text-gray-400 text-sm">No members listed.</p>
+              )}
             </div>
 
             {/* Join CTA */}
@@ -688,7 +565,7 @@ export default function ClubPage({}: ClubPageProps) {
           isOpen={isJoinModalOpen}
           onClose={() => setIsJoinModalOpen(false)}
           clubName={club.name}
-          clubImage={club.image || '/default-club-image.jpg'}
+          clubImage={club.image || '/logozynvo.jpg'}
           clubId={id}
         />
       )}

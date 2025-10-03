@@ -5,7 +5,7 @@ const securityHeaders = [
       default-src 'self';
       script-src 'self' 'unsafe-eval' 'unsafe-inline';
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://via.placeholder.com https://api.dicebear.com https://example.com;
+      img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com;
       connect-src 'self' data: https://backend.zynvo.social https://upload.imagekit.io;
       font-src 'self' data:;
     `
@@ -62,12 +62,6 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'via.placeholder.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
         hostname: 'api.dicebear.com',
         port: '',
         pathname: '/**',
@@ -96,6 +90,14 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
+  async rewrites() {
+    return [
+      {
+        source: '/proxy/:path*',
+        destination: 'https://backend.zynvo.social/:path*',
+      },
+    ];
+  },
   async headers() {
     return [
       {
