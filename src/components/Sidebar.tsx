@@ -72,13 +72,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
             <div className="flex-shrink-0 ml-2">
               <Link href="/dashboard">
                 {profile ? (
-                  <img
-                    src={profile}
-                    alt="Profile"
-                    className={`rounded-full object-cover border-2 border-yellow-500 ${
-                      isOpen ? 'w-14 h-14 sm:w-16 sm:h-16' : 'w-10 h-10'
-                    }`}
-                  />
+                  <div className={`relative rounded-full border-2 border-yellow-500 overflow-hidden ${
+                    isOpen ? 'w-14 h-14 sm:w-16 sm:h-16' : 'w-10 h-10'
+                  }`}>
+                    <Image
+                      src={profile}
+                      alt="Profile"
+                      width={isOpen ? 64 : 40}
+                      height={isOpen ? 64 : 40}
+                      className="object-cover"
+                      priority
+                      sizes={isOpen ? "(max-width: 640px) 56px, 64px" : "40px"}
+                    />
+                  </div>
                 ) : (
                   <div
                     className={`bg-yellow-500 rounded-full flex items-center justify-center border-2 border-yellow-500 ${
