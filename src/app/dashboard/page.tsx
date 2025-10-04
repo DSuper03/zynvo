@@ -871,10 +871,12 @@ export default function ZynvoDashboard() {
           <div className="relative px-3 sm:px-4 md:px-6 pb-4 sm:pb-6">
             <div className="absolute -top-6 sm:-top-8 md:-top-12 left-3 sm:left-4 md:left-6">
               {userData.profileAvatar ? (
-                <img
+                <Image
                   src={userData.profileAvatar}
                   className="w-12 h-12 sm:w-16 md:w-20 lg:w-24  sm:h-16 md:h-20 lg:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 object-cover"
                   alt="user pfp"
+                  width={48}
+                  height={48}
                 />
               ) : (
                 <div className="w-12 h-12 sm:w-16 md:w-20 lg:w-24  sm:h-16 md:h-20 lg:h-24 rounded-full border-2 sm:border-4 border-gray-900 bg-yellow-400 flex items-center justify-center text-gray-900 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
@@ -925,48 +927,125 @@ export default function ZynvoDashboard() {
                 </div>
               </div>
 
-                {/* Socials: Twitter/X, LinkedIn, Instagram */}
-                <div className="flex flex-wrap gap-2 mt-2">
-                {userData.twitter && (
-                  <a
-                  href={userData.twitter.startsWith('http') ? userData.twitter : `https://x.com/${userData.twitter.replace('@', '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center px-3 py-1 rounded-full bg-black text-white text-xs sm:text-sm font-medium hover:bg-gray-900 transition-colors"
-                  >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white" className="mr-1">
-                    <path d="M22.46 6c-.77.35-1.6.59-2.47.7a4.3 4.3 0 0 0 1.88-2.37c-.83.5-1.75.87-2.72 1.07A4.28 4.28 0 0 0 12 8.75c0 .34.04.67.1.99C8.09 9.6 4.83 7.88 2.67 5.15c-.37.64-.58 1.38-.58 2.17 0 1.5.76 2.83 1.92 3.61-.71-.02-1.38-.22-1.97-.54v.05c0 2.1 1.49 3.85 3.47 4.25-.36.1-.74.16-1.13.16-.28 0-.54-.03-.8-.07.54 1.68 2.11 2.9 3.97 2.93A8.6 8.6 0 0 1 2 19.54c-.32 0-.64-.02-.95-.06A12.13 12.13 0 0 0 8.29 21.5c7.55 0 11.69-6.26 11.69-11.69 0-.18-.01-.36-.02-.54A8.18 8.18 0 0 0 24 4.59a8.19 8.19 0 0 1-2.36.65z"/>
-                  </svg>
-                  <span className="truncate max-w-[100px]">{userData.twitter.replace('https://x.com/', '').replace('@', '')}</span>
-                  </a>
-                )}
-                {userData.linkedin && (
-                  <a
-                  href={userData.linkedin.startsWith('http') ? userData.linkedin : `https://linkedin.com/in/${userData.linkedin.replace('@', '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center px-3 py-1 rounded-full bg-blue-600 text-white text-xs sm:text-sm font-medium hover:bg-blue-700 transition-colors"
-                  >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white" className="mr-1">
-                    <path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.25c-.97 0-1.75-.78-1.75-1.75s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.75-1.75 1.75zm13.5 11.25h-3v-5.5c0-1.1-.9-2-2-2s-2 .9-2 2v5.5h-3v-10h3v1.5c.41-.77 1.36-1.5 2.5-1.5 1.93 0 3.5 1.57 3.5 3.5v6.5z"/>
-                  </svg>
-                  <span className="truncate max-w-[100px]">{userData.linkedin.replace('https://linkedin.com/in/', '').replace('@', '')}</span>
-                  </a>
-                )}
+              {/* Social Links Section - Redesigned with Senior Dev UX */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
+                    Connect
+                  </h3>
+                  <div className="h-px bg-gradient-to-r from-yellow-400/20 to-transparent flex-1 ml-3"></div>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {/* Twitter/X Link */}
+                  {userData.twitter && (
+                    <a
+                      href={userData.twitter.startsWith('http') ? userData.twitter : `https://x.com/${userData.twitter.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-xl p-4 hover:border-gray-600 transition-all duration-300 hover:shadow-lg hover:shadow-black/20 hover:scale-[1.02]"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-shrink-0 w-10 h-10 bg-black rounded-lg flex items-center justify-center group-hover:bg-gray-900 transition-colors duration-300">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="white" className="group-hover:scale-110 transition-transform duration-300">
+                            <path d="M22.46 6c-.77.35-1.6.59-2.47.7a4.3 4.3 0 0 0 1.88-2.37c-.83.5-1.75.87-2.72 1.07A4.28 4.28 0 0 0 12 8.75c0 .34.04.67.1.99C8.09 9.6 4.83 7.88 2.67 5.15c-.37.64-.58 1.38-.58 2.17 0 1.5.76 2.83 1.92 3.61-.71-.02-1.38-.22-1.97-.54v.05c0 2.1 1.49 3.85 3.47 4.25-.36.1-.74.16-1.13.16-.28 0-.54-.03-.8-.07.54 1.68 2.11 2.9 3.97 2.93A8.6 8.6 0 0 1 2 19.54c-.32 0-.64-.02-.95-.06A12.13 12.13 0 0 0 8.29 21.5c7.55 0 11.69-6.26 11.69-11.69 0-.18-.01-.36-.02-.54A8.18 8.18 0 0 0 24 4.59a8.19 8.19 0 0 1-2.36.65z"/>
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-white group-hover:text-gray-100 transition-colors">
+                            Twitter/X
+                          </p>
+                          <p className="text-xs text-gray-400 truncate">
+                            @{userData.twitter.replace('https://x.com/', '').replace('@', '')}
+                          </p>
+                        </div>
+                        <div className="flex-shrink-0">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 group-hover:text-gray-300 group-hover:translate-x-1 transition-all duration-300">
+                            <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </a>
+                  )}
+                  {/* LinkedIn Link */}
+                  {userData.linkedin && (
+                    <a
+                      href={userData.linkedin.startsWith('http') ? userData.linkedin : `https://linkedin.com/in/${userData.linkedin.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative overflow-hidden bg-gradient-to-br from-blue-900/20 to-blue-800/10 border border-blue-700/30 rounded-xl p-4 hover:border-blue-600/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 hover:scale-[1.02]"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center group-hover:bg-blue-700 transition-colors duration-300">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="white" className="group-hover:scale-110 transition-transform duration-300">
+                            <path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.25c-.97 0-1.75-.78-1.75-1.75s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.75-1.75 1.75zm13.5 11.25h-3v-5.5c0-1.1-.9-2-2-2s-2 .9-2 2v5.5h-3v-10h3v1.5c.41-.77 1.36-1.5 2.5-1.5 1.93 0 3.5 1.57 3.5 3.5v6.5z"/>
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-white group-hover:text-blue-100 transition-colors">
+                            LinkedIn
+                          </p>
+                          <p className="text-xs text-gray-400 truncate">
+                            {userData.linkedin.replace('https://linkedin.com/in/', '').replace('@', '')}
+                          </p>
+                        </div>
+                        <div className="flex-shrink-0">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 group-hover:text-blue-300 group-hover:translate-x-1 transition-all duration-300">
+                            <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </a>
+                  )}
                 {userData.instagram && (
                   <a
                   href={userData.instagram.startsWith('http') ? userData.instagram : `https://instagram.com/${userData.instagram.replace('@', '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center px-3 py-1 rounded-full bg-pink-500 text-white text-xs sm:text-sm font-medium hover:bg-pink-600 transition-colors"
+                  className="group relative overflow-hidden bg-gradient-to-br from-pink-900/20 to-purple-800/10 border border-pink-700/30 rounded-xl p-4 hover:border-pink-600/50 transition-all duration-300 hover:shadow-lg hover:shadow-pink-500/10 hover:scale-[1.02]"
                   >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="white" className="mr-1">
                     <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.974.974 1.246 2.241 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.334 2.633-1.308 3.608-.974.974-2.241 1.246-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.334-3.608-1.308-.974-.974-1.246-2.241-1.308-3.608-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608.974-.974 2.241-1.246 3.608-1.308 1.266-.058 1.646-.07 4.85-.07zm0-2.163c-3.259 0-3.667.013-4.947.072-1.276.059-2.555.334-3.535 1.314-.98.98-1.255 2.259-1.314 3.535-.059 1.28-.072 1.688-.072 4.947s.013 3.667.072 4.947c.059 1.276.334 2.555 1.314 3.535.98.98 2.259 1.255 3.535 1.314 1.28.059 1.688.072 4.947.072s3.667-.013 4.947-.072c1.276-.059 2.555-.334 3.535-1.314.98-.98 1.255-2.259 1.314-3.535.059-1.28.072-1.688.072-4.947s-.013-3.667-.072-4.947c-.059-1.276-.334-2.555-1.314-3.535-.98-.98-2.259-1.255-3.535-1.314-1.28-.059-1.688-.072-4.947-.072zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a3.999 3.999 0 1 1 0-7.998 3.999 3.999 0 0 1 0 7.998zm6.406-11.845a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0z"/>
                   </svg>
-                  <span className="truncate max-w-[100px]">{userData.instagram.replace('https://instagram.com/', '').replace('@', '')}</span>
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center group-hover:from-pink-600 group-hover:to-purple-700 transition-all duration-300">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="white" className="group-hover:scale-110 transition-transform duration-300">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.974.974 1.246 2.241 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.334 2.633-1.308 3.608-.974.974-2.241 1.246-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.334-3.608-1.308-.974-.974-1.246-2.241-1.308-3.608-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608.974-.974 2.241-1.246 3.608-1.308 1.266-.058 1.646.07-4.85.07zm0-2.163c-3.259 0-3.667.013-4.947.072-1.276.059-2.555.334-3.535 1.314-.98.98-1.255 2.259-1.314 3.535-.059 1.28-.072 1.688-.072 4.947s.013 3.667.072 4.947c.059 1.276.334 2.555 1.314 3.535.98.98 2.259 1.255 3.535 1.314 1.28.059 1.688.072 4.947.072s3.667-.013 4.947-.072c1.276-.059 2.555-.334 3.535-1.314.98-.98 1.255-2.259 1.314-3.535.059-1.28.072-1.688.072-4.947s-.013-3.667-.072-4.947c-.059-1.276-.334-2.555-1.314-3.535-.98-.98-2.259-1.255-3.535-1.314-1.28-.059-1.688-.072-4.947-.072zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a3.999 3.999 0 1 1 0-7.998 3.999 3.999 0 0 1 0 7.998zm6.406-11.845a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0z"/>
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-white group-hover:text-pink-100 transition-colors">
+                            Instagram
+                          </p>
+                          <p className="text-xs text-gray-400 truncate">
+                            @{userData.instagram.replace('https://instagram.com/', '').replace('@', '')}
+                          </p>
+                        </div>
+                        <div className="flex-shrink-0">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 group-hover:text-pink-300 group-hover:translate-x-1 transition-all duration-300">
+                            <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                          </svg>
+                        </div>
+                      </div>
                   </a>
                 )}
                 </div>
+
+                {/* Empty State for No Social Links */}
+                {!userData.twitter && !userData.linkedin && !userData.instagram && (
+                  <div className="text-center py-8 px-4 bg-gray-800/30 border border-gray-700/50 rounded-xl">
+                    <div className="w-12 h-12 mx-auto mb-3 bg-gray-700 rounded-full flex items-center justify-center">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-500">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                      </svg>
+                    </div>
+                    <p className="text-sm text-gray-400 mb-2">No social links added yet</p>
+                    <p className="text-xs text-gray-500">Complete your profile to add social connections</p>
+                  </div>
+                )}
+              </div>
 
               {/* Tags (limited) */}
               <div className="mb-3 sm:mb-4">
