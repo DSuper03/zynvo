@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -129,8 +130,19 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files);
+      const maxBytes = 2 * 1024 * 1024; // 2 MB
+
+      // Reject if any selected file exceeds 2 MB
+      const hasOversized = filesArray.some((file) => file.size > maxBytes);
+      if (hasOversized) {
+        toast('Image must be 2 MB or smaller');
+        // Clear the input so users can reselect the file
+        e.target.value = '';
+        return;
+      }
       if (images.length + filesArray.length > 1) {
         alert('You can only upload 1 image');
+        e.target.value = '';
         return;
       }
 
@@ -327,31 +339,45 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
             )}
 
             {/* Upload Controls */}
-            <div className="flex items-center justify-between border-t border-b border-gray-700 py-3 mb-4">
-              <span className="text-gray-400 text-sm">Add to your post</span>
-              <div className="flex space-x-2">
-                <Button
-                  onClick={() =>
-                    document.getElementById('image-upload')?.click()
-                  }
-                  className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-500/10"
-                  disabled={images.length >= 1} // changed from 4 → 1
-                >
-                  <ImageIcon size={20} />
-                </Button>
+            <div className="border-t border-b border-gray-700 py-3 mb-4">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400 text-sm">Add to your post</span>
+                <div className="flex space-x-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={() =>
+                            document.getElementById('image-upload')?.click()
+                          }
+                          className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-500/10"
+                          disabled={images.length >= 1}
+                        >
+                          <ImageIcon size={20} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Max file size 2 MB. Only 1 image allowed.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
 
-                <input
-                  id="image-upload"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                <Button className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-500/10">
-                  <Camera size={20} />
-                </Button>
+                  <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <Button className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-500/10">
+                    <Camera size={20} />
+                  </Button>
+                </div>
               </div>
+              <p className="mt-2 text-xs text-gray-400">
+                Max file size 2 MB • Only 1 image can be uploaded
+              </p>
             </div>
 
             {/* Tag Options */}
