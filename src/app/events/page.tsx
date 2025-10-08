@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { eventData } from '@/types/global-Interface';
 import axios from 'axios';
 import CreateEventButton from './components/createEventButton';
-import CreateEventModal from './components/modals';
+import CreateEventModal from './components/EventCreationModel';
 import EventCard from './components/EventCard';
 import { Button } from '@/components/ui/button';
 
@@ -88,6 +88,54 @@ export default function ZynvoEventsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [userAttendedEventIds, setUserAttendedEventIds] = useState<string[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [token, setToken] = useState('');
+
+  // Fetch token on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
+        setToken(storedToken);
+      }
+    }
+  }, []);
+
+  // Fetch user data and attended events
+  useEffect(() => {
+    async function fetchUserData() {
+      if (!token) return;
+      
+      try {
+        const userResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        
+        if (userResponse.data && (userResponse.data as any).user) {
+          const userData = (userResponse.data as any).user;
+          setCurrentUser(userData);
+          
+          // Extract attended event IDs from user data
+          if (userData.eventAttended && Array.isArray(userData.eventAttended)) {
+            const attendedIds = userData.eventAttended.map((attendance: any) => attendance.event.id);
+            setUserAttendedEventIds(attendedIds);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    }
+    
+    if (token) {
+      fetchUserData();
+    }
+  }, [token]);
 
   useEffect(() => {
     let isMounted = true;
@@ -139,6 +187,12 @@ export default function ZynvoEventsPage() {
       isMounted = false;
     };
   }, [currentPage]);
+
+  // Helper function to check if user is attending an event
+  const isUserAttendingEvent = (event: eventData): boolean => {
+    if (!currentUser) return false;
+    return userAttendedEventIds.includes(event.id);
+  };
 
   // Replace the filteredEvents computation with name-only search
   const filteredEvents = (events || []).filter((event) => {
@@ -271,7 +325,13 @@ export default function ZynvoEventsPage() {
             </div>
           ) : filteredEvents.length > 0 ? (
             // Pass the filtered events to EventCard
-            <EventCard />
+            <EventCard 
+              events={filteredEvents}
+              isLoading={isLoading}
+              error={error}
+              searchTerm={searchTerm}
+              isUserAttendingEvent={isUserAttendingEvent}
+            />
           ) : (
             <div className="text-center py-12">
               <div className="text-gray-400 mb-4">
