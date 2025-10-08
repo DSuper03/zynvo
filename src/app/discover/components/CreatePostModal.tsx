@@ -47,33 +47,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const [token, setToken] = useState<string | null>('');
   const [imageLink, setImageLink] = useState<string>('');
   const [title, setTitle] = useState('');
-  useEffect(() => {
-    let cancelled = false;
-    const controller = new AbortController();
-  
-    async function load() {
-      if (!selectedCollege) {
-        setClubs([]);
-        return;
-      }
-      try {
-        setSettingClubs(true);
-        setSelectedClub('');
-        const list = await fetchClubsByCollege(selectedCollege, controller.signal);
-        if (!cancelled) setClubs(list);
-      } catch {
-        if (!cancelled) setClubs([]);
-      } finally {
-        if (!cancelled) setSettingClubs(false);
-      }
-    }
-  
-    load();
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [selectedCollege]);
+  // removed duplicate effect
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const tok = localStorage.getItem('token');
@@ -103,7 +77,8 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
         setSelectedClub('');
         const list = await fetchClubsByCollege(
           selectedCollege,
-          controller.signal
+          controller.signal,
+          token || undefined
         );
         if (!cancelled) setClubs(list);
       } catch {
@@ -118,7 +93,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       cancelled = true;
       controller.abort();
     };
-  }, [selectedCollege]);
+  }, [selectedCollege, token]);
 
   // College selection modal state
   const [isCollegeModalOpen, setIsCollegeModalOpen] = useState(false);

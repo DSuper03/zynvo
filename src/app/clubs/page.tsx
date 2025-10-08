@@ -97,6 +97,8 @@ const ClubsPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [token, setToken] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [userJoinedClubIds, setUserJoinedClubIds] = useState<string[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   const handleShareClub = async (club: { id: string; name: string; description?: string }) => {
     try {
@@ -163,6 +165,34 @@ const ClubsPage = () => {
     call();
   }, [currentPage, token]);
 
+  useEffect(() => {
+    async function fetchUserData() {
+      if (!token) return;
+      
+      try {
+        // Get current user data
+        const userResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        
+        if (userResponse.data && (userResponse.data as any).user) {
+          setCurrentUser((userResponse.data as any).user);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    }
+    
+    if (token) {
+      fetchUserData();
+    }
+  }, [token]);
+
   const handleJoinClub = (club: response['resp'][0]) => {
     setSelectedClub({
       name: club.name,
@@ -181,6 +211,26 @@ const ClubsPage = () => {
         activetype === 'all' || String(club.type).toLowerCase() === activetype;
       return matchesSearch && matchesCategory;
     }) || [];
+
+  const isUserMemberOfClub = (club: any): boolean => {
+    if (!currentUser) return false;
+    
+    // Check by club ID (most reliable)
+    if (userJoinedClubIds.includes(club.id)) return true;
+    
+    // Fallback: Check if user's clubName matches this club's name
+    if (currentUser.clubName === club.name) return true;
+    
+    // Fallback: Check if user is in the club's members array
+    if (Array.isArray(club.members)) {
+      return club.members.some((member: { email: any; id: any; }) => 
+        member.email === currentUser.email || 
+        member.id === currentUser.id
+      );
+    }
+    
+    return false;
+  };
 
   return (
     <div className="flex flex-col h-screen">
@@ -372,13 +422,22 @@ const ClubsPage = () => {
                     <div className="p-3 pt-0">
                       <div className="flex items-center gap-2">
                         <Button
-                          className="flex-1 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-medium h-9 px-4 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400"
+                          className={`flex-1 text-xs font-medium h-9 px-4 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 ${
+                            isUserMemberOfClub(club)
+                              ? 'bg-green-600 hover:bg-green-500 text-white focus-visible:ring-green-400'
+                              : 'bg-yellow-500 hover:bg-yellow-400 text-black focus-visible:ring-yellow-400'
+                          }`}
                           onClick={(e) => {
                             e.preventDefault();
-                            handleJoinClub(club);
+                            if (isUserMemberOfClub(club)) {
+                              // User is already a member - could show a modal or do nothing
+                              toast.success('You are already a member of this club!');
+                            } else {
+                              handleJoinClub(club);
+                            }
                           }}
                         >
-                          Join Club
+                          {isUserMemberOfClub(club) ? 'You are a member' : 'Join Club'}
                         </Button>
                         <Button
                           className="bg-gray-700 hover:bg-gray-600 text-white text-xs font-medium h-9 w-9 p-0 rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
@@ -470,13 +529,22 @@ const ClubsPage = () => {
 
                       <div className="p-3 sm:p-4 pt-0 xs:pt-3 sm:pt-4 flex xs:items-center gap-2">
                         <Button
-                          className="w-full xs:w-auto bg-yellow-500 hover:bg-yellow-400 text-black text-xs sm:text-sm font-medium h-9 px-3 sm:px-4 rounded-lg transition-all duration-200 whitespace-nowrap hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400"
+                          className={`w-full xs:w-auto text-xs font-medium h-9 px-3 sm:px-4 rounded-lg transition-all duration-200 whitespace-nowrap hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 ${
+                            isUserMemberOfClub(club)
+                              ? 'bg-green-600 hover:bg-green-500 text-white focus-visible:ring-green-400'
+                              : 'bg-yellow-500 hover:bg-yellow-400 text-black focus-visible:ring-yellow-400'
+                          }`}
                           onClick={(e) => {
                             e.preventDefault();
-                            handleJoinClub(club);
+                            if (isUserMemberOfClub(club)) {
+                              // User is already a member - could show a modal or do nothing
+                              toast.success('You are already a member of this club!');
+                            } else {
+                              handleJoinClub(club);
+                            }
                           }}
                         >
-                          Join Club
+                          {isUserMemberOfClub(club) ? 'You are a member' : 'Join Club'}
                         </Button>
                         <Button
                           className="bg-gray-700 hover:bg-gray-600 text-white text-xs sm:text-sm font-medium h-9 w-9 p-0 rounded-lg transition-all duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
