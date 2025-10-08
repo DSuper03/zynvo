@@ -16,13 +16,23 @@ interface apiRespEvents {
   response: eventData[];
 }
 
-export default function EventCard() {
+interface EventCardProps {
+  events?: eventData[] | null;
+  isLoading?: boolean;
+  error?: string | null;
+  searchTerm?: string;
+  isUserAttendingEvent?: (event: eventData) => boolean;
+}
+
+export default function EventCard({ 
+  events = null, 
+  isLoading = true, 
+  error = null, 
+  searchTerm = '',
+  isUserAttendingEvent
+}: EventCardProps) {
   const [activeFilter, setActiveFilter] = useState('all');
-  const [events, setEvents] = useState<eventData[] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
 
   const router = useRouter();
 
@@ -54,25 +64,7 @@ export default function EventCard() {
     }
   };
 
-  useEffect(() => {
-    async function fetchEvents() {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await axios.get<apiRespEvents>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/all`
-        );
-        setEvents(response.data.response);
-      } catch (err) {
-        setError('Failed to load events');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchEvents();
-  }, []);
+  // Events are now passed as props, no need to fetch them here
 
   // Filter events based on active filter and search term
   const filteredEvents = events?.filter((event) => {
@@ -256,6 +248,15 @@ export default function EventCard() {
                       </motion.div>
                     </div>
                   </div>
+                  
+                  {/* Show attendance status above buttons */}
+                  {isUserAttendingEvent && isUserAttendingEvent(event) && (
+                    <div className="mt-2 text-center">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-600 text-white">
+                        ✓ You are attending
+                      </span>
+                    </div>
+                  )}
                 </div>
                 {/* highlight ring */}
                 <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-yellow-400/0 group-hover:ring-yellow-400/25 transition" />
@@ -269,14 +270,6 @@ export default function EventCard() {
                 ? 'No events found matching your search'
                 : 'No events found'}
             </p>
-            {searchTerm && (
-              <button
-                className="mt-4 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                onClick={() => setSearchTerm('')}
-              >
-                Clear Search
-              </button>
-            )}
           </div>
         )}
       </motion.div>

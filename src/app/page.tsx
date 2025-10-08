@@ -164,7 +164,7 @@ export default function Home() {
             name: 'Zynvo',
             alternateName: 'Zynvo - Agentic Social Media Platform',
             url: 'https://zynvo.social',
-            logo: '/hdlogozynvo.jpg',
+            logo: 'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226',
             description:
               'The leading agentic social media platform revolutionizing campus communities through intelligent networking and AI-powered connections',
             foundingDate: '2024',

@@ -53,6 +53,8 @@ const Eventid = () => {
     'overview' | 'speakers' | 'schedule' | 'gallery'
   >('overview');
   const [signedin, setSignedin] = useState<boolean>(false);
+  const [userAttendedEventIds, setUserAttendedEventIds] = useState<string[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -66,6 +68,41 @@ const Eventid = () => {
       }
     }
   }, []);
+
+  // Fetch user data and attended events
+  useEffect(() => {
+    async function fetchUserData() {
+      if (!token) return;
+      
+      try {
+        const userResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        
+        if (userResponse.data && (userResponse.data as any).user) {
+          const userData = (userResponse.data as any).user;
+          setCurrentUser(userData);
+          
+          // Extract attended event IDs from user data
+          if (userData.eventAttended && Array.isArray(userData.eventAttended)) {
+            const attendedIds = userData.eventAttended.map((attendance: any) => attendance.event.id);
+            setUserAttendedEventIds(attendedIds);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    }
+    
+    if (token) {
+      fetchUserData();
+    }
+  }, [token]);
 
   useEffect(() => {
     if (!token || !id) return;
@@ -143,6 +180,12 @@ const Eventid = () => {
     } finally {
       setIsRegistering(false);
     }
+  };
+
+  // Helper function to check if user is attending this event
+  const isUserAttendingEvent = (): boolean => {
+    if (!currentUser) return false;
+    return userAttendedEventIds.includes(id);
   };
   const formatDateRange = (start?: string, end?: string) => {
     if (!start && !end) return 'TBD';
@@ -257,19 +300,26 @@ const Eventid = () => {
 
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
                 {signedin ? (
-                  <Button
-                    onClick={handleRegistration}
-                    disabled={
-                      isRegistering || data.applicationStatus !== 'open'
-                    }
-                    className={`rounded-xl px-5 py-3 font-semibold ${
-                      isRegistering || data.applicationStatus !== 'open'
-                        ? 'bg-gray-700 text-gray-300 cursor-not-allowed'
-                        : 'bg-yellow-400 hover:bg-yellow-500 text-black'
-                    }`}
-                  >
-                    {isRegistering ? 'Registering...' : 'Register Now'}
-                  </Button>
+                  isUserAttendingEvent() ? (
+                    <div className="flex items-center gap-2 px-4 py-3 bg-green-600 text-white rounded-xl font-semibold">
+                      <CheckSquare className="w-5 h-5" />
+                      You are attending this event
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={handleRegistration}
+                      disabled={
+                        isRegistering || data.applicationStatus !== 'open'
+                      }
+                      className={`rounded-xl px-5 py-3 font-semibold ${
+                        isRegistering || data.applicationStatus !== 'open'
+                          ? 'bg-gray-700 text-gray-300 cursor-not-allowed'
+                          : 'bg-yellow-400 hover:bg-yellow-500 text-black'
+                      }`}
+                    >
+                      {isRegistering ? 'Registering...' : 'Register Now'}
+                    </Button>
+                  )
                 ) : (
                   <Button
                     onClick={() => {

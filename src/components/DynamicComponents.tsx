@@ -20,7 +20,7 @@ const ModalLoading = () => (
 
 // Dynamic imports for heavy components
 export const CreateEventModal = dynamic(
-  () => import('../app/events/components/modals'),
+  () => import('../app/events/components/EventCreationModel'),
   {
     loading: () => <ModalLoading />,
     ssr: false

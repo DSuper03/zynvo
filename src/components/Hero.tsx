@@ -4,10 +4,20 @@ import WrapButton from './ui/wrap-button';
 import Link from 'next/link';
 import HeroVideoDialog from './magicui/hero-video-dialog';
 import Image from 'next/image';
+import { useAuth } from '@/context/authContex';
 
 const Hero = () => {
   const heroRef = useRef(null);
-
+  const { user } = useAuth();
+  
+  // Determine the route based on authentication status
+  const getRoute = () => {
+    if (user && user.id) {
+      return '/dashboard';
+    }
+    return '/auth/signup';
+  };
+  
   return (
     <section
       ref={heroRef}
@@ -80,7 +90,7 @@ const Hero = () => {
             transition={{ duration: 0.8, delay: 0.8 }}
             className="pt-4 sm:pt-6"
           >
-            <Link href="/dashboard" className="inline-block">
+            <Link href={getRoute()} className="inline-block">
               <WrapButton className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 shadow-lg hover:shadow-yellow-500/25">
                 Zync It Now
               </WrapButton>

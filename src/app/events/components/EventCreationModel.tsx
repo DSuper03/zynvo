@@ -799,7 +799,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                           value={formData.contactPhone}
                           onChange={handleChange}
                           className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
-                          placeholder="+1 (123) 456-7890"
+                          placeholder="+91 1234567890"
                         />
                       </div>
                       {errors.contactPhone && (
