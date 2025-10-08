@@ -27,7 +27,6 @@ import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import EventBadgeCard from '@/components/ticket';
 import * as htmlToImage from 'html-to-image';
 
-// Define interfaces for better type checking
 interface Event {
   EventName: string;
   startDate: string;
@@ -891,13 +890,25 @@ export default function ZynvoDashboard() {
                   {userData.name}
                 </h1>
 
-                <HoverBorderGradient
-                  containerClassName="rounded-full"
-                  as="button"
-                  className="dark:bg-black bg-yellow-400 text-black dark:text-white flex items-center space-x-2 px-3 py-1 text-xs sm:text-sm self-start sm:self-auto"
-                >
-                  <p className="truncate max-w-[120px] sm:max-w-none"> {userData.clubName} </p>
-                </HoverBorderGradient>
+                {userData.clubName ? (
+                  <HoverBorderGradient
+                    containerClassName="rounded-full"
+                    as="button"
+                    className="dark:bg-black bg-yellow-400 text-black dark:text-white flex items-center space-x-2 px-3 py-1 text-xs sm:text-sm self-start sm:self-auto"
+                  >
+                    <p className="truncate max-w-[120px] sm:max-w-none"> {userData.clubName} </p>
+                  </HoverBorderGradient>
+                ) : (
+                  <div className="bg-gray-800 border border-gray-600 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-gray-700 transition-colors"
+                       onClick={() => navigate.push('/clubs')}>
+                    <p className="text-gray-300 text-xs sm:text-sm">
+                      You haven't joined any club yet
+                    </p>
+                    <p className="text-yellow-400 text-xs font-medium mt-1 hover:text-yellow-300 transition-colors">
+                      Join fast!
+                    </p>
+                  </div>
+                )}
               </div>
               <p className="text-gray-100 mb-3 text-sm sm:text-base font-serif line-clamp-2 leading-relaxed">
                 {userData.bio}

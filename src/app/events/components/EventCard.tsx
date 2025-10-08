@@ -270,14 +270,6 @@ export default function EventCard({
                 ? 'No events found matching your search'
                 : 'No events found'}
             </p>
-            {searchTerm && (
-              <button
-                className="mt-4 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                onClick={() => setSearchTerm('')}
-              >
-                Clear Search
-              </button>
-            )}
           </div>
         )}
       </motion.div>
