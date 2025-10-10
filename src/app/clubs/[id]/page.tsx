@@ -15,6 +15,25 @@ import {
   Share2,
   Clock,
   Flag,
+  Mail,
+  Phone,
+  Star,
+  Heart,
+  Zap,
+  Award,
+  Sparkles,
+  Copy,
+  Check,
+  ExternalLink,
+  ChevronRight,
+  UserPlus,
+  MessageCircle,
+  BookOpen,
+  Target,
+  TrendingUp,
+  Crown,
+  Shield,
+  Building,
 } from 'lucide-react';
 import JoinClubModal from '../joinclub';
 import { useParams } from 'next/navigation';
@@ -60,7 +79,6 @@ export default function ClubPage({}: ClubPageProps) {
   const param = useParams();
   const id = param.id as string;
 
-  const [activeTab, setActiveTab] = useState<'about' | 'events'>('about');
   const [isJoined, setIsJoined] = useState(false);
   const [club, setClub] = useState<ClubTypeProps>({
     id: '',
@@ -83,6 +101,8 @@ export default function ClubPage({}: ClubPageProps) {
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(true);
+  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'about' | 'events' | 'members'>('about');
 
   const getMemberCount = (c: { members?: unknown; memberCount?: number; membersCount?: number }): number => {
     if (typeof c?.members === 'number') return c.members as number;
@@ -217,347 +237,500 @@ export default function ClubPage({}: ClubPageProps) {
     }
   };
 
+  const copyToClipboard = async (text: string, type: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedEmail(type);
+      toast.success(`${type} copied to clipboard!`);
+      setTimeout(() => setCopiedEmail(null), 2000);
+    } catch (err) {
+      toast.error('Failed to copy to clipboard');
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    const typeLower = type.toLowerCase();
+    switch (typeLower) {
+      case 'tech':
+      case 'technology':
+        return 'from-cyan-500/20 to-blue-500/20 text-cyan-300 border-cyan-400/30 shadow-cyan-500/10';
+      case 'cultural':
+        return 'from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-400/30 shadow-purple-500/10';
+      case 'business':
+        return 'from-emerald-500/20 to-green-500/20 text-emerald-300 border-emerald-400/30 shadow-emerald-500/10';
+      case 'social':
+        return 'from-yellow-500/20 to-amber-500/20 text-yellow-300 border-yellow-400/30 shadow-yellow-500/10';
+      case 'literature':
+      case 'literary':
+        return 'from-orange-500/20 to-red-500/20 text-orange-300 border-orange-400/30 shadow-orange-500/10';
+      case 'design':
+        return 'from-pink-500/20 to-rose-500/20 text-pink-300 border-pink-400/30 shadow-pink-500/10';
+      case 'sports':
+        return 'from-red-500/20 to-orange-500/20 text-red-300 border-red-400/30 shadow-red-500/10';
+      case 'music':
+        return 'from-indigo-500/20 to-purple-500/20 text-indigo-300 border-indigo-400/30 shadow-indigo-500/10';
+      case 'drama':
+        return 'from-violet-500/20 to-purple-500/20 text-violet-300 border-violet-400/30 shadow-violet-500/10';
+      default:
+        return 'from-gray-500/20 to-slate-500/20 text-gray-300 border-gray-400/30 shadow-gray-500/10';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-950 pb-16">
-      {/* Club Header Section with Hero Image */}
-      <div className="relative h-72 md:h-96 w-full pb-6">
-        {/* Background image with gradient overlay */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      {/* Hero Section */}
+      <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden mb-16 md:mb-24">
+        {/* Background Image with Enhanced Overlay */}
         <div className="absolute inset-0 z-0">
-          <div className="relative w-full h-full">
             <Image
               src={club.image || '/banners/profilebanner.jpg'}
               alt={club.name}
-              width={1600}
-              height={900}
+            width={1920}
+            height={1080}
               className="object-cover w-full h-full"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-gray-950"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/90"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40"></div>
           </div>
+
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 z-5">
+          <div className="absolute top-20 left-20 w-32 h-32 bg-yellow-500/10 rounded-full blur-2xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-40 h-40 bg-yellow-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-yellow-500/15 rounded-full blur-xl animate-pulse delay-500"></div>
+          {/* Bottom fade to separate tabs from content */}
+          <div className="absolute bottom-0 left-0 right-0 h-20 md:h-28 bg-gradient-to-b from-transparent to-black/80"></div>
         </div>
 
-        {/* Centered Club Image */}
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          <div className="relative h-40 w-40 md:h-56 md:w-56 rounded-xl overflow-hidden border-4 border-yellow-500 shadow-2xl shadow-black/60 bg-gray-900/60">
+        {/* Hero Content */}
+        <div className="relative z-10 h-full flex flex-col justify-between p-6 md:p-12">
+          {/* Top Bar */}
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-3 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-700/50">
+              <Building className="w-4 h-4 text-yellow-400" />
+              <span className="text-white text-sm font-medium">{club.collegeName}</span>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <button className="p-3 bg-black/30 backdrop-blur-sm rounded-full border border-gray-700/50 text-white hover:bg-yellow-500/20 hover:border-yellow-500/50 transition-all duration-300 hover:scale-110">
+                <Share2 className="w-5 h-5" />
+              </button>
+              <button className="p-3 bg-black/30 backdrop-blur-sm rounded-full border border-gray-700/50 text-white hover:bg-red-500/20 hover:border-red-500/50 transition-all duration-300 hover:scale-110">
+                <Heart className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Center Content */}
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center max-w-4xl mx-auto">
+              {/* Club Logo */}
+              <div className="relative mb-8 mx-auto w-32 h-32 md:w-40 md:h-40">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-2xl blur-lg opacity-30 animate-pulse"></div>
+                <div className="relative w-full h-full rounded-2xl overflow-hidden border-4 border-yellow-500/50 shadow-2xl shadow-yellow-500/20 bg-gray-900/60 backdrop-blur-sm">
             <Image
               src={club.image || '/logozynvo.jpg'}
               alt={club.name}
-              width={224}
-              height={224}
+                    width={160}
+                    height={160}
               className="object-cover w-full h-full"
               priority
             />
           </div>
         </div>
 
-        {/* College Name */}
-        <div className="absolute top-8 left-4 md:left-8 z-10">
-          <div className="flex items-center">
-            <MapPin size={16} className="text-yellow-400 mr-2" />
-            <span className="text-white text-sm font-medium">
-              {club.collegeName}
+              {/* Club Name */}
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4">
+                <span className="bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 bg-clip-text text-transparent animate-gradient">
+                  {club.name}
+                </span>
+              </h1>
+
+              {/* Category Badge */}
+              <div className="inline-flex items-center gap-2 mb-6">
+                <span className={`px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r ${getTypeColor(club.category || club.type || 'general')} border shadow-lg backdrop-blur-sm`}>
+                  {String(club.category || club.type || 'General').charAt(0).toUpperCase() + String(club.category || club.type || 'General').slice(1)}
             </span>
-          </div>
+                <div className="flex items-center gap-1 text-yellow-400">
+                  <Star className="w-4 h-4 fill-current" />
+                  <span className="text-sm font-medium">4.8</span>
         </div>
       </div>
 
-      {/* Club Details */}
-      <div className="max-w-7xl mx-auto px-4 pt-20">
-        {/* Club Name and Basic Info */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-            {club.name}
-          </h1>
-
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="flex items-center text-gray-300">
-              <Users size={16} className="mr-1" />
-              <span>{getMemberCount(club)} members</span>
+              {/* Stats */}
+              <div className="flex items-center justify-center gap-8 mb-8">
+                <div className="flex items-center gap-2 text-white">
+                  <Users className="w-5 h-5 text-yellow-400" />
+                  <span className="text-lg font-semibold">{getMemberCount(club)}</span>
+                  <span className="text-gray-300">Members</span>
+                </div>
+                <div className="flex items-center gap-2 text-white">
+                  <CalendarDays className="w-5 h-5 text-yellow-400" />
+                  <span className="text-lg font-semibold">{event.length}</span>
+                  <span className="text-gray-300">Events</span>
+                </div>
+                <div className="flex items-center gap-2 text-white">
+                  <Zap className="w-5 h-5 text-yellow-400" />
+                  <span className="text-lg font-semibold">Active</span>
             </div>
-
-            <span className="bg-gray-800 text-gray-200 px-3 py-1 rounded-full text-sm border border-gray-700">
-              {String(club.category || club.type || 'general').toString()}
-            </span>
-
-            {club.isPopular && (
-              <span className="bg-gray-800 text-yellow-400 px-3 py-1 rounded-full text-sm border border-yellow-400/30">
-                Popular
-              </span>
-            )}
-
-            {club.isNew && (
-              <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-medium">
-                New
-              </span>
-            )}
           </div>
 
-          <p className="text-gray-300 max-w-2xl mx-auto mb-6">
-            {club.description}
-          </p>
-
-          <div className="flex justify-center gap-3 mt-4">
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={handleJoinClick}
-              className={`px-6 py-2 rounded-lg font-medium ${
+                  className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 shadow-2xl ${
                 isJoined
-                  ? 'bg-gray-700 text-white hover:bg-gray-600'
-                  : 'bg-yellow-500 text-black hover:bg-yellow-400'
-              } transition-colors`}
-            >
-              {isJoined ? 'Leave Club' : 'Join Club'}
+                      ? 'bg-gradient-to-r from-green-600 to-green-500 text-white hover:from-green-500 hover:to-green-400 shadow-green-500/25'
+                      : 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black hover:from-yellow-400 hover:to-yellow-300 shadow-yellow-500/25'
+                  }`}
+                >
+                  {isJoined ? (
+                    <>
+                      <Award className="w-5 h-5 inline mr-2" />
+                      You're a Member
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-5 h-5 inline mr-2" />
+                      Join Club
+                    </>
+                  )}
             </button>
 
-            <button className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors">
-              <Share2 size={20} />
+                <button className="px-6 py-4 rounded-2xl font-semibold text-white border-2 border-yellow-500/50 hover:border-yellow-400 hover:bg-yellow-500/10 transition-all duration-300 hover:scale-105 backdrop-blur-sm">
+                  <MessageCircle className="w-5 h-5 inline mr-2" />
+                  Contact Club
             </button>
-
-            <button className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors">
-              <Flag size={20} />
-            </button>
+              </div>
           </div>
         </div>
 
-        {/* Tabs Navigation */}
-        <div className="flex border-b border-gray-800 mb-6 overflow-x-auto">
+          {/* Bottom Navigation */}
+          <div className="absolute z-20 left-1/2 -translate-x-1/2 bottom-4 md:bottom-8 flex justify-center py-3">
+            <div className="flex items-center gap-1 bg-black/30 backdrop-blur-sm rounded-full px-2 py-1 border border-gray-700/50">
           <button
             onClick={() => setActiveTab('about')}
-            className={`px-4 py-3 font-medium text-sm ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
               activeTab === 'about'
-                ? 'text-yellow-400 border-b-2 border-yellow-400'
-                : 'text-gray-400 hover:text-white'
+                    ? 'bg-yellow-500 text-black'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
             }`}
           >
             About
           </button>
-
           <button
             onClick={() => setActiveTab('events')}
-            className={`px-4 py-3 font-medium text-sm ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
               activeTab === 'events'
-                ? 'text-yellow-400 border-b-2 border-yellow-400'
-                : 'text-gray-400 hover:text-white'
+                    ? 'bg-yellow-500 text-black'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
             }`}
           >
             Events
           </button>
-
-          {/* Announcements tab removed until backed by real data */}
+              <button
+                onClick={() => setActiveTab('members')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  activeTab === 'members'
+                    ? 'bg-yellow-500 text-black'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                }`}
+              >
+                Members
+              </button>
+            </div>
+          </div>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content Area */}
-          <div className="lg:col-span-2">
-            {/* About Tab Content */}
-            {activeTab === 'about' && (
-              <div className="bg-gray-900/60 rounded-lg p-6 space-y-6 border border-gray-800">
-                <div>
-                  <h2 className="text-xl font-bold text-white mb-3">
-                    About {club.name}
-                  </h2>
-                  <p className="text-gray-300 whitespace-pre-wrap break-words">{club.description}</p>
                 </div>
 
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">Contact Information</h3>
-                  <div className="space-y-2 text-gray-300">
-                    {club.clubContact && (
-                      <p className="flex items-center">
-                        <Globe size={18} className="mr-2" />
-                        {/^\+?\d[\d\s-]{3,}$/.test(String(club.clubContact)) ? (
-                          <a href={`tel:${club.clubContact}`} className="text-yellow-400 hover:underline break-all">
-                            {club.clubContact}
-                          </a>
-                        ) : (
-                          <span className="break-all">{club.clubContact}</span>
-                        )}
-                      </p>
-                    )}
-                    {club.founderEmail && (
-                      <p className="flex items-center">
-                        <Instagram size={18} className="mr-2" />
-                        <span className="text-gray-300"><span className="text-gray-400 mr-1">Founder:</span>{club.founderEmail}</span>
-                      </p>
-                    )}
-                    {club.facultyEmail && (
-                      <p className="flex items-center">
-                        <Twitter size={18} className="mr-2" />
-                        <span className="text-gray-300"><span className="text-gray-400 mr-1">Faculty:</span>{club.facultyEmail}</span>
-                      </p>
-                    )}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 mt-10 md:mt-16 pt-12 pb-12">
+        {/* Tab Content */}
+        <div className="space-y-12">
+          {/* About Tab */}
+          {activeTab === 'about' && (
+            <div className="space-y-8">
+              {/* Description Section */}
+              <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-3xl p-8 border border-gray-700/50 shadow-2xl">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-2xl flex items-center justify-center">
+                    <BookOpen className="w-6 h-6 text-black" />
                   </div>
+                  <h2 className="text-2xl font-bold text-white">About this Club</h2>
+                </div>
+                <p className="text-gray-300 text-lg leading-relaxed">{club.description}</p>
                 </div>
 
-                {club.requirements && (
+              {/* Contact Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Founder Card */}
+                {club.founderEmail && (
+                  <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-yellow-500/30 transition-all duration-300 group">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <Crown className="w-6 h-6 text-black" />
+                      </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white mb-2">Requirements</h3>
-                    <p className="text-gray-300 whitespace-pre-wrap break-words">{club.requirements}</p>
-                  </div>
-                )}
-
-                {Array.isArray((club as any).wings) && (club as any).wings.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">Wings</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {(club as any).wings.map((w: any, idx: number) => (
-                        <span key={w?.id || w?.name || idx} className="px-3 py-1 text-sm rounded-full bg-gray-800 text-gray-200 border border-gray-700">
-                          {w?.name || String(w)}
-                        </span>
-                      ))}
+                        <h3 className="text-lg font-bold text-white">Founder</h3>
+                        <p className="text-gray-400 text-sm">Club Founder</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-800/30 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <Mail className="w-5 h-5 text-yellow-400" />
+                        <span className="text-gray-300 font-mono text-sm">{club.founderEmail}</span>
+                      </div>
+                      <button
+                        onClick={() => copyToClipboard(club.founderEmail, 'Founder Email')}
+                        className="p-2 rounded-lg bg-gray-700/50 hover:bg-yellow-500/20 text-gray-400 hover:text-yellow-400 transition-all duration-200 hover:scale-110"
+                      >
+                        {copiedEmail === 'Founder Email' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
                 )}
 
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Meeting Schedule
-                  </h3>
-                  <p className="text-gray-300 flex items-center">
-                    <CalendarDays size={18} className="mr-2" />
-                    Weekly on Thursdays, 7:00 PM - 9:00 PM
-                  </p>
-                  <p className="text-gray-300 flex items-center">
-                    <MapPin size={18} className="mr-2" />
-                    {club.collegeName} - Block C, Room 204
-                  </p>
+                {/* Faculty Card */}
+                {club.facultyEmail && (
+                  <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-yellow-500/30 transition-all duration-300 group">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-400 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <Shield className="w-6 h-6 text-white" />
+                      </div>
+                  <div>
+                        <h3 className="text-lg font-bold text-white">Faculty Mentor</h3>
+                        <p className="text-gray-400 text-sm">Faculty Advisor</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-800/30 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <Mail className="w-5 h-5 text-blue-400" />
+                        <span className="text-gray-300 font-mono text-sm">{club.facultyEmail}</span>
+                      </div>
+                      <button
+                        onClick={() => copyToClipboard(club.facultyEmail, 'Faculty Email')}
+                        className="p-2 rounded-lg bg-gray-700/50 hover:bg-blue-500/20 text-gray-400 hover:text-blue-400 transition-all duration-200 hover:scale-110"
+                      >
+                        {copiedEmail === 'Faculty Email' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Requirements */}
+              {club.requirements && (
+                <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-400 rounded-2xl flex items-center justify-center">
+                      <Target className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white">Requirements</h3>
+                  </div>
+                  <p className="text-gray-300 leading-relaxed">{club.requirements}</p>
+                  </div>
+                )}
+
+              {/* Club Contact */}
+              {club.clubContact && (
+                <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-400 rounded-2xl flex items-center justify-center">
+                      <MessageCircle className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white">Club Contact</h3>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-gray-800/30 rounded-xl">
+                    {/^\+?\d[\d\s-]{3,}$/.test(String(club.clubContact)) ? (
+                      <>
+                        <Phone className="w-5 h-5 text-purple-400" />
+                        <a href={`tel:${club.clubContact}`} className="text-purple-400 hover:text-purple-300 transition-colors font-mono">
+                          {club.clubContact}
+                        </a>
+                      </>
+                    ) : (
+                      <>
+                        <Globe className="w-5 h-5 text-purple-400" />
+                        <span className="text-gray-300 font-mono">{club.clubContact}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
+              )}
               </div>
             )}
 
-            {/* Events Tab Content */}
+          {/* Events Tab */}
             {activeTab === 'events' && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold text-white">
-                  Upcoming Events
-                </h2>
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-2xl flex items-center justify-center">
+                  <CalendarDays className="w-6 h-6 text-black" />
+                </div>
+                <h2 className="text-2xl font-bold text-white">Upcoming Events</h2>
+              </div>
 
                 {event.length === 0 ? (
-                  <div className="bg-gray-900/60 rounded-lg p-6 text-center border border-gray-800">
-                    <p className="text-gray-300">No events found for this club.</p>
+                <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-12 text-center border border-gray-700/50">
+                  <div className="w-24 h-24 mx-auto bg-gray-800/50 rounded-full flex items-center justify-center mb-6">
+                    <CalendarDays className="w-12 h-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">No Events Yet</h3>
+                  <p className="text-gray-400">This club hasn't posted any events yet. Check back later!</p>
                   </div>
                 ) : (
-                  event.map((eventItem: EventType) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {event.map((eventItem: EventType) => (
                     <div
                       key={eventItem.id}
-                      className="bg-gray-900/60 border border-gray-800 rounded-lg overflow-hidden hover:border-yellow-500/30 transition-all duration-300 shadow-md"
+                      className="group bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-700/50 hover:border-yellow-500/50 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-yellow-500/10"
                     >
-                      <div className="relative h-48 w-full">
+                      <div className="relative h-48 overflow-hidden">
                         <Image
                           src={eventItem.image || '/pic1.jpg'}
                           alt={eventItem.title || 'Event Image'}
                           width={400}
                           height={200}
-                          className="object-cover w-full h-full"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-
-                        <div className="absolute bottom-0 left-0 p-4 w-full">
-                          <h3 className="text-xl font-bold text-white">
-                            {eventItem.EventName}
-                          </h3>
-                          <div className="flex items-center text-yellow-400 mt-1">
-                            <CalendarDays size={16} className="mr-1" />
-                            <span className="text-sm">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                        <div className="absolute top-3 right-3">
+                          <span className="px-3 py-1 bg-yellow-500/90 text-black text-xs font-semibold rounded-full">
                               {eventItem.createdAt.toLocaleDateString()}
                             </span>
-                          </div>
                         </div>
                       </div>
 
-                      <div className="p-4">
-                        <div className="flex items-center text-gray-300 mb-2">
-                          <Clock size={16} className="mr-1" />
-                          <span className="text-sm">{eventItem.time || 'TBA'}</span>
+                      <div className="p-6">
+                        <h3 className="text-lg font-bold text-white mb-2 group-hover:text-yellow-400 transition-colors">
+                          {eventItem.EventName}
+                        </h3>
+                        <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+                          {eventItem.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-gray-400 text-sm">
+                            <MapPin className="w-4 h-4" />
+                            <span>{club.collegeName}</span>
                         </div>
-
-                        <div className="flex items-center text-gray-300 mb-4">
-                          <MapPin size={16} className="mr-1" />
-                          <span className="text-sm">{club.collegeName}</span>
-                        </div>
-
-                        <div className="flex items-center justify-end">
-                          <Button className="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg text-sm font-medium transition-colors">
+                          <button className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-black rounded-xl font-semibold text-sm hover:from-yellow-400 hover:to-yellow-300 transition-all duration-200 hover:scale-105">
                             RSVP
-                          </Button>
+                          </button>
                         </div>
                       </div>
                     </div>
-                  ))
+                  ))}
+                </div>
                 )}
               </div>
             )}
-          </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6 lg:sticky lg:top-24 h-fit">
-            {/* Quick Stats */}
-            <div className="bg-gray-900/60 rounded-lg p-4 border border-gray-800">
-              <h3 className="text-lg font-bold text-white mb-3">Club Stats</h3>
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="bg-gray-900 rounded-lg p-3">
-                  <p className="text-yellow-400 text-xl font-bold">
-                    {getMemberCount(club)}
-                  </p>
-                  <p className="text-gray-300 text-sm">Members</p>
+          {/* Members Tab */}
+          {activeTab === 'members' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-2xl flex items-center justify-center">
+                    <Users className="w-6 h-6 text-black" />
                 </div>
-                <div className="bg-gray-900 rounded-lg p-3">
-                  <p className="text-yellow-400 text-xl font-bold">{event.length}</p>
-                  <p className="text-gray-300 text-sm">Events</p>
+                  <h2 className="text-2xl font-bold text-white">Club Members</h2>
                 </div>
-                <div className="bg-gray-900 rounded-lg p-3">
-                  <p className="text-yellow-400 text-xl font-bold">4.8</p>
-                  <p className="text-gray-300 text-sm">Rating</p>
-                </div>
-                <div className="bg-gray-900 rounded-lg p-3">
-                  <p className="text-yellow-400 text-xl font-bold">2018</p>
-                  <p className="text-gray-300 text-sm">Founded</p>
-                </div>
-              </div>
+                <span className="px-4 py-2 bg-gray-800/50 text-gray-300 rounded-full text-sm">
+                  {getMemberCount(club)} Members
+                </span>
             </div>
 
-            {/* Members - names only */}
-            <div className="bg-gray-900/60 rounded-lg p-4 border border-gray-800">
-              <h3 className="text-lg font-bold text-white mb-3">Members</h3>
               {Array.isArray(club.members) && club.members.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {club.members.map((m: any) => (
-                    <span
-                      key={m.id || m.email}
-                      className="px-3 py-1 text-sm rounded-full bg-gray-800 text-gray-200 border border-gray-700"
-                      title={m.email}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                  {club.members.slice(0, 12).map((member: any, index: number) => (
+                    <div
+                      key={member.id || index}
+                      className="group bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-4 border border-gray-700/50 hover:border-yellow-500/50 transition-all duration-300 hover:scale-105 text-center"
                     >
-                      {m.name || m.fullName || m.username || m.email}
-                    </span>
+                      <div className="relative w-16 h-16 mx-auto mb-3">
+                        <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-full blur-md opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                        <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-yellow-500/50">
+                          <Image
+                            src={member.profileAvatar || '/default-avatar.jpg'}
+                            alt={member.name || 'Member'}
+                            width={64}
+                            height={64}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                      <h4 className="text-white font-semibold text-sm mb-1 line-clamp-1">
+                        {member.name || member.fullName || member.username || 'Member'}
+                      </h4>
+                      {member.course && (
+                        <p className="text-gray-400 text-xs line-clamp-1">{member.course}</p>
+                      )}
+                      {member.year && (
+                        <p className="text-yellow-400 text-xs font-medium">{member.year} Year</p>
+                      )}
+                    </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 text-sm">No members listed.</p>
+                <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-12 text-center border border-gray-700/50">
+                  <div className="w-24 h-24 mx-auto bg-gray-800/50 rounded-full flex items-center justify-center mb-6">
+                    <Users className="w-12 h-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">No Members Yet</h3>
+                  <p className="text-gray-400">Be the first to join this amazing club!</p>
+                </div>
               )}
+            </div>
+          )}
+        </div>
             </div>
 
-            {/* Join CTA */}
-            <div className="bg-yellow-500 rounded-lg p-4 text-center">
-              <h3 className="text-xl font-bold text-black mb-2">
-                Join {club.name} Today!
-              </h3>
-              <p className="text-gray-800 mb-4">
-                Connect with like-minded peers and grow your skills.
+      {/* Footer Section */}
+      <footer className="bg-black border-t border-gray-800/50 mt-16">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="text-center md:text-left">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-xl flex items-center justify-center">
+                  <span className="text-black font-bold text-lg">Z</span>
+                </div>
+                <span className="text-2xl font-bold text-white">Zynvo</span>
+              </div>
+              <p className="text-gray-400 text-sm max-w-md">
+                Empowering campus communities through technology. Connect, collaborate, and grow together.
               </p>
-              {!isJoined && (
-                <Button
-                  onClick={() => setIsJoinModalOpen(true)}
-                  className="w-full py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
-                >
-                  Become a Member
-                </Button>
-              )}
-              {isJoined && (
-                <p className="font-medium text-black">You are a member! 🎉</p>
-              )}
             </div>
+            
+            <div className="flex flex-col items-center gap-6">
+              <div className="flex items-center gap-2 text-gray-400 text-sm">
+                <Sparkles className="w-4 h-4 text-yellow-400" />
+                <span>Powered by</span>
+                <span className="text-yellow-400 font-semibold">Zynvo</span>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors duration-200 hover:scale-110">
+                  <Instagram className="w-5 h-5" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors duration-200 hover:scale-110">
+                  <Twitter className="w-5 h-5" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors duration-200 hover:scale-110">
+                  <Globe className="w-5 h-5" />
+                </a>
           </div>
         </div>
       </div>
+          
+          <div className="border-t border-gray-800/50 mt-8 pt-8 text-center">
+            <p className="text-gray-500 text-sm">
+              © 2024 Zynvo. All rights reserved. Built with ❤️ for campus communities.
+            </p>
+          </div>
+        </div>
+      </footer>
 
       {/* Join Club Modal */}
       {club && (

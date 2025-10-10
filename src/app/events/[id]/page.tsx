@@ -134,7 +134,10 @@ const Eventid = () => {
               res.data.response.posterUrl ||
               res.data.response.eventHeaderImage ||
               '',
+              
           });
+          
+          
         }
       } catch (error) {
         console.error('Error fetching event data:', error);
@@ -143,7 +146,7 @@ const Eventid = () => {
         setIsLoading(false);
       }
     }
-
+   
     fetchEventData();
   }, [token, id]);
 
