@@ -12,7 +12,7 @@ const securityHeaders = [
       script-src 'self' 'unsafe-eval' 'unsafe-inline';
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com;
-      connect-src 'self' https://backend.zynvo.social https://upload.imagekit.io;
+      connect-src 'self' https://backend.zynvo.social https://upload.imagekit.io; https://zynvo-backend-ho7y.onrender.com
       font-src 'self' data:;
     `
       .replace(/\s{2,}/g, ' ')

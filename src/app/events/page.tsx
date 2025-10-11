@@ -146,7 +146,7 @@ export default function ZynvoEventsPage() {
         setError(null);
 
         const response = await axios.get<apiRespEvents>(
-          `https://zynvo-backend-ho7y.onrender.com/api/v1/events/all?page=${currentPage}`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/all?page=${currentPage}`,
           {
             timeout: 10000, // 10 second timeout
             headers: {
