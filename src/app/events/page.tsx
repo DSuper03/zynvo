@@ -146,7 +146,7 @@ export default function ZynvoEventsPage() {
         setError(null);
 
         const response = await axios.get<apiRespEvents>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/all?page=${currentPage}`,
+          `https://zynvo-backend-ho7y.onrender.com/api/v1/events/all?page=${currentPage}`,
           {
             timeout: 10000, // 10 second timeout
             headers: {
@@ -156,7 +156,7 @@ export default function ZynvoEventsPage() {
         );
 
         if (!isMounted) return; // Prevent state update if component is unmounted
-
+        console.log(response.data);
         if (response.data && Array.isArray(response.data.response)) {
           setEvents(response.data.response);
           setTotalPages(response.data.totalPages || 1);
