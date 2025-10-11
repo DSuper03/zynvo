@@ -5,6 +5,7 @@ import Link from 'next/link';
 import HeroVideoDialog from './magicui/hero-video-dialog';
 import Image from 'next/image';
 import { useAuth } from '@/context/authContex';
+import PWAInstallButton from './PWAInstallButton';
 
 const Hero = () => {
   const heroRef = useRef(null);
@@ -83,18 +84,25 @@ const Hero = () => {
             vibrant network for students across institutions.
           </motion.p>
 
-          {/* Enhanced CTA Button */}
+          {/* Enhanced CTA Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="pt-4 sm:pt-6"
+            className="pt-4 sm:pt-6 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6"
           >
             <Link href={getRoute()} className="inline-block">
               <WrapButton className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 shadow-lg hover:shadow-yellow-500/25">
                 Zync It Now
               </WrapButton>
             </Link>
+            
+            {/* PWA Install Button */}
+            <PWAInstallButton 
+              variant="secondary" 
+              size="md"
+              className="text-sm sm:text-base"
+            />
           </motion.div>
         </motion.div>
 
