@@ -1,7 +1,5 @@
 'use client';
 
-//need to add a leave club button
-
 import React, { useState, useEffect } from 'react';
 import Image from 'next/legacy/image';
 import Link from 'next/link';
@@ -10,13 +8,47 @@ import {
   Users,
   MapPin,
   Globe,
-  Instagram,
-  Twitter,
   Share2,
   Clock,
   Flag,
+  Mail,
+  Phone,
+  Star,
+  Heart,
+  Zap,
+  Award,
+  Sparkles,
+  Copy,
+  Check,
+  ExternalLink,
+  ChevronRight,
+  UserPlus,
+  MessageCircle,
+  BookOpen,
+  Target,
+  TrendingUp,
+  Crown,
+  Shield,
+  Building,
+  ArrowLeft,
+  Calendar,
+  UserCheck,
+  Settings,
+  MoreVertical,
+  Bookmark,
+  Share,
+  Bell,
+  Activity,
+  Briefcase,
+  GraduationCap,
+  Search,
+  Filter,
+  Plus,
+  Eye,
+  ThumbsUp,
 } from 'lucide-react';
 import JoinClubModal from '../joinclub';
+import CreateEventModal from '../../events/components/EventCreationModel';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 import {
@@ -24,7 +56,6 @@ import {
   ClubTypeProps,
   EventResponse,
   EventType,
-  Response,
 } from '@/types/global-Interface';
 
 interface ClubApiResponse {
@@ -51,6 +82,14 @@ interface ClubApiResponse {
     }[];
   };
 }
+
+interface UserApiResponse {
+  user: {
+    email: string;
+    name?: string;
+    id?: string;
+  };
+}
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 
@@ -60,7 +99,7 @@ export default function ClubPage({}: ClubPageProps) {
   const param = useParams();
   const id = param.id as string;
 
-  const [activeTab, setActiveTab] = useState<'about' | 'events'>('about');
+  const [activeTab, setActiveTab] = useState<'announcements' | 'events' | 'members'>('announcements');
   const [isJoined, setIsJoined] = useState(false);
   const [club, setClub] = useState<ClubTypeProps>({
     id: '',
@@ -81,8 +120,21 @@ export default function ClubPage({}: ClubPageProps) {
   });
   const [event, setEvent] = useState<EventType[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(true);
+  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+
+  // Function to check if current user is a member of the club
+  const checkUserMembership = (clubMembers: any[], userEmail?: string): boolean => {
+    if (!userEmail || !Array.isArray(clubMembers)) return false;
+    return clubMembers.some(member => 
+      member.email === userEmail || 
+      member.userEmail === userEmail ||
+      member.id === userEmail
+    );
+  };
 
   const getMemberCount = (c: { members?: unknown; memberCount?: number; membersCount?: number }): number => {
     if (typeof c?.members === 'number') return c.members as number;
@@ -142,6 +194,29 @@ export default function ClubPage({}: ClubPageProps) {
           image: clubData.profilePicUrl || '/logozynvo.jpg',
           category: clubData.type || 'tech',
         });
+
+        // Get current user email and check membership
+        try {
+          const userResponse = await axios.get<UserApiResponse>(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/profile`,
+            {
+              headers: {
+                authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          
+          const userEmail = (userResponse.data as UserApiResponse).user?.email;
+          if (userEmail) {
+            setCurrentUserEmail(userEmail);
+            const isUserMember = checkUserMembership(clubData.members || [], userEmail);
+            setIsJoined(isUserMember);
+          }
+        } catch (userError) {
+          console.error('Error fetching user profile:', userError);
+          // If we can't get user profile, assume not joined
+          setIsJoined(false);
+        }
 
         // Fetch events data - Fixed the API endpoint
         try {
@@ -212,13 +287,53 @@ export default function ClubPage({}: ClubPageProps) {
   const handleJoinClick = () => {
     if (!isJoined) {
       setIsJoinModalOpen(true);
-    } else {
-      setIsJoined(false); // Just leave the club if already joined
+    }
+    // If already joined, do nothing (button is now disabled)
+  };
+
+  const copyToClipboard = async (text: string, type: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedEmail(type);
+      toast.success(`${type} copied to clipboard!`);
+      setTimeout(() => setCopiedEmail(null), 2000);
+    } catch (err) {
+      toast.error('Failed to copy to clipboard');
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    const typeLower = type.toLowerCase();
+    switch (typeLower) {
+      case 'tech':
+      case 'technology':
+        return 'from-cyan-500/20 to-blue-500/20 text-cyan-300 border-cyan-400/30';
+      case 'cultural':
+        return 'from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-400/30';
+      case 'business':
+        return 'from-emerald-500/20 to-green-500/20 text-emerald-300 border-emerald-400/30';
+      case 'social':
+        return 'from-yellow-500/20 to-amber-500/20 text-yellow-300 border-yellow-400/30';
+      case 'literature':
+      case 'literary':
+        return 'from-orange-500/20 to-red-500/20 text-orange-300 border-orange-400/30';
+      case 'design':
+        return 'from-pink-500/20 to-rose-500/20 text-pink-300 border-pink-400/30';
+      case 'sports':
+        return 'from-red-500/20 to-orange-500/20 text-red-300 border-red-400/30';
+      case 'music':
+        return 'from-indigo-500/20 to-purple-500/20 text-indigo-300 border-indigo-400/30';
+      default:
+        return 'from-gray-500/20 to-slate-500/20 text-gray-300 border-gray-400/30';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      {/* Navigation Header */}
+      
+
+      {/* Hero Section */}
       {/* Club Header Section with Hero Image */}
       <div className="relative h-72 md:h-96 w-full pb-6">
         {/* Background image with gradient overlay */}
@@ -232,7 +347,7 @@ export default function ClubPage({}: ClubPageProps) {
               className="object-cover w-full h-full"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-gray-950"></div>
+            <div className="absolute"></div>
           </div>
         </div>
 
@@ -318,246 +433,478 @@ export default function ClubPage({}: ClubPageProps) {
           </div>
         </div>
 
-        {/* Tabs Navigation */}
-        <div className="flex border-b border-gray-800 mb-6 overflow-x-auto">
-          <button
-            onClick={() => setActiveTab('about')}
-            className={`px-4 py-3 font-medium text-sm ${
-              activeTab === 'about'
-                ? 'text-yellow-400 border-b-2 border-yellow-400'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            About
-          </button>
+       {/* Navigation Tabs - Mobile Responsive Design */}
+       <div className=" top-0 z-40  backdrop-blur-xl mt-6 sm:mt-8">
+         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8">
+           {/* Mobile: Horizontal scroll tabs */}
+           <div className="block sm:hidden py-4">
+             <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+               <Button
+                 onClick={() => setActiveTab('announcements')}
+                 className={`flex-shrink-0 px-4 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
+                   activeTab === 'announcements'
+                     ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg'
+                     : 'text-gray-400 bg-gray-800/50 hover:text-white hover:bg-gray-700/50'
+                 }`}
+               >
+                 <Bell className="w-4 h-4" />
+                 <span className="text-sm">Announcements</span>
+               </Button>
+               <button
+                 onClick={() => setActiveTab('events')}
+                 className={`flex-shrink-0 px-4 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
+                   activeTab === 'events'
+                     ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg'
+                     : 'text-gray-400 bg-gray-800/50 hover:text-white hover:bg-gray-700/50'
+                 }`}
+               >
+                 <Calendar className="w-4 h-4" />
+                 <span className="text-sm">Events</span>
+                 <span className="px-1.5 py-0.5 bg-gray-600/50 text-xs rounded-none">{event.length}</span>
+               </button>
+               <Button
+                 onClick={() => setActiveTab('members')}
+                 className={`flex-shrink-0 px-4 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
+                   activeTab === 'members'
+                     ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg'
+                     : 'text-gray-400 bg-gray-800/50 hover:text-white hover:bg-gray-700/50'
+                 }`}
+               >
+                 <Users className="w-4 h-4" />
+                 <span className="text-sm">Members</span>
+                 <span className="px-1.5 py-0.5 bg-gray-600/50 text-xs rounded-none">{getMemberCount(club)}</span>
+               </Button>
+             </div>
+           </div>
 
-          <button
-            onClick={() => setActiveTab('events')}
-            className={`px-4 py-3 font-medium text-sm ${
-              activeTab === 'events'
-                ? 'text-yellow-400 border-b-2 border-yellow-400'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Events
-          </button>
+           {/* Desktop: Centered tabs */}
+           <div className="hidden sm:flex justify-center py-6">
+             <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-2 shadow-2xl">
+               <div className="flex items-center gap-2">
+                 <Button
+                   onClick={() => setActiveTab('announcements')}
+                   className={`px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 lg:gap-3 ${
+                     activeTab === 'announcements'
+                       ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg shadow-yellow-500/25 transform scale-105'
+                       : 'text-gray-400 hover:text-white hover:bg-gray-700/50 hover:scale-105'
+                   }`}
+                 >
+                   <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
+                   <span className="text-sm lg:text-base">Announcements</span>
+                 </Button>
+                 <Button
+                   onClick={() => setActiveTab('events')}
+                   className={`px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 lg:gap-3 ${
+                     activeTab === 'events'
+                       ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg shadow-yellow-500/25 transform scale-105'
+                       : 'text-gray-400 hover:text-white hover:bg-gray-700/50 hover:scale-105'
+                   }`}
+                 >
+                   <Calendar className="w-4 h-4 lg:w-5 lg:h-5" />
+                   <span className="text-sm lg:text-base">Events</span>
+                   <span className="px-2 py-1 bg-gray-600/50 text-xs rounded-full">{event.length}</span>
+                 </Button>
+                 <Button
+                   onClick={() => setActiveTab('members')}
+                   className={`px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 lg:gap-3 ${
+                     activeTab === 'members'
+                       ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg shadow-yellow-500/25 transform scale-105'
+                       : 'text-gray-400 hover:text-white hover:bg-gray-700/50 hover:scale-105'
+                   }`}
+                 >
+                   <Users className="w-4 h-4 lg:w-5 lg:h-5" />
+                   <span className="text-sm lg:text-base">Members</span>
+                   <span className="px-2 py-1 bg-gray-600/50 text-xs rounded-full">{getMemberCount(club)}</span>
+                 </Button>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
 
-          {/* Announcements tab removed until backed by real data */}
-        </div>
+      {/* Main Content - Mobile Optimized */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-4 sm:py-6 md:py-8">
+        {/* Tab Content */}
+        <div className="space-y-4 sm:space-y-6 md:space-y-8">
+          {/* Announcements Tab */}
+          {activeTab === 'announcements' && (
+            <div className="space-y-4 sm:space-y-6">
+              {/* Announcements Header - Mobile Optimized */}
+              
+              {/* Sample Announcements */}
+              <div className="space-y-4">
+                {/* Announcement 1 */}
+               <div>
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-3">No announcements yet</h3>
+                </div>  
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content Area */}
-          <div className="lg:col-span-2">
-            {/* About Tab Content */}
-            {activeTab === 'about' && (
-              <div className="bg-gray-900/60 rounded-lg p-6 space-y-6 border border-gray-800">
-                <div>
-                  <h2 className="text-xl font-bold text-white mb-3">
+                {/* Announcement 2 */}
+              
+
+                {/* Announcement 3 */}
+             
+
+                {/* Club Information Card */}
+                <div className="bg-gradient-to-r from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
+                  <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-3">
+                    <BookOpen className="w-5 h-5 text-yellow-400" />
                     About {club.name}
-                  </h2>
-                  <p className="text-gray-300 whitespace-pre-wrap break-words">{club.description}</p>
+                  </h3>
+                  <p className="text-gray-300 leading-relaxed mb-4">{club.description}</p>
+                  
+                  {club.requirements && (
+                    <div className="mb-4">
+                      <h4 className="text-md font-semibold text-white mb-2 flex items-center gap-2">
+                        <Target className="w-4 h-4 text-green-400" />
+                        Membership Requirements
+                      </h4>
+                      <p className="text-gray-300 text-sm leading-relaxed">{club.requirements}</p>
+                    </div>
+                  )}
+
+                  {club.wings && (
+                    <div>
+                      <h4 className="text-md font-semibold text-white mb-2 flex items-center gap-2">
+                        <Briefcase className="w-4 h-4 text-blue-400" />
+                        Club Wings
+                      </h4>
+                      <p className="text-gray-300 text-sm leading-relaxed">{club.wings}</p>
+                    </div>
+                  )}
                 </div>
 
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">Contact Information</h3>
-                  <div className="space-y-2 text-gray-300">
+                {/* Contact Information */}
+                <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
+                  <h3 className="text-lg font-bold text-white mb-4">Contact Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Founder */}
+                    {club.founderEmail && (
+                      <div className="p-4 bg-gray-800/30 rounded-xl">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Crown className="w-4 h-4 text-yellow-400" />
+                          <span className="text-sm font-medium text-gray-300">Founder</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-400 font-mono">{club.founderEmail}</span>
+                          <button
+                            onClick={() => copyToClipboard(club.founderEmail, 'Founder Email')}
+                            className="p-1 rounded text-gray-400 hover:text-yellow-400 transition-colors"
+                          >
+                            {copiedEmail === 'Founder Email' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Faculty */}
+                    {club.facultyEmail && (
+                      <div className="p-4 bg-gray-800/30 rounded-xl">
+                        <div className="flex items-center gap-3 mb-2">
+                          <GraduationCap className="w-4 h-4 text-blue-400" />
+                          <span className="text-sm font-medium text-gray-300">Faculty Mentor</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-400 font-mono">{club.facultyEmail}</span>
+                          <button
+                            onClick={() => copyToClipboard(club.facultyEmail, 'Faculty Email')}
+                            className="p-1 rounded text-gray-400 hover:text-blue-400 transition-colors"
+                          >
+                            {copiedEmail === 'Faculty Email' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Club Contact */}
                     {club.clubContact && (
-                      <p className="flex items-center">
-                        <Globe size={18} className="mr-2" />
+                      <div className="p-4 bg-gray-800/30 rounded-xl md:col-span-2">
+                        <div className="flex items-center gap-3 mb-2">
+                          {/^\+?\d[\d\s-]{3,}$/.test(String(club.clubContact)) ? (
+                            <Phone className="w-4 h-4 text-green-400" />
+                          ) : (
+                            <Globe className="w-4 h-4 text-green-400" />
+                          )}
+                          <span className="text-sm font-medium text-gray-300">Club Contact</span>
+                        </div>
                         {/^\+?\d[\d\s-]{3,}$/.test(String(club.clubContact)) ? (
-                          <a href={`tel:${club.clubContact}`} className="text-yellow-400 hover:underline break-all">
+                          <a href={`tel:${club.clubContact}`} className="text-sm text-green-400 hover:text-green-300 transition-colors font-mono">
                             {club.clubContact}
                           </a>
                         ) : (
-                          <span className="break-all">{club.clubContact}</span>
+                          <span className="text-sm text-gray-400 font-mono">{club.clubContact}</span>
                         )}
-                      </p>
-                    )}
-                    {club.founderEmail && (
-                      <p className="flex items-center">
-                        <Instagram size={18} className="mr-2" />
-                        <span className="text-gray-300"><span className="text-gray-400 mr-1">Founder:</span>{club.founderEmail}</span>
-                      </p>
-                    )}
-                    {club.facultyEmail && (
-                      <p className="flex items-center">
-                        <Twitter size={18} className="mr-2" />
-                        <span className="text-gray-300"><span className="text-gray-400 mr-1">Faculty:</span>{club.facultyEmail}</span>
-                      </p>
+                      </div>
                     )}
                   </div>
-                </div>
-
-                {club.requirements && (
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">Requirements</h3>
-                    <p className="text-gray-300 whitespace-pre-wrap break-words">{club.requirements}</p>
-                  </div>
-                )}
-
-                {Array.isArray((club as any).wings) && (club as any).wings.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">Wings</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {(club as any).wings.map((w: any, idx: number) => (
-                        <span key={w?.id || w?.name || idx} className="px-3 py-1 text-sm rounded-full bg-gray-800 text-gray-200 border border-gray-700">
-                          {w?.name || String(w)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Meeting Schedule
-                  </h3>
-                  <p className="text-gray-300 flex items-center">
-                    <CalendarDays size={18} className="mr-2" />
-                    Weekly on Thursdays, 7:00 PM - 9:00 PM
-                  </p>
-                  <p className="text-gray-300 flex items-center">
-                    <MapPin size={18} className="mr-2" />
-                    {club.collegeName} - Block C, Room 204
-                  </p>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Events Tab Content */}
-            {activeTab === 'events' && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-bold text-white">
-                  Upcoming Events
-                </h2>
-
-                {event.length === 0 ? (
-                  <div className="bg-gray-900/60 rounded-lg p-6 text-center border border-gray-800">
-                    <p className="text-gray-300">No events found for this club.</p>
+          {/* Events Tab */}
+          {activeTab === 'events' && (
+            <div className="space-y-4 sm:space-y-6">
+              {/* Events Header - Mobile Optimized */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">Club Events</h2>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="relative flex-1 sm:flex-none">
+                    <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search events..."
+                      className="bg-gray-800/50 rounded-none sm:rounded-lg md:rounded-xl px-4 py-2 pl-10 text-white text-sm w-full sm:w-48 lg:w-64"
+                    />
                   </div>
-                ) : (
-                  event.map((eventItem: EventType) => (
+                  <button className="p-2 bg-gray-800/50 rounded-none sm:rounded-lg md:rounded-xl text-gray-400 hover:text-white transition-colors touch-manipulation">
+                    <Filter className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {event.length === 0 ? (
+                <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-8 sm:p-12 md:p-16 text-center">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto bg-gray-800/50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                    <CalendarDays className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">No Events Yet</h3>
+                  <p className="text-gray-400 mb-4 sm:mb-6 text-sm sm:text-base">This club hasn't posted any events yet. Be the first to create one!</p>
+                  <Button onClick={() => setIsCreateEventModalOpen(true)} className="px-4 py-2 sm:px-6 sm:py-3 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg sm:rounded-xl font-semibold transition-colors text-sm sm:text-base touch-manipulation">
+                    Create First Event
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {event.map((eventItem: EventType) => (
                     <div
                       key={eventItem.id}
-                      className="bg-gray-900/60 border border-gray-800 rounded-lg overflow-hidden hover:border-yellow-500/30 transition-all duration-300 shadow-md"
+                      className="group bg-gray-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl transition-all duration-300 overflow-hidden"
                     >
-                      <div className="relative h-48 w-full">
-                        <Image
-                          src={eventItem.image || '/pic1.jpg'}
-                          alt={eventItem.title || 'Event Image'}
-                          width={400}
-                          height={200}
-                          className="object-cover w-full h-full"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-
-                        <div className="absolute bottom-0 left-0 p-4 w-full">
-                          <h3 className="text-xl font-bold text-white">
-                            {eventItem.EventName}
-                          </h3>
-                          <div className="flex items-center text-yellow-400 mt-1">
-                            <CalendarDays size={16} className="mr-1" />
-                            <span className="text-sm">
+                      <div className="flex flex-col md:flex-row">
+                        {/* Event Image - Mobile Optimized */}
+                        <div className="relative w-full md:w-80 h-40 sm:h-48 md:h-auto overflow-hidden">
+                          <Image
+                            src={eventItem.image || '/pic1.jpg'}
+                            alt={eventItem.title || 'Event Image'}
+                            width={320}
+                            height={200}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 via-transparent to-transparent"></div>
+                          <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
+                            <span className="px-2 py-1 sm:px-3 sm:py-1 bg-yellow-500/90 text-black text-xs font-semibold rounded-full">
                               {eventItem.createdAt.toLocaleDateString()}
                             </span>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="p-4">
-                        <div className="flex items-center text-gray-300 mb-2">
-                          <Clock size={16} className="mr-1" />
-                          <span className="text-sm">{eventItem.time || 'TBA'}</span>
-                        </div>
+                        {/* Event Content - Mobile Optimized */}
+                        <div className="flex-1 p-4 sm:p-6">
+                          <div className="flex flex-col h-full">
+                            <div className="flex-1">
+                              <div className="flex items-start justify-between mb-2 sm:mb-3">
+                                <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-yellow-400 transition-colors leading-tight">
+                                  {eventItem.EventName}
+                                </h3>
+                                <button className="p-1.5 sm:p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white transition-all touch-manipulation">
+                                  <Bookmark className="w-3 h-3 sm:w-4 sm:h-4" />
+                                </button>
+                              </div>
+                              
+                              <p className="text-gray-300 mb-3 sm:mb-4 leading-relaxed text-sm sm:text-base line-clamp-2">
+                                {eventItem.description}
+                              </p>
 
-                        <div className="flex items-center text-gray-300 mb-4">
-                          <MapPin size={16} className="mr-1" />
-                          <span className="text-sm">{club.collegeName}</span>
-                        </div>
+                              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm text-gray-400">
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                  <span className="truncate">{club.collegeName}</span>
+                                </div>
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                  <span className="hidden sm:inline">Posted {eventItem.createdAt.toLocaleDateString()}</span>
+                                  <span className="sm:hidden">{eventItem.createdAt.toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                  <Users className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                  <span>0 attending</span>
+                                </div>
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                  <Eye className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                  <span>24 views</span>
+                                </div>
+                              </div>
+                            </div>
 
-                        <div className="flex items-center justify-end">
-                          <Button className="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg text-sm font-medium transition-colors">
-                            RSVP
-                          </Button>
+                            {/* Event Actions - Mobile Optimized */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 pt-3 sm:pt-4">
+                              <div className="flex items-center gap-2 sm:gap-3">
+                                <button className="px-4 py-2 sm:px-6 sm:py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation">
+                                  <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
+                                  RSVP
+                                </button>
+                                <button className="px-3 py-2 sm:px-4 sm:py-2 bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-white rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm transition-all touch-manipulation">
+                                  <Share className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
+                                  <span className="hidden sm:inline">Share</span>
+                                </button>
+                                <button className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-red-400 transition-all touch-manipulation">
+                                  <ThumbsUp className="w-3 h-3 sm:w-4 sm:h-4" />
+                                </button>
+                              </div>
+                              <button className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white transition-all touch-manipulation self-end sm:self-auto">
+                                <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6 lg:sticky lg:top-24 h-fit">
-            {/* Quick Stats */}
-            <div className="bg-gray-900/60 rounded-lg p-4 border border-gray-800">
-              <h3 className="text-lg font-bold text-white mb-3">Club Stats</h3>
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="bg-gray-900 rounded-lg p-3">
-                  <p className="text-yellow-400 text-xl font-bold">
-                    {getMemberCount(club)}
-                  </p>
-                  <p className="text-gray-300 text-sm">Members</p>
-                </div>
-                <div className="bg-gray-900 rounded-lg p-3">
-                  <p className="text-yellow-400 text-xl font-bold">{event.length}</p>
-                  <p className="text-gray-300 text-sm">Events</p>
-                </div>
-                <div className="bg-gray-900 rounded-lg p-3">
-                  <p className="text-yellow-400 text-xl font-bold">4.8</p>
-                  <p className="text-gray-300 text-sm">Rating</p>
-                </div>
-                <div className="bg-gray-900 rounded-lg p-3">
-                  <p className="text-yellow-400 text-xl font-bold">2018</p>
-                  <p className="text-gray-300 text-sm">Founded</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Members - names only */}
-            <div className="bg-gray-900/60 rounded-lg p-4 border border-gray-800">
-              <h3 className="text-lg font-bold text-white mb-3">Members</h3>
-              {Array.isArray(club.members) && club.members.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {club.members.map((m: any) => (
-                    <span
-                      key={m.id || m.email}
-                      className="px-3 py-1 text-sm rounded-full bg-gray-800 text-gray-200 border border-gray-700"
-                      title={m.email}
-                    >
-                      {m.name || m.fullName || m.username || m.email}
-                    </span>
                   ))}
                 </div>
-              ) : (
-                <p className="text-gray-400 text-sm">No members listed.</p>
               )}
             </div>
+          )}
 
-            {/* Join CTA */}
-            <div className="bg-yellow-500 rounded-lg p-4 text-center">
-              <h3 className="text-xl font-bold text-black mb-2">
-                Join {club.name} Today!
-              </h3>
-              <p className="text-gray-800 mb-4">
-                Connect with like-minded peers and grow your skills.
+          {/* Members Tab */}
+          {activeTab === 'members' && (
+            <div className="space-y-4 sm:space-y-6">
+              {/* Members Header - Mobile Optimized */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">Club Members</h2>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="relative flex-1 sm:flex-none">
+                    <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search members..."
+                      className="bg-gray-800/50 rounded-lg sm:rounded-xl px-4 py-2 pl-10 text-white text-sm w-full sm:w-48 lg:w-64"
+                    />
+                  </div>
+                  <select className="bg-gray-800/50 rounded-lg sm:rounded-xl px-3 py-2 text-white text-sm">
+                    <option>All</option>
+                    <option>Admins</option>
+                    <option>Recent</option>
+                  </select>
+                </div>
+              </div>
+
+              {Array.isArray(club.members) && club.members.length > 0 ? (
+                <div className="space-y-4">
+                  {/* Member List */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    {club.members.slice(0, 20).map((member: any, index: number) => (
+                      <div
+                        key={member.id || index}
+                        className="group bg-gray-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all duration-300"
+                      >
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          {/* Avatar - Mobile Optimized */}
+                          <div className="relative">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl overflow-hidden transition-colors">
+                              <Image
+                                src={member.profileAvatar || '/default-avatar.jpg'}
+                                alt={member.name || 'Member'}
+                                width={48}
+                                height={48}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full"></div>
+                          </div>
+
+                          {/* Member Info - Mobile Optimized */}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-white font-semibold truncate text-sm sm:text-base">
+                              {member.name || member.fullName || member.username || 'Member'}
+                            </h4>
+                            <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-400">
+                              {member.course && (
+                                <span className="truncate">{member.course}</span>
+                              )}
+                              {member.course && member.year && <span>•</span>}
+                              {member.year && (
+                                <span>{member.year} Year</span>
+                              )}
+                            </div>
+                            {member.email && (
+                              <p className="text-xs text-gray-500 truncate">{member.email}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Load More */}
+                  {club.members.length > 20 && (
+                    <div className="text-center">
+                      <button className="px-6 py-3 bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-white rounded-xl font-medium transition-all">
+                        Load More Members ({club.members.length - 20} remaining)
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl p-16 text-center">
+                  <div className="w-24 h-24 mx-auto bg-gray-800/50 rounded-full flex items-center justify-center mb-6">
+                    <Users className="w-12 h-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">No Members Yet</h3>
+                  <p className="text-gray-400 mb-6">Be the first to join this amazing club!</p>
+                  {isJoined ? (
+                    <div className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl font-semibold flex items-center justify-center">
+                      <UserCheck className="w-5 h-5 mr-2" />
+                      You are already joined
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleJoinClick}
+                      className="px-6 py-3 bg-yellow-500 hover:bg-yellow-400 text-black rounded-xl font-semibold transition-colors"
+                    >
+                      Join Now
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Footer - Mobile Optimized */}
+      <footer className="bg-black/50 mt-8 sm:mt-12 md:mt-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-lg flex items-center justify-center">
+                <span className="text-black font-bold text-sm sm:text-base">Z</span>
+              </div>
+              <span className="text-base sm:text-lg font-bold text-white">Zynvo</span>
+              <span className="text-gray-500 text-xs sm:text-sm hidden sm:inline">• Campus Communities</span>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors touch-manipulation">
+                  <Globe className="w-4 h-4" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors touch-manipulation">
+                  <Share2 className="w-4 h-4" />
+                </a>
+              </div>
+              <p className="text-gray-500 text-xs sm:text-sm text-center sm:text-left">
+                © 2024 Zynvo. All rights reserved.
               </p>
-              {!isJoined && (
-                <Button
-                  onClick={() => setIsJoinModalOpen(true)}
-                  className="w-full py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
-                >
-                  Become a Member
-                </Button>
-              )}
-              {isJoined && (
-                <p className="font-medium text-black">You are a member! 🎉</p>
-              )}
             </div>
           </div>
         </div>
-      </div>
+      </footer>
 
       {/* Join Club Modal */}
       {club && (
@@ -569,7 +916,13 @@ export default function ClubPage({}: ClubPageProps) {
           clubId={id}
         />
       )}
+
+      {/* Create Event Modal */}
+      <CreateEventModal
+        isOpen={isCreateEventModalOpen}
+        onClose={() => setIsCreateEventModalOpen(false)}
+      />
+    </div>
     </div>
   );
 }
- 

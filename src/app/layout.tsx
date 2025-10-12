@@ -8,6 +8,7 @@ import { WarmupProvider } from '@/components/WarmupProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
 import { QueryProvider } from '@/providers/QueryProvider';
+import FloatingPWAInstall from '@/components/FloatingPWAInstall';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -21,6 +22,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
+  manifest: "/manifest.json",
   title:
     'Zynvo - Agentic Social Media Platform for Campus Communities | Student Network',
   description:
@@ -125,6 +127,7 @@ export default function RootLayout({
           <SpeedInsights />
           <PerformanceMonitor />
           <Toaster />
+          <FloatingPWAInstall />
         </ErrorBoundary>
       </body>
     </html>

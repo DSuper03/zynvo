@@ -156,7 +156,6 @@ export default function ZynvoEventsPage() {
         );
 
         if (!isMounted) return; // Prevent state update if component is unmounted
-
         if (response.data && Array.isArray(response.data.response)) {
           setEvents(response.data.response);
           setTotalPages(response.data.totalPages || 1);

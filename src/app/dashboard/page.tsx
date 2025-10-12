@@ -837,18 +837,6 @@ export default function ZynvoDashboard() {
         {/* Dashboard Header - Mobile Responsive */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3 sm:gap-4">
           <div className="flex flex-wrap justify-end gap-2 sm:gap-3 w-full sm:w-auto self-end sm:self-auto">
-            <Button
-              onClick={() => setShowProfileModal(true)}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm flex-none min-w-0"
-            >
-              <span className="truncate">Complete Profile</span>
-            </Button>
-            <Button
-              onClick={() => navigate.push('/feedback')}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm flex-none min-w-0"
-            >
-              <span className="truncate">Feature Request</span>
-            </Button>
             <Button className="bg-yellow-500 h-8 w-8 sm:h-10 sm:w-10 rounded-full grid place-items-center flex-shrink-0">
               <BellDotIcon className="text-black w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
@@ -936,6 +924,18 @@ export default function ZynvoDashboard() {
                     {userData.collegeName || 'College not set'}
                   </span>
                 </div>
+                
+                {/* Complete Profile Button - Contextually placed */}
+                {(!userData.course || !userData.year || !userData.collegeName) && (
+                  <div className="mt-3">
+                    <Button
+                      onClick={() => setShowProfileModal(true)}
+                      className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-4 py-2 rounded-full text-sm transition-all duration-300 hover:scale-105"
+                    >
+                      ✨ Complete Your Profile
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* Social Links Section - Redesigned with Senior Dev UX */}
@@ -1358,6 +1358,17 @@ export default function ZynvoDashboard() {
           </div>
         </div>
       )}
+
+      {/* Feature Request Floating Button */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <Button
+          onClick={() => navigate.push('/feedback')}
+          className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 font-medium px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center space-x-2"
+        >
+          <span className="text-sm">💡</span>
+          <span className="hidden sm:inline text-sm">Feature Request</span>
+        </Button>
+      </div>
 
       {/* Complete Profile Modal - Mobile Responsive */}
       {showProfileModal && (

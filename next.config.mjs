@@ -6,7 +6,7 @@ const securityHeaders = [
       script-src 'self' 'unsafe-eval' 'unsafe-inline';
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com;
-      connect-src 'self' data: https://backend.zynvo.social https://upload.imagekit.io;
+      connect-src 'self' data: https://backend.zynvo.social https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com;
       font-src 'self' data:;
     `
       .replace(/\s{2,}/g, ' ')
@@ -27,6 +27,7 @@ const securityHeaders = [
 ];
 
 import bundleAnalyzer from '@next/bundle-analyzer';
+import withPWA from 'next-pwa';
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -83,7 +84,9 @@ const nextConfig = {
       },
     ],
   },
+  
   reactStrictMode: false,
+  swcMinify: true,
   eslint: {
     ignoreDuringBuilds: false,
   },
@@ -175,4 +178,13 @@ const nextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+// Apply PWA configuration
+const pwaConfig = withPWA({
+  dest: "public",         // destination directory for the PWA files
+  disable: false,        // enable PWA in all environments
+  register: true,         // register the PWA service worker
+  skipWaiting: true,      // skip waiting for service worker activation
+})(nextConfig);
+
+// Apply bundle analyzer and export
+export default withBundleAnalyzer(pwaConfig);
