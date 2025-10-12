@@ -36,7 +36,7 @@ const Eventid = () => {
     startDate: '',
     endDate: '',
     contactEmail: '',
-    contactPhone: 0,
+    contactPhone: '',
     university: '',
     applicationStatus: 'open',
     posterUrl: '',
@@ -128,7 +128,7 @@ const Eventid = () => {
             endDate: res.data.response.endDate || '',
             university: res.data.response.university || '',
             contactEmail: res.data.response.contactEmail || '',
-            contactPhone: res.data.response.contactPhone || 0,
+            contactPhone: res.data.response.contactPhone || '',
             applicationStatus: res.data.response.applicationStatus || 'open',
             posterUrl:
               res.data.response.posterUrl ||
