@@ -302,6 +302,37 @@ export default function ClubPage({}: ClubPageProps) {
     }
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: `${club.name} - ${club.collegeName}`,
+      text: `Check out this amazing club: ${club.name} at ${club.collegeName}. ${club.description}`,
+      url: window.location.href,
+    };
+
+    // Check if Web Share API is supported
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        toast.success('Club shared successfully!');
+      } catch (err) {
+        // User cancelled sharing or error occurred
+        if (err instanceof Error && err.name !== 'AbortError') {
+          console.error('Error sharing:', err);
+          toast.error('Failed to share club');
+        }
+      }
+    } else {
+      // Fallback: Copy URL to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Club link copied to clipboard!');
+      } catch (err) {
+        console.error('Error copying to clipboard:', err);
+        toast.error('Failed to copy link to clipboard');
+      }
+    }
+  };
+
   const getTypeColor = (type: string) => {
     const typeLower = type.toLowerCase();
     switch (typeLower) {
@@ -423,7 +454,11 @@ export default function ClubPage({}: ClubPageProps) {
               {isJoined ? 'Leave Club' : 'Join Club'}
             </button>
 
-            <button className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors">
+            <button 
+              onClick={handleShare}
+              className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors"
+              title="Share this club"
+            >
               <Share2 size={20} />
             </button>
 
@@ -746,7 +781,11 @@ export default function ClubPage({}: ClubPageProps) {
                                   <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
                                   RSVP
                                 </button>
-                                <button className="px-3 py-2 sm:px-4 sm:py-2 bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-white rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm transition-all touch-manipulation">
+                                <button 
+                                  onClick={handleShare}
+                                  className="px-3 py-2 sm:px-4 sm:py-2 bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-white rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm transition-all touch-manipulation"
+                                  title="Share this event"
+                                >
                                   <Share className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
                                   <span className="hidden sm:inline">Share</span>
                                 </button>
@@ -894,9 +933,13 @@ export default function ClubPage({}: ClubPageProps) {
                 <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors touch-manipulation">
                   <Globe className="w-4 h-4" />
                 </a>
-                <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors touch-manipulation">
+                <button 
+                  onClick={handleShare}
+                  className="text-gray-400 hover:text-yellow-400 transition-colors touch-manipulation"
+                  title="Share this club"
+                >
                   <Share2 className="w-4 h-4" />
-                </a>
+                </button>
               </div>
               <p className="text-gray-500 text-xs sm:text-sm text-center sm:text-left">
                 © 2024 Zynvo. All rights reserved.
