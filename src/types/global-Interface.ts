@@ -382,7 +382,7 @@ export interface respnseUseState {
   startDate: any;
   endDate: any;
   contactEmail: string;
-  contactPhone: number;
+  contactPhone: string;
   university: string;
   applicationStatus: string;
   posterUrl?: string;
@@ -429,7 +429,7 @@ export interface EventByIdResponse {
     collegeStudentsOnly: boolean;
     participationFee: boolean;
     contactEmail: string;
-    contactPhone: number;
+    contactPhone: string;
   };
 }
 
