@@ -302,6 +302,37 @@ export default function ClubPage({}: ClubPageProps) {
     }
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: `${club.name} - ${club.collegeName}`,
+      text: `Check out this amazing club: ${club.name} at ${club.collegeName}. ${club.description}`,
+      url: window.location.href,
+    };
+
+    // Check if Web Share API is supported
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        toast.success('Club shared successfully!');
+      } catch (err) {
+        // User cancelled sharing or error occurred
+        if (err instanceof Error && err.name !== 'AbortError') {
+          console.error('Error sharing:', err);
+          toast.error('Failed to share club');
+        }
+      }
+    } else {
+      // Fallback: Copy URL to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Club link copied to clipboard!');
+      } catch (err) {
+        console.error('Error copying to clipboard:', err);
+        toast.error('Failed to copy link to clipboard');
+      }
+    }
+  };
+
   const getTypeColor = (type: string) => {
     const typeLower = type.toLowerCase();
     switch (typeLower) {
@@ -343,7 +374,7 @@ export default function ClubPage({}: ClubPageProps) {
               src={club.image || '/banners/profilebanner.jpg'}
               alt={club.name}
               width={1600}
-              height={900}
+              height={600}
               className="object-cover w-full h-full"
               priority
             />
@@ -384,10 +415,10 @@ export default function ClubPage({}: ClubPageProps) {
             {club.name}
           </h1>
 
-          <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-4">
             <div className="flex items-center text-gray-300">
               <Users size={16} className="mr-1" />
-              <span>{getMemberCount(club)} members</span>
+              <span className="text-sm sm:text-base">{getMemberCount(club)} members</span>
             </div>
 
             <span className="bg-gray-800 text-gray-200 px-3 py-1 rounded-full text-sm border border-gray-700">
@@ -411,7 +442,7 @@ export default function ClubPage({}: ClubPageProps) {
             {club.description}
           </p>
 
-          <div className="flex justify-center gap-3 mt-4">
+          <div className="flex flex-wrap justify-center gap-3 mt-4">
             <button
               onClick={handleJoinClick}
               className={`px-6 py-2 rounded-lg font-medium ${
@@ -423,7 +454,11 @@ export default function ClubPage({}: ClubPageProps) {
               {isJoined ? 'Leave Club' : 'Join Club'}
             </button>
 
-            <button className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors">
+            <button 
+              onClick={handleShare}
+              className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors"
+              title="Share this club"
+            >
               <Share2 size={20} />
             </button>
 
@@ -433,8 +468,8 @@ export default function ClubPage({}: ClubPageProps) {
           </div>
         </div>
 
-       {/* Navigation Tabs - Mobile Responsive Design */}
-       <div className=" top-0 z-40  backdrop-blur-xl mt-6 sm:mt-8">
+       {/* Navigation Tabs - Responsive Design */}
+       <div className="sticky top-0 z-40 backdrop-blur-xl mt-6 sm:mt-8">
          <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8">
            {/* Mobile: Horizontal scroll tabs */}
            <div className="block sm:hidden py-4">
@@ -450,7 +485,7 @@ export default function ClubPage({}: ClubPageProps) {
                  <Bell className="w-4 h-4" />
                  <span className="text-sm">Announcements</span>
                </Button>
-               <button
+               <Button
                  onClick={() => setActiveTab('events')}
                  className={`flex-shrink-0 px-4 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
                    activeTab === 'events'
@@ -460,8 +495,8 @@ export default function ClubPage({}: ClubPageProps) {
                >
                  <Calendar className="w-4 h-4" />
                  <span className="text-sm">Events</span>
-                 <span className="px-1.5 py-0.5 bg-gray-600/50 text-xs rounded-none">{event.length}</span>
-               </button>
+                 <span className="px-1.5 py-0.5 bg-gray-600/50 text-xs rounded-full">{event.length}</span>
+               </Button>
                <Button
                  onClick={() => setActiveTab('members')}
                  className={`flex-shrink-0 px-4 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
@@ -472,7 +507,7 @@ export default function ClubPage({}: ClubPageProps) {
                >
                  <Users className="w-4 h-4" />
                  <span className="text-sm">Members</span>
-                 <span className="px-1.5 py-0.5 bg-gray-600/50 text-xs rounded-none">{getMemberCount(club)}</span>
+                 <span className="px-1.5 py-0.5 bg-gray-600/50 text-xs rounded-full">{getMemberCount(club)}</span>
                </Button>
              </div>
            </div>
@@ -522,7 +557,7 @@ export default function ClubPage({}: ClubPageProps) {
          </div>
        </div>
 
-      {/* Main Content - Mobile Optimized */}
+      {/* Main Content - Responsive Design */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-4 sm:py-6 md:py-8">
         {/* Tab Content */}
         <div className="space-y-4 sm:space-y-6 md:space-y-8">
@@ -644,7 +679,7 @@ export default function ClubPage({}: ClubPageProps) {
           {/* Events Tab */}
           {activeTab === 'events' && (
             <div className="space-y-4 sm:space-y-6">
-              {/* Events Header - Mobile Optimized */}
+              {/* Events Header - Responsive Design */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
@@ -656,10 +691,10 @@ export default function ClubPage({}: ClubPageProps) {
                     <input
                       type="text"
                       placeholder="Search events..."
-                      className="bg-gray-800/50 rounded-none sm:rounded-lg md:rounded-xl px-4 py-2 pl-10 text-white text-sm w-full sm:w-48 lg:w-64"
+                      className="bg-gray-800/50 rounded-lg sm:rounded-lg md:rounded-xl px-4 py-2 pl-10 text-white text-sm w-full sm:w-48 lg:w-64"
                     />
                   </div>
-                  <button className="p-2 bg-gray-800/50 rounded-none sm:rounded-lg md:rounded-xl text-gray-400 hover:text-white transition-colors touch-manipulation">
+                  <button className="p-2 bg-gray-800/50 rounded-lg sm:rounded-lg md:rounded-xl text-gray-400 hover:text-white transition-colors touch-manipulation">
                     <Filter className="w-4 h-4" />
                   </button>
                 </div>
@@ -746,7 +781,11 @@ export default function ClubPage({}: ClubPageProps) {
                                   <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
                                   RSVP
                                 </button>
-                                <button className="px-3 py-2 sm:px-4 sm:py-2 bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-white rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm transition-all touch-manipulation">
+                                <button 
+                                  onClick={handleShare}
+                                  className="px-3 py-2 sm:px-4 sm:py-2 bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-white rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm transition-all touch-manipulation"
+                                  title="Share this event"
+                                >
                                   <Share className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
                                   <span className="hidden sm:inline">Share</span>
                                 </button>
@@ -771,7 +810,7 @@ export default function ClubPage({}: ClubPageProps) {
           {/* Members Tab */}
           {activeTab === 'members' && (
             <div className="space-y-4 sm:space-y-6">
-              {/* Members Header - Mobile Optimized */}
+              {/* Members Header - Responsive Design */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <Users className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
@@ -894,9 +933,13 @@ export default function ClubPage({}: ClubPageProps) {
                 <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors touch-manipulation">
                   <Globe className="w-4 h-4" />
                 </a>
-                <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors touch-manipulation">
+                <button 
+                  onClick={handleShare}
+                  className="text-gray-400 hover:text-yellow-400 transition-colors touch-manipulation"
+                  title="Share this club"
+                >
                   <Share2 className="w-4 h-4" />
-                </a>
+                </button>
               </div>
               <p className="text-gray-500 text-xs sm:text-sm text-center sm:text-left">
                 © 2024 Zynvo. All rights reserved.

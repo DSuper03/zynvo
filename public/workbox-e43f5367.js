@@ -1,6 +1,6 @@
 define(['exports'], (function (exports) { 'use strict';
 
-    // @ts-ignore
+    // @ts-expect-ignore
     try {
       self['workbox:core:6.5.4'] && _();
     } catch (e) {}
@@ -49,7 +49,7 @@ define(['exports'], (function (exports) { 'use strict';
           inGroup = false;
         }
       };
-      // eslint-disable-next-line @typescript-eslint/ban-types
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const api = {};
       const loggerMethods = Object.keys(methodToColorMap);
       for (const key of loggerMethods) {
@@ -416,7 +416,7 @@ define(['exports'], (function (exports) { 'use strict';
     };
     const isInstance = (object,
     // Need the general type to do the check later.
-    // eslint-disable-next-line @typescript-eslint/ban-types
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expectedClass, details) => {
       if (!(object instanceof expectedClass)) {
         details['expectedClassName'] = expectedClass.name;
@@ -453,7 +453,7 @@ define(['exports'], (function (exports) { 'use strict';
       isArrayOfClass
     };
 
-    // @ts-ignore
+    // @ts-expect-ignore
     try {
       self['workbox:routing:6.5.4'] && _();
     } catch (e) {}
@@ -1182,7 +1182,7 @@ define(['exports'], (function (exports) { 'use strict';
       return route;
     }
 
-    // @ts-ignore
+    // @ts-expect-ignore
     try {
       self['workbox:strategies:6.5.4'] && _();
     } catch (e) {}
@@ -1343,7 +1343,7 @@ define(['exports'], (function (exports) { 'use strict';
     */
     // Callbacks to be executed whenever there's a quota error.
     // Can't change Function type right now.
-    // eslint-disable-next-line @typescript-eslint/ban-types
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const quotaErrorCallbacks = new Set();
 
     /*

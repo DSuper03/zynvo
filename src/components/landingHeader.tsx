@@ -339,7 +339,7 @@ const LandingHeader = () => {
               >
                 {[
                   { href: '/discover', label: 'Discover', icon: '🔍' },
-                  { href: '/', label: 'Testimonials', icon: '💬' },
+                  { href: '/events', label: 'Events', icon: '⚡' },
                   { href: '/clubs', label: 'Clubs', icon: '👥' },
                   { href: '/contact', label: 'Contact', icon: '📧' }
                 ].map((item, index) => (
