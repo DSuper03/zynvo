@@ -245,11 +245,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     if (createEvent.status === 201 || createEvent.status === 200  ) {
       toast('Event registered , start marketing now!!!');
       setIsSubmitting(false);
-      setIsModalOpen(false)
+      onClose();
     } else {
       toast(createEvent.data.msg);
       setIsSubmitting(false);
-      setIsModalOpen(false)
+      onClose();
     }
   };
  

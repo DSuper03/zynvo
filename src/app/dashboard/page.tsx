@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { AuroraText } from '@/components/magicui/aurora-text';
+import CompleteProfileModal from '@/components/modals/CompleteProfileModal';
 import { Badge } from '@/components/ui/badge';
 import {
   HoverCard,
@@ -926,7 +927,7 @@ export default function ZynvoDashboard() {
                 </div>
                 
                 {/* Complete Profile Button - Contextually placed */}
-                {(!userData.course || !userData.year || !userData.collegeName) && (
+                {  (
                   <div className="mt-3">
                     <Button
                       onClick={() => setShowProfileModal(true)}
@@ -1370,137 +1371,16 @@ export default function ZynvoDashboard() {
         </Button>
       </div>
 
-      {/* Complete Profile Modal - Mobile Responsive */}
-      {showProfileModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-          <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto mx-2 sm:mx-4">
-            <div className="flex justify-between items-center p-8 sm:p-4 md:p-6 border-b border-gray-700 sticky top-0 bg-gray-900 z-10">
-              <h2 className="text-base sm:text-lg md:text-xl font-bold text-white  top-20">
-                Complete Your Profile
-              </h2>
-              <Button
-                onClick={() => setShowProfileModal(false)}
-                className="text-gray-400 hover:text-white transition-colors p-1 sm:p-2"
-              >
-                <X className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-              </Button>
-            </div>
-
-            <form onSubmit={handleProfileFormSubmit} className="p-4 sm:p-6">
-              <div className="mb-4 sm:mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Bio
-                </label>
-                <textarea
-                  name="bio"
-                  value={profileForm.bio}
-                  onChange={handleProfileFormChange}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm sm:text-base"
-                  rows={3}
-                  placeholder="Tell us about yourself..."
-                />
-              </div>
-
-              <div className="mb-4 sm:mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Twitter
-                </label>
-                <textarea
-                  name="twitter"
-                  value={profileForm.twitter}
-                  onChange={handleProfileFormChange}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm sm:text-base"
-                  rows={3}
-                  placeholder="paste full link or with @"
-                />
-              </div>
-
-              <div className="mb-4 sm:mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  LinkedIn
-                </label>
-                <textarea
-                  name="linkedin"
-                  value={profileForm.linkedin}
-                  onChange={handleProfileFormChange}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm sm:text-base"
-                  rows={3}
-                  placeholder="paste full link or with @"
-                />
-              </div>
-
-
-              <div className="mb-4 sm:mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Instagram
-                </label>
-                <textarea
-                  name="instagram"
-                  value={profileForm.instagram}
-                  onChange={handleProfileFormChange}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm sm:text-base"
-                  rows={3}
-                  placeholder="paste full link or with @"
-                />
-              </div>
-
-
-              <div className="mb-4 sm:mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Course
-                </label>
-                <input
-                  type="text"
-                  name="course"
-                  value={profileForm.course}
-                  onChange={handleProfileFormChange}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm sm:text-base"
-                  placeholder="e.g. Computer Science"
-                />
-              </div>
-
-              <div className="mb-4 sm:mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Year
-                </label>
-                <input
-                  type="text"
-                  name="year"
-                  value={profileForm.year}
-                  onChange={handleProfileFormChange}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm sm:text-base"
-                  placeholder="e.g. 2025"
-                />
-              </div>
-
-              {/* Fix: Use only one TagSelector component */}
-              <TagSelector
-                selectedTags={selectedPredefinedTags}
-                onTagsChange={setSelectedPredefinedTags}
-                profileForm={profileForm}
-                handleProfileFormChange={handleProfileFormChange}
-              />
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  type="button"
-                  variant={'destructive'}
-                  onClick={() => setShowProfileModal(false)}
-                  className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-red-700 transition-colors text-sm sm:text-base"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  className="flex-1 px-4 py-2 bg-yellow-400 text-gray-900 rounded-md hover:bg-yellow-500 transition-colors font-medium text-sm sm:text-base"
-                >
-                  Save Profile
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Complete Profile Modal */}
+      <CompleteProfileModal
+        open={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        profileForm={profileForm}
+        onChange={handleProfileFormChange}
+        onSubmit={handleProfileFormSubmit}
+        selectedPredefinedTags={selectedPredefinedTags}
+        onTagsChange={setSelectedPredefinedTags}
+      />
 
       {/* Skills Modal */}
       <SkillsModal

@@ -38,6 +38,7 @@ export default function Feed() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
   // Slider events data
   const sliderEvents = [
@@ -352,9 +353,35 @@ export default function Feed() {
                       <h3 className="text-xl font-semibold text-yellow-400 mb-2">
                         {post.title}
                       </h3>
-                      <p className="text-gray-300 leading-relaxed mb-4">
-                        {post.description}
-                      </p>
+                      {(() => {
+                        const maxChars = 220;
+                        const isExpanded = expandedPosts.has(post.id);
+                        const needsTruncate = (post.description || '').length > maxChars;
+                        const visible = !needsTruncate || isExpanded
+                          ? post.description
+                          : `${post.description.slice(0, maxChars)}...`;
+                        return (
+                          <div className="text-gray-300 leading-relaxed mb-4">
+                            <span>{visible}</span>
+                            {needsTruncate && (
+                              <button
+                                type="button"
+                                className="ml-2 text-yellow-400 hover:text-yellow-300 text-sm underline-offset-2 hover:underline"
+                                onClick={() => {
+                                  setExpandedPosts((prev) => {
+                                    const next = new Set(prev);
+                                    if (isExpanded) next.delete(post.id);
+                                    else next.add(post.id);
+                                    return next;
+                                  });
+                                }}
+                              >
+                                {isExpanded ? 'Show less' : 'Read more'}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })()}
 
                       {/* Post Image */}
                       {post.image && (

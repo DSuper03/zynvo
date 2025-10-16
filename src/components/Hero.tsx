@@ -91,7 +91,7 @@ const Hero = () => {
             transition={{ duration: 0.8, delay: 0.8 }}
             className="pt-4 sm:pt-6 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6"
           >
-            <Link href={getRoute()} className="inline-block">
+            <Link href="/auth/signin" className="inline-block">
               <WrapButton className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 shadow-lg hover:shadow-yellow-500/25">
                 Zync It Now
               </WrapButton>

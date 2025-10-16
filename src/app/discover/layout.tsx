@@ -42,14 +42,15 @@ export default function RootLayout({
       {isMobileView && (
         <Button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="fixed top-4 left-4 z-50 p-2 size-10 bg-gray-800 rounded-md text-white"
-          aria-label="Toggle menu"
+          className={`${
+            isMobileMenuOpen
+              ? 'bg-black/80 text-yellow-400 border border-yellow-400/30'
+              : 'bg-gradient-to-br from-yellow-400 to-yellow-500 text-gray-900 border border-yellow-300/40'
+          } fixed top-4 left-4 z-50 h-12 w-12 rounded-full shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200 backdrop-blur-sm`}
+          aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+          aria-pressed={isMobileMenuOpen}
         >
-          {isMobileMenuOpen ? (
-            <X size={60} color="#e1d71f" strokeWidth={6} />
-          ) : (
-            <Menu size={60} color="#dc6c72fe" />
-          )}
+          {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </Button>
       )}
 
