@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 import dotenv from 'dotenv';
 import './responsive.css';
 import NoTokenModal from '@/components/modals/remindModal';
+import { useRouter } from 'next/navigation';
 
 dotenv.config();
 
@@ -79,7 +80,6 @@ const categories = [
   { id: 'literary', name: '🧠 Literature' },
   { id: 'design', name: '🎨 Design' },
 ];
-
 const ClubsPage = () => {
   const [activetype, setActivetype] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -99,7 +99,8 @@ const ClubsPage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [userJoinedClubIds, setUserJoinedClubIds] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
-
+  
+  const router = useRouter()
   const handleShareClub = async (club: { id: string; name: string; description?: string }) => {
     try {
       const url = typeof window !== 'undefined' ? `${window.location.origin}/clubs/${club.id}` : `https://zynvo.com/clubs/${club.id}`;
@@ -138,7 +139,12 @@ const ClubsPage = () => {
         return;
       }
       if (session !== 'true') {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         setIsOpen(true);
         return;
       }

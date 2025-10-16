@@ -23,6 +23,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { uploadImageDirectly } from '@/lib/imgkit';
 import { fetchClubsByCollege } from '@/app/api/hooks/useClubs';
+import { useRouter } from 'next/navigation';
 
 dotenv.config();
 
@@ -48,16 +49,27 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const [imageLink, setImageLink] = useState<string>('');
   const [title, setTitle] = useState('');
   // removed duplicate effect
+  const router = useRouter();
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       else {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
     }

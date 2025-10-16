@@ -83,7 +83,6 @@ export interface ApiResponse {
 }
 
 // Add these new components and styles to your dashboard
-
 // LEGO-like Skills Component
 const LegoSkillBlock = ({
   skill,
@@ -104,7 +103,7 @@ const LegoSkillBlock = ({
     'bg-indigo-500 hover:bg-indigo-400',
     'bg-teal-500 hover:bg-teal-400',
   ];
-
+  
   return (
     <div
       onClick={onClick}
@@ -577,16 +576,26 @@ export default function ZynvoDashboard() {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       else {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => navigate.push('/auth/signin'),
+          },
+        });
         return;
       }
 
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => navigate.push('/auth/signin'),
+          },
+        });
         return;
       }
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     setIsClient(true);
@@ -709,7 +718,12 @@ export default function ZynvoDashboard() {
   const handleProfileFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
-      toast('login please');
+       toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => navigate.push('/auth/signin'),
+          },
+        });
       return;
     }
 

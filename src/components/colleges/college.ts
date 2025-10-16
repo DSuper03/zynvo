@@ -4,6 +4,19 @@ export const collegesWithClubs = [
     State: 'Tamil nadu',
   },
   {
+    college: 'Bethune College, Kolkata, West Bengal',
+    State: 'West Bengal',
+  },
+  {
+    college: 'St. Xavier\'s College, Kolkata, West Bengal',
+    State: 'West Bengal',
+  },
+  {
+    college: 'University of Calcutta, Kolkata, West Bengal',
+    State: 'West Bengal',
+  },
+  
+  {
     college: 'College of Engineering, Anna University, Tamil nadu',
     State: 'Tamil nadu',
   },

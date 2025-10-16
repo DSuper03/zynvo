@@ -20,11 +20,21 @@ export default function FeedbackForm() {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       else {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
     }
@@ -103,7 +113,12 @@ export default function FeedbackForm() {
 
     try {
       if (!token) {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
 

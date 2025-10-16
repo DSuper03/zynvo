@@ -11,6 +11,7 @@ import {
   User,
   Building,
   Users,
+  X,
 } from 'lucide-react';
 import CreatePostButton from './components/CreatePostButton';
 import CreatePostModal from './components/CreatePostModal';
@@ -39,6 +40,10 @@ export default function Feed() {
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
+  
+  // Image modal state
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string } | null>(null);
 
   // Slider events data
   const sliderEvents = [
@@ -86,6 +91,36 @@ export default function Feed() {
     if (diffInDays < 7) return `${diffInDays}d ago`;
     return formatDate(date);
   };
+
+  // Function to handle image modal
+  const handleImageClick = (src: string, alt: string) => {
+    setSelectedImage({ src, alt });
+    setIsImageModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setIsImageModalOpen(false);
+    setSelectedImage(null);
+  };
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isImageModalOpen) {
+        closeImageModal();
+      }
+    };
+
+    if (isImageModalOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isImageModalOpen]);
 
   // Function to handle post sharing
   const handleSharePost = async (postId: string, postTitle: string) => {
@@ -316,9 +351,11 @@ export default function Feed() {
                     <div className="flex items-center gap-3 mb-4">
                       <div className="relative w-10 h-10">
                         {post.author.profileAvatar ? (
-                          <img
+                          <Image
                             src={post.author.profileAvatar}
                             alt={post.author.name || 'User'}
+                            width={40}
+                            height={40}
                             className="rounded-full object-cover"
                           />
                         ) : (
@@ -386,7 +423,10 @@ export default function Feed() {
                       {/* Post Image */}
                       {post.image && (
                         <div className="relative w-full max-w-2xl mx-auto mb-4">
-                          <div className="aspect-video bg-gray-700 rounded-lg overflow-hidden">
+                          <div 
+                            className="aspect-video bg-gray-700 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => post.image && handleImageClick(post.image, post.title)}
+                          >
                             <Image
                               src={post.image}
                               alt={post.title}
@@ -520,6 +560,39 @@ export default function Feed() {
         isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
       />
+
+      {/* Image Modal */}
+      {isImageModalOpen && selectedImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 p-4">
+          <div className="relative max-w-7xl max-h-full w-full h-full flex items-center justify-center">
+            {/* Close Button */}
+            <Button
+              onClick={closeImageModal}
+              className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white border border-gray-600 hover:border-gray-500 rounded-full p-2 transition-all duration-200"
+            >
+              <X className="w-6 h-6" />
+            </Button>
+            
+            {/* Image Container */}
+            <div className="relative w-full h-full flex items-center justify-center">
+              <Image
+                src={selectedImage.src}
+                alt={selectedImage.alt}
+                width={1200}
+                height={800}
+                className="max-w-full max-h-full object-contain rounded-lg"
+                priority
+              />
+            </div>
+            
+            {/* Click outside to close */}
+            <div 
+              className="absolute inset-0 -z-10"
+              onClick={closeImageModal}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -49,7 +49,7 @@ import {
 } from 'lucide-react';
 import JoinClubModal from '../joinclub';
 import CreateEventModal from '../../events/components/EventCreationModel';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import {
   ClubPageProps,
@@ -98,7 +98,7 @@ import { Button } from '@/components/ui/button';
 export default function ClubPage({}: ClubPageProps) {
   const param = useParams();
   const id = param.id as string;
-
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'announcements' | 'events' | 'members'>('announcements');
   const [isJoined, setIsJoined] = useState(false);
   const [club, setClub] = useState<ClubTypeProps>({
@@ -152,7 +152,12 @@ export default function ClubPage({}: ClubPageProps) {
         return;
       }
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
     }
@@ -161,7 +166,12 @@ export default function ClubPage({}: ClubPageProps) {
   useEffect(() => {
     async function call() {
       if (!token) {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
       

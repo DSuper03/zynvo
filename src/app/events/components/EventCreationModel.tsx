@@ -34,6 +34,7 @@ import axios from 'axios';
 import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
 import { stringify } from 'querystring';
+import { useRouter } from 'next/navigation';
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -67,6 +68,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     contactEmail: '',
     contactPhone: '',
   });
+  const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -77,7 +79,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     const tok = localStorage.getItem('token');
     if (tok) setToken(tok);
     else {
-      toast('login please');
+       toast('Login required', {
+          action: {
+            
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
       setIsModalOpen(true);
       return;
     }
