@@ -58,7 +58,7 @@ export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
         return;
       }
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (!token) {
