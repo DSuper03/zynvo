@@ -8,13 +8,15 @@ import { Button } from '@/components/ui/button';
 import EventBadgeCard from '@/components/ticket';
 import * as htmlToImage from 'html-to-image';
 import Image from 'next/image';
-import { AuroraText } from '@/components/magicui/aurora-text';
+
 import { Badge } from '@/components/ui/badge';
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
+import { FaRestroom, FaUserGraduate } from 'react-icons/fa';
+import TextWithLinks from '@/components/TextWithLinks';
 
 // Define interfaces for better type checking
 interface Event {
@@ -181,7 +183,12 @@ export default function PublicUserProfile() {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
     }
@@ -484,6 +491,10 @@ export default function PublicUserProfile() {
                     : 'Recently'}
                 </span>
               </div>
+              <div className="flex items-center gap-2">
+                <FaUserGraduate className="w-4 h-4 text-yellow-400" />
+                <span>{(userData.clubName && userData.clubName.trim()) || 'zynvo community fresher'}</span>
+              </div>
               {userData.collegeName && (
                 <div className="text-gray-300">{userData.collegeName}</div>
               )}
@@ -623,8 +634,8 @@ export default function PublicUserProfile() {
                   </div>
 
                   <p className="text-gray-300 text-sm mb-3 leading-relaxed">
-                    {post.description ||
-                      'No description available for this post.'}
+                    <TextWithLinks text={post.description ||
+                      'No description available for this post.'} />
                   </p>
 
                   <div className="flex justify-between items-center pt-2 border-t border-gray-800">

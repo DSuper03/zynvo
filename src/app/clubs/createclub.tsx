@@ -9,11 +9,13 @@ import { Button } from '@/components/ui/button';
 import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
 import axios from 'axios';
 import { fetchClubsByCollege } from '@/app/api/hooks/useClubs';
+import { useRouter } from 'next/navigation';
 
 const CreateClubModal: React.FC<CreateClubModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const router = useRouter();
   const [img, setImg] = useState<File | null>(null);
   const [clubData, setClubData] = useState({
     name: '',
@@ -43,15 +45,25 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       else {
-        toast('login please');
+        toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('login please');
+        toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
     }
-  }, []);
+  }, [router]);
 
   // Fetch user's college and existing clubs
   useEffect(() => {
@@ -197,7 +209,12 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     }
 
     if (!token) {
-      toast('login please');
+      toast('Login required', {
+        action: {
+          label: 'Sign in',
+          onClick: () => router.push('/auth/signin'),
+        },
+      });
       return;
     }
 

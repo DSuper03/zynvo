@@ -61,7 +61,12 @@ const Eventid = () => {
       const storedToken = localStorage.getItem('token');
       setToken(storedToken);
       if (sessionStorage.getItem('activeSession') !== 'true') {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       } else {
         setSignedin(true);

@@ -34,6 +34,7 @@ import axios from 'axios';
 import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
 import { stringify } from 'querystring';
+import { useRouter } from 'next/navigation';
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -67,6 +68,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     contactEmail: '',
     contactPhone: '',
   });
+  const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -77,7 +79,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     const tok = localStorage.getItem('token');
     if (tok) setToken(tok);
     else {
-      toast('login please');
+       toast('Login required', {
+          action: {
+            
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
       setIsModalOpen(true);
       return;
     }
@@ -245,11 +253,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     if (createEvent.status === 201 || createEvent.status === 200  ) {
       toast('Event registered , start marketing now!!!');
       setIsSubmitting(false);
-      setIsModalOpen(false)
+      onClose();
     } else {
       toast(createEvent.data.msg);
       setIsSubmitting(false);
-      setIsModalOpen(false)
+      onClose();
     }
   };
  
@@ -310,7 +318,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
 
           {/* Modal Body - Form Steps */}
-          <div className="px-6 py-4 max-h-[60vh] overflow-y-auto scrollbar-hide">
+          <form id="event-creation-form" onSubmit={(e) => { e.preventDefault(); if (step === 4) handleSubmit(); }} className="px-6 py-4 max-h-[60vh] overflow-y-auto scrollbar-hide">
             {/* Step 1: Basic Info */}
             {step === 1 && (
               <div className="space-y-6">
@@ -966,7 +974,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                 </div>
               </div>
             )}
-          </div>
+          </form>
 
           {/* Modal Footer */}
           <div className="sticky bottom-0 bg-gray-900 border-t border-yellow-500/30 p-4 flex justify-between">
@@ -1000,8 +1008,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
               </Button>
             ) : (
               <Button
-                type="button"
-                onClick={handleSubmit}
+                type="submit"
+                form="event-creation-form"
                 disabled={isSubmitting}
                 className={`px-6 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 transition-colors ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
                   }`}

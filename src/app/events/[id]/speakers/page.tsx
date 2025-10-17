@@ -10,7 +10,7 @@ import {
 } from 'react-icons/fa';
 import Image from 'next/legacy/image';
 import axios from 'axios';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import dotenv from 'dotenv';
 import { Button } from '@/components/ui/button';
@@ -53,7 +53,7 @@ const Speakers = () => {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
   };
-
+const router = useRouter();
   const [speakers, setSpeakers] = useState<speakers[]>([]);
   const [founder, setFounder] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,7 +73,12 @@ const Speakers = () => {
       const storedToken = localStorage.getItem('token');
       setToken(storedToken);
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
     }

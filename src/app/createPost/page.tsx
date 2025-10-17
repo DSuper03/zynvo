@@ -215,7 +215,7 @@ export default function CreatePostModal() {
         </div>
 
         {/* Post creation area */}
-        <div className="p-6 space-y-6">
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(e); }} className="p-6 space-y-6">
           {/* Post content textarea */}
           <div>
             <textarea
@@ -438,21 +438,20 @@ export default function CreatePostModal() {
             {/* Submit button */}
             <div className="text-right">
               <Button
-                type="button"
+                type="submit"
                 disabled={
                   !postText.trim() ||
                   !selectedClub ||
                   !selectedCollege ||
                   isLoading
                 }
-                onClick={handleSubmit}
                 className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Posting...' : 'Post Zynvo'}
               </Button>
             </div>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

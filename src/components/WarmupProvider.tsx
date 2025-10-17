@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 interface UserData {
   name: string | null;
@@ -39,6 +40,7 @@ export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
     name: null,
     profileAvatar: null,
   });
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
 
@@ -47,11 +49,16 @@ export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
       const storedToken = localStorage.getItem('token');
       setToken(storedToken);
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (!token) {

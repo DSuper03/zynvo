@@ -7,6 +7,7 @@ import { JoinClubModalProps } from '@/types/global-Interface';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 const JoinClubModal: React.FC<JoinClubModalProps> = ({
   isOpen,
@@ -19,13 +20,18 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
     motivation: '',
   });
   const [token, setToken] = useState<string | null>('');
-
+  const router = useRouter();
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
       setToken(storedToken);
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
     }
@@ -46,7 +52,12 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
-      toast('login please');
+       toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
       return;
     }
     const res = await axios.post<{ msg: string }>(
