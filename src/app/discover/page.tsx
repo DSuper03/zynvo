@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { AuroraText } from '@/components/magicui/aurora-text';
 import { toast } from 'sonner';
+import TextWithLinks from '@/components/TextWithLinks';
 
 interface ApiResponse {
   msg: string;
@@ -121,6 +122,7 @@ export default function Feed() {
       document.body.style.overflow = 'unset';
     };
   }, [isImageModalOpen]);
+
 
   // Function to handle post sharing
   const handleSharePost = async (postId: string, postTitle: string) => {
@@ -399,7 +401,7 @@ export default function Feed() {
                           : `${post.description.slice(0, maxChars)}...`;
                         return (
                           <div className="text-gray-300 leading-relaxed mb-4">
-                            <span>{visible}</span>
+                            <TextWithLinks text={visible} />
                             {needsTruncate && (
                               <button
                                 type="button"

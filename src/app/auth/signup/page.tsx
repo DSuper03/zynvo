@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
@@ -36,6 +36,7 @@ export default function SignUp() {
     avatarUrl: '',
   });
   const [agreeToTerms, setAgree] = useState(false);
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
   // NEW: password error + validator
   const [passwordError, setPasswordError] = useState<string>('');
@@ -70,12 +71,12 @@ export default function SignUp() {
   };
 
   // Handle avatar URL change
-  const handleAvatarChange = (url: string) => {
+  const handleAvatarChange = useCallback((url: string) => {
     setFormData((prev) => ({
       ...prev,
       avatarUrl: url,
     }));
-  };
+  }, []);
 
   const handleNextStep = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -93,16 +94,28 @@ export default function SignUp() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const msg = await axios.post<signupRes>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
-      formData
-    );
-    if (!msg) {
-      toast('Internal server error please try again later');
-    }
-    if (msg.data.msg == 'account created') {
-      toast('Account created, lets get you verified');
-      router.push('/Verify');
+    setIsCreatingAccount(true);
+    
+    try {
+      const msg = await axios.post<signupRes>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
+        formData
+      );
+      
+      if (!msg) {
+        toast('Internal server error please try again later');
+        return;
+      }
+      
+      if (msg.data.msg == 'account created') {
+        toast('Account created, lets get you verified');
+        router.push('/Verify');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      toast('Failed to create account. Please try again.');
+    } finally {
+      setIsCreatingAccount(false);
     }
   };
 
@@ -225,11 +238,11 @@ export default function SignUp() {
                 </div>
 
                 {/* Sign-Up Form Step 1 */}
-                <form onSubmit={handleNextStep}>
-                  <div className="mb-4">
+                <form onSubmit={handleNextStep} className="space-y-6">
+                  <div className="space-y-2">
                     <label
                       htmlFor="name"
-                      className="block text-gray-300 text-sm font-medium mb-2"
+                      className="block text-gray-300 text-sm font-medium"
                     >
                       Full Name
                     </label>
@@ -241,7 +254,7 @@ export default function SignUp() {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                        className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
                         placeholder="Aditya Kashyap"
                         required
                       />
@@ -254,10 +267,10 @@ export default function SignUp() {
                     onAvatarChange={handleAvatarChange}
                   />
 
-                  <div className="mb-4">
+                  <div className="space-y-2">
                     <label
                       htmlFor="email"
-                      className="block text-gray-300 text-sm font-medium mb-2"
+                      className="block text-gray-300 text-sm font-medium"
                     >
                       Email
                     </label>
@@ -269,17 +282,17 @@ export default function SignUp() {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                        className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
                         placeholder="your@email.com"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="mb-6">
+                  <div className="space-y-2">
                     <label
                       htmlFor="password"
-                      className="block text-gray-300 text-sm font-medium mb-2"
+                      className="block text-gray-300 text-sm font-medium"
                     >
                       Password
                     </label>
@@ -291,7 +304,7 @@ export default function SignUp() {
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
-                        className={`bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 ${
+                        className={`bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 ${
                           passwordError
                             ? 'focus:ring-red-500'
                             : 'focus:ring-yellow-500'
@@ -306,7 +319,7 @@ export default function SignUp() {
                       />
                       <Button
                         type="button"
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? <FiEyeOff /> : <FiEye />}
@@ -314,13 +327,13 @@ export default function SignUp() {
                     </div>
                     <p
                       id="password-help"
-                      className="text-gray-400 text-xs mt-2"
+                      className="text-gray-400 text-xs"
                     >
                       Password must be at least 8 characters long and include
                       uppercase, lowercase, and a number.
                     </p>
                     {passwordError && (
-                      <p className="text-red-400 text-xs mt-2">
+                      <p className="text-red-400 text-xs">
                         {passwordError}
                       </p>
                     )}
@@ -341,28 +354,26 @@ export default function SignUp() {
 
             {/* Step 2: Profile Information */}
             {currentStep === 2 && (
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <div className="mb-4">
-                    <label
-                      htmlFor="collegeName"
-                      className="block text-gray-300 text-sm font-medium mb-2"
-                    >
-                      College/University Name
-                    </label>
-                    <CollegeSearchSelect
-                      colleges={collegesWithClubs.sort((a, b) => a.college.localeCompare(b.college))}
-                      value={formData.collegeName}
-                      onChange={(value) =>
-                        setFormData((prev) => ({ ...prev, collegeName: value }))
-                      }
-                      placeholder="Search and select your college/university"
-                      required
-                    />
-                  </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="collegeName"
+                    className="block text-gray-300 text-sm font-medium"
+                  >
+                    College/University Name
+                  </label>
+                  <CollegeSearchSelect
+                    colleges={collegesWithClubs.sort((a, b) => a.college.localeCompare(b.college))}
+                    value={formData.collegeName}
+                    onChange={(value) =>
+                      setFormData((prev) => ({ ...prev, collegeName: value }))
+                    }
+                    placeholder="Search and select your college/university"
+                    required
+                  />
                 </div>
 
-                <div className="flex items-center mb-6">
+                <div className="flex items-start space-x-3">
                   <input
                     type="checkbox"
                     id="agreeToTerms"
@@ -371,24 +382,24 @@ export default function SignUp() {
                     onChange={() => {
                       setAgree(true);
                     }}
-                    className="h-4 w-4 rounded border-gray-700 bg-gray-800 text-yellow-500 focus:ring-yellow-500"
+                    className="h-4 w-4 rounded border-gray-700 bg-gray-800 text-yellow-500 focus:ring-yellow-500 mt-0.5"
                     required
                   />
                   <label
                     htmlFor="agreeToTerms"
-                    className="ml-2 block text-sm text-gray-300"
+                    className="text-sm text-gray-300 leading-relaxed"
                   >
                     I agree to Zynvo&#39;s{' '}
                     <Link
                       href="/terms"
-                      className="text-yellow-500 hover:text-yellow-400"
+                      className="text-yellow-500 hover:text-yellow-400 transition-colors"
                     >
                       Terms of Service
                     </Link>{' '}
                     and{' '}
                     <Link
                       href="/privacy"
-                      className="text-yellow-500 hover:text-yellow-400"
+                      className="text-yellow-500 hover:text-yellow-400 transition-colors"
                     >
                       Privacy Policy
                     </Link>
@@ -396,22 +407,37 @@ export default function SignUp() {
                 </div>
 
                 <div className="flex space-x-4">
-                  <Button
+                  <motion.button
                     type="button"
                     onClick={() => setCurrentStep(1)}
-                    className="flex-1 py-3 px-4 rounded-lg border border-gray-700 text-white hover:bg-gray-800 transition"
+                    className="flex-1 py-3 px-4 rounded-lg border border-gray-700 text-white hover:bg-gray-800 transition duration-300 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileTap={{ scale: 0.98 }}
+                    disabled={isCreatingAccount}
                   >
                     Back
-                  </Button>
+                  </motion.button>
 
                   <motion.button
                     type="submit"
-                    className="flex-1 flex items-center justify-center py-3 px-4 rounded-lg bg-yellow-500 text-black font-medium hover:bg-yellow-400 transition duration-300 transform hover:-translate-y-1"
-                    whileTap={{ scale: 0.98 }}
-                    disabled={!agreeToTerms}
+                    className={`flex-1 flex items-center justify-center py-3 px-4 rounded-lg font-medium transition duration-300 transform hover:-translate-y-1 ${
+                      isCreatingAccount || !agreeToTerms
+                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                        : 'bg-yellow-500 text-black hover:bg-yellow-400'
+                    }`}
+                    whileTap={{ scale: isCreatingAccount ? 1 : 0.98 }}
+                    disabled={!agreeToTerms || isCreatingAccount}
                   >
-                    <span>Create Account</span>
-                    <FiArrowRight className="ml-2" />
+                    {isCreatingAccount ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent mr-2"></div>
+                        <span>Account creating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Create Account</span>
+                        <FiArrowRight className="ml-2" />
+                      </>
+                    )}
                   </motion.button>
                 </div>
               </form>

@@ -27,6 +27,7 @@ import { FaSchool } from 'react-icons/fa';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import EventBadgeCard from '@/components/ticket';
 import * as htmlToImage from 'html-to-image';
+import TextWithLinks from '@/components/TextWithLinks';
 
 interface Event {
   EventName: string;
@@ -1198,8 +1199,8 @@ export default function ZynvoDashboard() {
                                 </div>
                                 <h4 className="text-gray-200 font-medium text-xs sm:text-sm truncate leading-relaxed">
                                   {post.description?.length > 50
-                                    ? post.description.slice(0, 50) + '...'
-                                    : post.description || 'Untitled Post'}
+                                    ? <TextWithLinks text={post.description.slice(0, 50) + '...'} />
+                                    : <TextWithLinks text={post.description || 'Untitled Post'} />}
                                 </h4>
                               </div>
                             </div>

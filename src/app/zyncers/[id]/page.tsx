@@ -16,6 +16,7 @@ import {
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
 import { FaRestroom, FaUserGraduate } from 'react-icons/fa';
+import TextWithLinks from '@/components/TextWithLinks';
 
 // Define interfaces for better type checking
 interface Event {
@@ -633,8 +634,8 @@ export default function PublicUserProfile() {
                   </div>
 
                   <p className="text-gray-300 text-sm mb-3 leading-relaxed">
-                    {post.description ||
-                      'No description available for this post.'}
+                    <TextWithLinks text={post.description ||
+                      'No description available for this post.'} />
                   </p>
 
                   <div className="flex justify-between items-center pt-2 border-t border-gray-800">
