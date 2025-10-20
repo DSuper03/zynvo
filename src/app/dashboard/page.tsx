@@ -810,7 +810,7 @@ export default function ZynvoDashboard() {
     try {
       setSelectedEventId(eventId);
       const safeId = encodeURIComponent(eventId);
-      const url = `/api/proxy/events/event-details?id=${safeId}`;
+      const url = `/api/events/event-details?id=${safeId}`;
       const headers: Record<string, string> = {};
       if (typeof window !== 'undefined') {
         const tok = localStorage.getItem('token');
