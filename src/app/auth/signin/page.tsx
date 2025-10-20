@@ -27,8 +27,6 @@ export default function SignIn() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: 'zynvo',
-    collegeName: 'zynvo college',
     email: '',
     password: '',
   });
