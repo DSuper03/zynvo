@@ -3490,6 +3490,11 @@ export const collegesWithClubs = [
     State: 'West Bengal',
   },
   {
+    college:'West Bengal University of Animal & Fishery Science, Kolkata',
+    State: 'West Bengal',
+  },
+  {
+
     college: 'Cooch Behar Government Engineering College',
     State: 'West Bengal',
   },
