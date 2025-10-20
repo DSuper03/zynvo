@@ -27,8 +27,6 @@ export default function SignIn() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: 'zynvo',
-    collegeName: 'zynvo college',
     email: '',
     password: '',
   });
@@ -54,7 +52,7 @@ export default function SignIn() {
     setLoading(true);
     setTimeout(async () => {
       const msg = await axios.post<signinRes>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/login`,
         formData
       );
       setLoading(false);
