@@ -3480,4 +3480,12 @@ export const collegesWithClubs = [
     college: 'Indian Institute of Information Technology Una',
     State: 'Himachal Pradesh',
   },
+  {
+    college:"Scottish Church College, Kolkata",
+    State: 'West Bengal',
+  },
+  {
+    college:"RCC Institute of Information Technology, Kolkata",
+    State: 'West Bengal',
+  }
 ];
