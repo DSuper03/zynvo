@@ -8,6 +8,10 @@ export const collegesWithClubs = [
     State: 'West Bengal',
   },
   {
+    college:'MCKV Institute of Engineering, Kolkata, West Bengal',
+    State: 'West Bengal',
+  },
+  {
     college: 'St. Xavier\'s College, Kolkata, West Bengal',
     State: 'West Bengal',
   },
@@ -3094,7 +3098,7 @@ export const collegesWithClubs = [
   },
   {
     college:
-      'Government College of Engineering and Leather Technology, Kolkata',
+      'Government College of Engineering and Leather Technology(GCELT), Kolkata',
     State: 'West Bengal',
   },
   {
@@ -3480,12 +3484,85 @@ export const collegesWithClubs = [
     college: 'Indian Institute of Information Technology Una',
     State: 'Himachal Pradesh',
   },
+  // Additional West Bengal Engineering Colleges
   {
-    college:"Scottish Church College, Kolkata",
+    college: 'Indian Institute of Engineering Science and Technology (IIEST), Shibpur',
     State: 'West Bengal',
   },
   {
-    college:"RCC Institute of Information Technology, Kolkata",
+    college:'West Bengal University of Animal & Fishery Science, Kolkata',
     State: 'West Bengal',
-  }
+    
+  },
+  {
+    college: "MJP Rohilkhand University, Bareilly",
+    State: "Uttar Pradesh"
+  },
+  {
+
+    college: 'Cooch Behar Government Engineering College',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Government College of Engineering and Textile Technology, Berhampore',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Hooghly Engineering & Technology College',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Academy of Technology (AOT), Adisaptagram',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Abacus Institute of Engineering and Management, Hooghly',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Dumkal Institute of Engineering & Technology',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Durgapur Institute of Advanced Technology and Management',
+    State: 'West Bengal',
+  },
+  // West Bengal Medical Colleges
+  {
+    college: 'Bankura Sammilani Medical College',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Burdwan Medical College',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Midnapore Medical College',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Malda Medical College',
+    State: 'West Bengal',
+  },
+  {
+    college: 'North Bengal Medical College, Siliguri',
+    State: 'West Bengal',
+  },
+  // West Bengal Arts/Science/Commerce Colleges
+  {
+    college: 'Scottish Church College, Kolkata',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Ramakrishna Mission Residential College, Narendrapur',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Presidency University, Kolkata',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Loreto College, Kolkata',
+    State: 'West Bengal',
+  },
 ];
