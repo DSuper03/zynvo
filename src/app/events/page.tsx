@@ -9,6 +9,9 @@ import CreateEventButton from './components/createEventButton';
 import CreateEventModal from './components/EventCreationModel';
 import EventCard from './components/EventCard';
 import { Button } from '@/components/ui/button';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 
 interface apiRespEvents {
@@ -91,6 +94,8 @@ export default function ZynvoEventsPage() {
   const [userAttendedEventIds, setUserAttendedEventIds] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [token, setToken] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
 
   // Fetch token on component mount
   useEffect(() => {
@@ -193,6 +198,19 @@ export default function ZynvoEventsPage() {
     return userAttendedEventIds.includes(event.id);
   };
 
+  // Helper function to get events for a specific date
+  const getEventsForDate = (date: Date): eventData[] => {
+    if (!events) return [];
+    
+    const targetDate = date.toISOString().split('T')[0]; // Get YYYY-MM-DD format
+    
+    return events.filter(event => {
+      if (!event.endDate) return false;
+      const eventDate = new Date(event.endDate).toISOString().split('T')[0];
+      return eventDate === targetDate;
+    });
+  };
+
   // Replace the filteredEvents computation with name-only search
   const filteredEvents = (events || []).filter((event) => {
     if (!event?.EventName) return false;
@@ -250,12 +268,24 @@ export default function ZynvoEventsPage() {
           )}
         </div>
 
-        {/* Create Event Button */}
+        {/* Create Event Button and Check Event Dates Button */}
         <div className="flex justify-between items-center mb-8">
           {isLoading ? (
-            <div className="h-10 w-32 bg-gray-800 rounded animate-pulse" />
+            <div className="flex gap-4">
+              <div className="h-10 w-32 bg-gray-800 rounded animate-pulse" />
+              <div className="h-10 w-40 bg-gray-800 rounded animate-pulse" />
+            </div>
           ) : (
-            <CreateEventButton onClick={() => setIsModalOpen(true)} />
+            <div className="flex gap-4">
+              <CreateEventButton onClick={() => setIsModalOpen(true)} />
+              <Button
+                onClick={() => setIsCalendarModalOpen(true)}
+                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <Calendar className="w-4 h-4" />
+                Check Event Dates
+              </Button>
+            </div>
           )}
         </div>
 
@@ -264,6 +294,126 @@ export default function ZynvoEventsPage() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
         />
+
+        {/* Calendar Modal */}
+        {isCalendarModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Event Calendar
+                </h2>
+                <Button
+                  onClick={() => setIsCalendarModalOpen(false)}
+                  className="text-gray-400 hover:text-white hover:bg-gray-700 p-2 rounded-lg"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <div className="mb-6">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  className="rounded-md border-0 bg-transparent"
+                  classNames={{
+                    day: "text-white hover:bg-gray-700",
+                    day_selected: "bg-yellow-500 text-black hover:bg-yellow-400",
+                    day_today: "bg-gray-700 text-white",
+                    day_outside: "text-gray-500",
+                    day_disabled: "text-gray-600",
+                    day_range_middle: "bg-gray-600 text-white",
+                    day_range_start: "bg-yellow-500 text-black",
+                    day_range_end: "bg-yellow-500 text-black",
+                    caption: "text-white",
+                    caption_label: "text-white",
+                    nav_button: "text-white hover:bg-gray-700",
+                    nav_button_previous: "text-white hover:bg-gray-700",
+                    nav_button_next: "text-white hover:bg-gray-700",
+                    table: "text-white",
+                    head_row: "text-white",
+                    head_cell: "text-gray-300",
+                    row: "text-white",
+                    cell: "text-white",
+                    button: "text-white hover:bg-gray-700",
+                  }}
+                />
+              </div>
+
+              {/* Events for Selected Date */}
+              {selectedDate && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium text-white mb-3">
+                    Events on {selectedDate.toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </h3>
+                  
+                  {(() => {
+                    const eventsForDate = getEventsForDate(selectedDate);
+                    return eventsForDate.length > 0 ? (
+                      <div className="space-y-3">
+                        {eventsForDate.map((event) => (
+                          <div key={event.id} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h4 className="text-white font-medium mb-2">{event.EventName}</h4>
+                                <p className="text-gray-300 text-sm mb-3 line-clamp-2">
+                                  {event.description}
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  {event.endDate && (
+                                    <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-200 border-yellow-500/30">
+                                      <Clock className="w-3 h-3 mr-1" />
+                                      {new Date(event.endDate).toLocaleTimeString('en-US', { 
+                                        hour: '2-digit', 
+                                        minute: '2-digit' 
+                                      })}
+                                    </Badge>
+                                  )}
+                                  {event.univerisity && (
+                                    <Badge variant="secondary" className="bg-blue-500/20 text-blue-200 border-blue-500/30">
+                                      <MapPin className="w-3 h-3 mr-1" />
+                                      {event.univerisity}
+                                    </Badge>
+                                  )}
+                                  {event.clubName && (
+                                    <Badge variant="outline" className="border-gray-500 text-gray-300">
+                                      {event.clubName}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Calendar className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+                        <p className="text-gray-400">No events scheduled for this date</p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2">
+                <Button
+                  onClick={() => setIsCalendarModalOpen(false)}
+                  className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Search and Filter Bar */}
         {isLoading ? (
