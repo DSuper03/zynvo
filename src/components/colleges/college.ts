@@ -3492,6 +3492,11 @@ export const collegesWithClubs = [
   {
     college:'West Bengal University of Animal & Fishery Science, Kolkata',
     State: 'West Bengal',
+    
+  },
+  {
+    college: "MJP Rohilkhand University, Bareilly",
+    State: "Uttar Pradesh"
   },
   {
 
