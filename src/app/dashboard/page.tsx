@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, use } from 'react';
 import {
   Calendar,
   BarChart2,
@@ -28,6 +28,7 @@ import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import EventBadgeCard from '@/components/ticket';
 import * as htmlToImage from 'html-to-image';
 import TextWithLinks from '@/components/TextWithLinks';
+import { headers } from 'next/headers';
 
 interface Event {
   EventName: string;
@@ -81,6 +82,11 @@ export interface ApiResponse {
       description: string;
     }[];
   };
+}
+
+interface isAdminResponse {
+  msg : string;
+  founder : string;
 }
 
 // Add these new components and styles to your dashboard
@@ -571,6 +577,7 @@ export default function ZynvoDashboard() {
   const [viewAllPosts, setViewAllPosts] = useState(false);
   const [viewAllEvents, setViewAllEvents] = useState(false);
   const [showAllProfileTags, setShowAllProfileTags] = useState(false);
+  const [founder , setFounder] = useState<string>('false')
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -705,6 +712,43 @@ export default function ZynvoDashboard() {
 
     fetchUserData();
   }, [isClient, navigate, update,token]);
+
+
+
+
+  useEffect(()=> {
+   if(!token || !sessionStorage.getItem('activeSession') || sessionStorage.getItem('activeSession') != "true") {
+    toast("please login")
+    return;
+   }
+
+   if(sessionStorage.getItem('founder')) {
+    setFounder(sessionStorage.getItem('founder') as string);
+    return;
+   } 
+
+   const fetch = async() => {
+     const isfounder = await axios.get<isAdminResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isClubFounder`
+      , {
+        headers : {
+          authorization : `Bearer ${token}`
+        }
+      }
+     )
+     if(isfounder.data.founder) {
+      sessionStorage.setItem('founder', isfounder.data.founder )
+      setFounder(isfounder.data.founder);
+     } else {
+      // remove in production
+      alert('check console')
+      console.log(isfounder.data.msg);
+     }
+     return;
+   }
+
+   // add this in loader as well ki agar ye set nhi hai toh keep the loader on.
+   fetch()
+  },[])
 
   const handleProfileFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
