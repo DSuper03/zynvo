@@ -1582,9 +1582,10 @@ export const collegesWithClubs = [
     college: 'Siliguri Institute of Technology, West bengal',
     State: 'West bengal',
   },
+  
   {
     college:
-      'University Institute of Technology, University Of Burdwan, West bengal',
+      'University Institute of Technology, West bengal',
     State: 'West bengal',
   },
   {
@@ -3142,6 +3143,9 @@ export const collegesWithClubs = [
   {
     college: 'Maulana Azad Medical College, Delhi',
     State: 'Delhi',
+  },{
+    college:"University of Burdwan, West Bengal",
+    State:"West Bengal"
   },
   {
     college: 'Lady Hardinge Medical College, Delhi',
