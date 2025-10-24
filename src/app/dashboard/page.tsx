@@ -945,6 +945,7 @@ export default function ZynvoDashboard() {
                     className="dark:bg-black bg-yellow-400 text-black dark:text-white flex items-center space-x-2 px-3 py-1 text-xs sm:text-sm self-start sm:self-auto"
                   >
                     <p className="truncate max-w-[120px] sm:max-w-none"> {userData.clubName} </p>
+                    {founder === 'true' && <p>is founder</p>}
                   </HoverBorderGradient>
                 ) : (
                   <div className="bg-gray-800 border border-gray-600 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-gray-700 transition-colors"
