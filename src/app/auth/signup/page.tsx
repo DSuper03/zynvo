@@ -38,6 +38,9 @@ export default function SignUp() {
   const [agreeToTerms, setAgree] = useState(false);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
+  // Inline validation error for college select
+  const [collegeError, setCollegeError] = useState<string>('');
+
   // NEW: password error + validator
   const [passwordError, setPasswordError] = useState<string>('');
   // Password must be at least 8 chars, contain uppercase, lowercase, number, and special char
@@ -95,7 +98,13 @@ export default function SignUp() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsCreatingAccount(true);
-    
+    // Validate college selection before submitting
+    if (!formData.collegeName || !formData.collegeName.trim()) {
+      setCollegeError('Please select your college/university');
+      toast('Please select your college/university');
+      setIsCreatingAccount(false);
+      return;
+    }
     try {
       const msg = await axios.post<signupRes>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
@@ -363,14 +372,19 @@ export default function SignUp() {
                     College/University Name
                   </label>
                   <CollegeSearchSelect
-                    colleges={collegesWithClubs.sort((a, b) => a.college.localeCompare(b.college))}
-                    value={formData.collegeName}
-                    onChange={(value) =>
-                      setFormData((prev) => ({ ...prev, collegeName: value }))
-                    }
-                    placeholder="Search and select your college/university"
-                    required
+                        colleges={collegesWithClubs.sort((a, b) => a.college.localeCompare(b.college))}
+                        value={formData.collegeName}
+                        onChange={(value) => {
+                          setFormData((prev) => ({ ...prev, collegeName: value }));
+                          // clear any previous college validation error
+                          if (value && value.trim()) setCollegeError('');
+                        }}
+                        placeholder="Search and select your college/university"
+                        required
                   />
+                      {collegeError && (
+                        <p className="text-red-400 text-xs mt-1">{collegeError}</p>
+                      )}
                 </div>
 
                 <div className="flex items-start space-x-3">
@@ -379,9 +393,7 @@ export default function SignUp() {
                     id="agreeToTerms"
                     name="agreeToTerms"
                     checked={agreeToTerms}
-                    onChange={() => {
-                      setAgree(true);
-                    }}
+                    onChange={() => setAgree((prev) => !prev)}
                     className="h-4 w-4 rounded border-gray-700 bg-gray-800 text-yellow-500 focus:ring-yellow-500 mt-0.5"
                     required
                   />
@@ -420,12 +432,12 @@ export default function SignUp() {
                   <motion.button
                     type="submit"
                     className={`flex-1 flex items-center justify-center py-3 px-4 rounded-lg font-medium transition duration-300 transform hover:-translate-y-1 ${
-                      isCreatingAccount || !agreeToTerms
+                      isCreatingAccount || !agreeToTerms || !formData.collegeName
                         ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                         : 'bg-yellow-500 text-black hover:bg-yellow-400'
                     }`}
                     whileTap={{ scale: isCreatingAccount ? 1 : 0.98 }}
-                    disabled={!agreeToTerms || isCreatingAccount}
+                    disabled={!agreeToTerms || isCreatingAccount || !formData.collegeName}
                   >
                     {isCreatingAccount ? (
                       <>
