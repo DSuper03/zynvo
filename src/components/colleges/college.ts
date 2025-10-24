@@ -1584,6 +1584,14 @@ export const collegesWithClubs = [
     State: 'Orissa',
   },
   {
+    college:"St Xavier's College ,kolkata, West bengal",
+    State: 'West bengal',
+  },
+  {
+    college:"St Xavier's university ,kolkata, West bengal",
+    State: 'West bengal',
+  },
+  {
     college: 'Indian Institute of Technology, Orissa',
     State: 'Orissa',
   },
