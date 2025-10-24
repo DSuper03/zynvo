@@ -945,7 +945,16 @@ export default function ZynvoDashboard() {
                     className="dark:bg-black bg-yellow-400 text-black dark:text-white flex items-center space-x-2 px-3 py-1 text-xs sm:text-sm self-start sm:self-auto"
                   >
                     <p className="truncate max-w-[120px] sm:max-w-none"> {userData.clubName} </p>
-                    {founder === 'true' && <p>is founder</p>}
+                    {founder === 'true' && (
+                      <Button
+                        onClick={() => navigate.push('/admin')}
+                        title="Access admin controls"
+                        aria-label="Access admin controls"
+                        className="ml-2 bg-black/60 text-yellow-400 hover:bg-yellow-400 hover:text-black px-2 py-1 rounded-full text-xs sm:text-sm font-medium transition-transform hover:scale-105"
+                      >
+                        Admin Controls
+                      </Button>
+                    )}
                   </HoverBorderGradient>
                 ) : (
                   <div className="bg-gray-800 border border-gray-600 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-gray-700 transition-colors"
