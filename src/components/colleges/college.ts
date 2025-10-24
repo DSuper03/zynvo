@@ -320,10 +320,7 @@ export const collegesWithClubs = [
     college: 'Sanskriti University, Uttar pradesh',
     State: 'Uttar pradesh',
   },
-  {
-    college: 'Monad University, Hapur, Uttar pradesh',
-    State: 'Uttar pradesh',
-  },
+  
   {
     college: 'Indian Institute of Information Technology, Uttar pradesh',
     State: 'Uttar pradesh',
@@ -1196,14 +1193,8 @@ export const collegesWithClubs = [
     college: 'J.C. Bose University Of Science And Technology,, Haryana',
     State: 'Haryana',
   },
-  {
-    college: 'Manav Rachna International Institute Of Research And, Haryana',
-    State: 'Haryana',
-  },
-  {
-    college: 'Manav Rachna International Institute of Research and, Haryana',
-    State: 'Haryana',
-  },
+  
+ 
   {
     college: 'Gurugram University, Gurgaon, Haryana',
     State: 'Haryana',
@@ -1261,10 +1252,7 @@ export const collegesWithClubs = [
     college: 'Chandigarh College of Engineering and Technology, Haryana',
     State: 'Haryana',
   },
-  {
-    college: 'Manav Rachna University, Haryana',
-    State: 'Haryana',
-  },
+  
   {
     college: 'Seth Jai Parkash Mukand Lal Institute of, Haryana',
     State: 'Haryana',
@@ -1514,14 +1502,8 @@ export const collegesWithClubs = [
     college: 'National Institute of Technology, West bengal',
     State: 'West bengal',
   },
-  {
-    college: 'Institute of Engineering and Management, West bengal',
-    State: 'West bengal',
-  },
-  {
-    college: 'Heritage Institute of Technology, West bengal',
-    State: 'West bengal',
-  },
+  
+ 
   {
     college: 'Maulana Abul Kalam Azad University of Technology, West bengal',
     State: 'West bengal',
@@ -1530,10 +1512,7 @@ export const collegesWithClubs = [
     college: 'Narula Institute of Technology, West bengal',
     State: 'West bengal',
   },
-  {
-    college: 'Haldia Institute of Technology, West bengal',
-    State: 'West bengal',
-  },
+ 
   {
     college: 'Amity University, Kolkata, West bengal',
     State: 'West bengal',
@@ -1554,18 +1533,12 @@ export const collegesWithClubs = [
     college: 'Asansol Engineering College, West bengal',
     State: 'West bengal',
   },
-  {
-    college: 'University of Engineering and Management, West bengal',
-    State: 'West bengal',
-  },
+  
   {
     college: 'JIS College of Engineering, West bengal',
     State: 'West bengal',
   },
-  {
-    college: 'Kalyani Government Engineering College, West bengal',
-    State: 'West bengal',
-  },
+  
   {
     college: 'Indian Institute of Information Technology, West bengal',
     State: 'West bengal',
@@ -1587,10 +1560,7 @@ export const collegesWithClubs = [
       'University Institute of Technology, University Of Burdwan, West bengal',
     State: 'West bengal',
   },
-  {
-    college: 'Jalpaiguri Government Engineering College, West bengal',
-    State: 'West bengal',
-  },
+
   {
     college: 'Techno India Salt Lake, Kolkata, West bengal',
     State: 'West bengal',
@@ -1603,10 +1573,7 @@ export const collegesWithClubs = [
     college: 'Dr. B.C. Roy Engineering College, West bengal',
     State: 'West bengal',
   },
-  {
-    college: 'Bengal College of Engineering, West bengal',
-    State: 'West bengal',
-  },
+  
   {
     college: 'Seacom Skills University, West bengal',
     State: 'West bengal',
@@ -3037,6 +3004,7 @@ export const collegesWithClubs = [
     college: 'Future Institute of Engineering and Management (FIEM), Kolkata',
     State: 'West Bengal',
   },
+  
   {
     college: 'Guru Nanak Institute of Technology, Kolkata',
     State: 'West Bengal',
@@ -3177,6 +3145,10 @@ export const collegesWithClubs = [
     State: 'West Bengal',
   },
   {
+    college:"Durgapur Government College , Durgapur",
+    State: 'West Bengal',
+  },
+  {
     college: 'Bengal College of Engineering and Technology, Durgapur',
     State: 'West Bengal',
   },
@@ -3247,7 +3219,7 @@ export const collegesWithClubs = [
     college: 'NIT Rourkela',
     State: 'Odisha',
   },
-  { college: 'Bhawanipur Education Society College', State: 'West Bengal' },
+
 
   {
     college: 'Bangabasi College, Kolkata',
@@ -3480,6 +3452,11 @@ export const collegesWithClubs = [
     college: 'Indian Institute of Information Technology Dharwad',
     State: 'Karnataka',
   },
+  {
+    college:'Visva-Bharati University, Santiniketan',
+    State: 'West Bengal',
+  },
+
   {
     college: 'Indian Institute of Information Technology Una',
     State: 'Himachal Pradesh',
