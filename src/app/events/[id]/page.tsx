@@ -22,6 +22,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import EventAnnouncements from '../components/eventAnnouncement';
 
 dotenv.config();
 
@@ -50,7 +51,7 @@ const Eventid = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'speakers' | 'schedule' | 'gallery'
+    'overview' | 'speakers' | 'schedule' | 'gallery' | 'announcement'
   >('overview');
   const [signedin, setSignedin] = useState<boolean>(false);
   const [userAttendedEventIds, setUserAttendedEventIds] = useState<string[]>([]);
@@ -403,6 +404,7 @@ const Eventid = () => {
                 { id: 'speakers', label: 'Speakers & Judges' },
                 { id: 'schedule', label: 'Schedule' },
                 { id: 'gallery', label: 'Gallery' },
+                { id: 'announcement', label: 'Announcements' },
               ] as const
             ).map((t) => (
               <button
@@ -515,6 +517,17 @@ const Eventid = () => {
                 </p>
               </div>
             )}
+            {activeTab === 'announcement' && (
+              <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-6">
+                <h2 className="text-xl font-bold text-yellow-400 mb-2">
+                  <EventAnnouncements/>
+                </h2>
+                <p className="text-gray-400">
+                  Photos and videos will appear here after the event.
+                </p>
+              </div>
+            )}
+
 
             {/* Big CTA card (like the design) */}
             <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-6">

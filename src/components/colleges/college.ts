@@ -1588,6 +1588,18 @@ export const collegesWithClubs = [
     State: 'West bengal',
   },
   {
+    college:"DY Patil International University ,kolkata, West bengal",
+    State: 'West bengal',
+  },
+  {
+college:"Punjab Agricultural University, Ludhiana, Punjab",
+State: 'Punjab',
+  },
+  {
+    college :"Dr. D. Y. Patil Vidyapeeth, Pimpri, Pune",
+    State: 'Maharashtra',
+  },
+  {
     college:"St Xavier's university ,kolkata, West bengal",
     State: 'West bengal',
   },
