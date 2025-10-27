@@ -3,7 +3,6 @@ import { FaUniversity, FaUsers } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import Link from 'next/link';
-import WrapButton from './ui/wrap-button';
 import Image from 'next/legacy/image';
 import { Button } from './ui/button';
 

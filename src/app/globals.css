@@ -209,3 +209,119 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* LEGO-style animations and effects */
+@keyframes lego-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  40% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+  60% {
+    transform: translateY(-5px) rotate(-1deg);
+  }
+}
+
+@keyframes lego-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(250, 204, 21, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(250, 204, 21, 0.6), 0 0 60px rgba(250, 204, 21, 0.3);
+  }
+}
+
+@keyframes lego-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(-4px) rotate(-1deg);
+  }
+}
+
+@keyframes lego-pulse-3d {
+  0%, 100% {
+    transform: scale(1) rotateX(0deg);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    transform: scale(1.05) rotateX(2deg);
+    box-shadow: 0 8px 16px rgba(250, 204, 21, 0.2);
+  }
+}
+
+.animate-lego-bounce {
+  animation: lego-bounce 2s ease-in-out infinite;
+}
+
+.animate-lego-glow {
+  animation: lego-glow 3s ease-in-out infinite;
+}
+
+.animate-lego-float {
+  animation: lego-float 4s ease-in-out infinite;
+}
+
+.animate-lego-pulse-3d {
+  animation: lego-pulse-3d 2s ease-in-out infinite;
+}
+
+/* LEGO-style button hover effects */
+.lego-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lego-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.lego-button:hover::before {
+  left: 100%;
+}
+
+.lego-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(250, 204, 21, 0.3);
+}
+
+/* LEGO-style card effects */
+.lego-card {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lego-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(250, 204, 21, 0.1) 50%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.lego-card:hover::before {
+  opacity: 1;
+}
+
+.lego-card:hover {
+  transform: translateY(-4px) rotateX(2deg);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(250, 204, 21, 0.2);
+}

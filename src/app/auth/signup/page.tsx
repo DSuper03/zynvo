@@ -67,7 +67,7 @@ export default function SignUp() {
         setPasswordError(
           isValidPassword(value)
             ? ''
-            : 'Password must be 8+ chars and include uppercase, lowercase, and a number.'
+            : 'Password must be 8+ chars and include uppercase, lowercase, and a number and a special character.'
         );
       }
     }
@@ -86,7 +86,7 @@ export default function SignUp() {
     // NEW: block next step if password invalid
     if (!isValidPassword(formData.password)) {
       setPasswordError(
-        'Password must be 8+ chars and include uppercase, lowercase, and a number.'
+        'Password must be 8+ chars and include uppercase, lowercase, and a number and a special character.'
       );
       toast('Please fix your password to continue');
       return;
@@ -339,7 +339,7 @@ export default function SignUp() {
                       className="text-gray-400 text-xs"
                     >
                       Password must be at least 8 characters long and include
-                      uppercase, lowercase, and a number.
+                      uppercase, lowercase, a number and a special character.
                     </p>
                     {passwordError && (
                       <p className="text-red-400 text-xs">

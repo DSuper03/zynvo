@@ -10,7 +10,7 @@ import CreateEventModal from './components/EventCreationModel';
 import EventCard from './components/EventCard';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Badge } from '@/components/ui/badge';
 
 
