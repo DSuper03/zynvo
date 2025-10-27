@@ -1533,7 +1533,10 @@ export const collegesWithClubs = [
     college: 'Asansol Engineering College, West bengal',
     State: 'West bengal',
   },
-  
+  {
+    college:"JIS University, Agarpara, West bengal",
+    State: 'West bengal',
+  },
   {
     college: 'JIS College of Engineering, West bengal',
     State: 'West bengal',
