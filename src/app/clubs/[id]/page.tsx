@@ -92,6 +92,7 @@ interface UserApiResponse {
 }
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import ZynvoClubAnnouncement from '@/components/ZynvoClubAnnouncement';
 
 // All dynamic content is driven by backend data; no hardcoded demo content
 
@@ -574,115 +575,8 @@ export default function ClubPage({}: ClubPageProps) {
           {/* Announcements Tab */}
           {activeTab === 'announcements' && (
             <div className="space-y-4 sm:space-y-6">
-              {/* Announcements Header - Mobile Optimized */}
-              
-              {/* Sample Announcements */}
-              <div className="space-y-4">
-                {/* Announcement 1 */}
-               <div>
-                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-3">No announcements yet</h3>
-                </div>  
-
-                {/* Announcement 2 */}
-              
-
-                {/* Announcement 3 */}
-             
-
-                {/* Club Information Card */}
-                <div className="bg-gradient-to-r from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
-                  <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-3">
-                    <BookOpen className="w-5 h-5 text-yellow-400" />
-                    About {club.name}
-                  </h3>
-                  <p className="text-gray-300 leading-relaxed mb-4">{club.description}</p>
-                  
-                  {club.requirements && (
-                    <div className="mb-4">
-                      <h4 className="text-md font-semibold text-white mb-2 flex items-center gap-2">
-                        <Target className="w-4 h-4 text-green-400" />
-                        Membership Requirements
-                      </h4>
-                      <p className="text-gray-300 text-sm leading-relaxed">{club.requirements}</p>
-                    </div>
-                  )}
-
-                  {club.wings && (
-                    <div>
-                      <h4 className="text-md font-semibold text-white mb-2 flex items-center gap-2">
-                        <Briefcase className="w-4 h-4 text-blue-400" />
-                        Club Wings
-                      </h4>
-                      <p className="text-gray-300 text-sm leading-relaxed">{club.wings}</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Contact Information */}
-                <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
-                  <h3 className="text-lg font-bold text-white mb-4">Contact Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Founder */}
-                    {club.founderEmail && (
-                      <div className="p-4 bg-gray-800/30 rounded-xl">
-                        <div className="flex items-center gap-3 mb-2">
-                          <Crown className="w-4 h-4 text-yellow-400" />
-                          <span className="text-sm font-medium text-gray-300">Founder</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-400 font-mono">{club.founderEmail}</span>
-                          <button
-                            onClick={() => copyToClipboard(club.founderEmail, 'Founder Email')}
-                            className="p-1 rounded text-gray-400 hover:text-yellow-400 transition-colors"
-                          >
-                            {copiedEmail === 'Founder Email' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Faculty */}
-                    {club.facultyEmail && (
-                      <div className="p-4 bg-gray-800/30 rounded-xl">
-                        <div className="flex items-center gap-3 mb-2">
-                          <GraduationCap className="w-4 h-4 text-blue-400" />
-                          <span className="text-sm font-medium text-gray-300">Faculty Mentor</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-400 font-mono">{club.facultyEmail}</span>
-                          <button
-                            onClick={() => copyToClipboard(club.facultyEmail, 'Faculty Email')}
-                            className="p-1 rounded text-gray-400 hover:text-blue-400 transition-colors"
-                          >
-                            {copiedEmail === 'Faculty Email' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Club Contact */}
-                    {club.clubContact && (
-                      <div className="p-4 bg-gray-800/30 rounded-xl md:col-span-2">
-                        <div className="flex items-center gap-3 mb-2">
-                          {/^\+?\d[\d\s-]{3,}$/.test(String(club.clubContact)) ? (
-                            <Phone className="w-4 h-4 text-green-400" />
-                          ) : (
-                            <Globe className="w-4 h-4 text-green-400" />
-                          )}
-                          <span className="text-sm font-medium text-gray-300">Club Contact</span>
-                        </div>
-                        {/^\+?\d[\d\s-]{3,}$/.test(String(club.clubContact)) ? (
-                          <a href={`tel:${club.clubContact}`} className="text-sm text-green-400 hover:text-green-300 transition-colors font-mono">
-                            {club.clubContact}
-                          </a>
-                        ) : (
-                          <span className="text-sm text-gray-400 font-mono">{club.clubContact}</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              {/* Show announcement component for everyone */}
+              <ZynvoClubAnnouncement club={club} />
             </div>
           )}
 
