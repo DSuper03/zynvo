@@ -213,7 +213,7 @@ const ZynvoClubAnnouncement: React.FC<ZynvoClubAnnouncementProps> = ({ club }) =
             </div>
             <Switch
               checked={announcement.notifyAll}
-              onCheckedChange={(checked) => setAnnouncement(prev => ({ ...prev, notifyAll: checked }))}
+              onCheckedChange={(checked : any) => setAnnouncement(prev => ({ ...prev, notifyAll: checked }))}
               className="data-[state=checked]:bg-[#FACC15]"
             />
           </div>

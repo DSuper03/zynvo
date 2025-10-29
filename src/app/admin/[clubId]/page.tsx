@@ -1,7 +1,7 @@
 'use client';
 
 import axios from "axios";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -49,9 +49,47 @@ export default function ClubAdminPage() {
     const [link2, setLink2] = useState('');
     const [link3, setLink3] = useState('');
 
+  const [isClient, setIsClient] = useState(false);
+  const [token, setToken] = useState('');
+  const navigate = useRouter();
+
+    useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const tok = token;
+      if (tok) setToken(tok);
+      else {
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => navigate.push('/auth/signin'),
+          },
+        });
+        return;
+      }
+
+      if (sessionStorage.getItem('activeSession') != 'true') {
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => navigate.push('/auth/signin'),
+          },
+        });
+        return;
+      }
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
     const fetchClubData = async () => {
+      if (!clubId || !isClient) return;
       try {
-        const fetch = await axios.get<any>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/clubs/${clubId}`);
+        const fetch = await axios.get<any>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/clubs/${clubId}`, { headers : {
+          authorization: `Bearer ${token}`
+        }
+        });
         setEvent(fetch.data.club.events);
         setClubData(fetch.data.club);
         setCoreMember1(fetch.data.club.coremember1);
@@ -69,7 +107,7 @@ export default function ClubAdminPage() {
     const deleteEvent = async () => {
       try {
         const deleteEv = await axios.post<any>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/admin/deleteEvent/${eventId}`, {}, { headers : {
-          authorization: `Bearer ${localStorage.getItem('token')}`
+          authorization: `Bearer ${token}`
         }
         });
         toast(deleteEv.data.msg);
@@ -84,7 +122,7 @@ export default function ClubAdminPage() {
           twitter,
           linkedin
         }, { headers : {
-          authorization: `Bearer ${localStorage.getItem('token')}`
+          authorization: `Bearer ${token}`
         }
         });
         toast(updateLinks.data.msg);
@@ -100,7 +138,7 @@ export default function ClubAdminPage() {
           coreMember2,
           coreMember3
         }, { headers : {
-          authorization: `Bearer ${localStorage.getItem('token')}`
+          authorization: `Bearer ${token}`
         }
         });
         toast(addCore.data.msg);
@@ -114,7 +152,7 @@ export default function ClubAdminPage() {
         const addWing = await axios.put<any>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/admin/addWings/${clubId}`, {
           wings
         }, { headers : {
-          authorization: `Bearer ${localStorage.getItem('token')}`
+          authorization: `Bearer ${token}`
         }
         });
         toast(addWing.data.msg);
@@ -127,7 +165,7 @@ export default function ClubAdminPage() {
       const removeMem = await axios.post<any>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/admin/removeMember/${clubId}`, {
         removeMemberId
       }, { headers : {
-        authorization: `Bearer ${localStorage.getItem('token')}`
+        authorization: `Bearer ${token}`
       }
       });
       toast(removeMem.data.msg);
@@ -142,7 +180,7 @@ export default function ClubAdminPage() {
       const transferOwn = await axios.put<any>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/admin/transferOwnership/${clubId}`, {
         newOwnerEmail
       }, { headers : {
-        authorization: `Bearer ${localStorage.getItem('token')}`
+        authorization: `Bearer ${token}`
       }
       });
       toast(transferOwn.data.msg);
@@ -159,7 +197,7 @@ export default function ClubAdminPage() {
         removeCoreMember2,
         removeCoreMember3
       }, { headers : {
-        authorization: `Bearer ${localStorage.getItem('token')}`
+        authorization: `Bearer ${token}`
       }
       });
       toast(removeCore.data.msg);
