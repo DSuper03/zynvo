@@ -266,6 +266,19 @@ export default function SignIn() {
                   </>
                 )}
               </motion.button>
+
+              {/* Sign Up Button Below Sign In */}
+              <div className="mt-4">
+                <Link href="/auth/signup" className="block">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full bg-transparent text-yellow-500 border border-yellow-500 hover:bg-yellow-500 hover:text-black p-4"
+                  >
+                    Sign up
+                  </Button>
+                </Link>
+              </div>
             </form>
 
             <p className="text-gray-400 text-xs text-center mt-8">

@@ -159,7 +159,7 @@ export default function ClubAdminPage() {
     setLoading(true);
     fetchClubData();
     setLoading(false);
-  }, [token, isClient, clubId]);
+  }, [token, isClient, clubId, fetchClubData]);
 
   if (loading) return <div className="p-6 text-yellow-400">Loading...</div>;
 
