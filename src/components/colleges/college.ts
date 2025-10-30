@@ -3566,7 +3566,7 @@ State: 'Punjab',
     State: 'Himachal Pradesh',
   },
   {
-    college:"Scottish Church College, Kolkata",
+    college: 'Scottish Church College, Kolkata',
     State: 'West Bengal',
   },
   {
