@@ -717,6 +717,8 @@ export default function ZynvoDashboard() {
 
 
   useEffect(()=> {
+   if(!isClient) return;
+
    if(!token || !sessionStorage.getItem('activeSession') || sessionStorage.getItem('activeSession') != "true") {
     toast("please login")
     return;
@@ -728,7 +730,7 @@ export default function ZynvoDashboard() {
    } 
 
    const fetch = async() => {
-     const isfounder = await axios.get<isAdminResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isClubFounder`
+     const isfounder = await axios.get<isAdminResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isClubAdmin`
       , {
         headers : {
           authorization : `Bearer ${token}`
@@ -748,7 +750,7 @@ export default function ZynvoDashboard() {
 
    // add this in loader as well ki agar ye set nhi hai toh keep the loader on.
    fetch()
-  },[])
+  },[isClient])
 
   const handleProfileFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
