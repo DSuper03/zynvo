@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import EventTab from "../../../components/eventTab";
+import Image from "next/image";
 
 export default function ClubAdminPage() {
   const params = useParams();
@@ -281,11 +282,14 @@ export default function ClubAdminPage() {
                       className="flex items-center justify-between bg-black border border-yellow-400/20 p-3 rounded-xl"
                     >
                       <div className="flex items-center gap-3">
-                        <img
-                          src={member.profileAvatar}
-                          alt="pfp"
-                          className="w-10 h-10 rounded-full border border-yellow-400/30"
-                        />
+
+                      <Image
+                        src={member.profileAvatar || '/default-avatar.png'}
+                        alt="Avatar"
+                        width={80}
+                        height={80}
+                      />
+
                         <p>{member.email}</p>
                       </div>
                       <button
