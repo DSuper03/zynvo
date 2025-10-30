@@ -40,7 +40,7 @@ export default function EventTab({ token, events }: { token: string; events: any
       );
       toast(updateLinks.data.msg);
     } catch (error) {
-      toast.error("Error updating club links");
+      toast.error("Error updating event links");
     }
   };
 
