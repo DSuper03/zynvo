@@ -52,6 +52,7 @@ export interface UserData {
   twitter: string | null;
   instagram: string | null;
   linkedin: string | null;
+  clubId: string | null;
 }
 export interface ApiResponse {
   user: {
@@ -70,6 +71,7 @@ export interface ApiResponse {
     twitter: string | null;
     instagram: string | null;
     linkedin: string | null;
+    clubId: string | null;
     eventAttended: {
       event: {
         id: string;
@@ -651,6 +653,7 @@ export default function ZynvoDashboard() {
               twitter,
               instagram,
               linkedin,
+              clubId
             } = response.data.user;
 
             const events =
@@ -676,6 +679,7 @@ export default function ZynvoDashboard() {
               twitter,
               instagram,
               linkedin,
+              clubId
             });
             setId(response.data.user.id);
             setPosts(response.data.user.CreatePost);
@@ -949,7 +953,7 @@ export default function ZynvoDashboard() {
                     <p className="truncate max-w-[120px] sm:max-w-none"> {userData.clubName} </p>
                     {founder === 'true' && (
                       <Button
-                        onClick={() => navigate.push('/admin')}
+                        onClick={() => navigate.push(`/admin/${userData.clubId}`)}
                         title="Access admin controls"
                         aria-label="Access admin controls"
                         className="ml-2 bg-black/60 text-yellow-400 hover:bg-yellow-400 hover:text-black px-2 py-1 rounded-full text-xs sm:text-sm font-medium transition-transform hover:scale-105"

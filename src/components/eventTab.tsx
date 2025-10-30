@@ -4,11 +4,16 @@ import axios from "axios";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export default function EventTab ({token, events}: {token : string, events : any}){
-   if (!token) {
+export default function EventTab ({token, events}: {token : string, events : any[]}){
+   if (!token || !events) {
     return <div>Please log in to view this content.</div>;
   }
 
+  if (events.length === 0) {   
+    return <div>No events available.</div>;
+  }
+    
+    const [loading, setLoading] = useState<boolean>(false); 
     const [eventId, setEventId] = useState<string>('');
     const [eventDetails, setEventDetails] = useState<any>(null);
     const [link1, setLink1] = useState('');

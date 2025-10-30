@@ -37,7 +37,7 @@ export default function ClubAdminPage() {
    const [wings, setWings] = useState<any[]>([]);
 
    // events state
-    const [event, setEvent] = useState({});
+    const [event, setEvent] = useState<any[]>([]);
 
   const [isClient, setIsClient] = useState(false);
   const [token, setToken] = useState('');
@@ -285,7 +285,7 @@ if (loading) {
         )
       }
 
-      {/* <EventTab events={event} token={token} /> */}
+      <EventTab events={event} token={token} />
     </div>
   );
 }
