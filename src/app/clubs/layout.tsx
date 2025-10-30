@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { WarmupProvider } from '@/components/WarmupProvider';
 
 export default function RootLayout({
   children,
@@ -21,7 +22,6 @@ export default function RootLayout({
       }
     };
 
-    // Set initial value
     handleResize();
 
     window.addEventListener('resize', handleResize);
@@ -40,10 +40,15 @@ export default function RootLayout({
       {isMobileView && (
         <Button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="fixed top-4 left-4 z-50 p-2 bg-gray-800 rounded-md text-white"
-          aria-label="Toggle menu"
+          className={`${
+            isMobileMenuOpen
+              ? 'bg-black/80 text-yellow-400 border border-yellow-400/30'
+              : 'bg-gradient-to-br from-yellow-400 to-yellow-500 text-gray-900 border border-yellow-300/40'
+          } fixed top-4 left-4 z-50 h-12 w-12 rounded-full shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200 backdrop-blur-sm`}
+          aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+          aria-pressed={isMobileMenuOpen}
         >
-          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </Button>
       )}
 
@@ -72,12 +77,12 @@ export default function RootLayout({
       <main
         className={`
           flex-1 overflow-auto p-4 md:p-6 
-          bg-gradient-to-br from-black to-gray-900
-          pt-16 md:pt-6 /* Add padding-top for mobile to avoid content behind the toggle button */
+          bg-black
+          pt-1 md:pt-6 /* Add padding-top for mobile to avoid content behind the toggle button */
         `}
         onClick={handleMainContentClick}
       >
-        {children}
+        <WarmupProvider>{children}</WarmupProvider>
       </main>
     </div>
   );

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Search,
   Plus,
@@ -14,6 +14,15 @@ import {
   Share2,
   User,
 } from 'lucide-react';
+import {
+  IconCpu,
+  IconMasksTheater,
+  IconTrendingUp,
+  IconUsersGroup,
+  IconBook2,
+  IconPalette,
+  IconChartBar,
+} from '@tabler/icons-react';
 
 import Link from 'next/link';
 import CreateClubModal from './createclub';
@@ -28,6 +37,7 @@ import dotenv from 'dotenv';
 import './responsive.css';
 import NoTokenModal from '@/components/modals/remindModal';
 import { useRouter } from 'next/navigation';
+import { ShimmerButton } from '@/components/ui/shimmer-button';
 
 dotenv.config();
 
@@ -72,13 +82,13 @@ const getMemberCount = (club: any): number => {
 
 
 const categories = [
-  { id: 'all', name: 'All Clubs' },
-  { id: 'tech', name: '💻 Technology' },
-  { id: 'cultural', name: '🎭 Cultural' },
-  { id: 'business', name: '📈 Business' },
-  { id: 'social', name: '🌱 Social' },
-  { id: 'literary', name: '🧠 Literature' },
-  { id: 'design', name: '🎨 Design' },
+  { id: 'all', name: 'All Clubs', icon: null },
+  { id: 'tech', name: 'Technology', icon: <IconCpu size={16} /> },
+  { id: 'cultural', name: 'Cultural', icon: <IconMasksTheater size={16} /> },
+  { id: 'business', name: 'Business', icon: <IconChartBar size={16} /> },
+  { id: 'social', name: 'Social', icon: <IconUsersGroup size={16} /> },
+  { id: 'literary', name: 'Literature', icon: <IconBook2 size={16} /> },
+  { id: 'design', name: 'Design', icon: <IconPalette size={16} /> },
 ];
 const ClubsPage = () => {
   const [activetype, setActivetype] = useState('all');
@@ -99,6 +109,9 @@ const ClubsPage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [userJoinedClubIds, setUserJoinedClubIds] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const categoriesRef = useRef<HTMLDivElement | null>(null);
+  const [showLeft, setShowLeft] = useState(false);
+  const [showRight, setShowRight] = useState(false);
   
   const router = useRouter()
   const handleShareClub = async (club: { id: string; name: string; description?: string }) => {
@@ -171,6 +184,30 @@ const ClubsPage = () => {
     call();
   }, [currentPage, token]);
 
+  // Categories scroll controls visibility
+  useEffect(() => {
+    const el = categoriesRef.current;
+    if (!el) return;
+
+    const updateShadows = () => {
+      const canScroll = el.scrollWidth > el.clientWidth + 2; // tolerance
+      const atStart = el.scrollLeft <= 1;
+      const atEnd = Math.ceil(el.scrollLeft + el.clientWidth) >= el.scrollWidth - 1;
+      setShowLeft(canScroll && !atStart);
+      setShowRight(canScroll && !atEnd);
+    };
+
+    updateShadows();
+    el.addEventListener('scroll', updateShadows, { passive: true });
+    window.addEventListener('resize', updateShadows);
+    const id = window.setInterval(updateShadows, 500); // handle font/icon async layout
+    return () => {
+      el.removeEventListener('scroll', updateShadows);
+      window.removeEventListener('resize', updateShadows);
+      window.clearInterval(id);
+    };
+  }, []);
+
   useEffect(() => {
     async function fetchUserData() {
       if (!token) return;
@@ -239,7 +276,7 @@ const ClubsPage = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen mt-11">
       {/* Fixed Header Section */}
       <div className="flex-shrink-0 sticky top-0 z-20 bg-black border-b border-gray-800 shadow-lg">
         {/* Search, Sort, View Toggle */}
@@ -299,52 +336,70 @@ const ClubsPage = () => {
                 </Button>
               </div>
 
-              {/* View Toggle Button */}
-              <Button
-                onClick={() => setIsGridView(!isGridView)}
-                className="bg-gray-800 text-white p-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center"
-                title={
-                  isGridView ? 'Switch to List View' : 'Switch to Grid View'
-                }
-              >
-                {isGridView ? (
-                  <List className="h-4 w-4 md:h-5 md:w-5" />
-                ) : (
-                  <Grid3X3 className="h-4 w-4 md:h-5 md:w-5" />
-                )}
-              </Button>
+            
             </div>
           </div>
         </div>
 
         {/* Create Club Button */}
         <div className="px-3 md:px-4 pb-2">
-          <Button
-            className="bg-yellow-500 hover:bg-yellow-400 text-black rounded-full flex items-center justify-center shadow-lg transition-colors px-6 py-3 font-bold text-lg"
+          <ShimmerButton
             onClick={() => setIsCreateModalOpen(true)}
             title="Create New Club"
+            shimmerDuration="2.5s"
+            borderRadius="9999px"
+            className="px-6 py-3 text-yellow-400 hover:text-yellow-300 font-bold text-lg rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_10px_35px_rgb(0,0,0,0.18)] inline-flex items-center gap-2"
           >
-            <Plus className="w-5 h-5 md:w-6 md:h-6 mr-2" />
-            Create Your Club
-          </Button>
+            <Plus className="w-5 h-5 md:w-6 md:h-6" />
+            <span>Create Your Club</span>
+          </ShimmerButton>
         </div>
 
         {/* Categories */}
         <div className="px-3 md:px-4 pb-3 md:pb-4">
-          <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
+          <div className="relative">
+            {/* Left scroll button */}
+            <button
+              type="button"
+              aria-hidden={!showLeft}
+              tabIndex={showLeft ? 0 : -1}
+              onClick={() => categoriesRef.current?.scrollBy({ left: -240, behavior: 'smooth' })}
+              className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-black/60 ring-1 ring-white/10 text-white grid place-items-center hover:bg-black/70 transition ${showLeft ? '' : 'opacity-0 pointer-events-none'}`}
+            >
+              ‹
+            </button>
+
+            {/* Scrollable categories */}
+            <div
+              ref={categoriesRef}
+              className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory px-1"
+            >
             {categories.map((type) => (
               <Button
                 key={type.id}
                 onClick={() => setActivetype(type.id)}
-                className={`whitespace-nowrap px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-colors ${
+                className={`snap-start whitespace-nowrap px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-colors flex items-center gap-2 ${
                   activetype === type.id
                     ? 'bg-yellow-500 text-black'
                     : 'bg-gray-800 text-white hover:bg-gray-700'
                 }`}
               >
-                {type.name}
+                {type.icon && <span className="inline-flex items-center">{type.icon}</span>}
+                <span>{type.name}</span>
               </Button>
             ))}
+            </div>
+
+            {/* Right scroll button */}
+            <button
+              type="button"
+              aria-hidden={!showRight}
+              tabIndex={showRight ? 0 : -1}
+              onClick={() => categoriesRef.current?.scrollBy({ left: 240, behavior: 'smooth' })}
+              className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-black/60 ring-1 ring-white/10 text-white grid place-items-center hover:bg-black/70 transition ${showRight ? '' : 'opacity-0 pointer-events-none'}`}
+            >
+              ›
+            </button>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-# Zynvo Optimization Implementation Guide
+dis# Zynvo Optimization Implementation Guide
 
 ## 🚀 Step-by-Step Implementation
 

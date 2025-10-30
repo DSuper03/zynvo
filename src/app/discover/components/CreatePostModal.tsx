@@ -112,35 +112,126 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Image upload handler
+  // Client-side image compressor to keep files under 2 MB
+  async function compressImageToUnder2MB(originalFile: File): Promise<File> {
+    const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
+    const MAX_DIMENSION = 1920; // cap long edge to 1920px for web posts
+
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = reject;
+      reader.readAsDataURL(originalFile);
+    });
+
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const imageEl = new window.Image();
+      imageEl.onload = () => resolve(imageEl);
+      imageEl.onerror = reject as any;
+      imageEl.src = dataUrl;
+    });
+
+    // Determine target dimensions while preserving aspect ratio
+    let targetWidth = img.width;
+    let targetHeight = img.height;
+    if (Math.max(img.width, img.height) > MAX_DIMENSION) {
+      if (img.width >= img.height) {
+        targetWidth = MAX_DIMENSION;
+        targetHeight = Math.round((img.height / img.width) * targetWidth);
+      } else {
+        targetHeight = MAX_DIMENSION;
+        targetWidth = Math.round((img.width / img.height) * targetHeight);
+      }
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, targetWidth);
+    canvas.height = Math.max(1, targetHeight);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return originalFile;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // Iteratively reduce JPEG quality until under MAX_BYTES or min quality reached
+    let quality = 0.9;
+    let blob: Blob | null = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+    while (blob && blob.size > MAX_BYTES && quality > 0.4) {
+      quality -= 0.1;
+      blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+    }
+
+    if (!blob) return originalFile;
+
+    // If still too large, attempt a secondary downscale to 1280 on long edge
+    if (blob.size > MAX_BYTES) {
+      const scale = Math.min(1280 / canvas.width, 1280 / canvas.height, 1);
+      if (scale < 1) {
+        const tmp = document.createElement('canvas');
+        tmp.width = Math.max(1, Math.round(canvas.width * scale));
+        tmp.height = Math.max(1, Math.round(canvas.height * scale));
+        const tctx = tmp.getContext('2d');
+        if (tctx) {
+          tctx.drawImage(canvas, 0, 0, tmp.width, tmp.height);
+          quality = Math.max(quality, 0.6);
+          blob = await new Promise((resolve) => tmp.toBlob(resolve, 'image/jpeg', quality));
+        }
+      }
+    }
+
+    if (!blob || blob.size > MAX_BYTES) {
+      return originalFile; // fallback to original if compression unsuccessful
+    }
+
+    return new File([blob], originalFile.name.replace(/\.[^.]+$/, '.jpg'), {
+      type: 'image/jpeg',
+      lastModified: Date.now(),
+    });
+  }
+
+  // Image upload handler with compression to <= 2MB
   // Image upload handler
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
+    if (!e.target.files) return;
       const filesArray = Array.from(e.target.files);
       const maxBytes = 2 * 1024 * 1024; // 2 MB
 
-      // Reject if any selected file exceeds 2 MB
-      const hasOversized = filesArray.some((file) => file.size > maxBytes);
-      if (hasOversized) {
-        toast('Image must be 2 MB or smaller');
-        // Clear the input so users can reselect the file
-        e.target.value = '';
-        return;
-      }
-      if (images.length + filesArray.length > 1) {
-        alert('You can only upload 1 image');
+    if (images.length + filesArray.length > 1) {
+      toast('You can only upload 1 image');
         e.target.value = '';
         return;
       }
 
-      setImages((prevImages) => [...prevImages, ...filesArray]);
+    (async () => {
+      try {
+        const processed = await Promise.all(
+          filesArray.map(async (file) => {
+            if (file.size > maxBytes) {
+              const compressed = await compressImageToUnder2MB(file);
+              if (compressed.size > maxBytes) {
+                toast('Could not compress image under 2 MB. Try a smaller image.');
+                return null;
+              }
+              return compressed;
+            }
+            return file;
+          })
+        );
 
-      // Create preview URLs for new images
-      const newPreviewUrls = filesArray.map((file) =>
-        URL.createObjectURL(file)
-      );
+        const validFiles = processed.filter((f): f is File => !!f);
+        if (validFiles.length === 0) {
+        e.target.value = '';
+        return;
+      }
+
+        setImages((prevImages) => [...prevImages, ...validFiles]);
+        const newPreviewUrls = validFiles.map((file) => URL.createObjectURL(file));
       setPreviewUrls((prevUrls) => [...prevUrls, ...newPreviewUrls]);
+      } catch {
+        toast('Failed to process image. Please try again.');
+      } finally {
+        // Clear the input so users can select the same file again if needed
+        e.target.value = '';
     }
+    })();
   };
 
   async function uploadImg(img: File): Promise<string> {
@@ -177,7 +268,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Upload image if exists
+      // Upload image first if provided, then create the post with the URL
       let uploadedImageUrl = '';
       if (images.length > 0) {
         uploadedImageUrl = await uploadImg(images[0]);
@@ -188,7 +279,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
         description: postText,
         collegeName: selectedCollege,
         clubName: selectedClub,
-        image: uploadedImageUrl || imageLink || '', // Use uploaded URL or existing imageLink
+        image: uploadedImageUrl || imageLink || '',
       };
 
       const submit = await axios.post<{
@@ -214,9 +305,20 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       } else {
         toast(submit.data.msg);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Post creation failed:', error);
+      const maybeMsg = (error?.response?.data?.msg || error?.message || '').toString().toLowerCase();
+      const notInClub = maybeMsg.includes('not a part of any club') || maybeMsg.includes('not part of any club') || error?.response?.status === 403;
+      if (notInClub) {
+        toast('You need to join or create a club to post.', {
+          action: {
+            label: 'Explore Clubs',
+            onClick: () => router.push('/clubs'),
+          },
+        });
+      } else {
       toast('Failed to create post. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }

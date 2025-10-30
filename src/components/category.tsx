@@ -1,5 +1,14 @@
 import React from 'react';
-import { FaUniversity } from 'react-icons/fa';
+import {
+  IconSchool,
+  IconTrophy,
+  IconPalette,
+  IconCpu,
+  IconUsersGroup,
+  IconDeviceGamepad2,
+  IconMusic,
+  IconHeartHandshake,
+} from '@tabler/icons-react';
 import { motion } from 'framer-motion';
 import Image from 'next/legacy/image';
 const Category = () => {
@@ -38,166 +47,62 @@ const Category = () => {
               {
                 name: 'Academic',
                 count: 42,
-                icon: <FaUniversity className="text-2xl" />,
+                icon: <IconSchool size={24} />,
               },
               {
                 name: 'Sports',
                 count: 37,
-                icon: (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"
-                    />
-                  </svg>
-                ),
+                icon: <IconTrophy size={24} />,
               },
               {
                 name: 'Arts',
                 count: 29,
-                icon: (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                    />
-                  </svg>
-                ),
+                icon: <IconPalette size={24} />,
               },
               {
                 name: 'Technology',
                 count: 31,
-                icon: (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                ),
+                icon: <IconCpu size={24} />,
               },
               {
                 name: 'Culture',
                 count: 24,
-                icon: (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3.055 11H5a2 2 0 002 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                ),
+                icon: <IconUsersGroup size={24} />,
               },
               {
                 name: 'Gaming',
                 count: 19,
-                icon: (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"
-                    />
-                  </svg>
-                ),
+                icon: <IconDeviceGamepad2 size={24} />,
               },
               {
                 name: 'Music',
                 count: 22,
-                icon: (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                    />
-                  </svg>
-                ),
+                icon: <IconMusic size={24} />,
               },
               {
                 name: 'Volunteering',
                 count: 16,
-                icon: (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                    />
-                  </svg>
-                ),
+                icon: <IconHeartHandshake size={24} />,
               },
             ].map((category, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
+                whileHover={{ y: -2 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="rounded-lg p-6 cursor-pointer transition duration-300 bg-black/70 backdrop-blur-sm border border-yellow-500/20 hover:bg-black/80 hover:border-yellow-500/40"
+                className="group rounded-xl p-6 cursor-pointer transition duration-300 bg-black/70 backdrop-blur-sm ring-1 ring-white/10 hover:bg-black/80 hover:ring-yellow-500/40"
               >
                 <div className="flex justify-between items-center mb-4">
-                  <div className="p-3 bg-yellow-500/20 rounded-lg text-yellow-400">
+                  <div className="p-3 rounded-lg text-yellow-400 bg-white/5 ring-1 ring-white/10 group-hover:text-yellow-300">
                     {category.icon}
                   </div>
-                  <span className="text-sm bg-yellow-500/30 rounded-full px-2 py-1 text-yellow-100">
+                  <span className="text-sm rounded-full px-2 py-1 text-yellow-100 bg-yellow-500/20 group-hover:bg-yellow-500/30">
                     {category.count}
                   </span>
                 </div>
-                <h3 className="text-lg font-medium text-white">
+                <h3 className="text-lg font-medium text-white group-hover:text-yellow-200">
                   {category.name}
                 </h3>
               </motion.div>

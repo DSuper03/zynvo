@@ -6,7 +6,7 @@ import {
   MessageCircle,
   Share,
   MoreHorizontal,
-  Plus,
+  PenSquare,
   Calendar,
   User,
   Building,
@@ -28,9 +28,6 @@ interface ApiResponse {
 }
 
 export default function Feed() {
-  const [activeTab, setActiveTab] = useState<'recents' | 'friends' | 'popular'>(
-    'recents'
-  );
   const [posts, setPost] = useState<PostData[]>([]);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -232,15 +229,19 @@ export default function Feed() {
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Responsive buttons/actions row */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              {/* Mobile View - Only Create Post Button */}
+              {/* Mobile View - Only Create Post Button */
+              }
               <div className="flex sm:hidden items-center justify-end w-full">
                 <div className="flex items-center space-x-3">
                   {/* Circular Create Post Button for Mobile */}
                   <Button
                     onClick={() => setIsPostModalOpen(true)}
-                    className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-600 hover:to-yellow-500 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-105"
+                    className="w-16 h-16 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_10px_35px_rgb(0,0,0,0.18)] transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-yellow-500 via-yellow-400 to-amber-300 hover:from-yellow-500 hover:via-yellow-500 hover:to-yellow-400 border border-yellow-300/40 relative overflow-hidden"
                   >
-                    <Plus className="h-6 w-6 text-black" />
+                    <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                      <span className="absolute -inset-[120%] bg-white/20 rotate-12 translate-x-[-20%] group-hover:translate-x-[60%] transition-transform duration-700 ease-out" />
+                    </span>
+                    <PenSquare className="h-6 w-6 text-black" />
                   </Button>
                 </div>
               </div>
@@ -254,37 +255,7 @@ export default function Feed() {
               </div>
 
               {/* Tab navigation - Hidden on mobile */}
-              <div className="hidden sm:block overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-                <div className="flex space-x-2 min-w-max">
-                  <Button
-                    onClick={() => setActiveTab('recents')}
-                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${activeTab === 'recents'
-                        ? 'bg-yellow-500 text-black'
-                        : 'text-yellow-400 hover:bg-yellow-500/10'
-                      }`}
-                  >
-                    Recents
-                  </Button>
-                  <Button
-                    onClick={() => setActiveTab('friends')}
-                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${activeTab === 'friends'
-                        ? 'bg-yellow-500 text-black'
-                        : 'text-yellow-400 hover:bg-yellow-500/10'
-                      }`}
-                  >
-                    Friends
-                  </Button>
-                  <Button
-                    onClick={() => setActiveTab('popular')}
-                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${activeTab === 'popular'
-                        ? 'bg-yellow-500 text-black'
-                        : 'text-yellow-400 hover:bg-yellow-500/10'
-                      }`}
-                  >
-                    Popular
-                  </Button>
-                </div>
-              </div>
+              
             </div>
 
             {/* Mobile slider: now placed above posts */}
@@ -523,9 +494,7 @@ export default function Feed() {
               <div className="sticky top-4">
                 <div className="bg-gray-800 rounded-lg border border-yellow-500/20 overflow-hidden">
                   <div className="bg-gradient-to-r from-yellow-500 to-yellow-400 px-4 py-3">
-                    <h3 className="text-black font-semibold">
-                      Powered by Zynvo
-                    </h3>
+                    
                   </div>
                   <div className="space-y-4">
                     {sliderEvents.map((ev, i) => (
@@ -540,9 +509,7 @@ export default function Feed() {
                             />
                           </div>
                           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                            <span className="text-black text-xs font-medium px-2 py-1 rounded-full">
-                              {ev.title}
-                            </span>
+                           
                           </div>
                         </div>
                       </Card>
