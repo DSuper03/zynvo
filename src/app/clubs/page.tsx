@@ -557,18 +557,18 @@ const ClubsPage = () => {
                     </Link>
 
                     <div className="p-3 pt-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                         <Button
                           asChild
-                          className="flex-1 text-xs font-medium h-9 px-3 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 bg-blue-600 hover:bg-blue-500 text-white focus-visible:ring-blue-400"
+                          className="flex-1 min-w-0 text-xs font-medium h-9 sm:h-10 px-2 sm:px-3 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 bg-blue-600 hover:bg-blue-500 text-white focus-visible:ring-blue-400"
                         >
-                          <Link href={`/clubs/${club.id}`}>
-                            <Eye className="h-3 w-3 mr-1.5" />
-                            Check Club
+                          <Link href={`/clubs/${club.id}`} className="flex items-center justify-center gap-1">
+                            <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0" />
+                            <span className="truncate">Check Club</span>
                           </Link>
                         </Button>
                         <Button
-                          className={`flex-1 text-xs font-medium h-9 px-3 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 ${
+                          className={`flex-1 min-w-0 text-xs font-medium h-9 sm:h-10 px-2 sm:px-3 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 ${
                             isUserMemberOfClub(club)
                               ? 'bg-green-600 hover:bg-green-500 text-white focus-visible:ring-green-400'
                               : 'bg-yellow-500 hover:bg-yellow-400 text-black focus-visible:ring-yellow-400'
@@ -583,18 +583,7 @@ const ClubsPage = () => {
                             }
                           }}
                         >
-                          {isUserMemberOfClub(club) ? 'Joined' : 'Join Club'}
-                        </Button>
-                        <Button
-                          className="bg-gray-700 hover:bg-gray-600 text-white text-xs font-medium h-9 w-9 p-0 rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 flex-shrink-0"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleShareClub({ id: club.id, name: club.name, description: club.description });
-                          }}
-                          title="Share"
-                          aria-label="Share club"
-                        >
-                          <Share2 className="h-4 w-4" />
+                          <span className="truncate">{isUserMemberOfClub(club) ? 'Joined' : 'Join Club'}</span>
                         </Button>
                       </div>
                     </div>
@@ -673,18 +662,18 @@ const ClubsPage = () => {
                         </div>
                       </Link>
 
-                      <div className="p-3 sm:p-4 pt-0 xs:pt-3 sm:pt-4 flex xs:items-center gap-2 flex-wrap">
+                      <div className="p-3 sm:p-4 pt-0 xs:pt-3 sm:pt-4 flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
                         <Button
                           asChild
-                          className="flex-1 text-xs font-medium h-9 px-3 sm:px-4 rounded-lg transition-all duration-200 whitespace-nowrap hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 bg-blue-600 hover:bg-blue-500 text-white focus-visible:ring-blue-400"
+                          className="flex-1 min-w-0 text-xs font-medium h-9 sm:h-10 px-2 sm:px-3 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 bg-blue-600 hover:bg-blue-500 text-white focus-visible:ring-blue-400"
                         >
-                          <Link href={`/clubs/${club.id}`}>
-                            <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5" />
-                            Check Club
+                          <Link href={`/clubs/${club.id}`} className="flex items-center justify-center gap-1 sm:gap-1.5">
+                            <Eye className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                            <span className="truncate">Check Club</span>
                           </Link>
                         </Button>
                         <Button
-                          className={`flex-1 text-xs font-medium h-9 px-3 sm:px-4 rounded-lg transition-all duration-200 whitespace-nowrap hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 ${
+                          className={`flex-1 min-w-0 text-xs font-medium h-9 sm:h-10 px-2 sm:px-3 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 ${
                             isUserMemberOfClub(club)
                               ? 'bg-green-600 hover:bg-green-500 text-white focus-visible:ring-green-400'
                               : 'bg-yellow-500 hover:bg-yellow-400 text-black focus-visible:ring-yellow-400'
@@ -699,18 +688,7 @@ const ClubsPage = () => {
                             }
                           }}
                         >
-                          {isUserMemberOfClub(club) ? 'Joined' : 'Join Club'}
-                        </Button>
-                        <Button
-                          className="bg-gray-700 hover:bg-gray-600 text-white text-xs sm:text-sm font-medium h-9 w-9 p-0 rounded-lg transition-all duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 flex-shrink-0"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleShareClub({ id: club.id, name: club.name, description: club.description });
-                          }}
-                          title="Share"
-                          aria-label="Share club"
-                        >
-                          <Share2 className="h-4 w-4" />
+                          <span className="truncate">{isUserMemberOfClub(club) ? 'Joined' : 'Join Club'}</span>
                         </Button>
                       </div>
                     </div>
