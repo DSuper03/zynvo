@@ -6,7 +6,7 @@ import { X, Upload, Camera, Plus, Trash2, ChevronDown, Building } from 'lucide-r
 import { CreateClubModalProps } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
+import { toBase64, uploadImageToImageKit, compressImageToUnder2MB } from '@/lib/imgkit';
 import axios from 'axios';
 import { fetchClubsByCollege } from '@/app/api/hooks/useClubs';
 import { useRouter } from 'next/navigation';
@@ -38,6 +38,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   const [selectedExistingClub, setSelectedExistingClub] = useState<string>('');
   const [isLoadingClubs, setIsLoadingClubs] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [typeSearch, setTypeSearch] = useState('');
 
 
   useEffect(() => {
@@ -185,12 +186,22 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImg(file);
+      const maxBytes = 2 * 1024 * 1024;
+      let processed = file;
+      if (file.size > maxBytes) {
+        processed = await compressImageToUnder2MB(file);
+        if (processed.size > maxBytes) {
+          toast('Could not compress image under 2 MB. Try a smaller image.');
+          return;
+        }
+      }
+      setImg(processed);
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewImage(reader.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(processed);
+      e.currentTarget.value = '';
     }
   };
 
@@ -222,7 +233,16 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
       let image: string;
       
       if (img) {
-        image = await uploadImageToImageKit(await toBase64(img), img.name);
+        const maxBytes = 2 * 1024 * 1024;
+        let toUpload = img;
+        if (img.size > maxBytes) {
+          toUpload = await compressImageToUnder2MB(img);
+          if (toUpload.size > maxBytes) {
+            toast('Could not compress image under 2 MB. Try a smaller image.');
+            return;
+          }
+        }
+        image = await uploadImageToImageKit(await toBase64(toUpload), toUpload.name);
       } else {
         toast('please upload a logo for your club');
         return;
@@ -529,6 +549,17 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
             >
               Category/Type*
             </label>
+            {/* Search box for club type */}
+            <input
+              type="text"
+              placeholder="Search for a type..."
+              value={typeSearch}
+              onChange={e => {
+                const value = e.target.value;
+                setTypeSearch(value);
+              }}
+              className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none mb-2"
+            />
             <select
               id="type"
               name="type"
@@ -537,15 +568,40 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
               onChange={handleChange}
               className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
             >
-              <option value="" disabled>
+              <option value="" disabled hidden>
                 Select a type
               </option>
-              <option value="tech">Technology</option>
-              <option value="cultural">Cultural</option>
-              <option value="business">Business </option>
-              <option value="social">Social</option>
-              <option value="literary">Literature</option>
-              <option value="design">Design</option>
+              {/* Filter types based on search */}
+              {[
+                { label: "Open Mic", value: "open_mic"},
+                { label: "Technology", value: "tech" },
+                { label: "Quiz", value: "Quiz" },
+                { label: "Sports", value: "Sports" },
+                { label: "Debate", value: "Debate" },
+                { label: "Drama", value: "Drama" },
+                { label: "Music", value: "Music" },
+                { label: "Theatre", value: "Theatre" },
+                { label: "Art", value: "Art" },
+                { label: "Crafts", value: "Crafts" },
+                { label: "Food", value: "Food" },
+                { label: "Fashion", value: "Fashion" },
+                { label: "Photography", value: "Photography" },
+                { label: "Other", value: "Other" },
+                { label: "Cultural", value: "cultural" },
+                { label: "Business", value: "business" },
+                { label: "Social", value: "social" },
+                { label: "Literature", value: "literary" },
+                { label: "Design", value: "design" }
+              ]
+                .filter(opt =>
+                  !typeSearch ||
+                  opt.label.toLowerCase().includes(typeSearch.toLowerCase())
+                )
+                .map(opt => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
             </select>
           </div>
 

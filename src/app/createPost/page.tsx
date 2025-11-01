@@ -85,16 +85,32 @@ export default function CreatePostModal() {
       return;
     }
 
-    const files = Array.from(e.target.files);
-    if (files.length > 0) {
-      setImages([...images, ...files]);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-      // Create preview URLs
-      const newPreviewUrls = files.map((file: any) =>
-        URL.createObjectURL(file)
+    const MAX_BYTES = 2 * 1024 * 1024;
+
+    (async () => {
+      const { compressImageToUnder2MB } = await import('@/lib/imgkit');
+      const processed = await Promise.all(
+        files.map(async (f: any) => {
+          if (f.size > MAX_BYTES) {
+            const c = await compressImageToUnder2MB(f);
+            return c.size <= MAX_BYTES ? c : null;
+          }
+          return f;
+        })
       );
+      const valid = processed.filter(Boolean) as File[];
+      if (valid.length === 0) {
+        alert('Could not compress images under 2 MB. Try smaller images.');
+        return;
+      }
+      setImages([...images, ...valid]);
+      const newPreviewUrls = valid.map((file: any) => URL.createObjectURL(file));
       setPreviewUrls([...previewUrls, ...newPreviewUrls]);
-    }
+      e.target.value = '';
+    })();
   };
 
   const removeImage = (index: any) => {

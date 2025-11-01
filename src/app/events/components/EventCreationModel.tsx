@@ -28,7 +28,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { EventFormData } from '@/types/global-Interface';
-import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
+import { toBase64, uploadImageToImageKit, compressImageToUnder2MB } from '@/lib/imgkit';
 import { toast } from 'sonner';
 import axios from 'axios';
 import NoTokenModal from '@/components/modals/remindModal';
@@ -67,6 +67,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     prizes: '',
     contactEmail: '',
     contactPhone: '',
+    form: '',
   });
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -131,16 +132,46 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev: any) => ({ ...prev, [name]: value }));
-
-    // Clear error when field is edited
-    if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
+    setFormData((prev: any) => {
+      const updated = { ...prev, [name]: value };
+      
+      // Validate dates in real-time
+      const newErrors: Record<string, string> = { ...errors };
+      
+      // Validate event end date vs start date
+      if (name === 'eventStartDate' || name === 'eventEndDate') {
+        if (updated.eventStartDate && updated.eventEndDate) {
+          const startDate = new Date(updated.eventStartDate);
+          const endDate = new Date(updated.eventEndDate);
+          if (endDate < startDate) {
+            newErrors.eventEndDate = 'End date cannot be before start date';
+          } else {
+            delete newErrors.eventEndDate;
+          }
+        }
+      }
+      
+      // Validate application end date vs start date
+      if (name === 'applicationStartDate' || name === 'applicationEndDate') {
+        if (updated.applicationStartDate && updated.applicationEndDate) {
+          const appStartDate = new Date(updated.applicationStartDate);
+          const appEndDate = new Date(updated.applicationEndDate);
+          if (appEndDate < appStartDate) {
+            newErrors.applicationEndDate = 'Application end date cannot be before start date';
+          } else {
+            delete newErrors.applicationEndDate;
+          }
+        }
+      }
+      
+      // Clear error when field is edited (only if validation passes)
+      if (newErrors[name]) {
         delete newErrors[name];
-        return newErrors;
-      });
-    }
+      }
+      
+      setErrors(newErrors);
+      return updated;
+    });
   }, [errors]);
 
   // Memoized handler for checkbox changes
@@ -149,19 +180,28 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     setFormData((prev: any) => ({ ...prev, [name]: checked }));
   }, []);
 
-  // Handle file upload
+  // Handle file upload with compression under 2MB
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setImg(file);
-      // Create preview URL
+      const maxBytes = 2 * 1024 * 1024;
+      let processed = file;
+      if (file.size > maxBytes) {
+        processed = await compressImageToUnder2MB(file);
+        if (processed.size > maxBytes) {
+          toast('Could not compress image under 2 MB. Try a smaller image.');
+          return;
+        }
+      }
+      setImg(processed);
       const fileReader = new FileReader();
       fileReader.onload = () => {
         if (typeof fileReader.result === 'string') {
           setPreviewUrl(fileReader.result);
         }
       };
-      fileReader.readAsDataURL(file);
+      fileReader.readAsDataURL(processed);
+      e.currentTarget.value = '';
     }
   };
 
@@ -194,6 +234,25 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           newErrors.eventStartDate = 'Event start date is required';
         if (!formData.eventEndDate)
           newErrors.eventEndDate = 'Event end date is required';
+        
+        // Validate end date is not before start date
+        if (formData.eventStartDate && formData.eventEndDate) {
+          const startDate = new Date(formData.eventStartDate);
+          const endDate = new Date(formData.eventEndDate);
+          if (endDate < startDate) {
+            newErrors.eventEndDate = 'End date cannot be before start date';
+          }
+        }
+        
+        // Validate application end date is not before application start date
+        if (formData.applicationStartDate && formData.applicationEndDate) {
+          const appStartDate = new Date(formData.applicationStartDate);
+          const appEndDate = new Date(formData.applicationEndDate);
+          if (appEndDate < appStartDate) {
+            newErrors.applicationEndDate = 'Application end date cannot be before start date';
+          }
+        }
+        
         if (!formData.contactEmail?.trim())
           newErrors.contactEmail = 'Contact email is required';
         if (!formData.contactPhone?.trim())
@@ -232,7 +291,17 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       setIsSubmitting(false);
       return;
     } else {
-      imageLink = await uploadImageToImageKit(await toBase64(img), img.name);
+      const maxBytes = 2 * 1024 * 1024;
+      let toUpload = img;
+      if (img.size > maxBytes) {
+        toUpload = await compressImageToUnder2MB(img);
+        if (toUpload.size > maxBytes) {
+          toast('Could not compress image under 2 MB. Try a smaller image.');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      imageLink = await uploadImageToImageKit(await toBase64(toUpload), toUpload.name);
       toast('Image uploaded');
     }
 
@@ -343,9 +412,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                             }
                           `}
                           onClick={() => {
+                            const modeValue = mode.toLowerCase();
                             setFormData((prev: any) => ({
                               ...prev,
-                              eventMode: mode.toLowerCase(),
+                              eventMode: modeValue,
+                              // If online, set venue to "Online"
+                              venue: modeValue === 'online' ? 'Online' : prev.venue,
                             }));
                             if (errors.eventMode) {
                               setErrors((prev) => {
@@ -488,6 +560,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                         <SelectItem value="cultural">Cultural</SelectItem>
                         <SelectItem value="sports">Sports</SelectItem>
                         <SelectItem value="technical">Technical</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.eventType && (
@@ -545,9 +618,17 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       type="text"
                       value={formData.venue}
                       onChange={handleChange}
-                      className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
-                      placeholder="Event venue"
+                      disabled={formData.eventMode === 'online'}
+                      className={`w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none ${
+                        formData.eventMode === 'online' ? 'opacity-70 cursor-not-allowed' : ''
+                      }`}
+                      placeholder={formData.eventMode === 'online' ? 'Online' : 'Event venue'}
                     />
+                    {formData.eventMode === 'online' && (
+                      <p className="mt-1 text-xs text-gray-400">
+                        Venue is automatically set to "Online" for online events
+                      </p>
+                    )}
                     {errors.venue && (
                       <p className="mt-1 text-sm text-red-500">
                         {errors.venue}
@@ -628,6 +709,32 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       />
                     </div>
                   </div>
+
+                  <div>
+                    <label
+                      htmlFor="form"
+                      className="block text-sm font-medium text-yellow-400 mb-1"
+                    >
+                      Registration/Application Form (optional)
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Globe className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        id="form"
+                        name="form"
+                        type="url"
+                        value={formData.form || ''}
+                        onChange={handleChange}
+                        className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
+                        placeholder="https://forms.google.com/... or https://typeform.com/..."
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-gray-400">
+                      Add a link to your registration form (Google Forms, Typeform, etc.)
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
@@ -685,6 +792,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                           type="date"
                           value={formData.eventEndDate}
                           onChange={handleChange}
+                          min={formData.eventStartDate || undefined}
                           className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -736,9 +844,15 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                           type="date"
                           value={formData.applicationEndDate}
                           onChange={handleChange}
+                          min={formData.applicationStartDate || undefined}
                           className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
                         />
                       </div>
+                      {errors.applicationEndDate && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.applicationEndDate}
+                        </p>
+                      )}
                     </div>
                   </div>
 

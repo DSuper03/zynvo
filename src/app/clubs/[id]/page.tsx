@@ -46,6 +46,9 @@ import {
   Plus,
   Eye,
   ThumbsUp,
+  Instagram,
+  Linkedin,
+  Twitter,
 } from 'lucide-react';
 import JoinClubModal from '../joinclub';
 import CreateEventModal from '../../events/components/EventCreationModel';
@@ -100,7 +103,7 @@ export default function ClubPage({}: ClubPageProps) {
   const param = useParams();
   const id = param.id as string;
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'announcements' | 'events' | 'members'>('announcements');
+  const [activeTab, setActiveTab] = useState<'announcements' | 'events' | 'members' | 'social'>('announcements');
   const [isJoined, setIsJoined] = useState(false);
   const [club, setClub] = useState<ClubTypeProps>({
     id: '',
@@ -126,6 +129,11 @@ export default function ClubPage({}: ClubPageProps) {
   const [loading, setLoading] = useState(true);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+  const [socialLinks, setSocialLinks] = useState<{
+    instagram?: string;
+    linkedin?: string;
+    twitter?: string;
+  }>({});
 
   // Function to check if current user is a member of the club
   const checkUserMembership = (clubMembers: any[], userEmail?: string): boolean => {
@@ -204,6 +212,13 @@ export default function ClubPage({}: ClubPageProps) {
           facultyEmail: clubData.facultyEmail,
           image: clubData.profilePicUrl || '/logozynvo.jpg',
           category: clubData.type || 'tech',
+        });
+
+        // Set social media links
+        setSocialLinks({
+          instagram: (clubData as any).instagram || undefined,
+          linkedin: (clubData as any).linkedin || undefined,
+          twitter: (clubData as any).twitter || undefined,
         });
 
         // Get current user email and check membership
@@ -473,9 +488,9 @@ export default function ClubPage({}: ClubPageProps) {
               <Share2 size={20} />
             </button>
 
-            <button className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors">
+            <Button className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors">
               <Flag size={20} />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -520,6 +535,17 @@ export default function ClubPage({}: ClubPageProps) {
                  <span className="text-sm">Members</span>
                  <span className="px-1.5 py-0.5 bg-gray-600/50 text-xs rounded-full">{getMemberCount(club)}</span>
                </Button>
+               <Button
+                 onClick={() => setActiveTab('social')}
+                 className={`flex-shrink-0 px-4 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
+                   activeTab === 'social'
+                     ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg'
+                     : 'text-gray-400 bg-gray-800/50 hover:text-white hover:bg-gray-700/50'
+                 }`}
+               >
+                 <Share2 className="w-4 h-4" />
+                 <span className="text-sm">Social</span>
+               </Button>
              </div>
            </div>
 
@@ -561,6 +587,17 @@ export default function ClubPage({}: ClubPageProps) {
                    <Users className="w-4 h-4 lg:w-5 lg:h-5" />
                    <span className="text-sm lg:text-base">Members</span>
                    <span className="px-2 py-1 bg-gray-600/50 text-xs rounded-full">{getMemberCount(club)}</span>
+                 </Button>
+                 <Button
+                   onClick={() => setActiveTab('social')}
+                   className={`px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 lg:gap-3 ${
+                     activeTab === 'social'
+                       ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg shadow-yellow-500/25 transform scale-105'
+                       : 'text-gray-400 hover:text-white hover:bg-gray-700/50 hover:scale-105'
+                   }`}
+                 >
+                   <Share2 className="w-4 h-4 lg:w-5 lg:h-5" />
+                   <span className="text-sm lg:text-base">Social</span>
                  </Button>
                </div>
              </div>
@@ -813,6 +850,104 @@ export default function ClubPage({}: ClubPageProps) {
                       Join Now
                     </button>
                   )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Social Tab */}
+          {activeTab === 'social' && (
+            <div className="space-y-4 sm:space-y-6">
+              {/* Social Header - Responsive Design */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Share2 className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">Social Media</h2>
+                </div>
+              </div>
+
+              {/* Social Links */}
+              {(socialLinks.instagram || socialLinks.linkedin || socialLinks.twitter) ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {/* Instagram */}
+                  {socialLinks.instagram && (
+                    <a
+                      href={socialLinks.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 rounded-xl sm:rounded-2xl p-6 sm:p-8 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-pink-500/25"
+                    >
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                          <Instagram className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Instagram</h3>
+    
+                        </div>
+                        <div className="flex items-center text-white/90 text-sm group-hover:text-white transition-colors">
+                          <span>Visit Profile</span>
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        </div>
+                      </div>
+                    </a>
+                  )}
+
+                  {/* LinkedIn */}
+                  {socialLinks.linkedin && (
+                    <a
+                      href={socialLinks.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl p-6 sm:p-8 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25"
+                    >
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                          <Linkedin className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">LinkedIn</h3>
+                          <p className="text-white/80 text-sm truncate max-w-full overflow-hidden">{socialLinks.linkedin}</p>
+                        </div>
+                        <div className="flex items-center text-white/90 text-sm group-hover:text-white transition-colors">
+                          <span>Visit Profile</span>
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        </div>
+                      </div>
+                    </a>
+                  )}
+
+                  {/* Twitter */}
+                  {socialLinks.twitter && (
+                    <a
+                      href={socialLinks.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group bg-gradient-to-br from-sky-500 to-blue-500 rounded-xl sm:rounded-2xl p-6 sm:p-8 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-sky-500/25"
+                    >
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                          <Twitter className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Twitter</h3>
+                        
+                        </div>
+                        <div className="flex items-center text-white/90 text-sm group-hover:text-white transition-colors">
+                          <span>Visit Profile</span>
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        </div>
+                      </div>
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-8 sm:p-12 md:p-16 text-center">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto bg-gray-800/50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                    <Share2 className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">No Social Media Links</h3>
+                  <p className="text-gray-400 mb-4 sm:mb-6 text-sm sm:text-base">This club hasn't added any social media links yet.</p>
                 </div>
               )}
             </div>

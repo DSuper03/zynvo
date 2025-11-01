@@ -35,6 +35,7 @@ export interface EventFormData {
   prizes: string;
   contactEmail: string;
   contactPhone: string;
+  form?: string; // Registration/Application form URL (Google Forms, Typeform, etc.)
   // image: string;
 }
 

@@ -2,10 +2,11 @@
 
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import EventTab from "../../../components/eventTab";
 import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
 
 export default function ClubAdminPage() {
   const params = useParams();
@@ -27,6 +28,7 @@ export default function ClubAdminPage() {
   const [isClient, setIsClient] = useState(false);
   const [token, setToken] = useState('');
   const navigate = useRouter();
+  const hasShownToast = useRef(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -56,9 +58,10 @@ export default function ClubAdminPage() {
 
   useEffect(() => setIsClient(true), []);
 
-  const fetchClubData = async () => {
+  const fetchClubData = useCallback(async () => {
     if (!clubId || !isClient || !token) return;
     try {
+      setLoading(true);
       const fetch = await axios.get<any>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/${clubId}`, { 
         headers: { authorization: `Bearer ${token}` }
       });
@@ -70,11 +73,17 @@ export default function ClubAdminPage() {
       setInstagramLink(fetch.data.club.instagram);
       setLinkedinLink(fetch.data.club.linkedin);
       setTwitterLink(fetch.data.club.twitter);
-      toast(fetch.data.msg);
+      // Only show toast once, not on every fetch
+      if (!hasShownToast.current && fetch.data.msg) {
+        toast(fetch.data.msg);
+        hasShownToast.current = true;
+      }
     } catch {
       alert('Error fetching club data');
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [clubId, isClient, token]);
 
   const updateClubLinks = async () => {
     try {
@@ -156,17 +165,24 @@ export default function ClubAdminPage() {
 
   useEffect(() => {
     if (!isClient || !token || !clubId) return;
-    setLoading(true);
     fetchClubData();
-    setLoading(false);
-  }, [token, isClient, clubId, fetchClubData]);
+  }, [fetchClubData, isClient, token, clubId]);
 
   if (loading) return <div className="p-6 text-yellow-400">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-black text-yellow-400 font-[Inter] p-10">
       <div className="max-w-3xl mx-auto space-y-10">
-        <h1 className="text-4xl font-bold tracking-tight text-yellow-300">⚡ Club Admin Dashboard</h1>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate.back()}
+            className="flex items-center justify-center w-10 h-10 rounded-lg bg-zinc-900 border border-yellow-400/30 text-yellow-400 hover:bg-yellow-400/10 hover:text-yellow-300 transition-all"
+            title="Go back"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="text-4xl font-bold tracking-tight text-yellow-300">⚡ Club Admin Dashboard</h1>
+        </div>
 
         {clubData && clubData.name && (
           <div className="space-y-10">
