@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -29,6 +30,7 @@ import EventBadgeCard from '@/components/ticket';
 import * as htmlToImage from 'html-to-image';
 import TextWithLinks from '@/components/TextWithLinks';
 import { headers } from 'next/headers';
+
 
 interface Event {
   EventName: string;
@@ -950,7 +952,9 @@ export default function ZynvoDashboard() {
                     as="button"
                     className="dark:bg-black bg-yellow-400 text-black dark:text-white flex items-center space-x-2 px-3 py-1 text-xs sm:text-sm self-start sm:self-auto"
                   >
+                    <Link href={`/clubs/${userData.clubId}`}>
                     <p className="truncate max-w-[120px] sm:max-w-none"> {userData.clubName} </p>
+                    </Link>
                     {founder === 'true' && (
                       <Button
                         onClick={() => navigate.push(`/admin/${userData.clubId}`)}
