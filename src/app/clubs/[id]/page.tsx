@@ -103,7 +103,7 @@ export default function ClubPage({}: ClubPageProps) {
   const param = useParams();
   const id = param.id as string;
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'announcements' | 'events' | 'members' | 'social'>('announcements');
+  const [activeTab, setActiveTab] = useState<'announcements' | 'events' | 'members' | 'social'>('events');
   const [isJoined, setIsJoined] = useState(false);
   const [club, setClub] = useState<ClubTypeProps>({
     id: '',
@@ -501,17 +501,6 @@ export default function ClubPage({}: ClubPageProps) {
            <div className="block sm:hidden py-4">
              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
                <Button
-                 onClick={() => setActiveTab('announcements')}
-                 className={`flex-shrink-0 px-4 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
-                   activeTab === 'announcements'
-                     ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg'
-                     : 'text-gray-400 bg-gray-800/50 hover:text-white hover:bg-gray-700/50'
-                 }`}
-               >
-                 <Bell className="w-4 h-4" />
-                 <span className="text-sm">Announcements</span>
-               </Button>
-               <Button
                  onClick={() => setActiveTab('events')}
                  className={`flex-shrink-0 px-4 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
                    activeTab === 'events'
@@ -546,6 +535,17 @@ export default function ClubPage({}: ClubPageProps) {
                  <Share2 className="w-4 h-4" />
                  <span className="text-sm">Social</span>
                </Button>
+               <Button
+                 onClick={() => setActiveTab('announcements')}
+                 className={`flex-shrink-0 px-4 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
+                   activeTab === 'announcements'
+                     ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg'
+                     : 'text-gray-400 bg-gray-800/50 hover:text-white hover:bg-gray-700/50'
+                 }`}
+               >
+                 <Bell className="w-4 h-4" />
+                 <span className="text-sm">Announcements</span>
+               </Button>
              </div>
            </div>
 
@@ -553,17 +553,6 @@ export default function ClubPage({}: ClubPageProps) {
            <div className="hidden sm:flex justify-center py-6">
              <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-2 shadow-2xl">
                <div className="flex items-center gap-2">
-                 <Button
-                   onClick={() => setActiveTab('announcements')}
-                   className={`px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 lg:gap-3 ${
-                     activeTab === 'announcements'
-                       ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg shadow-yellow-500/25 transform scale-105'
-                       : 'text-gray-400 hover:text-white hover:bg-gray-700/50 hover:scale-105'
-                   }`}
-                 >
-                   <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
-                   <span className="text-sm lg:text-base">Announcements</span>
-                 </Button>
                  <Button
                    onClick={() => setActiveTab('events')}
                    className={`px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 lg:gap-3 ${
@@ -599,6 +588,17 @@ export default function ClubPage({}: ClubPageProps) {
                    <Share2 className="w-4 h-4 lg:w-5 lg:h-5" />
                    <span className="text-sm lg:text-base">Social</span>
                  </Button>
+                 <Button
+                   onClick={() => setActiveTab('announcements')}
+                   className={`px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 lg:gap-3 ${
+                     activeTab === 'announcements'
+                       ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg shadow-yellow-500/25 transform scale-105'
+                       : 'text-gray-400 hover:text-white hover:bg-gray-700/50 hover:scale-105'
+                   }`}
+                 >
+                   <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
+                   <span className="text-sm lg:text-base">Announcements</span>
+                 </Button>
                </div>
              </div>
            </div>
@@ -609,14 +609,6 @@ export default function ClubPage({}: ClubPageProps) {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-4 sm:py-6 md:py-8">
         {/* Tab Content */}
         <div className="space-y-4 sm:space-y-6 md:space-y-8">
-          {/* Announcements Tab */}
-          {activeTab === 'announcements' && (
-            <div className="space-y-4 sm:space-y-6">
-              {/* Show announcement component for everyone */}
-              <ZynvoClubAnnouncement club={club} />
-            </div>
-          )}
-
           {/* Events Tab */}
           {activeTab === 'events' && (
             <div className="space-y-4 sm:space-y-6">
@@ -952,6 +944,14 @@ export default function ClubPage({}: ClubPageProps) {
               )}
             </div>
           )}
+
+          {/* Announcements Tab */}
+          {activeTab === 'announcements' && (
+            <div className="space-y-4 sm:space-y-6">
+              {/* Show announcement component for everyone */}
+              <ZynvoClubAnnouncement club={club} />
+            </div>
+          )}
         </div>
       </div>
 
@@ -996,6 +996,7 @@ export default function ClubPage({}: ClubPageProps) {
           clubName={club.name}
           clubImage={club.image || '/logozynvo.jpg'}
           clubId={id}
+          requirements={club.requirements}
         />
       )}
 

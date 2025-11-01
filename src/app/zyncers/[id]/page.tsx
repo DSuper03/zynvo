@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Calendar, BarChart2, User, ArrowLeft, Share2 } from 'lucide-react';
 import axios from 'axios';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import EventBadgeCard from '@/components/ticket';
@@ -176,6 +177,7 @@ export default function PublicUserProfile() {
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [ticketData, setTicketData] = useState<any>({});
+  const [clubId, setClubId] = useState<string | null>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -262,6 +264,34 @@ export default function PublicUserProfile() {
           });
 
           setPosts(response.data.user.CreatePost);
+
+          // Fetch club ID if club name exists
+          if (clubName) {
+            try {
+              const clubsResponse = await axios.get<any>(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getAll?page=1&limit=1000`,
+                {
+                  headers: token
+                    ? {
+                        authorization: `Bearer ${token}`,
+                      }
+                    : {},
+                }
+              );
+
+              const clubs = clubsResponse.data?.resp || clubsResponse.data?.clubs || [];
+              const matchingClub = clubs.find((club: any) => 
+                club.name && club.name.toLowerCase() === clubName.toLowerCase()
+              );
+              
+              if (matchingClub?.id) {
+                setClubId(matchingClub.id);
+              }
+            } catch (clubError) {
+              console.error('Error fetching club ID:', clubError);
+              // Continue without club ID - link won't work but page will still render
+            }
+          }
         } else {
           setIsNotFound(true);
         }
@@ -465,12 +495,39 @@ export default function PublicUserProfile() {
 
           {/* Name and Bio */}
           <div className="mb-4">
-            <h2 className="text-2xl font-bold text-white mb-1">
-              {userData.name || 'User'}
-            </h2>
-            <p className="text-gray-400 mb-3 leading-relaxed">
-              {userData.bio || "This user hasn't added a bio yet."}
-            </p>
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-white mb-1">
+                  {userData.name || 'User'}
+                </h2>
+                <p className="text-gray-400 mb-3 leading-relaxed">
+                  {userData.bio || "This user hasn't added a bio yet."}
+                </p>
+              </div>
+              {/* Club Name on Right Side */}
+              {(userData.clubName && userData.clubName.trim()) && (
+                <div className="flex-shrink-0">
+                  {clubId ? (
+                    <Link
+                      href={`/clubs/${clubId}`}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 hover:border-yellow-500/50 text-yellow-400 transition-all duration-200 group"
+                    >
+                      <FaUserGraduate className="w-4 h-4 text-yellow-400 group-hover:scale-110 transition-transform" />
+                      <span className="text-sm font-medium whitespace-nowrap">
+                        {userData.clubName.trim()}
+                      </span>
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-400">
+                      <FaUserGraduate className="w-4 h-4 text-yellow-400" />
+                      <span className="text-sm font-medium whitespace-nowrap">
+                        {userData.clubName.trim()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Info Row */}
             <div className="space-y-1 text-sm text-gray-300">
@@ -490,10 +547,6 @@ export default function PublicUserProfile() {
                       })
                     : 'Recently'}
                 </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <FaUserGraduate className="w-4 h-4 text-yellow-400" />
-                <span>{(userData.clubName && userData.clubName.trim()) || 'zynvo community fresher'}</span>
               </div>
               {userData.collegeName && (
                 <div className="text-gray-300">{userData.collegeName}</div>

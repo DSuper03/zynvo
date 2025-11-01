@@ -6,18 +6,16 @@ import {
   Search,
   Plus,
   Users,
-  Star,
-  TrendingUp,
-  Calendar,
   Grid3X3,
   List,
   Share2,
   User,
+  Eye,
+  ArrowRight,
 } from 'lucide-react';
 import {
   IconCpu,
   IconMasksTheater,
-  IconTrendingUp,
   IconUsersGroup,
   IconBook2,
   IconPalette,
@@ -93,7 +91,7 @@ const categories = [
 const ClubsPage = () => {
   const [activetype, setActivetype] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('popular'); // 'popular', 'new', 'trending'
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [isGridView, setIsGridView] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
@@ -101,14 +99,17 @@ const ClubsPage = () => {
     name: string;
     image: string;
     id: string;
+    requirements?: string;
   } | null>(null);
   const [clubData, setData] = useState<response['resp']>();
+  const [allClubs, setAllClubs] = useState<response['resp']>([]); // Store all clubs for search
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [token, setToken] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [userJoinedClubIds, setUserJoinedClubIds] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isLoadingAll, setIsLoadingAll] = useState(false);
   const categoriesRef = useRef<HTMLDivElement | null>(null);
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(false);
@@ -164,25 +165,84 @@ const ClubsPage = () => {
     }
   }, []);
 
+  // Debounce search query to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      // Reset to page 1 when search query changes
+      setCurrentPage(1);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch clubs - either all pages (for search) or paginated
   useEffect(() => {
     async function call() {
       if (!token) {
         return;
       }
-      const response = await axios.get<response>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getAll?page=${currentPage}`,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
+
+      // If there's a search query, fetch all pages
+      if (debouncedSearchQuery.trim()) {
+        setIsLoadingAll(true);
+        try {
+          // First, get the total pages by fetching page 1
+          const firstPageResponse = await axios.get<response>(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getAll?page=1`,
+            {
+              headers: {
+                authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          const totalPagesCount = firstPageResponse.data.totalPages || 1;
+          setTotalPages(totalPagesCount);
+
+          // Fetch all pages in parallel
+          const pagePromises = Array.from({ length: totalPagesCount }, (_, i) =>
+            axios.get<response>(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getAll?page=${i + 1}`,
+              {
+                headers: {
+                  authorization: `Bearer ${token}`,
+                },
+              }
+            )
+          );
+
+          const allResponses = await Promise.all(pagePromises);
+          
+          // Combine all clubs from all pages
+          const allClubsCombined = allResponses.flatMap((response) => response.data.resp || []);
+          
+          setAllClubs(allClubsCombined);
+          setData(allClubsCombined); // Set data for filtering
+        } catch (error) {
+          console.error('Error fetching all clubs for search:', error);
+          toast.error('Failed to load all clubs for search');
+        } finally {
+          setIsLoadingAll(false);
         }
-      );
-      setData(response.data.resp);
-      setTotalPages(response.data.totalPages || 1);
+      } else {
+        // No search query - use normal pagination
+        setAllClubs([]); // Clear all clubs when not searching
+        const response = await axios.get<response>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getAll?page=${currentPage}`,
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setData(response.data.resp);
+        setTotalPages(response.data.totalPages || 1);
+      }
     }
 
     call();
-  }, [currentPage, token]);
+  }, [currentPage, token, debouncedSearchQuery]);
 
   // Categories scroll controls visibility
   useEffect(() => {
@@ -241,6 +301,7 @@ const ClubsPage = () => {
       name: club.name,
       image: club.profilePicUrl || 'https://via.placeholder.com/150',
       id: club.id,
+      requirements: club.requirements || undefined,
     });
     setIsJoinModalOpen(true);
   };
@@ -248,8 +309,9 @@ const ClubsPage = () => {
   const filteredClubs =
     clubData?.filter((club) => {
       const matchesSearch =
-        club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        club.description.toLowerCase().includes(searchQuery.toLowerCase());
+        !debouncedSearchQuery.trim() ||
+        club.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        club.description?.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
       const matchesCategory =
         activetype === 'all' || String(club.type).toLowerCase() === activetype;
       return matchesSearch && matchesCategory;
@@ -279,80 +341,63 @@ const ClubsPage = () => {
     <div className="flex flex-col h-screen mt-11">
       {/* Fixed Header Section */}
       <div className="flex-shrink-0 sticky top-0 z-20 bg-black border-b border-gray-800 shadow-lg">
-        {/* Search, Sort, View Toggle */}
+        {/* Search and Create Club Row */}
         <div className="p-3 md:p-4">
           <div className="max-w-none">
-            <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:gap-4">
-              {/* Search Input */}
-              <div className="relative flex-grow">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 md:h-5 md:w-5 text-gray-400" />
+            <div className="flex flex-row items-center gap-2 sm:gap-3 md:gap-4">
+              {/* Enhanced Search Input */}
+              <div className="relative flex-grow min-w-0">
+                <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none z-10">
+                  <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                 </div>
                 <input
                   type="text"
-                  className="bg-gray-800 text-white w-full py-2.5 md:py-3 pl-10 md:pl-11 pr-4 rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all duration-200"
+                  className="bg-gray-800/90 backdrop-blur-sm text-white w-full py-2.5 sm:py-3 md:py-3.5 pl-10 sm:pl-12 md:pl-14 pr-8 sm:pr-10 md:pr-4 rounded-lg sm:rounded-xl text-xs sm:text-sm md:text-base border border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 transition-all duration-300 placeholder:text-gray-500 shadow-lg hover:shadow-xl hover:border-gray-600/50"
                   placeholder="Search clubs..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute inset-y-0 right-0 pr-3 sm:pr-4 flex items-center z-10 text-gray-400 hover:text-white transition-colors touch-manipulation bg-transparent border-none outline-none focus:outline-none"
+                    aria-label="Clear search"
+                  >
+                    <svg
+                      className="h-4 w-4 sm:h-5 sm:w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                )}
               </div>
 
-              {/* Sort Buttons */}
-              <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-                <Button
-                  onClick={() => setSortBy('popular')}
-                  className={`flex items-center px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm whitespace-nowrap transition-all duration-200 ${
-                    sortBy === 'popular'
-                      ? 'bg-yellow-500 text-black shadow-lg'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  }`}
+              {/* Create Club Button - Right Side */}
+              <div className="flex-shrink-0">
+                <ShimmerButton
+                  onClick={() => setIsCreateModalOpen(true)}
+                  title="Create New Club"
+                  shimmerDuration="2.5s"
+                  borderRadius="9999px"
+                  className="px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-3.5 text-yellow-400 hover:text-yellow-300 font-semibold text-xs sm:text-sm md:text-base lg:text-lg rounded-full shadow-[0_8px_30px_rgb(250,204,21,0.15)] hover:shadow-[0_10px_40px_rgb(250,204,21,0.25)] inline-flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap border border-yellow-400/20 bg-gradient-to-r from-yellow-500/10 to-yellow-400/5 hover:from-yellow-500/20 hover:to-yellow-400/10 transition-all duration-300 touch-manipulation"
                 >
-                  <Star className="h-3 w-3 md:h-4 md:w-4 mr-1.5" />
-                  <span>Popular</span>
-                </Button>
-
-                <Button
-                  onClick={() => setSortBy('new')}
-                  className={`flex items-center px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm whitespace-nowrap transition-all duration-200 ${
-                    sortBy === 'new'
-                      ? 'bg-yellow-500 text-black shadow-lg'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  <Calendar className="h-3 w-3 md:h-4 md:w-4 mr-1.5" />
-                  <span>New</span>
-                </Button>
-
-                <Button
-                  onClick={() => setSortBy('trending')}
-                  className={`flex items-center px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm whitespace-nowrap transition-all duration-200 ${
-                    sortBy === 'trending'
-                      ? 'bg-yellow-500 text-black shadow-lg'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  <TrendingUp className="h-3 w-3 md:h-4 md:w-4 mr-1.5" />
-                  <span>Trending</span>
-                </Button>
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 flex-shrink-0" />
+                  <span className="sm:hidden">Create</span>
+                  <span className="hidden sm:inline md:hidden">Create Club</span>
+                  <span className="hidden md:inline">Create Your Club</span>
+                </ShimmerButton>
               </div>
-
-            
             </div>
           </div>
-        </div>
-
-        {/* Create Club Button */}
-        <div className="px-3 md:px-4 pb-2">
-          <ShimmerButton
-            onClick={() => setIsCreateModalOpen(true)}
-            title="Create New Club"
-            shimmerDuration="2.5s"
-            borderRadius="9999px"
-            className="px-6 py-3 text-yellow-400 hover:text-yellow-300 font-bold text-lg rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_10px_35px_rgb(0,0,0,0.18)] inline-flex items-center gap-2"
-          >
-            <Plus className="w-5 h-5 md:w-6 md:h-6" />
-            <span>Create Your Club</span>
-          </ShimmerButton>
         </div>
 
         {/* Categories */}
@@ -419,8 +464,39 @@ const ClubsPage = () => {
           </span>
         </div>
 
+        {/* Pagination Controls - Mobile View (Top) */}
+        {!debouncedSearchQuery.trim() && totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mb-6 md:hidden">
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pb-2">
+              {Array.from({ length: totalPages }, (_, idx) => (
+                <Button
+                  key={idx + 1}
+                  onClick={() => {
+                    setCurrentPage(idx + 1);
+                    // Smooth scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className={`min-w-[40px] h-10 w-10 rounded-full transition-all duration-300 ease-in-out ${
+                    currentPage === idx + 1
+                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black font-bold shadow-lg shadow-yellow-500/30 scale-110'
+                      : 'bg-gray-700/50 text-white hover:bg-gray-600/50 hover:scale-105'
+                  }`}
+                  variant={currentPage === idx + 1 ? 'default' : 'ghost'}
+                >
+                  {idx + 1}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Clubs Grid/List */}
-        {clubData ? (
+        {isLoadingAll && debouncedSearchQuery.trim() ? (
+          <div className="text-center py-12">
+            <div className="text-yellow-400 text-lg mb-2">Loading all clubs for search...</div>
+            <div className="text-gray-400 text-sm">Please wait while we fetch all available clubs</div>
+          </div>
+        ) : clubData ? (
           filteredClubs.length > 0 ? (
             isGridView ? (
               <div className="grid grid-cols-1 xs:grid-cols-2 responsive-grid gap-4">
@@ -429,7 +505,7 @@ const ClubsPage = () => {
                     key={club.id}
                     className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-yellow-500/50 transition-all duration-300 group flex flex-col hover:shadow-xl hover:shadow-yellow-500/10 hover:scale-[1.02] club-card w-full"
                   >
-                    <Link href={`/clubs/${club.id}`} className="flex-1">
+                    <Link href={`/clubs/${club.id}`} className="flex-1 cursor-pointer">
                       <div className="h-32 overflow-hidden relative">
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/30 transition-all duration-300"></div>
                         <Image
@@ -483,7 +559,16 @@ const ClubsPage = () => {
                     <div className="p-3 pt-0">
                       <div className="flex items-center gap-2">
                         <Button
-                          className={`flex-1 text-xs font-medium h-9 px-4 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 ${
+                          asChild
+                          className="flex-1 text-xs font-medium h-9 px-3 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 bg-blue-600 hover:bg-blue-500 text-white focus-visible:ring-blue-400"
+                        >
+                          <Link href={`/clubs/${club.id}`}>
+                            <Eye className="h-3 w-3 mr-1.5" />
+                            Check Club
+                          </Link>
+                        </Button>
+                        <Button
+                          className={`flex-1 text-xs font-medium h-9 px-3 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 ${
                             isUserMemberOfClub(club)
                               ? 'bg-green-600 hover:bg-green-500 text-white focus-visible:ring-green-400'
                               : 'bg-yellow-500 hover:bg-yellow-400 text-black focus-visible:ring-yellow-400'
@@ -498,10 +583,10 @@ const ClubsPage = () => {
                             }
                           }}
                         >
-                          {isUserMemberOfClub(club) ? 'You are a member' : 'Join Club'}
+                          {isUserMemberOfClub(club) ? 'Joined' : 'Join Club'}
                         </Button>
                         <Button
-                          className="bg-gray-700 hover:bg-gray-600 text-white text-xs font-medium h-9 w-9 p-0 rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                          className="bg-gray-700 hover:bg-gray-600 text-white text-xs font-medium h-9 w-9 p-0 rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 flex-shrink-0"
                           onClick={(e) => {
                             e.preventDefault();
                             handleShareClub({ id: club.id, name: club.name, description: club.description });
@@ -526,7 +611,7 @@ const ClubsPage = () => {
                     <div className="flex flex-col xs:flex-row">
                       <Link
                         href={`/clubs/${club.id}`}
-                        className="flex flex-col xs:flex-row flex-1"
+                        className="flex flex-col xs:flex-row flex-1 cursor-pointer"
                       >
                         <div className="w-full xs:w-24 sm:w-32 md:w-40 h-32 xs:h-24 sm:h-32 md:h-32 overflow-hidden relative flex-shrink-0">
                           <div className="absolute inset-0 bg-gradient-to-t xs:bg-gradient-to-r from-black/50 to-transparent z-10 group-hover:from-black/30 transition-all duration-300"></div>
@@ -588,9 +673,18 @@ const ClubsPage = () => {
                         </div>
                       </Link>
 
-                      <div className="p-3 sm:p-4 pt-0 xs:pt-3 sm:pt-4 flex xs:items-center gap-2">
+                      <div className="p-3 sm:p-4 pt-0 xs:pt-3 sm:pt-4 flex xs:items-center gap-2 flex-wrap">
                         <Button
-                          className={`w-full xs:w-auto text-xs font-medium h-9 px-3 sm:px-4 rounded-lg transition-all duration-200 whitespace-nowrap hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 ${
+                          asChild
+                          className="flex-1 text-xs font-medium h-9 px-3 sm:px-4 rounded-lg transition-all duration-200 whitespace-nowrap hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 bg-blue-600 hover:bg-blue-500 text-white focus-visible:ring-blue-400"
+                        >
+                          <Link href={`/clubs/${club.id}`}>
+                            <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5" />
+                            Check Club
+                          </Link>
+                        </Button>
+                        <Button
+                          className={`flex-1 text-xs font-medium h-9 px-3 sm:px-4 rounded-lg transition-all duration-200 whitespace-nowrap hover:scale-[1.02] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 ${
                             isUserMemberOfClub(club)
                               ? 'bg-green-600 hover:bg-green-500 text-white focus-visible:ring-green-400'
                               : 'bg-yellow-500 hover:bg-yellow-400 text-black focus-visible:ring-yellow-400'
@@ -605,10 +699,10 @@ const ClubsPage = () => {
                             }
                           }}
                         >
-                          {isUserMemberOfClub(club) ? 'You are a member' : 'Join Club'}
+                          {isUserMemberOfClub(club) ? 'Joined' : 'Join Club'}
                         </Button>
                         <Button
-                          className="bg-gray-700 hover:bg-gray-600 text-white text-xs sm:text-sm font-medium h-9 w-9 p-0 rounded-lg transition-all duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                          className="bg-gray-700 hover:bg-gray-600 text-white text-xs sm:text-sm font-medium h-9 w-9 p-0 rounded-lg transition-all duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 flex-shrink-0"
                           onClick={(e) => {
                             e.preventDefault();
                             handleShareClub({ id: club.id, name: club.name, description: club.description });
@@ -655,22 +749,29 @@ const ClubsPage = () => {
           </div>
         )}
 
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-8">
-            {Array.from({ length: totalPages }, (_, idx) => (
-              <Button
-                key={idx + 1}
-                onClick={() => setCurrentPage(idx + 1)}
-                className={`px-3 py-1 rounded ${
-                  currentPage === idx + 1
-                    ? 'bg-yellow-500 text-black font-bold'
-                    : 'bg-gray-700 text-white'
-                }`}
-              >
-                {idx + 1}
-              </Button>
-            ))}
+        {/* Pagination Controls - Desktop View (Bottom) */}
+        {!debouncedSearchQuery.trim() && totalPages > 1 && (
+          <div className="hidden md:flex justify-center items-center gap-2 mt-8">
+            <div className="flex items-center gap-2">
+              {Array.from({ length: totalPages }, (_, idx) => (
+                <Button
+                  key={idx + 1}
+                  onClick={() => {
+                    setCurrentPage(idx + 1);
+                    // Smooth scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className={`min-w-[44px] h-11 w-11 rounded-full transition-all duration-300 ease-in-out ${
+                    currentPage === idx + 1
+                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black font-bold shadow-lg shadow-yellow-500/30 scale-110'
+                      : 'bg-gray-700/50 text-white hover:bg-gray-600/50 hover:scale-105'
+                  }`}
+                  variant={currentPage === idx + 1 ? 'default' : 'ghost'}
+                >
+                  {idx + 1}
+                </Button>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -691,6 +792,7 @@ const ClubsPage = () => {
           clubName={selectedClub.name}
           clubImage={selectedClub.image}
           clubId={selectedClub.id}
+          requirements={selectedClub.requirements}
         />
       )}
     </div>

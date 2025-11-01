@@ -168,6 +168,7 @@ export interface JoinClubModalProps {
   clubName: string;
   clubImage: string;
   clubId: string;
+  requirements?: string;
 }
 export enum clubType {
   Technology,
