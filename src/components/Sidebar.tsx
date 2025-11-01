@@ -147,6 +147,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
             `}
             onClick={() => {
               sessionStorage.removeItem('activeSession');
+              sessionStorage.removeItem('founder');
             }}
           >
             <div className="flex-shrink-0">{item.icon}</div>

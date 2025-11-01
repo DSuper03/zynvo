@@ -5,15 +5,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export default function EventTab({ token, events }: { token: string; events: any[] }) {
-  // Hooks must be declared unconditionally at the top of the component
-  const [loading, setLoading] = useState<boolean>(false);
-  const [eventId, setEventId] = useState<string>("");
-  const [eventDetails, setEventDetails] = useState<any>(null);
-  const [link1, setLink1] = useState("");
-  const [link2, setLink2] = useState("");
-  const [link3, setLink3] = useState("");
-  const [openEventModal, setOpenEventModal] = useState<boolean>(false);
-
   if (!token || !events) {
     return <div className="text-yellow-400 text-center mt-4">Please log in to view this content.</div>;
   }
@@ -21,6 +12,14 @@ export default function EventTab({ token, events }: { token: string; events: any
   if (events.length === 0) {
     return <div className="text-yellow-400 text-center mt-4">No events available.</div>;
   }
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [eventId, setEventId] = useState<string>("");
+  const [eventDetails, setEventDetails] = useState<any>(null);
+  const [link1, setLink1] = useState("");
+  const [link2, setLink2] = useState("");
+  const [link3, setLink3] = useState("");
+  const [openEventModal, setOpenEventModal] = useState<boolean>(false);
 
   const EventModal = async (id: string) => {
     try {
@@ -41,11 +40,11 @@ export default function EventTab({ token, events }: { token: string; events: any
       );
       toast(updateLinks.data.msg);
     } catch (error) {
-      toast.error("Error updating event links");
+      toast.error("Error updating club links");
     }
   };
 
-  const deleteEvent = async () => {
+  const deleteEvent = async (eventId : string) => {
     try {
       const deleteEv = await axios.post<any>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/admin/deleteEvent/${eventId}`,
@@ -74,7 +73,7 @@ export default function EventTab({ token, events }: { token: string; events: any
               <button
                 onClick={() => {
                   setEventId(eventItem.id);
-                  deleteEvent();
+                  deleteEvent(eventItem.id); 
                 }}
                 className="bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-400 transition-all"
               >
