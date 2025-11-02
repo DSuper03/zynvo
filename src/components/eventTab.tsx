@@ -53,7 +53,6 @@ export default function EventTab({ token, events }: { token: string; events: any
     }
   };
 
-  // ✅ Handle conditions *inside* the JSX
   if (!token || !events) {
     return <div className="text-yellow-400 text-center mt-4">Please log in to view this content.</div>;
   }

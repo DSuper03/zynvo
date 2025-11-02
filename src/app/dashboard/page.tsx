@@ -30,6 +30,7 @@ import EventBadgeCard from '@/components/ticket';
 import * as htmlToImage from 'html-to-image';
 import TextWithLinks from '@/components/TextWithLinks';
 import { headers } from 'next/headers';
+import LeaveBtn from '@/components/leaveBtn';
 
 
 interface Event {
@@ -955,6 +956,7 @@ export default function ZynvoDashboard() {
                     <Link href={`/clubs/${userData.clubId}`}>
                     <p className="truncate max-w-[120px] sm:max-w-none"> {userData.clubName} </p>
                     </Link>
+                    <LeaveBtn token={token}></LeaveBtn>
                     {founder === 'true' && (
                       <Button
                         onClick={() => navigate.push(`/admin/${userData.clubId}`)}
