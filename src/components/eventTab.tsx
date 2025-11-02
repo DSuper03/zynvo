@@ -14,6 +14,15 @@ export default function EventTab({ token, events }: { token: string; events: any
   const [link3, setLink3] = useState("");
   const [openEventModal, setOpenEventModal] = useState<boolean>(false);
 
+  // Early returns after hooks
+  if (!token || !events) {
+    return <div className="text-yellow-400 text-center mt-4">Please log in to view this content.</div>;
+  }
+
+  if (events.length === 0) {
+    return <div className="text-yellow-400 text-center mt-4">No events available.</div>;
+  }
+
   const EventModal = async (id: string) => {
     try {
       const eventRes = await axios.get<any>(

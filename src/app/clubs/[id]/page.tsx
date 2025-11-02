@@ -170,7 +170,7 @@ export default function ClubPage({}: ClubPageProps) {
         return;
       }
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     async function call() {

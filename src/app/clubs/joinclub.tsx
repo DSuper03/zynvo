@@ -38,7 +38,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
         return;
       }
     }
-  }, []);
+  }, [router]);
 
   const handleChange = (
     e: React.ChangeEvent<
