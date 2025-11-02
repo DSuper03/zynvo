@@ -257,15 +257,25 @@ export default function ClubPage({}: ClubPageProps) {
 
           const events = response2.data.event;
 
-          const filteredEvents = events.map((e) => ({
-            id: e.id,
-            EventName: e.EventName,
-            description: e.description,
-            clubName: e.clubName,
-            createdAt: new Date(e.createdAt), // Convert string to Date
-            image: e.eventHeaderImage || '/default-event-image.jpg',
-            title: e.EventName,
-          }));
+          const filteredEvents = events.map((e) => {
+            const imageUrl = e.posterUrl || e.eventHeaderImage || '/default-event-image.jpg';
+            console.log('Event image mapping:', {
+              eventId: e.id,
+              eventName: e.EventName,
+              posterUrl: e.posterUrl,
+              eventHeaderImage: e.eventHeaderImage,
+              finalImage: imageUrl
+            });
+            return {
+              id: e.id,
+              EventName: e.EventName,
+              description: e.description,
+              clubName: e.clubName,
+              createdAt: new Date(e.createdAt), // Convert string to Date
+              image: imageUrl,
+              title: e.EventName,
+            };
+          });
 
           setEvent(filteredEvents);
         } catch (eventError) {

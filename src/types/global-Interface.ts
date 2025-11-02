@@ -231,6 +231,7 @@ export interface EventResponse {
     clubName: string;
     description: string;
     eventHeaderImage: string | null;
+    posterUrl?: string | null;
     prizes: string;
     clubId: string;
     createdAt: Date;

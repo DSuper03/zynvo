@@ -242,7 +242,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
             return;
           }
         }
-        image = await uploadImageToImageKit(await toBase64(toUpload), toUpload.name);
+        image = await uploadImageToImageKit(await toBase64(toUpload), toUpload.name, '/clubs');
       } else {
         toast('please upload a logo for your club');
         return;

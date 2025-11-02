@@ -24,10 +24,11 @@ function base64ToBlob(base64: string): Blob {
 
 export async function uploadImageToImageKit(
   file: string,
-  fileName: string
+  fileName: string,
+  folder: string = '/posts'
 ): Promise<string> {
   try {
-    console.log('Starting image upload process...');
+    console.log('Starting image upload process...', 'Folder:', folder);
     
     // Convert base64 to blob without using fetch (CSP-friendly)
     const blob = base64ToBlob(file);
@@ -36,6 +37,7 @@ export async function uploadImageToImageKit(
     // Create form data for upload
     const formData = new FormData();
     formData.append('image', blob, fileName);
+    formData.append('folder', folder); // Add folder parameter
     
     // Try backend first, then fallback to local API
     const uploadUrls = [
@@ -86,13 +88,14 @@ export async function uploadImageToImageKit(
 }
 
 // Direct file upload without base64 conversion
-export async function uploadImageDirectly(file: File): Promise<string> {
+export async function uploadImageDirectly(file: File, folder: string = '/posts'): Promise<string> {
   try {
-    console.log('Starting direct image upload for:', file.name, 'Size:', file.size);
+    console.log('Starting direct image upload for:', file.name, 'Size:', file.size, 'Folder:', folder);
     
     // Create form data directly from file
     const formData = new FormData();
     formData.append('image', file, file.name);
+    formData.append('folder', folder); // Add folder parameter
     
     // Try backend first, then fallback to local API
     const uploadUrls = [

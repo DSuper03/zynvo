@@ -239,7 +239,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       console.log('Starting image upload for:', img.name);
       toast('Uploading image...');
       
-      const link = await uploadImageDirectly(img);
+      const link = await uploadImageDirectly(img, '/posts');
       console.log('Image uploaded successfully:', link);
       
       setImageLink(link);

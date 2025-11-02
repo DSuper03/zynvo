@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { X, Info, CheckCircle2 } from 'lucide-react';
+import { X, Info, CheckCircle2, AlertTriangle } from 'lucide-react';
 import Image from 'next/legacy/image';
 import { JoinClubModalProps } from '@/types/global-Interface';
 import axios from 'axios';
@@ -93,6 +93,14 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
           <Button onClick={onClose} className="text-gray-300 hover:text-white">
             <X size={24} />
           </Button>
+        </div>
+
+        {/* Warning Banner */}
+        <div className="bg-yellow-500/10 border-l-4 border-yellow-500 px-4 py-3 mx-4 mt-4 rounded-r-lg flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+          <p className="text-sm text-yellow-300 font-medium">
+            You can join only 1 club at a time
+          </p>
         </div>
 
         <div className="flex flex-col items-center pt-6 gap-4">
