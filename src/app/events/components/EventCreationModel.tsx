@@ -301,7 +301,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           return;
         }
       }
-      imageLink = await uploadImageToImageKit(await toBase64(toUpload), toUpload.name);
+      imageLink = await uploadImageToImageKit(await toBase64(toUpload), toUpload.name, '/events');
       toast('Image uploaded');
     }
 
