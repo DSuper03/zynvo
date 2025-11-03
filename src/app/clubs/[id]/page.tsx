@@ -129,6 +129,7 @@ export default function ClubPage({}: ClubPageProps) {
   const [loading, setLoading] = useState(true);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [socialLinks, setSocialLinks] = useState<{
     instagram?: string;
     linkedin?: string;
@@ -237,6 +238,13 @@ export default function ClubPage({}: ClubPageProps) {
             setCurrentUserEmail(userEmail);
             const isUserMember = checkUserMembership(clubData.members || [], userEmail);
             setIsJoined(isUserMember);
+            
+            // Check if user is admin/founder
+            const isUserAdmin = userEmail === clubData.founderEmail || 
+                              (clubData.members || []).some((member: any) => 
+                                member.email === userEmail && member.role === 'admin'
+                              );
+            setIsAdmin(isUserAdmin);
           }
         } catch (userError) {
           console.error('Error fetching user profile:', userError);
@@ -324,7 +332,41 @@ export default function ClubPage({}: ClubPageProps) {
     if (!isJoined) {
       setIsJoinModalOpen(true);
     }
-    // If already joined, do nothing (button is now disabled)
+  };
+
+  const handleLeaveClub = async () => {
+    if (!token) {
+      toast('Login required', {
+        action: {
+          label: 'Sign in',
+          onClick: () => router.push('/auth/signin'),
+        },
+      });
+      return;
+    }
+
+    try {
+      const leaveResponse = await axios.put<{ message?: string; msg?: string }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/leaveClub`,
+        null,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      toast.success(leaveResponse.data.message || leaveResponse.data.msg || 'Successfully left the club');
+      setIsJoined(false);
+      
+      // Refresh the page to update the UI
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error: any) {
+      console.error('Error leaving club:', error);
+      toast.error(error.response?.data?.message || error.response?.data?.msg || 'Failed to leave club. Please try again.');
+    }
   };
 
   const copyToClipboard = async (text: string, type: string) => {
@@ -444,63 +486,96 @@ export default function ClubPage({}: ClubPageProps) {
       </div>
 
       {/* Club Details */}
-      <div className="max-w-7xl mx-auto px-4 pt-20">
+      <div className="max-w-7xl mx-auto px-4 pt-8 md:pt-12">
         {/* Club Name and Basic Info */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-            {club.name}
-          </h1>
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+            {/* Club Name Section */}
+            <div className="flex-1">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight">
+                {club.name}
+              </h1>
+              
+              <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-3">
+                <div className="flex items-center text-gray-300 bg-gray-800/50 px-3 py-1.5 rounded-full text-sm">
+                  <Users size={16} className="mr-1.5 text-yellow-400" />
+                  <span>{getMemberCount(club)} members</span>
+                </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 mb-4">
-            <div className="flex items-center text-gray-300">
-              <Users size={16} className="mr-1" />
-              <span className="text-sm sm:text-base">{getMemberCount(club)} members</span>
+                <span className="bg-gray-800 text-gray-200 px-3 py-1.5 rounded-full text-sm border border-gray-700 font-medium">
+                  {String(club.category || club.type || 'general').toString()}
+                </span>
+
+                {club.isPopular && (
+                  <span className="bg-yellow-500/20 text-yellow-400 px-3 py-1.5 rounded-full text-sm border border-yellow-400/30 font-medium">
+                    Popular
+                  </span>
+                )}
+
+                {club.isNew && (
+                  <span className="bg-yellow-500 text-black px-3 py-1.5 rounded-full text-sm font-medium">
+                    New
+                  </span>
+                )}
+              </div>
+
+              <p className="text-gray-300 max-w-3xl text-sm md:text-base leading-relaxed">
+                {club.description}
+              </p>
             </div>
 
-            <span className="bg-gray-800 text-gray-200 px-3 py-1 rounded-full text-sm border border-gray-700">
-              {String(club.category || club.type || 'general').toString()}
-            </span>
+            {/* Action Buttons Section */}
+            <div className="flex flex-col sm:flex-row gap-3 md:flex-col md:min-w-[200px]">
+              {isJoined ? (
+                <Button
+                  onClick={handleLeaveClub}
+                  variant="outline"
+                  className="w-full sm:w-auto md:w-full bg-red-500/10 hover:bg-red-500/20 border-red-500/50 text-red-400 hover:text-red-300 font-medium py-2.5 transition-all"
+                >
+                  <UserCheck className="w-4 h-4 mr-2" />
+                  Leave Club
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleJoinClick}
+                  className="w-full sm:w-auto md:w-full bg-yellow-500 hover:bg-yellow-400 text-black font-medium py-2.5 transition-all shadow-lg shadow-yellow-500/20"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Join Club
+                </Button>
+              )}
 
-            {club.isPopular && (
-              <span className="bg-gray-800 text-yellow-400 px-3 py-1 rounded-full text-sm border border-yellow-400/30">
-                Popular
-              </span>
-            )}
+              {isAdmin && (
+                <Link href={`/admin/${id}`}>
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto md:w-full bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/50 text-blue-400 hover:text-blue-300 font-medium py-2.5 transition-all"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Admin Controls
+                  </Button>
+                </Link>
+              )}
 
-            {club.isNew && (
-              <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-medium">
-                New
-              </span>
-            )}
-          </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleShare}
+                  variant="outline"
+                  className="flex-1 bg-gray-800 hover:bg-gray-700 text-white border-gray-700 transition-colors"
+                  title="Share this club"
+                >
+                  <Share2 size={18} />
+                </Button>
 
-          <p className="text-gray-300 max-w-2xl mx-auto mb-6">
-            {club.description}
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-3 mt-4">
-            <button
-              onClick={handleJoinClick}
-              className={`px-6 py-2 rounded-lg font-medium ${
-                isJoined
-                  ? 'bg-gray-700 text-white hover:bg-gray-600'
-                  : 'bg-yellow-500 text-black hover:bg-yellow-400'
-              } transition-colors`}
-            >
-              {isJoined ? 'Leave Club' : 'Join Club'}
-            </button>
-
-            <button 
-              onClick={handleShare}
-              className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors"
-              title="Share this club"
-            >
-              <Share2 size={20} />
-            </button>
-
-            <Button className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors">
-              <Flag size={20} />
-            </Button>
+                <Button 
+                  variant="outline"
+                  className="flex-1 bg-gray-800 hover:bg-gray-700 text-white border-gray-700 transition-colors"
+                  title="Report club"
+                >
+                  <Flag size={18} />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 

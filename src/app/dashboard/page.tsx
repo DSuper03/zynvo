@@ -8,6 +8,9 @@ import {
   BellDotIcon,
   Menu,
   School,
+  UserCheck,
+  Settings,
+  Building,
 } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -30,7 +33,6 @@ import EventBadgeCard from '@/components/ticket';
 import * as htmlToImage from 'html-to-image';
 import TextWithLinks from '@/components/TextWithLinks';
 import { headers } from 'next/headers';
-import LeaveBtn from '@/components/leaveBtn';
 
 
 interface Event {
@@ -942,44 +944,79 @@ export default function ZynvoDashboard() {
             </div>
 
             <div className="pt-8 sm:pt-10 md:pt-12 lg:pt-14 xl:pt-16">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 sm:mb-1 gap-2 sm:gap-0">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-sans bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent leading-tight">
-                  {userData.name}
-                </h1>
+              {/* Name Section */}
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-sans bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent leading-tight mb-3 sm:mb-4">
+                {userData.name}
+              </h1>
 
-                {userData.clubName ? (
-                  <HoverBorderGradient
-                    containerClassName="rounded-full"
-                    as="button"
-                    className="dark:bg-black bg-yellow-400 text-black dark:text-white flex items-center space-x-2 px-3 py-1 text-xs sm:text-sm self-start sm:self-auto"
-                  >
-                    <Link href={`/clubs/${userData.clubId}`}>
-                    <p className="truncate max-w-[120px] sm:max-w-none"> {userData.clubName} </p>
-                    </Link>
-                    <LeaveBtn token={token}></LeaveBtn>
+              {/* Club Section - Mobile Responsive */}
+              {userData.clubName ? (
+                <div className="mb-4 sm:mb-5">
+                  {/* Club Name Badge */}
+                  <Link href={`/clubs/${userData.clubId}`}>
+                    <div className="inline-flex items-center gap-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/50 text-yellow-400 px-4 py-2 rounded-full transition-all duration-200 hover:scale-105 mb-3 cursor-pointer">
+                      <Building className="w-4 h-4 flex-shrink-0" />
+                      <span className="text-sm sm:text-base font-medium truncate max-w-[200px] sm:max-w-none">
+                        {userData.clubName}
+                      </span>
+                    </div>
+                  </Link>
+
+                  {/* Action Buttons - Stack on Mobile */}
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3">
+                    <Button
+                      onClick={async () => {
+                        try {
+                          const leave = await axios.put<any>(
+                            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/leaveClub`,
+                            {
+                              clubId: userData.clubId,
+                              clubname: userData.clubName,
+                            },
+                            {
+                              headers: {
+                                authorization: `Bearer ${token}`,
+                              },
+                            }
+                          );
+                          toast.success(leave.data.message || leave.data.msg || 'Successfully left the club');
+                          setTimeout(() => window.location.reload(), 1000);
+                        } catch (error: any) {
+                          toast.error(error.response?.data?.message || error.response?.data?.msg || 'Error leaving club');
+                        }
+                      }}
+                      variant="outline"
+                      className="w-full sm:w-auto bg-red-500/10 hover:bg-red-500/20 border-red-500/50 text-red-400 hover:text-red-300 font-medium py-2 transition-all"
+                    >
+                      <UserCheck className="w-4 h-4 mr-2" />
+                      Leave Club
+                    </Button>
+
                     {founder === 'true' && (
                       <Button
                         onClick={() => navigate.push(`/admin/${userData.clubId}`)}
-                        title="Access admin controls"
-                        aria-label="Access admin controls"
-                        className="ml-2 bg-black/60 text-yellow-400 hover:bg-yellow-400 hover:text-black px-2 py-1 rounded-full text-xs sm:text-sm font-medium transition-transform hover:scale-105"
+                        variant="outline"
+                        className="w-full sm:w-auto bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/50 text-blue-400 hover:text-blue-300 font-medium py-2 transition-all"
                       >
+                        <Settings className="w-4 h-4 mr-2" />
                         Admin Controls
                       </Button>
                     )}
-                  </HoverBorderGradient>
-                ) : (
-                  <div className="bg-gray-800 border border-gray-600 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-gray-700 transition-colors"
-                       onClick={() => navigate.push('/clubs')}>
-                    <p className="text-gray-300 text-xs sm:text-sm">
-                      You haven't joined any club yet
-                    </p>
-                    <p className="text-yellow-400 text-xs font-medium mt-1 hover:text-yellow-300 transition-colors">
-                      Join fast!
-                    </p>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div 
+                  className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-center cursor-pointer hover:bg-gray-700 transition-colors mb-4"
+                  onClick={() => navigate.push('/clubs')}
+                >
+                  <p className="text-gray-300 text-sm sm:text-base">
+                    You haven't joined any club yet
+                  </p>
+                  <p className="text-yellow-400 text-xs sm:text-sm font-medium mt-1 hover:text-yellow-300 transition-colors">
+                    Join fast! →
+                  </p>
+                </div>
+              )}
               <p className="text-gray-100 mb-3 text-sm sm:text-base font-serif line-clamp-2 leading-relaxed">
                 {userData.bio}
               </p>
