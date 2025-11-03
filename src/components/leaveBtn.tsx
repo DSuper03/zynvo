@@ -10,9 +10,8 @@ export default function LeaveBtn({ token }: { token: string }) {
   const handleLeave = async () => {
     try {
       setLoading(true);
-      const leave = await axios.post<any>(
+      const leave = await axios.put<any>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/leaveClub`,
-        {},
         {
           headers: {
             authorization: `Bearer ${token}`,
