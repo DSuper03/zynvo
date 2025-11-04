@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import EventTab from "../../../components/eventTab";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function ClubAdminPage() {
   const params = useParams();
@@ -29,6 +30,7 @@ export default function ClubAdminPage() {
   const [token, setToken] = useState('');
   const navigate = useRouter();
   const hasShownToast = useRef(false);
+  const [openCriteriaModal, setOpenCriteriaModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -187,7 +189,16 @@ export default function ClubAdminPage() {
         {clubData && clubData.name && (
           <div className="space-y-10">
             <section className="bg-zinc-900 border border-yellow-400/30 rounded-2xl p-6 shadow-[0_0_20px_rgba(255,215,0,0.1)]">
-              <h2 className="text-2xl font-semibold mb-4 text-yellow-300">{clubData.name}</h2>
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h2 className="text-2xl font-semibold text-yellow-300">{clubData.name}</h2>
+                <Button
+                  onClick={() => setOpenCriteriaModal(true)}
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-400/40 text-yellow-300 text-xs hover:bg-yellow-500/20 transition-colors"
+                  title="View membership criteria"
+                >
+                  Membership Criteria
+                </Button>
+              </div>
               <div className="space-y-4">
                 {['instagram', 'twitter', 'linkedin'].map((social) => (
                   <div key={social}>
@@ -215,6 +226,26 @@ export default function ClubAdminPage() {
                 </button>
               </div>
             </section>
+
+            {openCriteriaModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/70" onClick={() => setOpenCriteriaModal(false)}></div>
+                <div className="relative z-10 w-full max-w-lg mx-4 bg-zinc-950 border border-yellow-400/30 rounded-2xl p-6 text-yellow-300 shadow-[0_0_30px_rgba(255,215,0,0.08)]">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xl font-semibold">Membership Criteria</h3>
+                    <button
+                      onClick={() => setOpenCriteriaModal(false)}
+                      className="text-sm text-yellow-400/80 hover:text-yellow-300"
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <div className="max-h-80 overflow-auto pr-1 text-yellow-200/90 leading-relaxed whitespace-pre-wrap">
+                    {clubData?.requirements?.trim() ? clubData.requirements : 'No membership criteria provided.'}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <section className="bg-zinc-900 border border-yellow-400/30 rounded-2xl p-6">
               <h2 className="text-xl font-semibold mb-4 text-yellow-300">Core Members</h2>

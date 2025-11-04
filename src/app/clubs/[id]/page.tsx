@@ -129,21 +129,31 @@ export default function ClubPage({}: ClubPageProps) {
   const [loading, setLoading] = useState(true);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+  const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [currentUser, setCurrentUser] = useState<{ email?: string; id?: string; clubName?: string } | null>(null);
+  const [userJoinedClubIds, setUserJoinedClubIds] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [socialLinks, setSocialLinks] = useState<{
     instagram?: string;
     linkedin?: string;
     twitter?: string;
   }>({});
+  const [openCriteriaModal, setOpenCriteriaModal] = useState<boolean>(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState<boolean>(false);
 
   // Function to check if current user is a member of the club
-  const checkUserMembership = (clubMembers: any[], userEmail?: string): boolean => {
-    if (!userEmail || !Array.isArray(clubMembers)) return false;
-    return clubMembers.some(member => 
-      member.email === userEmail || 
-      member.userEmail === userEmail ||
-      member.id === userEmail
-    );
+  const isUserMemberOfClub = (clubObj: any): boolean => {
+    if (!currentUser) return false;
+    if (userJoinedClubIds.includes(clubObj?.id)) return true;
+    if (currentUser.clubName && clubObj?.name && currentUser.clubName === clubObj.name) return true;
+    if (Array.isArray(clubObj?.members)) {
+      return clubObj.members.some((member: any) =>
+        member?.email === currentUser.email || member?.id === currentUser.id
+      );
+    }
+    // Treat founder as member
+    if (clubObj?.founderEmail && currentUser.email && clubObj.founderEmail === currentUser.email) return true;
+    return false;
   };
 
   const getMemberCount = (c: { members?: unknown; memberCount?: number; membersCount?: number }): number => {
@@ -213,6 +223,9 @@ export default function ClubPage({}: ClubPageProps) {
           facultyEmail: clubData.facultyEmail,
           image: clubData.profilePicUrl || '/logozynvo.jpg',
           category: clubData.type || 'tech',
+          requirements: (clubData as any).requirements || '',
+          clubContact: (clubData as any).clubContact || '',
+          wings: (clubData as any).wings || '',
         });
 
         // Set social media links
@@ -234,18 +247,24 @@ export default function ClubPage({}: ClubPageProps) {
           );
           
           const userEmail = (userResponse.data as UserApiResponse).user?.email;
-          if (userEmail) {
-            setCurrentUserEmail(userEmail);
-            const isUserMember = checkUserMembership(clubData.members || [], userEmail);
-            setIsJoined(isUserMember);
-            
-            // Check if user is admin/founder
-            const isUserAdmin = userEmail === clubData.founderEmail || 
-                              (clubData.members || []).some((member: any) => 
-                                member.email === userEmail && member.role === 'admin'
-                              );
-            setIsAdmin(isUserAdmin);
-          }
+          const userId = (userResponse.data as any)?.user?.id || (userResponse.data as any)?.user?._id;
+          if (userEmail) setCurrentUserEmail(userEmail);
+          if (userId) setCurrentUserId(userId);
+          setCurrentUser({ email: userEmail, id: userId, clubName: (userResponse.data as any)?.user?.clubName });
+          // If backend provides joined clubs, map them here (fallback empty)
+          const joinedIds: string[] = (userResponse.data as any)?.user?.joinedClubs?.map((c: any) => c?.id || c) || [];
+          setUserJoinedClubIds(Array.isArray(joinedIds) ? joinedIds : []);
+
+          const joined = isUserMemberOfClub({ id: clubData.id, name: clubData.name, members: clubData.members, founderEmail: clubData.founderEmail });
+          setIsJoined(joined);
+
+          // Check if user is admin/founder (unchanged)
+          const isUserAdmin = userEmail === clubData.founderEmail || 
+                            (Array.isArray(clubData.members) && (clubData.members || []).some((member: any) => {
+                              const memEmail = member?.email || member?.userEmail || member?.user?.email;
+                              return memEmail === userEmail && member?.role === 'admin';
+                            }));
+          setIsAdmin(!!isUserAdmin);
         } catch (userError) {
           console.error('Error fetching user profile:', userError);
           // If we can't get user profile, assume not joined
@@ -492,9 +511,18 @@ export default function ClubPage({}: ClubPageProps) {
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
             {/* Club Name Section */}
             <div className="flex-1">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight">
-                {club.name}
-              </h1>
+              <div className="flex items-center gap-3 mb-3">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+                  {club.name}
+                </h1>
+                <button
+                  onClick={() => setOpenCriteriaModal(true)}
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-400/40 text-yellow-300 text-xs hover:bg-yellow-500/20 transition-colors"
+                  title="View membership criteria"
+                >
+                  Membership Criteria
+                </button>
+              </div>
               
               <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-3">
                 <div className="flex items-center text-gray-300 bg-gray-800/50 px-3 py-1.5 rounded-full text-sm">
@@ -519,22 +547,40 @@ export default function ClubPage({}: ClubPageProps) {
                 )}
               </div>
 
-              <p className="text-gray-300 max-w-3xl text-sm md:text-base leading-relaxed">
-                {club.description}
-              </p>
+              <div>
+                <p
+                  className="text-gray-300 max-w-3xl text-sm md:text-base leading-relaxed"
+                  style={
+                    isDescriptionExpanded
+                      ? undefined
+                      : {
+                          display: '-webkit-box',
+                          WebkitBoxOrient: 'vertical' as any,
+                          WebkitLineClamp: 4,
+                          overflow: 'hidden',
+                        }
+                  }
+                >
+                  {club.description}
+                </p>
+                {club?.description && club.description.length > 0 && (
+                  <button
+                    onClick={() => setIsDescriptionExpanded((v) => !v)}
+                    className="mt-2 text-yellow-400 hover:text-yellow-300 font-medium"
+                  >
+                    {isDescriptionExpanded ? 'Show less' : 'Read more'}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Action Buttons Section */}
             <div className="flex flex-col sm:flex-row gap-3 md:flex-col md:min-w-[200px]">
               {isJoined ? (
-                <Button
-                  onClick={handleLeaveClub}
-                  variant="outline"
-                  className="w-full sm:w-auto md:w-full bg-red-500/10 hover:bg-red-500/20 border-red-500/50 text-red-400 hover:text-red-300 font-medium py-2.5 transition-all"
-                >
-                  <UserCheck className="w-4 h-4 mr-2" />
-                  Leave Club
-                </Button>
+                <div className="w-full sm:w-auto md:w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/10 border border-green-500/40 text-green-300 font-medium">
+                
+                  Hi member
+                </div>
               ) : (
                 <Button
                   onClick={handleJoinClick}
@@ -1090,6 +1136,27 @@ export default function ClubPage({}: ClubPageProps) {
         isOpen={isCreateEventModalOpen}
         onClose={() => setIsCreateEventModalOpen(false)}
       />
+
+      {/* Membership Criteria Modal */}
+      {openCriteriaModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/70" onClick={() => setOpenCriteriaModal(false)}></div>
+          <div className="relative z-10 w-full max-w-xl mx-4 bg-gray-950 border border-yellow-400/30 rounded-2xl p-6 text-white shadow-[0_0_30px_rgba(255,215,0,0.08)]">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xl font-semibold text-yellow-300">Membership Criteria</h3>
+              <button
+                onClick={() => setOpenCriteriaModal(false)}
+                className="text-sm text-yellow-400/80 hover:text-yellow-300"
+              >
+                Close
+              </button>
+            </div>
+            <div className="max-h-80 overflow-auto pr-1 text-gray-200 leading-relaxed whitespace-pre-wrap">
+              {club?.requirements?.trim() ? club.requirements : 'No membership criteria provided.'}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     </div>
   );
