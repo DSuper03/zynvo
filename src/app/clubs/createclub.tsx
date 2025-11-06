@@ -265,10 +265,10 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
       });
 
       const msg = upload?.data;
-      if (upload.status == 200) {
+      if (upload.status >= 200 && upload.status < 300) {
         toast(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
         onClose();
-      } else if(upload.status !== 200) {
+      } else {
         toast(msg.msg);
       }
     } catch (error: any) {

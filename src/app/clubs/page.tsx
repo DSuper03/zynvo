@@ -12,6 +12,7 @@ import {
   User,
   Eye,
   ArrowRight,
+  School,
 } from 'lucide-react';
 import {
   IconCpu,
@@ -81,6 +82,7 @@ const getMemberCount = (club: any): number => {
 
 const categories = [
   { id: 'all', name: 'All Clubs', icon: null },
+  { id: 'my', name: 'My College', icon: <School size={16} /> },
   { id: 'tech', name: 'Technology', icon: <IconCpu size={16} /> },
   { id: 'cultural', name: 'Cultural', icon: <IconMasksTheater size={16} /> },
   { id: 'business', name: 'Business', icon: <IconChartBar size={16} /> },
@@ -312,8 +314,19 @@ const ClubsPage = () => {
         !debouncedSearchQuery.trim() ||
         club.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
         club.description?.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
-      const matchesCategory =
-        activetype === 'all' || String(club.type).toLowerCase() === activetype;
+
+      if (activetype === 'all') {
+        return matchesSearch;
+      }
+
+      if (activetype === 'my') {
+        const userCollege = (currentUser?.collegeName || (currentUser as any)?.college || currentUser?.collegeId || '').toString().toLowerCase();
+        const clubCollege = ((club as any)?.collegeName || (club as any)?.college || '').toString().toLowerCase();
+        if (!userCollege) return false;
+        return matchesSearch && clubCollege === userCollege;
+      }
+
+      const matchesCategory = String(club.type || '').toLowerCase() === activetype;
       return matchesSearch && matchesCategory;
     }) || [];
 
