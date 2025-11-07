@@ -1,6 +1,7 @@
 'use client';
 import axios from 'axios';
 import React, { useEffect, useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
   MessageCircle,
@@ -13,6 +14,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
+
 import CreatePostButton from './components/CreatePostButton';
 import CreatePostModal from './components/CreatePostModal';
 import { PostData } from '@/types/global-Interface';
@@ -20,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { AuroraText } from '@/components/magicui/aurora-text';
 import { toast } from 'sonner';
+import { setPostCache } from '@/lib/postCache';
 import TextWithLinks from '@/components/TextWithLinks';
 
 interface ApiResponse {
@@ -42,6 +45,8 @@ export default function Feed() {
   // Image modal state
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string } | null>(null);
+
+  const router = useRouter();
 
   // Slider events data
   const sliderEvents = [
@@ -318,7 +323,12 @@ export default function Feed() {
                 posts.map((post) => (
                   <div
                     key={post.id}
-                    className="bg-gray-800 p-6 rounded-lg border border-yellow-500/20 hover:border-yellow-500/40 transition-colors"
+                    className="bg-gray-800 p-6 rounded-lg border border-yellow-500/20 hover:border-yellow-500/40 transition-colors cursor-pointer"
+                    onClick={() => {
+                      // populate client-side cache so post page can render without fetching
+                      setPostCache(post.id, post);
+                      router.push(`/post/${post.id}`);
+                    }}
                   >
                     {/* Author Info Header */}
                     <div className="flex items-center gap-3 mb-4">
@@ -374,20 +384,21 @@ export default function Feed() {
                           <div className="text-gray-300 leading-relaxed mb-4">
                             <TextWithLinks text={visible} />
                             {needsTruncate && (
-                              <button
-                                type="button"
-                                className="ml-2 text-yellow-400 hover:text-yellow-300 text-sm underline-offset-2 hover:underline"
-                                onClick={() => {
-                                  setExpandedPosts((prev) => {
-                                    const next = new Set(prev);
-                                    if (isExpanded) next.delete(post.id);
-                                    else next.add(post.id);
-                                    return next;
-                                  });
-                                }}
-                              >
-                                {isExpanded ? 'Show less' : 'Read more'}
-                              </button>
+                                <button
+                                  type="button"
+                                  className="ml-2 text-yellow-400 hover:text-yellow-300 text-sm underline-offset-2 hover:underline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedPosts((prev) => {
+                                      const next = new Set(prev);
+                                      if (isExpanded) next.delete(post.id);
+                                      else next.add(post.id);
+                                      return next;
+                                    });
+                                  }}
+                                >
+                                  {isExpanded ? 'Show less' : 'Read more'}
+                                </button>
                             )}
                           </div>
                         );
@@ -398,7 +409,7 @@ export default function Feed() {
                         <div className="relative w-full max-w-2xl mx-auto mb-4">
                           <div 
                             className="aspect-video bg-gray-700 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={() => post.image && handleImageClick(post.image, post.title)}
+                            onClick={(e) => { e.stopPropagation(); post.image && handleImageClick(post.image, post.title); }}
                           >
                             <Image
                               src={post.image}
@@ -435,7 +446,7 @@ export default function Feed() {
                           variant="ghost"
                           size="sm"
                           className="text-gray-400 hover:text-yellow-400 hover:bg-black transition-colors"
-                          onClick={() => handleSharePost(post.id, post.title)}
+                          onClick={(e) => { e.stopPropagation(); handleSharePost(post.id, post.title); }}
                         >
                           <Share className="w-4 h-4 mr-1" />
                           <span className="text-sm">Share</span>
@@ -445,6 +456,7 @@ export default function Feed() {
                         variant="ghost"
                         size="sm"
                         className="text-gray-400 hover:text-gray-300"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <MoreHorizontal className="w-4 h-4" />
                       </Button>
@@ -488,40 +500,6 @@ export default function Feed() {
           </div>
 
           {/* Column 3: Sidebar (hidden on mobile) */}
-          <div>
-            {/* Desktop sidebar */}
-            <div className="hidden lg:block">
-              <div className="sticky top-4">
-                <div className="bg-gray-800 rounded-lg border border-yellow-500/20 overflow-hidden">
-                  <div className="bg-gradient-to-r from-yellow-500 to-yellow-400 px-4 py-3">
-                    
-                  </div>
-                  <div className="space-y-4">
-                    {sliderEvents.map((ev, i) => (
-                      <Card key={i} className="group cursor-pointer">
-                        <div className="relative overflow-hidden rounded-lg mb-2">
-                          <div className="aspect-[3/4] bg-gray-700 rounded-lg overflow-hidden">
-                            <Image
-                              src={ev.img}
-                              alt={ev.title}
-                              layout="fill"
-                              className="object-cover transition-transform group-hover:scale-105"
-                            />
-                          </div>
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                           
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                    <Button className="w-full py-2 text-sm text-yellow-400 hover:text-yellow-300 transition-colors">
-                      View all events →
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
