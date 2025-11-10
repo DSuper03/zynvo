@@ -87,23 +87,12 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
         );
         
         const userData = (userResponse.data as any).user;
-        console.log('Full user response:', userResponse.data); // Debug log
-        console.log('User data:', userData); // Debug log
-        
-        // Try different possible college field names
-        const userCollege = userData?.collegeName || userData?.college || userData?.collegeId;
-        console.log('User college (collegeName):', userData?.collegeName);
-        console.log('User college (college):', userData?.college);
-        console.log('User college (collegeId):', userData?.collegeId);
-        console.log('Final user college:', userCollege);
         
         if (userCollege) {
           setUserCollege(userCollege);
           
           // Fetch existing clubs for this college
           setIsLoadingClubs(true);
-          console.log('Fetching clubs for college:', userCollege); // Debug log
-          
           // Test the API call directly first
           try {
             const testUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClubs/${encodeURIComponent(userCollege)}`;
@@ -148,7 +137,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
             setExistingClubs(clubs);
           }
         } else {
-          console.log('No college found for user');
+          
           // Add sample clubs even if no college is found
           const sampleClubs = [
             'Computer Science Club',

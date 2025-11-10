@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import {
@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import TextWithLinks from '@/components/TextWithLinks';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getPostCache } from '@/lib/postCache';
 
 interface PostResponse {
   msg?: string;
@@ -30,10 +31,10 @@ export default function PostPage() {
   const router = useRouter();
   const postId = params.id as string;
 
+  // Post is loaded from the client-side cache only (no backend fetch)
   const [post, setPost] = useState<PostData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
 
   // Format date function
   const formatDate = (date: Date | string) => {
@@ -99,80 +100,62 @@ export default function PostPage() {
     }
   };
 
-  // Fetch token
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('token');
-      setToken(storedToken);
-    }
-  }, []);
-
-  // Fetch post data
+  // Load from cache on mount
   useEffect(() => {
     if (!postId) return;
+    const load = async () => {
+      setIsLoading(true);
+      setError(null);
 
-    const fetchPost = async () => {
+      const cached = getPostCache(postId);
+      if (cached) {
+        setPost(cached);
+        setIsLoading(false);
+        return;
+      }
+
+      // Cache miss: fetch from backend so direct/shared links work
       try {
-        setIsLoading(true);
-        setError(null);
-
-        // Try different possible API endpoints
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
         const endpoints = [
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/${postId}`,
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/get/${postId}`,
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/details/${postId}`,
         ];
 
-        let response: Awaited<ReturnType<typeof axios.get<PostResponse>>> | null = null;
-        let lastError: any = null;
-
-        for (const endpoint of endpoints) {
+        let resp = null as any;
+        let lastErr: any = null;
+        for (const ep of endpoints) {
           try {
-            response = await axios.get<PostResponse>(endpoint, {
-              headers: token
-                ? {
-                    authorization: `Bearer ${token}`,
-                  }
-                : {},
+            resp = await axios.get(ep, {
+              headers: token ? { authorization: `Bearer ${token}` } : {},
             });
-
-            if (response.status === 200 && (response.data.post || response.data.response || response.data)) {
-              break;
-            }
+            if (resp?.status === 200 && (resp.data?.post || resp.data?.response || resp.data)) break;
           } catch (err: any) {
-            lastError = err;
+            lastErr = err;
             continue;
           }
         }
 
-        if (!response || !response.data) {
-          throw lastError || new Error('Post not found');
+        if (!resp || !resp.data) {
+          throw lastErr || new Error('Post not found');
         }
 
-        const postData =
-          response.data.post ||
-          response.data.response ||
-          (response.data as any as PostData);
-
-        if (!postData || !postData.id) {
-          throw new Error('Post not found');
-        }
+        const postData = resp.data.post || resp.data.response || resp.data;
+        if (!postData || !postData.id) throw new Error('Post not found');
 
         setPost(postData as PostData);
-      } catch (error: any) {
-        console.error('Error fetching post:', error);
-        if (error.response?.status === 404) {
-          setError('Post not found');
-        } else {
-          setError('Failed to load post. Please try again later.');
-        }
+      } catch (err: any) {
+        console.error('Error fetching post:', err);
+        if (err?.response?.status === 404) setError('Post not found');
+        else setError('Failed to load post. Please try again later.');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchPost();
-  }, [postId, token]);
+    load();
+  }, [postId]);
 
   if (isLoading) {
     return (
