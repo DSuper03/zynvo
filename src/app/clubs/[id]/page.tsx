@@ -128,7 +128,7 @@ export default function ClubPage({}: ClubPageProps) {
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(true);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
-  const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+ const [usersClub,setUserClub]=useState<boolean>(false)
   const [currentUserId, setCurrentUserId] = useState<string>('');
   const [currentUser, setCurrentUser] = useState<{ email?: string; id?: string; clubName?: string } | null>(null);
   const [userJoinedClubIds, setUserJoinedClubIds] = useState<string[]>([]);
@@ -141,20 +141,6 @@ export default function ClubPage({}: ClubPageProps) {
   const [openCriteriaModal, setOpenCriteriaModal] = useState<boolean>(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState<boolean>(false);
 
-  // Function to check if current user is a member of the club
-  const isUserMemberOfClub = (clubObj: any): boolean => {
-    if (!currentUser) return false;
-    if (userJoinedClubIds.includes(clubObj?.id)) return true;
-    if (currentUser.clubName && clubObj?.name && currentUser.clubName === clubObj.name) return true;
-    if (Array.isArray(clubObj?.members)) {
-      return clubObj.members.some((member: any) =>
-        member?.email === currentUser.email || member?.id === currentUser.id
-      );
-    }
-    // Treat founder as member
-    if (clubObj?.founderEmail && currentUser.email && clubObj.founderEmail === currentUser.email) return true;
-    return false;
-  };
 
   const getMemberCount = (c: { members?: unknown; memberCount?: number; membersCount?: number }): number => {
     if (typeof c?.members === 'number') return c.members as number;
@@ -182,7 +168,6 @@ export default function ClubPage({}: ClubPageProps) {
       }
     }
   }, [router]);
-
   useEffect(() => {
     async function call() {
       if (!token) {
@@ -235,43 +220,6 @@ export default function ClubPage({}: ClubPageProps) {
           twitter: (clubData as any).twitter || undefined,
         });
 
-        // Get current user email and check membership
-        try {
-          const userResponse = await axios.get<UserApiResponse>(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/profile`,
-            {
-              headers: {
-                authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          
-          const userEmail = (userResponse.data as UserApiResponse).user?.email;
-          const userId = (userResponse.data as any)?.user?.id || (userResponse.data as any)?.user?._id;
-          if (userEmail) setCurrentUserEmail(userEmail);
-          if (userId) setCurrentUserId(userId);
-          setCurrentUser({ email: userEmail, id: userId, clubName: (userResponse.data as any)?.user?.clubName });
-          // If backend provides joined clubs, map them here (fallback empty)
-          const joinedIds: string[] = (userResponse.data as any)?.user?.joinedClubs?.map((c: any) => c?.id || c) || [];
-          setUserJoinedClubIds(Array.isArray(joinedIds) ? joinedIds : []);
-
-          const joined = isUserMemberOfClub({ id: clubData.id, name: clubData.name, members: clubData.members, founderEmail: clubData.founderEmail });
-          setIsJoined(joined);
-
-          // Check if user is admin/founder (unchanged)
-          const isUserAdmin = userEmail === clubData.founderEmail || 
-                            (Array.isArray(clubData.members) && (clubData.members || []).some((member: any) => {
-                              const memEmail = member?.email || member?.userEmail || member?.user?.email;
-                              return memEmail === userEmail && member?.role === 'admin';
-                            }));
-          setIsAdmin(!!isUserAdmin);
-        } catch (userError) {
-          console.error('Error fetching user profile:', userError);
-          // If we can't get user profile, assume not joined
-          setIsJoined(false);
-        }
-
-        // Fetch events data - Fixed the API endpoint
         try {
           const response2 = await axios.get<EventResponse>(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/eventByClub/${id}`,
@@ -327,6 +275,36 @@ export default function ClubPage({}: ClubPageProps) {
       call();
     }
   }, [id, token]);
+useEffect(() => {
+  const fetchUserData = async () => {
+    try {
+      const userResponse = await axios.get<UserApiResponse>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const userData = userResponse.data.user as any;
+     
+      // Check if the user's club ID matches the current club ID
+      if (userData.clubId === id) {
+        setUserClub(true);
+       
+      }
+     
+      
+      setCurrentUser(userData);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  if (token) {
+    fetchUserData();
+  }
+}, [token]);
 
   if (loading) {
     return (
@@ -576,7 +554,7 @@ export default function ClubPage({}: ClubPageProps) {
 
             {/* Action Buttons Section */}
             <div className="flex flex-col sm:flex-row gap-3 md:flex-col md:min-w-[200px]">
-              {isJoined ? (
+              {usersClub ? (
                 <div className="w-full sm:w-auto md:w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/10 border border-green-500/40 text-green-300 font-medium">
                 
                   Hi member
