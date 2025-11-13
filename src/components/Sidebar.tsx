@@ -11,6 +11,7 @@ import {
   NotebookText,
   Trophy,
   Newspaper,
+  MapPinCheckIcon,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -42,6 +43,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
       icon: <NotebookText size={22} />,
       label: 'Resources',
       href: '/resources',
+    },
+    {
+      icon:<MapPinCheckIcon />, label: 'Campus Map', href: '/cmap'
     },
     { icon: <Trophy size={22} />, label: 'Leaderboard', href: '/leaderboard' },
     { icon: <User size={22} />, label: 'Profile', href: '/dashboard' },
