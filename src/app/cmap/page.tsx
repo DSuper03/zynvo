@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search, MapPin, Building2, AlertCircle, Sparkles, Navigation, Compass, Layers, DoorOpen, Zap, Grid3x3 } from 'lucide-react';
+import CampusReminderModal from '@/components/CampusReminderModal';
 
 const CmapPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -689,6 +690,9 @@ const CmapPage: React.FC = () => {
           </motion.div>
         )}
       </div>
+      
+      {/* Campus Reminder Modal - only on cmap page */}
+      <CampusReminderModal />
     </div>
   );
 };
