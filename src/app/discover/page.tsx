@@ -24,6 +24,7 @@ import { AuroraText } from '@/components/magicui/aurora-text';
 import { toast } from 'sonner';
 import { setPostCache } from '@/lib/postCache';
 import TextWithLinks from '@/components/TextWithLinks';
+import ProfileHeaderCompact from '@/components/ProfileHeaderCompact';
 
 interface ApiResponse {
   msg: string;
@@ -220,35 +221,28 @@ export default function Feed() {
   return (
     <div className="min-h-screen w-full bg-transparent overflow-y-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        {/* Page heading */}
-        <header className="mb-4 sm:mb-6">
-          <h1 className="text-center">
-            <AuroraText className="text-3xl sm:text-4xl font-bold leading-tight tracking-tight">
-              Discover
-            </AuroraText>
-          </h1>
-        </header>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Column 1-2: Main Content */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Responsive buttons/actions row */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              {/* Mobile View - Only Create Post Button */
-              }
-              <div className="flex sm:hidden items-center justify-end w-full">
-                <div className="flex items-center space-x-3">
-                  {/* Circular Create Post Button for Mobile */}
-                  <Button
-                    onClick={() => setIsPostModalOpen(true)}
-                    className="w-16 h-16 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_10px_35px_rgb(0,0,0,0.18)] transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-yellow-500 via-yellow-400 to-amber-300 hover:from-yellow-500 hover:via-yellow-500 hover:to-yellow-400 border border-yellow-300/40 relative overflow-hidden"
-                  >
-                    <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                      <span className="absolute -inset-[120%] bg-white/20 rotate-12 translate-x-[-20%] group-hover:translate-x-[60%] transition-transform duration-700 ease-out" />
-                    </span>
-                    <PenSquare className="h-6 w-6 text-black" />
-                  </Button>
+              {/* Mobile View - Profile Header and Create Post Button */}
+              <div className="flex sm:hidden items-center justify-between gap-3 w-full">
+                {/* Profile Header Compact - Left side */}
+                <div className="flex-1 min-w-0">
+                  <ProfileHeaderCompact />
                 </div>
+                
+                {/* Circular Create Post Button - Right side */}
+                <Button
+                  onClick={() => setIsPostModalOpen(true)}
+                  className="w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_10px_35px_rgb(0,0,0,0.18)] transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-yellow-500 via-yellow-400 to-amber-300 hover:from-yellow-500 hover:via-yellow-500 hover:to-yellow-400 border border-yellow-300/40 relative overflow-hidden flex-shrink-0"
+                >
+                  <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                    <span className="absolute -inset-[120%] bg-white/20 rotate-12 translate-x-[-20%] group-hover:translate-x-[60%] transition-transform duration-700 ease-out" />
+                  </span>
+                  <PenSquare className="h-5 w-5 text-black" />
+                </Button>
               </div>
 
               {/* Desktop View - Original Create Post Button */}
