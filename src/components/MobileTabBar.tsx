@@ -74,19 +74,10 @@ const MobileTabBar = () => {
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        <motion.div 
-          animate={{
-            y: [0, -8, 0],
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-          className="inline-flex items-center justify-center gap-1 px-2.5 py-2 rounded-full shadow-2xl backdrop-blur-sm"
+        <div 
+          className="inline-flex items-center justify-center gap-1 px-2.5 py-2 rounded-full shadow-lg backdrop-blur-sm"
           style={{
             backgroundColor: '#FFD700',
-            boxShadow: '0 10px 40px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3)',
           }}
         >
           {tabs.map((tab) => {
@@ -97,13 +88,13 @@ const MobileTabBar = () => {
               <motion.button
                 key={tab.id}
                 onClick={() => handleTabClick(tab.href)}
-                className="relative flex flex-col items-center justify-center px-2.5 py-1 rounded-lg transition-all duration-200 min-w-[52px]"
+                className="relative flex flex-col items-center justify-center px-2.5 py-1 rounded-full transition-all duration-200 min-w-[52px]"
                 whileTap={{ scale: 0.85 }}
                 whileHover={{ scale: 1.1 }}
               >
                 <motion.div
                   animate={{
-                    color: active ? '#FFFFFF' : '#121212',
+                    color: active ? '#FFD700' : '#121212',
                     scale: active ? 1.05 : 1,
                   }}
                   transition={{ duration: 0.2 }}
@@ -118,9 +109,9 @@ const MobileTabBar = () => {
                 {active && (
                   <motion.div
                     layoutId="activeIndicator"
-                    className="absolute inset-0 rounded-lg z-0"
+                    className="absolute inset-0 rounded-full z-0"
                     style={{
-                      backgroundColor: 'rgba(18, 18, 18, 0.2)',
+                      backgroundColor: '#121212',
                     }}
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
@@ -128,7 +119,7 @@ const MobileTabBar = () => {
               </motion.button>
             );
           })}
-        </motion.div>
+        </div>
       </motion.div>
     </div>
   );

@@ -27,6 +27,9 @@ export default function RootLayout({
       >
         <WarmupProvider>{children}</WarmupProvider>
       </main>
+
+      {/* Mobile Tab Bar - shown on mobile, hidden on desktop */}
+      <MobileTabBar />
     </div>
   );
 }
