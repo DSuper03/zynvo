@@ -7,18 +7,29 @@ import Image from 'next/image';
 type NoTokenModalProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  /** If true, user has token but no active session - redirect to signin. If false/undefined, no token - redirect to signup */
+  hasToken?: boolean;
 };
 
 export default function NoTokenModal({
   isOpen,
   onOpenChange,
+  hasToken = false,
 }: NoTokenModalProps) {
   const router = useRouter();
+
+  // Redirect based on whether user has token or not
+  // No token → signup (new user)
+  // Has token but no session → signin (returning user)
+  const handleDismiss = () => {
+    onOpenChange(false);
+    router.push(hasToken ? '/auth/signin' : '/auth/signup');
+  };
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        onOpenChange(false);
+        handleDismiss();
       }
     };
 
@@ -31,19 +42,18 @@ export default function NoTokenModal({
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, onOpenChange]);
+  }, [isOpen, onOpenChange, router]);
 
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      onOpenChange(false);
+      handleDismiss();
     }
   };
 
   const handleClose = () => {
-    onOpenChange(false);
-    router.push('/');
+    handleDismiss();
   };
 
   return (

@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import EventAnnouncements from '../components/eventAnnouncement';
+import NoTokenModal from '@/components/modals/remindModal';
 
 dotenv.config();
 
@@ -56,24 +57,40 @@ const Eventid = () => {
   const [signedin, setSignedin] = useState<boolean>(false);
   const [userAttendedEventIds, setUserAttendedEventIds] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [hasTokenForModal, setHasTokenForModal] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
-      setToken(storedToken);
-      if (sessionStorage.getItem('activeSession') !== 'true') {
-         toast('Login required', {
+      const session = sessionStorage.getItem('activeSession');
+      
+      if (storedToken) {
+        setToken(storedToken);
+        setHasTokenForModal(true);
+      } else {
+        // No token - user needs to sign up
+        setHasTokenForModal(false);
+        setIsAuthModalOpen(true);
+        return;
+      }
+      
+      if (session !== 'true') {
+        // Has token but no session - user needs to sign in
+        toast('Login required', {
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),
           },
         });
+        setHasTokenForModal(true);
+        setIsAuthModalOpen(true);
         return;
       } else {
         setSignedin(true);
       }
     }
-  }, []);
+  }, [router]);
 
   // Fetch user data and attended events
   useEffect(() => {
@@ -619,6 +636,8 @@ const Eventid = () => {
 
         <div className="h-8" />
       </div>
+      
+      <NoTokenModal isOpen={isAuthModalOpen} onOpenChange={setIsAuthModalOpen} hasToken={hasTokenForModal} />
     </div>
   );
 };

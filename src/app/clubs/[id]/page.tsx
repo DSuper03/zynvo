@@ -96,6 +96,7 @@ interface UserApiResponse {
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import ZynvoClubAnnouncement from '@/components/ZynvoClubAnnouncement';
+import NoTokenModal from '@/components/modals/remindModal';
 
 // All dynamic content is driven by backend data; no hardcoded demo content
 
@@ -140,6 +141,8 @@ export default function ClubPage({}: ClubPageProps) {
   }>({});
   const [openCriteriaModal, setOpenCriteriaModal] = useState<boolean>(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState<boolean>(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [hasTokenForModal, setHasTokenForModal] = useState(false);
 
 
   const getMemberCount = (c: { members?: unknown; memberCount?: number; membersCount?: number }): number => {
@@ -153,17 +156,28 @@ export default function ClubPage({}: ClubPageProps) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const tok = localStorage.getItem('token');
-      if (tok) setToken(tok);
-      else {
+      const session = sessionStorage.getItem('activeSession');
+      
+      if (tok) {
+        setToken(tok);
+        setHasTokenForModal(true);
+      } else {
+        // No token - user needs to sign up
+        setHasTokenForModal(false);
+        setIsAuthModalOpen(true);
         return;
       }
-      if (sessionStorage.getItem('activeSession') != 'true') {
-         toast('Login required', {
+      
+      if (session !== 'true') {
+        // Has token but no session - user needs to sign in
+        toast('Login required', {
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),
           },
         });
+        setHasTokenForModal(true);
+        setIsAuthModalOpen(true);
         return;
       }
     }
@@ -1135,6 +1149,8 @@ useEffect(() => {
           </div>
         </div>
       )}
+
+      <NoTokenModal isOpen={isAuthModalOpen} onOpenChange={setIsAuthModalOpen} hasToken={hasTokenForModal} />
     </div>
     </div>
   );

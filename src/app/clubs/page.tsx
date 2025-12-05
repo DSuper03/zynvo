@@ -109,6 +109,7 @@ const ClubsPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [token, setToken] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [hasTokenForModal, setHasTokenForModal] = useState(false);
   const [userJoinedClubIds, setUserJoinedClubIds] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoadingAll, setIsLoadingAll] = useState(false);
@@ -148,19 +149,24 @@ const ClubsPage = () => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
       const session = sessionStorage.getItem('activeSession');
-      if (token) setToken(token);
-      else {
-      
+      if (token) {
+        setToken(token);
+        setHasTokenForModal(true);
+      } else {
+        // No token - user needs to sign up
+        setHasTokenForModal(false);
         setIsOpen(true);
         return;
       }
       if (session !== 'true') {
-         toast('Login required', {
+        // Has token but no session - user needs to sign in
+        toast('Login required', {
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),
           },
         });
+        setHasTokenForModal(true);
         setIsOpen(true);
         return;
       }
@@ -767,7 +773,7 @@ const ClubsPage = () => {
         )}
       </div>
 
-      <NoTokenModal isOpen={isOpen} onOpenChange={setIsOpen} />
+      <NoTokenModal isOpen={isOpen} onOpenChange={setIsOpen} hasToken={hasTokenForModal} />
 
       {/* Create Club Modal */}
       <CreateClubModal

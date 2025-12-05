@@ -10,8 +10,10 @@ import CreateEventModal from './components/EventCreationModel';
 import EventCard from './components/EventCard';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-
 import { Badge } from '@/components/ui/badge';
+import NoTokenModal from '@/components/modals/remindModal';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 
 interface apiRespEvents {
@@ -96,16 +98,41 @@ export default function ZynvoEventsPage() {
   const [token, setToken] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [hasTokenForModal, setHasTokenForModal] = useState(false);
+  
+  const router = useRouter();
 
   // Fetch token on component mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
+      const session = sessionStorage.getItem('activeSession');
+      
       if (storedToken) {
         setToken(storedToken);
+        setHasTokenForModal(true);
+      } else {
+        // No token - user needs to sign up
+        setHasTokenForModal(false);
+        setIsAuthModalOpen(true);
+        return;
+      }
+      
+      if (session !== 'true') {
+        // Has token but no session - user needs to sign in
+        toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
+        setHasTokenForModal(true);
+        setIsAuthModalOpen(true);
+        return;
       }
     }
-  }, []);
+  }, [router]);
 
   // Fetch user data and attended events
   useEffect(() => {
@@ -564,6 +591,8 @@ export default function ZynvoEventsPage() {
           </div>
         )}
       </main>
+      
+      <NoTokenModal isOpen={isAuthModalOpen} onOpenChange={setIsAuthModalOpen} hasToken={hasTokenForModal} />
     </div>
   );
 }
