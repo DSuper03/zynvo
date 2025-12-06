@@ -5,13 +5,13 @@ import {
   BarChart2,
   User,
   X,
-  BellDotIcon,
   Menu,
   School,
   UserCheck,
   Settings,
   Building,
 } from 'lucide-react';
+import { NotificationDropdown } from '@/components/notifications';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -908,9 +908,7 @@ export default function ZynvoDashboard() {
         {/* Dashboard Header - Mobile Responsive */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3 sm:gap-4">
           <div className="flex flex-wrap justify-end gap-2 sm:gap-3 w-full sm:w-auto self-end sm:self-auto">
-            <Button className="bg-yellow-500 h-8 w-8 sm:h-10 sm:w-10 rounded-full grid place-items-center flex-shrink-0">
-              <BellDotIcon className="text-black w-4 h-4 sm:w-5 sm:h-5" />
-            </Button>
+            <NotificationDropdown />
           </div>
         </div>
 
