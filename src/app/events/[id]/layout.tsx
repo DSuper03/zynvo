@@ -1,21 +1,8 @@
 'use client';
 
-import Image from 'next/legacy/image';
-import { Tablist } from '@/components/Tablist';
-import { EventLayoutProps } from '@/types/global-Interface';
 import MobileTabBar from '@/components/MobileTabBar';
 
-const eventTabItems = [
-  { id: 'overview', label: 'OVERVIEW', href: '/' },
-  { id: 'prizes', label: 'PRIZES', href: 'prizes' },
-  { id: 'speakers', label: 'SPEAKERS & JUDGES', href: 'speakers' },
-  { id: 'schedule', label: 'SCHEDULE', href: 'schedule' },
-  { id: 'gallery', label: 'GALLERY', href: 'gallery' },
-];
-
-export default function EventLayout({ children, params }: EventLayoutProps) {
-  const eventId = params.id;
-
+export default function EventLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       {/* Main Content - Responsive padding */}

@@ -86,7 +86,7 @@ const nextConfig = {
   },
   
   reactStrictMode: false,
-  swcMinify: true,
+  // swcMinify is enabled by default in Next.js 15
   eslint: {
     ignoreDuringBuilds: false,
   },

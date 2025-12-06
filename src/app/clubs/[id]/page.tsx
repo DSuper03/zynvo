@@ -55,7 +55,6 @@ import CreateEventModal from '../../events/components/EventCreationModel';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import {
-  ClubPageProps,
   ClubTypeProps,
   EventResponse,
   EventType,
@@ -100,7 +99,7 @@ import NoTokenModal from '@/components/modals/remindModal';
 
 // All dynamic content is driven by backend data; no hardcoded demo content
 
-export default function ClubPage({}: ClubPageProps) {
+export default function ClubPage() {
   const param = useParams();
   const id = param.id as string;
   const router = useRouter();
