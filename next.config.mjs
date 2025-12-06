@@ -91,8 +91,29 @@ const nextConfig = {
     ignoreDuringBuilds: false,
   },
   experimental: {
-    optimizeCss: true,
+    // optimizeCss requires critters package - disabled for now
+    optimizeCss: false,
   },
+  
+  // Performance optimizations
+  compiler: {
+    // Remove console.log in production
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
+  },
+  
+  // Tree-shake icon libraries for smaller bundles
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
+    },
+    '@tabler/icons-react': {
+      transform: '@tabler/icons-react/dist/esm/icons/{{member}}',
+    },
+    'react-icons/?(((\\w*)?/?)*)': {
+      transform: 'react-icons/{{ matches.[1] }}/{{ member }}',
+    },
+  },
+  
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
