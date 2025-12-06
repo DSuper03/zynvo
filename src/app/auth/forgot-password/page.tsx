@@ -1,14 +1,17 @@
 "use client";
 import axios from 'axios';
 import { NextPage } from 'next';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 const ForgotPasswordPage: NextPage = () => {
+  const router = useRouter()
   const sendMail = async() => {
    const send = await axios.post<any>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/forgot`, {
      email
     })
+    setEmail("");
     toast(send.data.msg);
   }
   const [email, setEmail] = useState("");
@@ -42,6 +45,7 @@ const ForgotPasswordPage: NextPage = () => {
             onClick={(e) => {
               e.preventDefault();
               sendMail();
+              router.push('/auth/signin');
             }}
           >
             Send Password Reset Email

@@ -205,7 +205,7 @@ export default function SignIn() {
                   <Link
                     href="/auth/forgot-password"
                     className="text-sm text-yellow-500 hover:text-yellow-400 transition"
-                  ></Link>
+                  >Forgot Password</Link>
                 </div>
                 <div className="relative">
                   <FiLock className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
