@@ -1,4 +1,6 @@
+import axios from "axios";
 import React, { useState } from "react";
+import { toast } from "sonner";
 
 type Props = {
   onSubmit?: (oldPassword: string, newPassword: string) => Promise<void> | void;
@@ -23,7 +25,11 @@ export default function ResetPassword({ onSubmit }: Props) {
 
     setLoading(true);
     try {
-      await onSubmit?.(oldPassword, newPassword);
+     const res = await axios.post<any>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/reset-password`, {
+        oldPassword,
+        newPassword,
+      });
+      toast(res.data.msg)
       setSuccess("Password updated successfully.");
       setOldPassword("");
       setNewPassword("");
