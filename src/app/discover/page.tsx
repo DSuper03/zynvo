@@ -25,6 +25,7 @@ import { toast } from 'sonner';
 import { setPostCache } from '@/lib/postCache';
 import TextWithLinks from '@/components/TextWithLinks';
 import ProfileHeaderCompact from '@/components/ProfileHeaderCompact';
+import { NotificationDropdown } from '@/components/notifications';
 
 interface ApiResponse {
   msg: string;
@@ -233,20 +234,27 @@ export default function Feed() {
                   <ProfileHeaderCompact />
                 </div>
                 
-                {/* Circular Create Post Button - Right side */}
-                <Button
-                  onClick={() => setIsPostModalOpen(true)}
-                  className="w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_10px_35px_rgb(0,0,0,0.18)] transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-yellow-500 via-yellow-400 to-amber-300 hover:from-yellow-500 hover:via-yellow-500 hover:to-yellow-400 border border-yellow-300/40 relative overflow-hidden flex-shrink-0"
-                >
-                  <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                    <span className="absolute -inset-[120%] bg-white/20 rotate-12 translate-x-[-20%] group-hover:translate-x-[60%] transition-transform duration-700 ease-out" />
-                  </span>
-                  <PenSquare className="h-5 w-5 text-black" />
-                </Button>
+                {/* Right side actions */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {/* Notification Dropdown */}
+                  <NotificationDropdown />
+                  
+                  {/* Circular Create Post Button */}
+                  <Button
+                    onClick={() => setIsPostModalOpen(true)}
+                    className="w-12 h-12 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_10px_35px_rgb(0,0,0,0.18)] transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-yellow-500 via-yellow-400 to-amber-300 hover:from-yellow-500 hover:via-yellow-500 hover:to-yellow-400 border border-yellow-300/40 relative overflow-hidden"
+                  >
+                    <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                      <span className="absolute -inset-[120%] bg-white/20 rotate-12 translate-x-[-20%] group-hover:translate-x-[60%] transition-transform duration-700 ease-out" />
+                    </span>
+                    <PenSquare className="h-5 w-5 text-black" />
+                  </Button>
+                </div>
               </div>
 
-              {/* Desktop View - Original Create Post Button */}
-              <div className="hidden sm:block">
+              {/* Desktop View - Create Post Button and Notifications */}
+              <div className="hidden sm:flex items-center gap-3">
+                <NotificationDropdown />
                 <CreatePostButton
                   onClick={() => setIsPostModalOpen(true)}
                   className="w-full sm:w-auto"
