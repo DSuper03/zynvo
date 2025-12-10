@@ -38,9 +38,9 @@ const ForgotPasswordPage: NextPage = () => {
           <button
             type="submit"
             className="w-full px-4 py-2 text-lg font-semibold text-gray-900 bg-yellow-500 rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault();
-              sendMail();
+              await sendMail();
               router.push('/auth/signin');
             }}
           >
