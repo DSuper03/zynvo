@@ -14,7 +14,7 @@ interface UpvoteButtonProps {
   enableParticles?: boolean;
 }
 
-// Particle component for the celebration effect
+
 const Particle = ({ 
   style, 
   color 
