@@ -376,14 +376,15 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70">
-      <div className="flex min-h-full justify-center p-4 text-center items-end sm:items-center">
-        <MagicCard className="group relative bg-gray-900 rounded-xl w-full max-w-lg transition-all duration-300 hover:scale-[1.01] border border-transparent hover:border-transparent">
-          <div className="absolute inset-0 rounded-xl -z-10 bg-gray-900" />
+    <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/70 backdrop-blur-sm">
+      <div className="flex min-h-full justify-center p-4 text-center items-center">
+        <MagicCard className="group relative bg-neutral-950 rounded-2xl w-full max-w-lg transition-all duration-300 border border-white/10 shadow-2xl flex flex-col max-h-[85vh]">
+          <div className="absolute inset-0 rounded-2xl -z-10 bg-neutral-950" />
+          <div className="absolute inset-0 bg-[radial-gradient(800px_400px_at_50%_-20%,rgba(250,204,21,0.15),transparent)] pointer-events-none" />
 
           {/* Gradient border effect */}
           <div
-            className="absolute -z-10 inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            className="absolute -z-10 inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             style={{
               background:
                 'linear-gradient(90deg, #ff5bff 0%, #ff3131 50%, #38ff4c 100%)',
@@ -395,32 +396,32 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
           />
 
           {/* Modal Header */}
-          <div className="sticky top-0 z-10 bg-gray-900 border-b border-yellow-500/30 p-4 flex justify-between items-center">
-            <h2 className="text-2xl font-extrabold text-white">Create Post</h2>
+          <div className="shrink-0 bg-neutral-950/90 backdrop-blur-md border-b border-white/10 p-4 flex justify-between items-center rounded-t-2xl z-10">
+            <h2 className="text-xl font-bold text-white">Create Post</h2>
             <Button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-neutral-400 hover:text-white transition-colors bg-transparent hover:bg-white/5"
             >
-              <X size={24} />
+              <X size={20} />
             </Button>
           </div>
 
           {/* Modal Body */}
-          <div className="p-4 max-h-[70vh] overflow-y-auto">
+          <div className="p-4 overflow-y-auto flex-1 text-left">
             <div className="mb-4">
               <Input
                 type="text"
                 placeholder="Enter a title..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
+                className="w-full bg-neutral-900/50 border border-neutral-800 focus:border-yellow-500/50 text-white px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500/20 transition-all"
               />
             </div>
 
             {/* Post Content */}
             <div className="mb-4">
               <Textarea
-                className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white p-4 rounded-lg focus:outline-none resize-none"
+                className="w-full bg-neutral-900/50 border border-neutral-800 focus:border-yellow-500/50 text-white p-4 rounded-xl focus:outline-none resize-none focus:ring-2 focus:ring-yellow-500/20 transition-all"
                 placeholder="What's on your mind?"
                 rows={5}
                 value={postText}
@@ -436,7 +437,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 {previewUrls.map((url, index) => (
                   <div
                     key={index}
-                    className="relative aspect-video bg-gray-800 rounded-lg overflow-hidden"
+                    className="relative aspect-video bg-neutral-900 rounded-xl overflow-hidden border border-white/10"
                   >
                     <Image
                       src={url}
@@ -447,9 +448,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     />
                     <Button
                       onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 bg-black/70 rounded-full p-1 text-red-400 hover:text-red-500"
+                      className="absolute top-2 right-2 bg-black/70 rounded-full p-1.5 text-red-400 hover:text-red-500 hover:bg-black/90 transition-all"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </Button>
                   </div>
                 ))}
@@ -457,9 +458,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
             )}
 
             {/* Upload Controls */}
-            <div className="border-t border-b border-gray-700 py-3 mb-4">
+            <div className="border-t border-b border-white/5 py-3 mb-4">
               <div className="flex items-center justify-between">
-                <span className="text-gray-400 text-sm">Add to your post</span>
+                <span className="text-neutral-400 text-sm font-medium">Add to your post</span>
                 <div className="flex space-x-2">
                   <TooltipProvider>
                     <Tooltip>
@@ -468,7 +469,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                           onClick={() =>
                             document.getElementById('image-upload')?.click()
                           }
-                          className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-500/10"
+                          className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-400/10 transition-colors"
                           disabled={images.length >= 1}
                         >
                           <ImageIcon size={20} />
@@ -488,12 +489,12 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     onChange={handleImageUpload}
                     className="hidden"
                   />
-                  <Button className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-500/10">
+                  <Button className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-yellow-400/10 transition-colors">
                     <Camera size={20} />
                   </Button>
                 </div>
               </div>
-              <p className="mt-2 text-xs text-gray-400">
+              <p className="mt-2 text-xs text-neutral-500">
                 Max file size 2 MB • Only 1 image can be uploaded
               </p>
             </div>
@@ -502,62 +503,69 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
             <div className="space-y-4">
               {/* College Selection */}
               <div>
-                <Label className="text-sm font-medium text-yellow-400 mb-1 flex items-center">
-                  <School size={16} className="mr-1" />
+                <Label className="text-xs font-semibold text-yellow-500/80 mb-1.5 flex items-center uppercase tracking-wider">
+                  <School size={14} className="mr-1.5" />
                   Select a College
                 </Label>
                 <Button
                   onClick={openCollegeModal}
-                  className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none flex justify-between items-center"
+                  className="w-full bg-neutral-900/50 border border-neutral-800 hover:border-yellow-500/30 text-white px-4 py-2.5 rounded-xl focus:outline-none flex justify-between items-center transition-all group"
                 >
                   {selectedCollege ? (
-                    <span>{selectedCollege}</span>
+                    <span className="font-medium">{selectedCollege}</span>
                   ) : (
-                    <span className="text-gray-400">Select a college</span>
+                    <span className="text-neutral-500">Select a college</span>
                   )}
-                  <Search size={18} className="ml-2 text-yellow-400" />
+                  <Search size={16} className="ml-2 text-neutral-500 group-hover:text-yellow-400 transition-colors" />
                 </Button>
               </div>
 
               {/* Club Selection */}
               <div>
-                <Label className="text-sm font-medium text-yellow-400 mb-1 flex items-center">
-                  <Award size={16} className="mr-1" />
+                <Label className="text-xs font-semibold text-yellow-500/80 mb-1.5 flex items-center uppercase tracking-wider">
+                  <Award size={14} className="mr-1.5" />
                   Select a Club
                 </Label>
-                <select
-                  value={selectedClub}
-                  onChange={(e) => setSelectedClub(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
-                  disabled={!selectedCollege}
-                >
-                  <option value="">{settingClubs ? 'Loading clubs...' : 'Post without a club'}</option>
-                  {!settingClubs && selectedCollege && clubs.length === 0 && (
-                    <option value="" disabled>No clubs associated</option>
-                  )}
-                  {!settingClubs &&
-                    clubs.map((name) => (
-                      <option key={name} value={name}>
-                        {name}
-                      </option>
-                    ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={selectedClub}
+                    onChange={(e) => setSelectedClub(e.target.value)}
+                    className="w-full appearance-none bg-neutral-900/50 border border-neutral-800 hover:border-yellow-500/30 text-white px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500/20 transition-all"
+                    disabled={!selectedCollege}
+                  >
+                    <option value="">{settingClubs ? 'Loading clubs...' : 'Post without a club'}</option>
+                    {!settingClubs && selectedCollege && clubs.length === 0 && (
+                      <option value="" disabled>No clubs associated</option>
+                    )}
+                    {!settingClubs &&
+                      clubs.map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-500">
+                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Modal Footer */}
-          <div className="sticky bottom-0 bg-gray-900 border-t border-yellow-500/30 p-4 flex justify-end">
+          <div className="shrink-0 bg-neutral-950/90 backdrop-blur-md border-t border-white/10 p-4 flex justify-end rounded-b-2xl z-10">
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting || !postText.trim()}
-              className={`px-6 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 transition-colors flex items-center ${
+              className={`px-6 py-2.5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black rounded-xl font-bold hover:from-yellow-500 hover:to-yellow-600 shadow-[0_0_20px_rgba(250,204,21,0.15)] hover:shadow-[0_0_25px_rgba(250,204,21,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center ${
                 isSubmitting || !postText.trim()
                   ? 'opacity-70 cursor-not-allowed'
                   : ''
               }`}
             >
-              <Send size={19} className="mr-2" />
+              <Send size={18} className="mr-2" />
               {isSubmitting ? 'Zyncing It...' : 'Zync It'}
             </Button>
           </div>

@@ -159,7 +159,7 @@ const TagSelector = ({
               onClick={() => toggleTag(tag)}
               className={`px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${
                 selectedTags.includes(tag)
-                  ? 'bg-yellow-400 text-gray-900 scale-105'
+                  ? 'bg-yellow-400 text-gray-100 scale-105'
                   : 'bg-neutral-800 text-neutral-200 hover:bg-neutral-700'
               }`}
             >
@@ -218,24 +218,26 @@ export default function CompleteProfileModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-6">
-      <div className="relative w-full max-w-2xl max-h-[92vh] overflow-hidden rounded-2xl border border-neutral-800 shadow-2xl">
-        <div className="absolute inset-0 bg-[radial-gradient(1200px_600px_at_50%_-10%,rgba(250,204,21,0.15),transparent)]" />
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[100] p-3 sm:p-6">
+      <div className="relative w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl border border-white/10 shadow-2xl bg-neutral-950">
+        <div className="absolute inset-0 bg-[radial-gradient(1200px_600px_at_50%_-10%,rgba(250,204,21,0.15),transparent)] pointer-events-none" />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_100%)] pointer-events-none" />
 
-        <div className="relative bg-neutral-950/95">
-          <div className="sticky top-0 z-10 flex items-center justify-between px-5 sm:px-6 py-4 border-b border-neutral-800 bg-neutral-950/90">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-yellow-400/80 font-semibold">Profile</p>
-              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">Complete Your Profile</h2>
-              <p className="text-xs text-neutral-400 mt-0.5">Help others discover you faster</p>
-            </div>
-            <Button onClick={onClose} className="text-neutral-300 hover:text-white bg-transparent hover:bg-neutral-800/60 px-2 py-2">
-              <X className="w-5 h-5" />
-            </Button>
+        {/* Header - Fixed at top */}
+        <div className="relative shrink-0 z-10 flex items-center justify-between px-5 sm:px-6 py-4 border-b border-white/10 bg-neutral-950/90 backdrop-blur-md">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.18em] text-yellow-400/80 font-semibold">Profile</p>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">Complete Your Profile</h2>
+            <p className="text-xs text-neutral-400 mt-0.5">Help others discover you faster</p>
           </div>
+          <Button onClick={onClose} className="text-neutral-300 hover:text-white bg-transparent hover:bg-neutral-800/60 px-2 py-2">
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
 
-          <form onSubmit={onSubmit} className="px-5 sm:px-6 py-5 space-y-5 overflow-y-auto max-h-[calc(92vh-72px)]">
+        {/* Scrollable Form Content */}
+        <div className="relative flex-1 overflow-y-auto min-h-0 bg-neutral-950/50">
+          <form id="complete-profile-form" onSubmit={onSubmit} className="px-5 sm:px-6 py-5 space-y-5">
             <div>
               <label className="block text-sm font-semibold text-gray-200 mb-2">Bio</label>
               <textarea
@@ -315,24 +317,31 @@ export default function CompleteProfileModal({
               profileForm={{ tags: profileForm.tags }}
               handleProfileFormChange={onChange as any}
             />
-
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Button
-                type="button"
-                variant={'destructive'}
-                onClick={onClose}
-                className="flex-1 px-4 py-2 bg-neutral-800 text-white rounded-md hover:bg-red-600/80 transition-colors text-sm"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1 px-4 py-2 bg-yellow-400 text-gray-900 rounded-md hover:bg-yellow-500 transition-colors font-medium text-sm"
-              >
-                Save Profile
-              </Button>
-            </div>
+            
+            {/* Spacer to ensure content isn't cut off */}
+            <div className="h-2"></div>
           </form>
+        </div>
+
+        {/* Footer - Fixed at bottom */}
+        <div className="relative shrink-0 px-5 sm:px-6 py-4 border-t border-white/10 bg-neutral-950/80 backdrop-blur-xl z-10">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              type="button"
+              variant={'ghost'}
+              onClick={onClose}
+              className="flex-1 px-4 py-2.5 bg-neutral-900/50 border border-white/5 text-neutral-400 rounded-xl hover:bg-white/5 hover:text-white hover:border-white/10 transition-all duration-200 text-sm font-medium"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="complete-profile-form"
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black rounded-xl hover:from-yellow-500 hover:to-yellow-600 shadow-[0_0_20px_rgba(250,204,21,0.15)] hover:shadow-[0_0_25px_rgba(250,204,21,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 font-bold text-sm"
+            >
+              Save Profile
+            </Button>
+          </div>
         </div>
       </div>
     </div>
