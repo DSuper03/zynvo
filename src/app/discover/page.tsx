@@ -26,6 +26,7 @@ import { setPostCache } from '@/lib/postCache';
 import TextWithLinks from '@/components/TextWithLinks';
 import ProfileHeaderCompact from '@/components/ProfileHeaderCompact';
 import { NotificationDropdown } from '@/components/notifications';
+import { VoteButtonsCompact } from '@/components/ui/vote-buttons';
 
 interface ApiResponse {
   msg: string;
@@ -444,6 +445,16 @@ export default function Feed() {
                     {/* Post Actions */}
                     <div className="flex items-center justify-between pt-4 border-t border-gray-700">
                       <div className="flex items-center space-x-4">
+                        {/* Vote Buttons */}
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <VoteButtonsCompact
+                            postId={post.id}
+                            initialUpvotes={(post as PostData & { upvoteCount?: number }).upvoteCount || 0}
+                            initialDownvotes={(post as PostData & { downvoteCount?: number }).downvoteCount || 0}
+                            initialUserVote={(post as PostData & { userVote?: 'upvote' | 'downvote' | null }).userVote || null}
+                          />
+                        </div>
+                        
                         <Button
                           variant="ghost"
                           size="sm"
