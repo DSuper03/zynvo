@@ -282,7 +282,7 @@ export function VoteButtons({
         />
       </button>
 
-      {/* Score Display */}
+      
       {showScore && (
         <span
           className={cn(

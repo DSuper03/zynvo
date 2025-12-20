@@ -117,12 +117,20 @@ export function useVote({
 
       const data = await response.json().catch(() => ({}));
       
+      console.log(`[useVote] ${voteType} response:`, { status: response.ok, data });
+      
       if (!response.ok) {
         throw new Error(data.msg || `Failed to ${voteType}`);
       }
 
-      
+      // Update with server response
       if (data) {
+        console.log('[useVote] Updating from server:', {
+          upvoteCount: data.upvoteCount,
+          downvoteCount: data.downvoteCount,
+          userVote: data.userVote
+        });
+        
         if (typeof data.upvoteCount === 'number') {
           setUpvotes(data.upvoteCount);
         }
