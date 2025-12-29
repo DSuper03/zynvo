@@ -109,7 +109,7 @@ export function useVote({
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/post/${voteType}/${encodeURIComponent(postId)}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/post/${voteType}/${postId}`, {
         method: 'POST',
         headers,
         mode: 'cors',
