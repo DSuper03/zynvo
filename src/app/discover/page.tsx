@@ -449,8 +449,8 @@ export default function Feed() {
                         <div onClick={(e) => e.stopPropagation()}>
                           <VoteButtonsCompact
                             postId={post.id}
-                            initialUpvotes={(post as PostData & { upvoteCount?: number }).upvoteCount || 0}
-                            initialDownvotes={(post as PostData & { downvoteCount?: number }).downvoteCount || 0}
+                            initialUpvotes={(post as PostData).upvotes.length || 0}
+                            initialDownvotes={(post as PostData).downvotes.length || 0}
                             initialUserVote={(post as PostData & { userVote?: 'upvote' | 'downvote' | null }).userVote || null}
                           />
                         </div>

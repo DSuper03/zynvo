@@ -392,22 +392,36 @@ export interface respnseUseState {
   eventHeader?: string;
 }
 export interface PostData {
-  id: string;
-  title: string;
-  description: string;
-  image: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  published: boolean;
-  collegeId: string | null;
-  authorId: string;
-  collegeName: string;
-  clubName: string;
-  author: {
-    profileAvatar: string | null;
-    name: string | null;
-  };
+ 
+    title: string;
+    description: string;
+    collegeName: string;
+    clubName: string;
+    image: string | null;
+    id: string;
+    createdAt: Date;
+    collegeId: string | null;
+    updatedAt: Date;
+    published: boolean;
+    author: {
+        name: string | null;
+        profileAvatar: string | null;
+    };
+    upvotes: {
+        id: string;
+        createdAt: Date;
+        postId: string;
+        userId: string;
+    }[];
+    downvotes: {
+        id: string;
+        createdAt: Date;
+        postId: string;
+        userId: string;
+    }[];
+    authorId: string;
 }
+
 export interface EventByIdResponse {
   msg: string;
   response: {
