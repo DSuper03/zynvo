@@ -1,6 +1,6 @@
 'use client';
 import axios from 'axios';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
@@ -98,16 +98,16 @@ export default function Feed() {
     return formatDate(date);
   };
 
-  // Function to handle image modal
-  const handleImageClick = (src: string, alt: string) => {
+  // Function to handle image modal - memoized
+  const handleImageClick = useCallback((src: string, alt: string) => {
     setSelectedImage({ src, alt });
     setIsImageModalOpen(true);
-  };
+  }, []);
 
-  const closeImageModal = () => {
+  const closeImageModal = useCallback(() => {
     setIsImageModalOpen(false);
     setSelectedImage(null);
-  };
+  }, []);
 
   // Handle escape key to close modal
   useEffect(() => {
@@ -129,8 +129,8 @@ export default function Feed() {
   }, [isImageModalOpen]);
 
 
-  // Function to handle post sharing
-  const handleSharePost = async (postId: string, postTitle: string) => {
+  // Function to handle post sharing - memoized
+  const handleSharePost = useCallback(async (postId: string, postTitle: string) => {
     try {
       const postUrl = `${window.location.origin}/post/${postId}`;
 
@@ -163,14 +163,17 @@ export default function Feed() {
         toast('Unable to copy link. Please try again.');
       }
     }
-  };
+  }, []);
+
+  // Memoize slider events length
+  const sliderEventsLength = useMemo(() => sliderEvents.length, [sliderEvents.length]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setSlideIdx((idx) => (idx + 1) % sliderEvents.length);
+      setSlideIdx((idx) => (idx + 1) % sliderEventsLength);
     }, 3500);
     return () => clearInterval(interval);
-  }, [sliderEvents.length]);
+  }, [sliderEventsLength]);
 
   useEffect(() => {
     const postData = async () => {
@@ -203,20 +206,29 @@ export default function Feed() {
     postData();
   }, [page]);
 
-  // Infinite scroll handler
+  // Infinite scroll handler with debouncing
   useEffect(() => {
+    let ticking = false;
+    
     const handleScroll = () => {
-      if (
-        window.innerHeight + window.scrollY >=
-        document.body.offsetHeight - 200 &&
-        hasMore &&
-        !isLoading &&
-        !isFetchingMore
-      ) {
-        setPage((prev) => prev + 1);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (
+            window.innerHeight + window.scrollY >=
+            document.body.offsetHeight - 200 &&
+            hasMore &&
+            !isLoading &&
+            !isFetchingMore
+          ) {
+            setPage((prev) => prev + 1);
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
-    window.addEventListener('scroll', handleScroll);
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMore, isLoading, isFetchingMore]);
 

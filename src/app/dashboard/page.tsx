@@ -30,7 +30,6 @@ import CollegeSearchSelect from '@/components/colleges/collegeSelect';
 import { FaSchool } from 'react-icons/fa';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import EventBadgeCard from '@/components/ticket';
-import * as htmlToImage from 'html-to-image';
 import TextWithLinks from '@/components/TextWithLinks';
 import { headers } from 'next/headers';
 
@@ -852,6 +851,8 @@ export default function ZynvoDashboard() {
 
   const downloadTicket = async () => {
     if (badgeRef.current) {
+      // Lazy load html-to-image only when needed
+      const htmlToImage = await import('html-to-image');
       const dataUrl = await htmlToImage.toPng(badgeRef.current, {
         cacheBust: true,
         skipFonts: false,
