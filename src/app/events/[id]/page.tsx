@@ -68,27 +68,24 @@ const Eventid = () => {
       if (storedToken) {
         setToken(storedToken);
         setHasTokenForModal(true);
+              if (session !== 'true') {
+              // Has token but no session - user needs to sign in
+              toast('Login required', {
+                action: {
+                  label: 'Sign in',
+                  onClick: () => router.push('/auth/signin'),
+                },
+              });
+              return;
+            } else {
+              setSignedin(true);
+            }
       } else {
         // No token - user needs to sign up
-        setHasTokenForModal(false);
-        setIsAuthModalOpen(true);
+        toast('Sign up required');
+        setHasTokenForModal(false);    
         return;
-      }
-      
-      if (session !== 'true') {
-        // Has token but no session - user needs to sign in
-        toast('Login required', {
-          action: {
-            label: 'Sign in',
-            onClick: () => router.push('/auth/signin'),
-          },
-        });
-        setHasTokenForModal(true);
-        setIsAuthModalOpen(true);
-        return;
-      } else {
-        setSignedin(true);
-      }
+      } 
     }
   }, [router]);
 
@@ -128,7 +125,7 @@ const Eventid = () => {
   }, [token]);
 
   useEffect(() => {
-    if (!token || !id) return;
+    if (!id) return;
 
     async function fetchEventData() {
       try {
