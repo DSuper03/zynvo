@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import EventBadgeCard from '@/components/ticket';
-import * as htmlToImage from 'html-to-image';
 import Image from 'next/image';
 
 import { Badge } from '@/components/ui/badge';
@@ -385,6 +384,8 @@ export default function PublicUserProfile() {
 
   const downloadTicket = async () => {
     if (badgeRef.current) {
+      // Lazy load html-to-image only when needed
+      const htmlToImage = await import('html-to-image');
       const dataUrl = await htmlToImage.toPng(badgeRef.current, {
         cacheBust: true,
         skipFonts: false,
