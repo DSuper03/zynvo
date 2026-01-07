@@ -62,9 +62,9 @@ const ZynvoClubAnnouncement: React.FC<ZynvoClubAnnouncementProps> = ({ club }) =
   };
 
   return (
-    <div className="min-h-screen bg-[#0F0F0F] text-white relative overflow-hidden">
+    <div className="w-full bg-transparent text-white relative">
       {/* Background decorative elements */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none opacity-30">
         {/* LEGO brick patterns */}
         <div className="absolute top-20 left-10 w-6 h-3 bg-[#FACC15] rounded-sm opacity-20 animate-pulse"></div>
         <div className="absolute top-40 right-20 w-4 h-2 bg-[#FACC15] rounded-sm opacity-30 animate-pulse delay-1000"></div>
@@ -95,7 +95,7 @@ const ZynvoClubAnnouncement: React.FC<ZynvoClubAnnouncementProps> = ({ club }) =
         </div>
       </div>
 
-      <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Header Section */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-4 mb-4">

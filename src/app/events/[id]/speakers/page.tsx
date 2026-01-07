@@ -7,6 +7,7 @@ import {
   FaGithub,
   FaMicrophone,
   FaGavel,
+  FaPlus,
 } from 'react-icons/fa';
 import Image from 'next/legacy/image';
 import axios from 'axios';
@@ -14,6 +15,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import dotenv from 'dotenv';
 import { Button } from '@/components/ui/button';
+import { useQuery } from '@tanstack/react-query';
+import AddSpeakerModal from './AddSpeakerModal';
 
 dotenv.config();
 
@@ -54,18 +57,9 @@ const Speakers = () => {
     show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
   };
 const router = useRouter();
-  const [speakers, setSpeakers] = useState<speakers[]>([]);
   const [founder, setFounder] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
-  const [newSpeaker, setNewSpeaker] = useState({
-    name: '',
-    email: '',
-    about: '',
-    profilePic: '',
-    eventId: id || '',
-  });
 
   // Get token on client side only
   useEffect(() => {
@@ -84,31 +78,36 @@ const router = useRouter();
     }
   }, []);
 
-  // Update eventId when id changes
-  useEffect(() => {
-    if (id) {
-      setNewSpeaker((prev) => ({ ...prev, eventId: id }));
-    }
-  }, [id]);
+  // Fetch speakers using TanStack Query
+  const {
+    data: speakersData,
+    isLoading,
+  } = useQuery<speakerResponse>({
+    queryKey: ['speakers', id],
+    queryFn: async () => {
+      if (!id || !token) throw new Error('Missing id or token');
+      const res = await axios.get<speakerResponse>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/getSpeakers?id=${id}`,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return res.data;
+    },
+    enabled: !!id && !!token,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
+  const speakers = speakersData?.speakers || [];
+
+  // Check if user is founder
   useEffect(() => {
     if (!id || !token) return;
 
-    async function fetchData() {
+    async function checkFounderStatus() {
       try {
-        setIsLoading(true);
-
-        // Fetch speakers
-        const res = await axios.get<speakerResponse>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/getSpeakers?id=${id}`,
-          {
-            headers: {
-              authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        // Check if user is founder
         const checkFounder = await axios.get<{ msg: string }>(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isFounder?id=${id}`,
           {
@@ -127,78 +126,13 @@ const router = useRouter();
         } else if (checkFounder.status === 500) {
           toast('Internal server error checking founder status');
         }
-
-        if (res.status === 200) {
-          setSpeakers(res.data.speakers || []);
-        } else {
-          toast(res.data.msg || 'Failed to fetch speakers');
-        }
       } catch (error) {
-        console.error('Error fetching data:', error);
-        toast('Error loading speakers data');
-      } finally {
-        setIsLoading(false);
+        console.error('Error checking founder status:', error);
       }
     }
 
-    fetchData();
+    checkFounderStatus();
   }, [id, token]);
-
-  const handleAddSpeaker = async () => {
-    if (!token) {
-      toast('Please login to add speakers');
-      return;
-    }
-
-    try {
-      const add = await axios.post<{ msg: string }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/addSpeakers`,
-        newSpeaker,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (add && add.status === 200) {
-        toast(add.data.msg);
-        // Refresh speakers list
-        const res = await axios.get<speakerResponse>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/getSpeakers?id=${id}`,
-          {
-            headers: {
-              authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (res.status === 200) {
-          setSpeakers(res.data.speakers || []);
-        }
-      } else {
-        toast(`Error: ${add.data.msg}`);
-      }
-    } catch (error) {
-      console.error('Error adding speaker:', error);
-      toast('Failed to add speaker');
-    }
-
-    setNewSpeaker({
-      name: '',
-      email: '',
-      about: '',
-      profilePic: '',
-      eventId: id || '',
-    });
-    setIsModalOpen(false);
-  };
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setNewSpeaker((prev) => ({ ...prev, [name]: value }));
-  };
 
   if (isLoading) {
     return (
@@ -236,13 +170,23 @@ const router = useRouter();
 
         {/* Speakers Section */}
         <section className="mb-20">
-          <div className="flex items-center mb-10">
-            <div className="h-10 w-10 rounded-full bg-yellow-400 flex items-center justify-center mr-4">
-              <FaMicrophone className="text-black text-lg" />
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center">
+              <div className="h-10 w-10 rounded-full bg-yellow-400 flex items-center justify-center mr-4">
+                <FaMicrophone className="text-black text-lg" />
+              </div>
+              <h2 className="text-3xl font-bold text-white">
+                Featured Speakers & Judges
+              </h2>
             </div>
-            <h2 className="text-3xl font-bold text-white">
-              Featured Speakers & Judges
-            </h2>
+            {/* Add Speaker Button - Always visible */}
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              className="px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2"
+            >
+              <FaPlus className="w-4 h-4" />
+              Add Speaker
+            </Button>
           </div>
 
           {speakers.length === 0 ? (
@@ -356,124 +300,27 @@ const router = useRouter();
         )}
 
         {/* Add Speaker Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-gray-900 border-2 border-yellow-500/30 rounded-xl p-6 w-full max-w-md"
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold text-white">
-                  Add New Speaker
-                </h3>
-                <Button
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </Button>
-              </div>
-
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleAddSpeaker();
-                }}
-                className="space-y-4"
-              >
-                <div>
-                  <label className="block text-white font-medium mb-2">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={newSpeaker.name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-yellow-400 focus:outline-none"
-                    placeholder="Enter speaker name"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-white font-medium mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={newSpeaker.email}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-yellow-400 focus:outline-none"
-                    placeholder="Enter speaker email"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-white font-medium mb-2">
-                    Profile Picture URL
-                  </label>
-                  <input
-                    type="url"
-                    name="profilePic"
-                    value={newSpeaker.profilePic}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-yellow-400 focus:outline-none"
-                    placeholder="Enter profile picture URL (optional)"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-white font-medium mb-2">
-                    About
-                  </label>
-                  <textarea
-                    name="about"
-                    value={newSpeaker.about}
-                    onChange={handleInputChange}
-                    rows={4}
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-yellow-400 focus:outline-none resize-none"
-                    placeholder="Enter speaker bio/description"
-                    required
-                  />
-                </div>
-
-                <div className="flex gap-4 pt-4">
-                  <Button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-colors"
-                  >
-                    Add Speaker
-                  </Button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
+        <AddSpeakerModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          eventId={id}
+        />
       </div>
+
+      {/* Floating Action Button - Mobile/Always visible */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="fixed bottom-6 right-6 z-40 md:hidden"
+      >
+        <Button
+          onClick={() => setIsModalOpen(true)}
+          className="w-14 h-14 rounded-full bg-yellow-400 text-black font-bold shadow-lg hover:bg-yellow-500 transition-all duration-300 flex items-center justify-center"
+          size="icon"
+        >
+          <FaPlus className="w-6 h-6" />
+        </Button>
+      </motion.div>
 
       {/* Visual elements */}
       <div className="fixed top-1/3 right-0 w-32 h-32 bg-yellow-400/10 rounded-full blur-3xl -z-10"></div>
