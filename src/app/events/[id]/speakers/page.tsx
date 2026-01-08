@@ -2,9 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  FaLinkedin,
-  FaTwitter,
-  FaGithub,
   FaMicrophone,
   FaGavel,
   FaPlus,
@@ -234,34 +231,10 @@ const router = useRouter();
 
                     <p className="text-gray-300 mb-4">{speaker.about}</p>
 
-                    <div className="flex flex-wrap gap-2 mb-6">
+                    <div className="flex flex-wrap gap-2">
                       <span className="bg-gray-800 text-yellow-400 text-xs font-medium px-3 py-1 rounded-full">
                         Speaker & Judge
                       </span>
-                    </div>
-
-                    <div className="flex space-x-3">
-                      <a
-                        href="#"
-                        className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-colors"
-                        aria-label="LinkedIn"
-                      >
-                        <FaLinkedin />
-                      </a>
-                      <a
-                        href="#"
-                        className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-colors"
-                        aria-label="Twitter"
-                      >
-                        <FaTwitter />
-                      </a>
-                      <a
-                        href="#"
-                        className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-colors"
-                        aria-label="GitHub"
-                      >
-                        <FaGithub />
-                      </a>
                     </div>
                   </div>
                 </motion.div>

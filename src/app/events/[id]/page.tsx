@@ -26,8 +26,25 @@ import { toast } from 'sonner';
 import EventAnnouncements from '../components/eventAnnouncement';
 import NoTokenModal from '@/components/modals/remindModal';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
+import AddSpeakerModal from './speakers/AddSpeakerModal';
+import { Plus } from 'lucide-react';
 
 dotenv.config();
+
+interface Speaker {
+  id: number;
+  email: string;
+  name: string;
+  profilePic: string | null;
+  about: string;
+  eventId: string;
+}
+
+interface SpeakerResponse {
+  msg: string;
+  speakers: Speaker[];
+}
 
 const Eventid = () => {
   const params = useParams();
@@ -61,6 +78,8 @@ const Eventid = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
+  const [isAddSpeakerModalOpen, setIsAddSpeakerModalOpen] = useState(false);
+  const [isFounder, setIsFounder] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -90,6 +109,59 @@ const Eventid = () => {
       } 
     }
   }, [router]);
+
+  // Fetch speakers for this event (used in the Speakers tab)
+  const {
+    data: speakersData,
+    isLoading: isSpeakersLoading,
+  } = useQuery<SpeakerResponse>({
+    queryKey: ['speakers', id],
+    queryFn: async () => {
+      if (!id || !token) throw new Error('Missing id or token');
+      const res = await axios.get<SpeakerResponse>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/getSpeakers?id=${id}`,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return res.data;
+    },
+    enabled: !!id && !!token,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const speakers = speakersData?.speakers || [];
+
+  // Check if user is founder
+  useEffect(() => {
+    if (!id || !token) return;
+
+    async function checkFounderStatus() {
+      try {
+        const checkFounder = await axios.get<{ msg: string }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isFounder?id=${id}`,
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (
+          checkFounder.status === 200 &&
+          checkFounder.data.msg === 'identified'
+        ) {
+          setIsFounder(true);
+        }
+      } catch (error) {
+        console.error('Error checking founder status:', error);
+      }
+    }
+
+    checkFounderStatus();
+  }, [id, token]);
 
   // Fetch user data and attended events
   useEffect(() => {
@@ -515,21 +587,72 @@ const Eventid = () => {
             )}
 
             {activeTab === 'speakers' && (
-              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6">
-                <div className="flex items-center justify-between mb-4">
+              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6 space-y-4">
+                <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold text-yellow-400">
                     Speakers & Judges
                   </h2>
-                  <Link
-                    href={`/events/${id}/speakers`}
-                    className="text-yellow-400 hover:text-yellow-300 text-sm font-medium"
-                  >
-                    View All →
-                  </Link>
+                  {isFounder && (
+                    <Button
+                      onClick={() => setIsAddSpeakerModalOpen(true)}
+                      className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Speaker
+                    </Button>
+                  )}
                 </div>
-                <p className="text-gray-400">
-                  Speakers will be revealed closer to the event.
-                </p>
+
+                {isSpeakersLoading ? (
+                  <p className="text-gray-400">Loading speakers...</p>
+                ) : speakers.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-400 mb-4">
+                      Speakers will be revealed closer to the event.
+                    </p>
+                    {isFounder && (
+                      <Button
+                        onClick={() => setIsAddSpeakerModalOpen(true)}
+                        className="px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2 mx-auto"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add First Speaker
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {speakers.map((speaker) => (
+                      <div
+                        key={speaker.id}
+                        className="bg-black border border-yellow-500/20 rounded-lg p-4 flex gap-3"
+                      >
+                        <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-800 flex-shrink-0">
+                          <Image
+                            src={
+                              speaker.profilePic ||
+                              'https://i.pravatar.cc/150?img=11'
+                            }
+                            alt={speaker.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-semibold text-white truncate">
+                            {speaker.name}
+                          </h3>
+                          <p className="text-xs text-yellow-400 truncate">
+                            {speaker.email}
+                          </p>
+                          <p className="mt-1 text-xs text-gray-300 line-clamp-2">
+                            {speaker.about}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -628,6 +751,13 @@ const Eventid = () => {
       </div>
       
       <NoTokenModal isOpen={isAuthModalOpen} onOpenChange={setIsAuthModalOpen} hasToken={hasTokenForModal} />
+      
+      {/* Add Speaker Modal */}
+      <AddSpeakerModal
+        isOpen={isAddSpeakerModalOpen}
+        onClose={() => setIsAddSpeakerModalOpen(false)}
+        eventId={id}
+      />
     </div>
   );
 };
