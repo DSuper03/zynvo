@@ -2,16 +2,18 @@ import { res } from "@/hooks/useResetPw";
 import axios from "axios";
 import React, { useState } from "react";
 import { toast } from "sonner";
-import { Eye, EyeOff, Lock } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Lock, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 type Props = {
   onSubmit?: (oldPassword: string, newPassword: string) => Promise<void> | void;
 };
 
 export default function ResetPassword({ onSubmit }: Props) {
+  const router = useRouter();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [showOldPassword, setShowOldPassword] = useState(false);
@@ -51,12 +53,23 @@ export default function ResetPassword({ onSubmit }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center p-4 relative">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl"></div>
       </div>
+
+      {/* Back to Dashboard Button - Top Left */}
+      <Button
+        onClick={() => router.push('/dashboard')}
+        variant="ghost"
+        size="icon"
+        className="absolute top-10 left-8 sm:top-6 sm:left-6 h-10 w-10 rounded-full bg-gray-800/50 hover:bg-gray-800 border border-gray-100 hover:border-yellow-400/50 text-gray-400 hover:text-yellow-400 transition-all duration-200 z-20"
+        aria-label="Back to Dashboard"
+      >
+        <ArrowLeft className="w-5 h-5 text-white" />
+      </Button>
 
       <div className="relative z-10 w-full max-w-md">
         <form
@@ -171,6 +184,21 @@ export default function ResetPassword({ onSubmit }: Props) {
           <p className="mt-6 text-xs text-gray-500 text-center">
             Use a strong password with at least 8 characters
           </p>
+
+          {/* Google Password Save Suggestion */}
+          <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Shield className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-blue-300 mb-1">
+                  Save your password securely
+                </p>
+                <p className="text-xs text-blue-400/80 leading-relaxed">
+                  Consider saving your new password with Google Password Manager for easy and secure access across all your devices.
+                </p>
+              </div>
+            </div>
+          </div>
         </form>
       </div>
     </div>
