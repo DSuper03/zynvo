@@ -2,6 +2,10 @@ import { res } from "@/hooks/useResetPw";
 import axios from "axios";
 import React, { useState } from "react";
 import { toast } from "sonner";
+import { Eye, EyeOff, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type Props = {
   onSubmit?: (oldPassword: string, newPassword: string) => Promise<void> | void;
@@ -10,6 +14,8 @@ type Props = {
 export default function ResetPassword({ onSubmit }: Props) {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -24,145 +30,149 @@ export default function ResetPassword({ onSubmit }: Props) {
       return;
     }
 
+    if (oldPassword === newPassword) {
+      setError("New password must be different from current password.");
+      return;
+    }
+
     setLoading(true);
     try {
-      res(oldPassword, newPassword);
+      await res(oldPassword, newPassword);
       setSuccess("Password updated successfully.");
       setOldPassword("");
       setNewPassword("");
+      toast.success("Password updated successfully!");
     } catch (err) {
-      setError("Unable to update password. Try again.");
+      setError("Unable to update password. Please try again.");
+      toast.error("Failed to update password. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const styles: Record<string, React.CSSProperties> = {
-    page: {
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "#000",
-      color: "#fff",
-      padding: 20,
-    },
-    card: {
-      width: "100%",
-      maxWidth: 480,
-      background: "#0b0b0b",
-      borderRadius: 12,
-      padding: 24,
-      boxShadow: "0 8px 30px rgba(0,0,0,0.6)",
-      border: "1px solid #1f1f1f",
-    },
-    header: {
-      marginBottom: 18,
-      textAlign: "center",
-    },
-    title: {
-      color: "#fbbf24",
-      fontSize: 20,
-      margin: 0,
-      fontWeight: 700,
-    },
-    subtitle: {
-      color: "#bfbfbf",
-      fontSize: 13,
-      marginTop: 6,
-    },
-    label: {
-      display: "block",
-      marginBottom: 6,
-      color: "#fbbf24",
-      fontWeight: 600,
-      fontSize: 13,
-    },
-    input: {
-      width: "100%",
-      padding: "10px 12px",
-      borderRadius: 8,
-      border: "1px solid #333",
-      background: "#111",
-      color: "#fff",
-      marginBottom: 12,
-      outline: "none",
-    },
-    btn: {
-      background: "#fbbf24",
-      color: "#000",
-      border: "none",
-      padding: "10px 14px",
-      borderRadius: 8,
-      fontWeight: 700,
-      cursor: "pointer",
-      width: "100%",
-    },
-    note: {
-      fontSize: 13,
-      color: "#9ca3af",
-      marginTop: 12,
-      textAlign: "center",
-    },
-    error: {
-      color: "#ff6b6b",
-      marginBottom: 10,
-      textAlign: "center",
-    },
-    success: {
-      color: "#8be38b",
-      marginBottom: 10,
-      textAlign: "center",
-    },
-  };
-
   return (
-    <div style={styles.page}>
-      <form style={styles.card} onSubmit={handleSubmit} aria-label="reset-password-form">
-        <div style={styles.header}>
-          <h2 style={styles.title}>Reset password</h2>
-          <div style={styles.subtitle}>Enter your current password and choose a new one.</div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center p-4">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl"></div>
+      </div>
 
-        {error && <div style={styles.error}>{error}</div>}
-        {success && <div style={styles.success}>{success}</div>}
+      <div className="relative z-10 w-full max-w-md">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-gray-900/80 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 shadow-2xl"
+          aria-label="reset-password-form"
+        >
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-400/10 rounded-full mb-4">
+              <Lock className="w-8 h-8 text-yellow-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">Reset Password</h2>
+            <p className="text-gray-400 text-sm">
+              Enter your current password and choose a new one
+            </p>
+          </div>
 
-        <label htmlFor="oldPassword" style={styles.label}>
-          Current password
-        </label>
-        <input
-          id="oldPassword"
-          name="oldPassword"
-          type="password"
-          autoComplete="current-password"
-          value={oldPassword}
-          onChange={(e) => setOldPassword(e.target.value)}
-          style={styles.input}
-          placeholder="Enter current password"
-        />
+          {/* Error/Success Messages */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <p className="text-red-400 text-sm text-center">{error}</p>
+            </div>
+          )}
+          {success && (
+            <div className="mb-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+              <p className="text-green-400 text-sm text-center">{success}</p>
+            </div>
+          )}
 
-        <label htmlFor="newPassword" style={styles.label}>
-          New password
-        </label>
-        <input
-          id="newPassword"
-          name="newPassword"
-          type="password"
-          autoComplete="new-password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          style={styles.input}
-          placeholder="Enter new password"
-        />
+          {/* Current Password Field */}
+          <div className="mb-6">
+            <Label htmlFor="oldPassword" className="text-yellow-400 text-sm font-medium mb-2 block">
+              Current Password
+            </Label>
+            <div className="relative">
+              <Input
+                id="oldPassword"
+                name="oldPassword"
+                type={showOldPassword ? "text" : "password"}
+                autoComplete="current-password"
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                className="w-full bg-gray-800/50 border-gray-700 text-white placeholder:text-gray-500 pr-10 focus:border-yellow-400 focus:ring-yellow-400/20"
+                placeholder="Enter current password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowOldPassword(!showOldPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-yellow-400 transition-colors"
+                aria-label={showOldPassword ? "Hide password" : "Show password"}
+              >
+                {showOldPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+          </div>
 
-        <button type="submit" style={styles.btn} disabled={loading}>
-          {loading ? "Updating…" : "Update password"}
-        </button>
+          {/* New Password Field */}
+          <div className="mb-6">
+            <Label htmlFor="newPassword" className="text-yellow-400 text-sm font-medium mb-2 block">
+              New Password
+            </Label>
+            <div className="relative">
+              <Input
+                id="newPassword"
+                name="newPassword"
+                type={showNewPassword ? "text" : "password"}
+                autoComplete="new-password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full bg-gray-800/50 border-gray-700 text-white placeholder:text-gray-500 pr-10 focus:border-yellow-400 focus:ring-yellow-400/20"
+                placeholder="Enter new password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-yellow-400 transition-colors"
+                aria-label={showNewPassword ? "Hide password" : "Show password"}
+              >
+                {showNewPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+          </div>
 
-        <div style={styles.note}>
-          Use a strong password. The theme is black and yellow.
-        </div>
-      </form>
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            disabled={loading || !oldPassword || !newPassword}
+            className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+                Updating...
+              </span>
+            ) : (
+              "Update Password"
+            )}
+          </Button>
+
+          {/* Helper Text */}
+          <p className="mt-6 text-xs text-gray-500 text-center">
+            Use a strong password with at least 8 characters
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
