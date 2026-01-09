@@ -28,7 +28,8 @@ import NoTokenModal from '@/components/modals/remindModal';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import AddSpeakerModal from './speakers/AddSpeakerModal';
-import { Plus } from 'lucide-react';
+import { Plus, Download, Users } from 'lucide-react';
+import { useParticipants, downloadParticipantsCSV, type Participant } from '@/hooks/useParticipants';
 
 dotenv.config();
 
@@ -71,7 +72,7 @@ const Eventid = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'speakers' | 'schedule' | 'gallery' | 'announcement'
+    'overview' | 'speakers' | 'schedule' | 'gallery' | 'announcement' | 'attendees'
   >('overview');
   const [signedin, setSignedin] = useState<boolean>(false);
   const [userAttendedEventIds, setUserAttendedEventIds] = useState<string[]>([]);
@@ -133,6 +134,23 @@ const Eventid = () => {
   });
 
   const speakers = speakersData?.speakers || [];
+
+  // Fetch participants for this event
+  const [participantsPage, setParticipantsPage] = useState(1);
+  const participantsLimit = 50;
+  const {
+    data: participantsData,
+    isLoading: isParticipantsLoading,
+    error: participantsError,
+  } = useParticipants({
+    eventId: id,
+    page: participantsPage,
+    limit: participantsLimit,
+    enabled: activeTab === 'attendees' && !!id,
+  });
+
+  const participants = participantsData?.data || [];
+  const participantsPagination = participantsData?.pagination;
 
   // Check if user is founder
   useEffect(() => {
@@ -514,6 +532,7 @@ const Eventid = () => {
                 { id: 'schedule', label: 'Schedule' },
                 { id: 'gallery', label: 'Gallery' },
                 { id: 'announcement', label: 'Announcements' },
+                { id: 'attendees', label: 'Attendees' },
               ] as const
             ).map((t) => (
               <button
@@ -673,6 +692,147 @@ const Eventid = () => {
                   Announcements
                 </h2>
                 <EventAnnouncements />
+              </div>
+            )}
+
+            {activeTab === 'attendees' && (
+              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6 space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-yellow-400 flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    Attendees
+                  </h2>
+                  {isFounder && (
+                    <Button
+                      onClick={async () => {
+                        try {
+                          await downloadParticipantsCSV(id, token);
+                        } catch (error) {
+                          console.error('Error downloading CSV:', error);
+                        }
+                      }}
+                      className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download CSV
+                    </Button>
+                  )}
+                </div>
+
+                {isParticipantsLoading ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-400">Loading attendees...</p>
+                  </div>
+                ) : participantsError ? (
+                  <div className="text-center py-8">
+                    <p className="text-red-400">
+                      Failed to load attendees. Please try again.
+                    </p>
+                  </div>
+                ) : participants.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-400">
+                      No attendees registered yet.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-3">
+                      {participants.map((participant: Participant) => (
+                        <div
+                          key={`${participant.user.id}-${participant.joinedAt}`}
+                          className="bg-black border border-yellow-500/20 rounded-lg p-4 flex gap-4 hover:border-yellow-500/40 transition-colors"
+                        >
+                          <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
+                            {participant.user.profileAvatar ? (
+                              <Image
+                                src={participant.user.profileAvatar}
+                                alt={participant.user.name || 'User'}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center">
+                                <span className="text-black font-bold text-sm">
+                                  {participant.user.name
+                                    ? participant.user.name.charAt(0).toUpperCase()
+                                    : 'U'}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-semibold text-white truncate">
+                              {participant.user.name || 'Anonymous User'}
+                            </h3>
+                            <p className="text-xs text-yellow-400 truncate">
+                              {participant.user.email}
+                            </p>
+                            {participant.user.collegeName && (
+                              <p className="text-xs text-gray-400 mt-1 truncate">
+                                {participant.user.collegeName}
+                               
+                                {participant.user.year && ` • Year ${participant.user.year}`}
+                              </p>
+                            )}
+                           
+                            <p className="text-xs text-gray-500 mt-1">
+                              Joined:{' '}
+                              {new Date(participant.joinedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {participantsPagination &&
+                      participantsPagination.totalPages > 1 && (
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-800">
+                          <p className="text-sm text-gray-400">
+                            Showing {participants.length} of{' '}
+                            {participantsPagination.total} attendees
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              onClick={() =>
+                                setParticipantsPage((p) => Math.max(1, p - 1))
+                              }
+                              disabled={participantsPage === 1}
+                              variant="outline"
+                              size="sm"
+                              className="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 disabled:opacity-50"
+                            >
+                              Previous
+                            </Button>
+                            <span className="text-sm text-gray-400">
+                              Page {participantsPagination.page} of{' '}
+                              {participantsPagination.totalPages}
+                            </span>
+                            <Button
+                              onClick={() =>
+                                setParticipantsPage((p) =>
+                                  Math.min(
+                                    participantsPagination.totalPages,
+                                    p + 1
+                                  )
+                                )
+                              }
+                              disabled={
+                                participantsPage >=
+                                participantsPagination.totalPages
+                              }
+                              variant="outline"
+                              size="sm"
+                              className="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 disabled:opacity-50"
+                            >
+                              Next
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                  </>
+                )}
               </div>
             )}
 
