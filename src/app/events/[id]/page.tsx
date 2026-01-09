@@ -146,7 +146,7 @@ const Eventid = () => {
     eventId: id,
     page: participantsPage,
     limit: participantsLimit,
-    enabled: activeTab === 'attendees' && !!id,
+    enabled: activeTab === 'attendees' && !!id && isFounder,
   });
 
   const participants = participantsData?.data || [];
@@ -719,7 +719,13 @@ const Eventid = () => {
                   )}
                 </div>
 
-                {isParticipantsLoading ? (
+                {!isFounder ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-400">
+                      You are not allowed to view the attendees list.
+                    </p>
+                  </div>
+                ) : isParticipantsLoading ? (
                   <div className="text-center py-8">
                     <p className="text-gray-400">Loading attendees...</p>
                   </div>
@@ -771,11 +777,11 @@ const Eventid = () => {
                             {participant.user.collegeName && (
                               <p className="text-xs text-gray-400 mt-1 truncate">
                                 {participant.user.collegeName}
-                               
+
                                 {participant.user.year && ` • Year ${participant.user.year}`}
                               </p>
                             )}
-                           
+
                             <p className="text-xs text-gray-500 mt-1">
                               Joined:{' '}
                               {new Date(participant.joinedAt).toLocaleDateString()}
