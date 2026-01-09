@@ -20,12 +20,32 @@ import {
   ChevronRight,
   Menu,
   Sparkles,
+  ArrowLeft,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import EventAnnouncements from '../components/eventAnnouncement';
 import NoTokenModal from '@/components/modals/remindModal';
+import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
+import AddSpeakerModal from './speakers/AddSpeakerModal';
+import { Plus, Download, Users } from 'lucide-react';
+import { useParticipants, downloadParticipantsCSV, type Participant } from '@/hooks/useParticipants';
 
 dotenv.config();
+
+interface Speaker {
+  id: number;
+  email: string;
+  name: string;
+  profilePic: string | null;
+  about: string;
+  eventId: string;
+}
+
+interface SpeakerResponse {
+  msg: string;
+  speakers: Speaker[];
+}
 
 const Eventid = () => {
   const params = useParams();
@@ -52,13 +72,15 @@ const Eventid = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'speakers' | 'schedule' | 'gallery' | 'announcement'
+    'overview' | 'speakers' | 'schedule' | 'gallery' | 'announcement' | 'attendees'
   >('overview');
   const [signedin, setSignedin] = useState<boolean>(false);
   const [userAttendedEventIds, setUserAttendedEventIds] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
+  const [isAddSpeakerModalOpen, setIsAddSpeakerModalOpen] = useState(false);
+  const [isFounder, setIsFounder] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -88,6 +110,76 @@ const Eventid = () => {
       } 
     }
   }, [router]);
+
+  // Fetch speakers for this event (used in the Speakers tab)
+  const {
+    data: speakersData,
+    isLoading: isSpeakersLoading,
+  } = useQuery<SpeakerResponse>({
+    queryKey: ['speakers', id],
+    queryFn: async () => {
+      if (!id || !token) throw new Error('Missing id or token');
+      const res = await axios.get<SpeakerResponse>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/getSpeakers?id=${id}`,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return res.data;
+    },
+    enabled: !!id && !!token,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const speakers = speakersData?.speakers || [];
+
+  // Fetch participants for this event
+  const [participantsPage, setParticipantsPage] = useState(1);
+  const participantsLimit = 50;
+  const {
+    data: participantsData,
+    isLoading: isParticipantsLoading,
+    error: participantsError,
+  } = useParticipants({
+    eventId: id,
+    page: participantsPage,
+    limit: participantsLimit,
+    enabled: activeTab === 'attendees' && !!id,
+  });
+
+  const participants = participantsData?.data || [];
+  const participantsPagination = participantsData?.pagination;
+
+  // Check if user is founder
+  useEffect(() => {
+    if (!id || !token) return;
+
+    async function checkFounderStatus() {
+      try {
+        const checkFounder = await axios.get<{ msg: string }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isFounder?id=${id}`,
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (
+          checkFounder.status === 200 &&
+          checkFounder.data.msg === 'identified'
+        ) {
+          setIsFounder(true);
+        }
+      } catch (error) {
+        console.error('Error checking founder status:', error);
+      }
+    }
+
+    checkFounderStatus();
+  }, [id, token]);
 
   // Fetch user data and attended events
   useEffect(() => {
@@ -276,142 +368,163 @@ const Eventid = () => {
   }
 
   return (
-    <div className="min-h-screen  text-white">
-      {/* Top App Bar */}
+    <div className="min-h-screen bg-black text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Back Button */}
+        <Link
+          href="/events"
+          className="inline-flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition-colors mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Events</span>
+        </Link>
 
-      {/* Hero Section */}
-      <div className="max-w-6xl mx-auto px-4 mt-6">
-        <div className="relative overflow-hidden rounded-3xl bg-[#0B0B0B] border border-gray-800">
-          {/* soft glow blobs */}
-          <div className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-yellow-400/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-yellow-400/10 blur-3xl" />
+        {/* Hero Section - Compact Design */}
+        <div className="relative rounded-2xl bg-[#0B0B0B] border border-gray-800 overflow-hidden mb-6">
+          {/* Subtle glow effects */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 rounded-full blur-3xl -z-0" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-400/5 rounded-full blur-3xl -z-0" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 md:p-10">
-            {/* Left: Event primary info */}
-            <div className="lg:col-span-7">
-              <p className="text-gray-300 mb-2">
-                {data.description
-                  ? 'The Ultimate, Student Developer Experience'
-                  : 'Curated by Zynvo'}
-              </p>
-              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-yellow-400">
-                {data.EventName || 'Event Title'}
-              </h1>
-
-              <div className="mt-6 space-y-3 text-gray-200">
-                <div className="flex items-center gap-3">
-                  <CheckSquare className="w-4 h-4" />
-                  <span className="text-sm">
-                    {formatDateRange(data.startDate, data.endDate)}
-                  </span>
+          <div className="relative z-10 p-6 md:p-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left: Event Info */}
+              <div className="lg:col-span-2 space-y-4">
+                <div>
+                  <p className="text-gray-400 text-sm mb-2">Event</p>
+                  <h1 className="text-3xl md:text-4xl font-bold text-yellow-400 leading-tight">
+                    {data.EventName || 'Event Title'}
+                  </h1>
                 </div>
-                <div className="flex items-center gap-3">
-                  <MapPin className="w-4 h-4" />
-                  <span className="text-sm">{data.university || 'TBD'}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  {isOnline ? (
-                    <Globe className="w-4 h-4" />
-                  ) : (
-                    <Square className="w-4 h-4" />
-                  )}
-                  <span className="text-sm">
-                    {isOnline ? 'Online' : data.EventMode || 'Mode TBD'}
-                  </span>
-                </div>
-              </div>
 
-              <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                {signedin ? (
-                  isUserAttendingEvent() ? (
-                    <div className="flex items-center gap-2 px-4 py-3 bg-green-600 text-white rounded-xl font-semibold">
-                      <CheckSquare className="w-5 h-5" />
-                      You are attending this event
+                {/* Event Details - Compact */}
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <CalendarIcon className="w-4 h-4 text-yellow-400" />
+                    <span>{formatDateRange(data.startDate, data.endDate)}</span>
+                  </div>
+                  {data.university && (
+                    <div className="flex items-center gap-2 text-gray-300">
+                      <MapPin className="w-4 h-4 text-yellow-400" />
+                      <span>{data.university}</span>
                     </div>
+                  )}
+                  <div className="flex items-center gap-2 text-gray-300">
+                    {isOnline ? (
+                      <Globe className="w-4 h-4 text-yellow-400" />
+                    ) : (
+                      <Square className="w-4 h-4 text-yellow-400" />
+                    )}
+                    <span>{isOnline ? 'Online' : data.EventMode || 'TBD'}</span>
+                  </div>
+                </div>
+
+                {/* Status Badge */}
+                <div>
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                      data.applicationStatus === 'open'
+                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                        : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                    }`}
+                  >
+                    {data.applicationStatus === 'open' ? (
+                      <CheckSquare className="w-3 h-3 mr-1.5" />
+                    ) : null}
+                    Applications {data.applicationStatus}
+                  </span>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-3 pt-2">
+                  {signedin ? (
+                    isUserAttendingEvent() ? (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 text-green-400 rounded-lg font-medium">
+                        <CheckSquare className="w-4 h-4" />
+                        <span>You're attending</span>
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={handleRegistration}
+                        disabled={
+                          isRegistering || data.applicationStatus !== 'open'
+                        }
+                        className={`rounded-lg px-5 py-2 font-medium ${
+                          isRegistering || data.applicationStatus !== 'open'
+                            ? 'bg-gray-800 text-gray-400 cursor-not-allowed'
+                            : 'bg-yellow-400 hover:bg-yellow-500 text-black'
+                        }`}
+                      >
+                        {isRegistering ? 'Registering...' : 'Register Now'}
+                      </Button>
+                    )
                   ) : (
                     <Button
-                      onClick={handleRegistration}
-                      disabled={
-                        isRegistering || data.applicationStatus !== 'open'
-                      }
-                      className={`rounded-xl px-5 py-3 font-semibold ${
-                        isRegistering || data.applicationStatus !== 'open'
-                          ? 'bg-gray-700 text-gray-300 cursor-not-allowed'
-                          : 'bg-yellow-400 hover:bg-yellow-500 text-black'
-                      }`}
+                      onClick={() => router.push('/auth/signup')}
+                      className="rounded-lg px-5 py-2 font-medium bg-yellow-400 hover:bg-yellow-500 text-black"
                     >
-                      {isRegistering ? 'Registering...' : 'Register Now'}
+                      Sign Up to Register
                     </Button>
-                  )
-                ) : (
-                  <Button
-                    onClick={() => {
-                      router.push('/auth/signup');
-                    }}
-                    className={`rounded-xl px-5 py-3 font-semibold bg-yellow-400 hover:bg-yellow-500 text-black
-                  `}
+                  )}
+
+                  <a
+                    href={googleCalendarHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg px-4 py-2 bg-gray-900 border border-gray-800 hover:border-gray-700 text-white transition-colors"
                   >
-                    Sign Up to Regester
-                  </Button>
-                )}
+                    <CalendarIcon className="w-4 h-4" />
+                    <span>Add to Calendar</span>
+                  </a>
+                </div>
 
-                     {/* Success notice (unchanged logic) */}
-                      {forkedUpId && (
-                        <div className="mt-6 p-4 bg-green-900/30 border border-green-500/30 rounded-2xl">
-                          <p className="text-green-400 font-medium mb-1">
-                            Registration Successful! 🎉
-                          </p>
-                          <p className="text-gray-300">
-                            Get your pass for this event on{' '}
-                            <a
-                              href={`https://zynvo.social/ticket/${forkedUpId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-yellow-400 hover:text-yellow-300 underline font-semibold transition-colors"
-                            >
-                              Zynced It
-                            </a>
-                            . Without this you&apos;ll not be allowed to take part.
-                          </p>
-                        </div>
-                      )}
-
-                <a
-                  href={googleCalendarHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-xl px-5 py-3 font-semibold bg-[#0E0E0E] border border-gray-800 hover:border-gray-700 text-white inline-flex items-center gap-2"
-                >
-                  <CalendarIcon className="w-4 h-4" />
-                  Add to Calendar
-                </a>
-              </div>
-            </div>
-
-            {/* Right: Poster */}
-            <div className="lg:col-span-5">
-              <div className="relative w-full aspect-[4/3] md:aspect-[3/2] rounded-2xl bg-gradient-to-br from-yellow-500/15 to-transparent border border-gray-800 overflow-hidden">
-                {data.posterUrl || data.eventHeader ? (
-                  <Image
-                    src={data.posterUrl || '/poster/2.png'}
-                    alt="Event Poster"
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-yellow-200/70">
-                    <CalendarIcon className="w-16 h-16 mb-2 opacity-60" />
-                    <span className="text-sm">Event poster coming soon</span>
+                {/* Success notice */}
+                {forkedUpId && (
+                  <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                    <p className="text-green-400 font-medium mb-1 text-sm">
+                      Registration Successful! 🎉
+                    </p>
+                    <p className="text-gray-300 text-sm">
+                      Get your pass on{' '}
+                      <a
+                        href={`https://zynvo.social/ticket/${forkedUpId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-yellow-400 hover:text-yellow-300 underline font-medium"
+                      >
+                        Zynced It
+                      </a>
+                      .
+                    </p>
                   </div>
                 )}
+              </div>
+
+              {/* Right: Compact Poster Image */}
+              <div className="lg:col-span-1">
+                <div className="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-gray-900 border border-gray-800">
+                  {data.posterUrl ? (
+                    <Image
+                      src={data.posterUrl}
+                      alt="Event Poster"
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
+                      <CalendarIcon className="w-12 h-12 mb-2 opacity-50" />
+                      <span className="text-xs">Poster coming soon</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="mt-6">
-          <div className="flex flex-wrap gap-2">
+        {/* Tabs Navigation */}
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2 border-b border-gray-800">
             {(
               [
                 { id: 'overview', label: 'Overview' },
@@ -419,15 +532,16 @@ const Eventid = () => {
                 { id: 'schedule', label: 'Schedule' },
                 { id: 'gallery', label: 'Gallery' },
                 { id: 'announcement', label: 'Announcements' },
+                { id: 'attendees', label: 'Attendees' },
               ] as const
             ).map((t) => (
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
-                className={`px-4 py-2 rounded-full text-sm border transition ${
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === t.id
-                    ? 'bg-yellow-400 text-black border-yellow-400'
-                    : 'bg-[#0E0E0E] text-gray-300 border-gray-800 hover:border-gray-700'
+                    ? 'border-yellow-400 text-yellow-400'
+                    : 'border-transparent text-gray-400 hover:text-gray-300'
                 }`}
               >
                 {t.label}
@@ -436,72 +550,53 @@ const Eventid = () => {
           </div>
         </div>
 
-        {/* Main content grid */}
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left column */}
-          <div className="lg:col-span-8 space-y-6">
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Main Content */}
+          <div className="lg:col-span-2 space-y-6">
             {activeTab === 'overview' && (
-              <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-6">
-                <h2 className="text-2xl font-bold text-yellow-400 mb-3">
-                  Design Thinking Workshop
+              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6">
+                <h2 className="text-xl font-bold text-yellow-400 mb-4">
+                  About This Event
                 </h2>
-                <p className="text-gray-300 leading-relaxed">
+                <p className="text-gray-300 leading-relaxed mb-6">
                   {data.description ||
                     'Event description will be available soon...'}
                 </p>
 
-                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <MapPin className="w-4 h-4 text-yellow-400" />
-                    <span>University</span>
-                    <span className="ml-auto text-white">
-                      {data.university || 'TBD'}
-                    </span>
+                {/* Details Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-800">
+                  <div className="space-y-1">
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">Location</p>
+                    <p className="text-white">{data.university || 'TBD'}</p>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <Globe className="w-4 h-4 text-yellow-400" />
-                    <span>Mode</span>
-                    <span className="ml-auto text-white">
-                      {data.EventMode || 'TBD'}
-                    </span>
+                  <div className="space-y-1">
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">Mode</p>
+                    <p className="text-white">{data.EventMode || 'TBD'}</p>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <AlarmClock className="w-4 h-4 text-yellow-400" />
-                    <span>Starts</span>
-                    <span className="ml-auto text-white">
+                  <div className="space-y-1">
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">Start Date</p>
+                    <p className="text-white">
                       {data.startDate
-                        ? new Date(data.startDate).toLocaleString()
+                        ? new Date(data.startDate).toLocaleDateString()
                         : 'TBD'}
-                    </span>
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <AlarmClock className="w-4 h-4 text-yellow-400" />
-                    <span>Ends</span>
-                    <span className="ml-auto text-white">
+                  <div className="space-y-1">
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">End Date</p>
+                    <p className="text-white">
                       {data.endDate
-                        ? new Date(data.endDate).toLocaleString()
+                        ? new Date(data.endDate).toLocaleDateString()
                         : 'TBD'}
-                    </span>
+                    </p>
                   </div>
-                </div>
-
-                <div className="mt-4 flex items-center gap-2">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      data.applicationStatus === 'open'
-                        ? 'bg-green-300/20 text-green-300 border border-green-400/30'
-                        : 'bg-red-300/20 text-red-300 border border-red-400/30'
-                    }`}
-                  >
-                    Applications {data.applicationStatus}
-                  </span>
                 </div>
               </div>
             )}
 
             {activeTab === 'schedule' && (
-              <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-6">
-                <h2 className="text-xl font-bold text-yellow-400 mb-2">
+              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6">
+                <h2 className="text-xl font-bold text-yellow-400 mb-4">
                   Schedule
                 </h2>
                 <p className="text-gray-400">
@@ -511,19 +606,78 @@ const Eventid = () => {
             )}
 
             {activeTab === 'speakers' && (
-              <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-6">
-                <h2 className="text-xl font-bold text-yellow-400 mb-2">
-                  Speakers & Judges
-                </h2>
-                <p className="text-gray-400">
-                  Speakers will be revealed closer to the event.
-                </p>
+              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-yellow-400">
+                    Speakers & Judges
+                  </h2>
+                  {isFounder && (
+                    <Button
+                      onClick={() => setIsAddSpeakerModalOpen(true)}
+                      className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Speaker
+                    </Button>
+                  )}
+                </div>
+
+                {isSpeakersLoading ? (
+                  <p className="text-gray-400">Loading speakers...</p>
+                ) : speakers.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-400 mb-4">
+                      Speakers will be revealed closer to the event.
+                    </p>
+                    {isFounder && (
+                      <Button
+                        onClick={() => setIsAddSpeakerModalOpen(true)}
+                        className="px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2 mx-auto"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add First Speaker
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {speakers.map((speaker) => (
+                      <div
+                        key={speaker.id}
+                        className="bg-black border border-yellow-500/20 rounded-lg p-4 flex gap-3"
+                      >
+                        <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-800 flex-shrink-0">
+                          <Image
+                            src={
+                              speaker.profilePic ||
+                              'https://i.pravatar.cc/150?img=11'
+                            }
+                            alt={speaker.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-semibold text-white truncate">
+                            {speaker.name}
+                          </h3>
+                          <p className="text-xs text-yellow-400 truncate">
+                            {speaker.email}
+                          </p>
+                          <p className="mt-1 text-xs text-gray-300 line-clamp-2">
+                            {speaker.about}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
             {activeTab === 'gallery' && (
-              <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-6">
-                <h2 className="text-xl font-bold text-yellow-400 mb-2">
+              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6">
+                <h2 className="text-xl font-bold text-yellow-400 mb-4">
                   Gallery
                 </h2>
                 <p className="text-gray-400">
@@ -531,85 +685,206 @@ const Eventid = () => {
                 </p>
               </div>
             )}
+
             {activeTab === 'announcement' && (
-              <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-6">
-                <h2 className="text-xl font-bold text-yellow-400 mb-2">
-                  <EventAnnouncements/>
+              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6">
+                <h2 className="text-xl font-bold text-yellow-400 mb-4">
+                  Announcements
                 </h2>
-                <p className="text-gray-400">
-                  Photos and videos will appear here after the event.
-                </p>
+                <EventAnnouncements />
               </div>
             )}
 
+            {activeTab === 'attendees' && (
+              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6 space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-yellow-400 flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    Attendees
+                  </h2>
+                  {isFounder && (
+                    <Button
+                      onClick={async () => {
+                        try {
+                          await downloadParticipantsCSV(id, token);
+                        } catch (error) {
+                          console.error('Error downloading CSV:', error);
+                        }
+                      }}
+                      className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download CSV
+                    </Button>
+                  )}
+                </div>
 
-            {/* Big CTA card (like the design) */}
-            <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-6">
-              <h3 className="text-2xl md:text-3xl font-extrabold text-yellow-400">
-                Make Your Campus Life Unforgettable. Join Zynvo!
-              </h3>
-              <div className="mt-4">
-                <Button
-                  onClick={() => (window.location.href = '/auth/signup')}
-                  className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-xl px-6 py-3"
-                >
-                  Join Zynvo
-                </Button>
+                {isParticipantsLoading ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-400">Loading attendees...</p>
+                  </div>
+                ) : participantsError ? (
+                  <div className="text-center py-8">
+                    <p className="text-red-400">
+                      Failed to load attendees. Please try again.
+                    </p>
+                  </div>
+                ) : participants.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-400">
+                      No attendees registered yet.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-3">
+                      {participants.map((participant: Participant) => (
+                        <div
+                          key={`${participant.user.id}-${participant.joinedAt}`}
+                          className="bg-black border border-yellow-500/20 rounded-lg p-4 flex gap-4 hover:border-yellow-500/40 transition-colors"
+                        >
+                          <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
+                            {participant.user.profileAvatar ? (
+                              <Image
+                                src={participant.user.profileAvatar}
+                                alt={participant.user.name || 'User'}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center">
+                                <span className="text-black font-bold text-sm">
+                                  {participant.user.name
+                                    ? participant.user.name.charAt(0).toUpperCase()
+                                    : 'U'}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-semibold text-white truncate">
+                              {participant.user.name || 'Anonymous User'}
+                            </h3>
+                            <p className="text-xs text-yellow-400 truncate">
+                              {participant.user.email}
+                            </p>
+                            {participant.user.collegeName && (
+                              <p className="text-xs text-gray-400 mt-1 truncate">
+                                {participant.user.collegeName}
+                               
+                                {participant.user.year && ` • Year ${participant.user.year}`}
+                              </p>
+                            )}
+                           
+                            <p className="text-xs text-gray-500 mt-1">
+                              Joined:{' '}
+                              {new Date(participant.joinedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {participantsPagination &&
+                      participantsPagination.totalPages > 1 && (
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-800">
+                          <p className="text-sm text-gray-400">
+                            Showing {participants.length} of{' '}
+                            {participantsPagination.total} attendees
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              onClick={() =>
+                                setParticipantsPage((p) => Math.max(1, p - 1))
+                              }
+                              disabled={participantsPage === 1}
+                              variant="outline"
+                              size="sm"
+                              className="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 disabled:opacity-50"
+                            >
+                              Previous
+                            </Button>
+                            <span className="text-sm text-gray-400">
+                              Page {participantsPagination.page} of{' '}
+                              {participantsPagination.totalPages}
+                            </span>
+                            <Button
+                              onClick={() =>
+                                setParticipantsPage((p) =>
+                                  Math.min(
+                                    participantsPagination.totalPages,
+                                    p + 1
+                                  )
+                                )
+                              }
+                              disabled={
+                                participantsPage >=
+                                participantsPagination.totalPages
+                              }
+                              variant="outline"
+                              size="sm"
+                              className="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 disabled:opacity-50"
+                            >
+                              Next
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                  </>
+                )}
               </div>
+            )}
+
+            {/* CTA Card */}
+            <div className="rounded-xl bg-gradient-to-br from-yellow-400/10 to-transparent border border-yellow-400/20 p-6">
+              <h3 className="text-xl font-bold text-yellow-400 mb-2">
+                Make Your Campus Life Unforgettable
+              </h3>
+              <p className="text-gray-300 mb-4 text-sm">
+                Join Zynvo and connect with your campus community.
+              </p>
+              <Button
+                onClick={() => router.push('/auth/signup')}
+                className="bg-yellow-400 hover:bg-yellow-500 text-black font-medium rounded-lg px-5 py-2"
+              >
+                Join Zynvo
+              </Button>
             </div>
           </div>
 
-          {/* Right column */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* Compact poster card (matches right-hand visual in design) */}
-            <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-3">
-              <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-yellow-500/10">
-                {data.posterUrl ? (
-                  <Image
-                    src={data.posterUrl}
-                    alt="Event Poster"
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-yellow-200/70">
-                    <CalendarIcon className="w-12 h-12 opacity-60" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Contact info card */}
+          {/* Right Column - Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Contact Card */}
             {(data.contactEmail || data.contactPhone) && (
-              <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-6">
-                <h3 className="text-lg font-bold mb-4">Contact info</h3>
-                <div className="space-y-3 text-sm">
+              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-5">
+                <h3 className="text-lg font-semibold mb-4 text-white">Contact</h3>
+                <div className="space-y-3">
                   {data.contactEmail && (
                     <a
                       href={`mailto:${data.contactEmail}`}
-                      className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition-colors"
+                      className="flex items-center gap-3 text-sm text-gray-300 hover:text-yellow-400 transition-colors"
                     >
-                      <Mail className="w-4 h-4 text-yellow-400" />
-                      <span>{data.contactEmail}</span>
+                      <Mail className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                      <span className="break-all">{data.contactEmail}</span>
                     </a>
                   )}
-                  {data.contactPhone ? (
+                  {data.contactPhone && (
                     <a
                       href={`tel:${data.contactPhone}`}
-                      className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition-colors"
+                      className="flex items-center gap-3 text-sm text-gray-300 hover:text-yellow-400 transition-colors"
                     >
-                      <Phone className="w-4 h-4 text-yellow-400" />
+                      <Phone className="w-4 h-4 text-yellow-400 flex-shrink-0" />
                       <span>{data.contactPhone}</span>
                     </a>
-                  ) : null}
+                  )}
                 </div>
-
-                <div className="mt-6">
+                <div className="mt-4 pt-4 border-t border-gray-800">
                   <a
                     href={googleCalendarHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-black font-medium"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 bg-gray-900 border border-gray-800 hover:border-yellow-400/50 text-white transition-colors text-sm"
                   >
                     <Share2 className="w-4 h-4" />
                     Save / Share
@@ -618,23 +893,31 @@ const Eventid = () => {
               </div>
             )}
 
-            {/* Small reactions bar to echo the design accents */}
-            <div className="rounded-2xl bg-[#0B0B0B] border border-gray-800 p-4 flex items-center gap-3">
-              <button className="w-9 h-9 rounded-full bg-[#0E0E0E] border border-gray-800 hover:border-gray-700" />
-              <button className="w-9 h-9 rounded-full bg-[#0E0E0E] border border-gray-800 hover:border-gray-700" />
-              <button className="w-9 h-9 rounded-full bg-[#0E0E0E] border border-gray-800 hover:border-gray-700 flex items-center justify-center">
-                <ChevronRight className="w-4 h-4 text-gray-300" />
-              </button>
-            </div>
+            {/* Compact Poster Card */}
+            {data.posterUrl && (
+              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-3">
+                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-gray-900">
+                  <Image
+                    src={data.posterUrl}
+                    alt="Event Poster"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
-
-   
-
-        <div className="h-8" />
       </div>
       
       <NoTokenModal isOpen={isAuthModalOpen} onOpenChange={setIsAuthModalOpen} hasToken={hasTokenForModal} />
+      
+      {/* Add Speaker Modal */}
+      <AddSpeakerModal
+        isOpen={isAddSpeakerModalOpen}
+        onClose={() => setIsAddSpeakerModalOpen(false)}
+        eventId={id}
+      />
     </div>
   );
 };
