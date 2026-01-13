@@ -45,23 +45,12 @@ export default function AIHome() {
     }
   }, []);
 
-  // Read the key once; if missing, show a warning and disable calls
-  // Client no longer calls the model directly; server route uses server-side key
-  const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY as
-    | string
-    | undefined;
-  const hasKey = Boolean(API_KEY && API_KEY.trim().length > 0);
+  // SECURITY: Removed API key check from frontend - server route handles authentication
+  // API keys should never be exposed in frontend code
 
   const handleAsk = async (p?: string) => {
     const q = (p ?? prompt).trim();
     if (!q || loading) return;
-
-    if (!hasKey) {
-      setError(
-        'Missing NEXT_PUBLIC_GOOGLE_AI_API_KEY. Add it to .env.local and restart the dev server.'
-      );
-      return;
-    }
 
     setLoading(true);
     setAnswer('');

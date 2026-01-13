@@ -71,9 +71,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     const fetchUserCollegeAndClubs = async () => {
       if (!token) return;
       
-      // Debug environment variables
-      console.log('Backend URL:', process.env.NEXT_PUBLIC_BACKEND_URL);
-      console.log('Token available:', !!token);
+      // SECURITY: Removed console.log statements that expose sensitive data
       
       try {
         // Get user's college information
