@@ -10,6 +10,7 @@ import {
   UserCheck,
   Settings,
   Building,
+  Lock,
 } from 'lucide-react';
 import { NotificationDropdown } from '@/components/notifications';
 import axios from 'axios';
@@ -30,7 +31,6 @@ import CollegeSearchSelect from '@/components/colleges/collegeSelect';
 import { FaSchool } from 'react-icons/fa';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import EventBadgeCard from '@/components/ticket';
-import * as htmlToImage from 'html-to-image';
 import TextWithLinks from '@/components/TextWithLinks';
 import { headers } from 'next/headers';
 
@@ -852,6 +852,8 @@ export default function ZynvoDashboard() {
 
   const downloadTicket = async () => {
     if (badgeRef.current) {
+      // Lazy load html-to-image only when needed
+      const htmlToImage = await import('html-to-image');
       const dataUrl = await htmlToImage.toPng(badgeRef.current, {
         cacheBust: true,
         skipFonts: false,
@@ -950,15 +952,26 @@ export default function ZynvoDashboard() {
               {/* Club Section - Mobile Responsive */}
               {userData.clubName ? (
                 <div className="mb-4 sm:mb-5">
-                  {/* Club Name Badge */}
-                  <Link href={`/clubs/${userData.clubId}`}>
-                    <div className="inline-flex items-center gap-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/50 text-yellow-400 px-4 py-2 rounded-full transition-all duration-200 hover:scale-105 mb-3 cursor-pointer">
-                      <Building className="w-4 h-4 flex-shrink-0" />
-                      <span className="text-sm sm:text-base font-medium truncate max-w-[200px] sm:max-w-none">
-                        {userData.clubName}
-                      </span>
-                    </div>
-                  </Link>
+                  {/* Club Name Badge with Reset Password Button */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <Link href={`/clubs/${userData.clubId}`}>
+                      <div className="inline-flex items-center gap-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/50 text-yellow-400 px-4 py-2 rounded-full transition-all duration-200 hover:scale-105 cursor-pointer">
+                        <Building className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm sm:text-base font-medium truncate max-w-[200px] sm:max-w-none">
+                          {userData.clubName}
+                        </span>
+                      </div>
+                    </Link>
+                    <Button
+                      onClick={() => navigate.push('/reset-password')}
+                      variant="ghost"
+                      size="icon"
+                      className="h-12 w-12 rounded-full bg-gray-800/50 hover:bg-gray-800 border border-neutral-300 hover:border-yellow-400/50 text-gray-400 hover:text-yellow-400 transition-all duration-200"
+                      aria-label="Reset Password"
+                    >
+                      <Lock className="w-4 h-4" />
+                    </Button>
+                  </div>
 
                   {/* Action Buttons - Stack on Mobile */}
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3">

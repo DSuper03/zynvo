@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import ImageKit from 'imagekit';
 
+// SECURITY: Private keys should NEVER use NEXT_PUBLIC_ prefix as they get exposed to the browser
 const imagekit = new ImageKit({
   publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY as string,
-  privateKey: process.env.NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY as string,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY as string,
   urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT as string,
 });
 
