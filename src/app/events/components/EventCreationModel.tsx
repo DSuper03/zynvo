@@ -320,6 +320,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       toast('please login or signup');
       return;
     }
+    if (!clubName) {
+      toast('You haven\'t created any club yet. Please create a club first.');
+      return;
+    }
     if (!validateStep()) return;
 
     setIsSubmitting(true);
@@ -370,6 +374,44 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   };
  
   if (!isOpen) return null;
+
+  // Check if user has created a club
+  if (!clubName) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-transparent">
+        <Card className="flex min-h-full items-center justify-center p-4 bg-transparent shadow-none">
+          <MagicCard className="group relative bg-gray-900 rounded-xl w-full max-w-md transition-all duration-300 hover:scale-[1.01] border border-transparent hover:border-transparent">
+            <div className="absolute inset-0 rounded-xl -z-10 bg-gray-900" />
+
+            <div className="p-8 text-center">
+              <div className="text-5xl mb-4">🏢</div>
+              <h2 className="text-2xl font-bold text-white mb-3">No Club Found</h2>
+              <p className="text-gray-300 mb-6">
+                You haven't created any club yet. Please create a club first before creating an event.
+              </p>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => {
+                    onClose();
+                    router.push('/clubs');
+                  }}
+                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-lg"
+                >
+                  Create Club Now
+                </Button>
+                <Button
+                  onClick={onClose}
+                  className="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-3 rounded-lg"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </MagicCard>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-transparent">

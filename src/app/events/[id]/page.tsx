@@ -30,6 +30,7 @@ import { useQuery } from '@tanstack/react-query';
 import AddSpeakerModal from './speakers/AddSpeakerModal';
 import { Plus, Download, Users } from 'lucide-react';
 import { useParticipants, downloadParticipantsCSV, type Participant } from '@/hooks/useParticipants';
+import AchievementCelebration from '@/components/AchievementCelebration';
 
 dotenv.config();
 
@@ -74,6 +75,7 @@ const Eventid = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRegistering, setIsRegistering] = useState(false);
   const [showWhatsappModal, setShowWhatsappModal] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
     'overview' | 'speakers' | 'schedule' | 'gallery' | 'announcement' | 'attendees'
@@ -290,16 +292,19 @@ const Eventid = () => {
       );
 
       if (resp && resp.status === 200) {
-        alert(resp.data.msg);
         setForkedUpId(resp.data.ForkedUpId);
-        // Show WhatsApp modal if link is available
+        // Show celebration modal
+        setShowCelebration(true);
+        // Show WhatsApp modal after celebration closes if link is available
         if (data.whatsappLink) {
-          setShowWhatsappModal(true);
+          setTimeout(() => {
+            setShowWhatsappModal(true);
+          }, 2500);
         }
       }
     } catch (error) {
       console.error('Registration error:', error);
-      alert('Registration failed. Please try again.');
+      toast.error('Registration failed. Please try again.');
     } finally {
       setIsRegistering(false);
     }
@@ -1040,6 +1045,13 @@ const Eventid = () => {
         isOpen={isAddSpeakerModalOpen}
         onClose={() => setIsAddSpeakerModalOpen(false)}
         eventId={id}
+      />
+
+      {/* Achievement Celebration Modal */}
+      <AchievementCelebration
+        isOpen={showCelebration}
+        onClose={() => setShowCelebration(false)}
+        eventName={data.EventName || 'Event'}
       />
 
       {/* WhatsApp Group Modal */}
