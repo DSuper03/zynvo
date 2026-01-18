@@ -36,6 +36,7 @@ export interface EventFormData {
   contactEmail: string;
   contactPhone: string;
   form?: string; // Registration/Application form URL (Google Forms, Typeform, etc.)
+  whatsappLink?: string; // Optional WhatsApp group link for clubhead to share
   // image: string;
 }
 
@@ -390,6 +391,9 @@ export interface respnseUseState {
   applicationStatus: string;
   posterUrl?: string;
   eventHeader?: string;
+  whatsappLink?: string;
+  eventWebsite?: string;
+  form?: string;
 }
 export interface PostData {
  
@@ -447,6 +451,11 @@ export interface EventByIdResponse {
     participationFee: boolean;
     contactEmail: string;
     contactPhone: string;
+    whatsappLink?: string; // Optional WhatsApp group link
+    whatsappGroupLink?: string; // Alternative field name
+    eventWebsite?: string; // Optional event website
+    form?: string; // Optional registration form
+    registrationForm?: string; // Alternative field name for registration form
   };
 }
 

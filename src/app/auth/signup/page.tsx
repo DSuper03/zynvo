@@ -10,6 +10,7 @@ import {
   FiLock,
   FiEye,
   FiEyeOff,
+  FiPhone,
 } from 'react-icons/fi';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
 import dotenv from 'dotenv';
@@ -34,6 +35,7 @@ export default function SignUp() {
     password: '',
     collegeName: '',
     avatarUrl: '',
+    phone: '',
   });
   const [agreeToTerms, setAgree] = useState(false);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
@@ -294,6 +296,27 @@ export default function SignUp() {
                         className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
                         placeholder="your@email.com"
                         required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="phone"
+                      className="block text-gray-300 text-sm font-medium"
+                    >
+                      Phone Number <span className="text-gray-500 text-xs">(Optional)</span>
+                    </label>
+                    <div className="relative">
+                      <FiPhone className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+                        placeholder="+1 (555) 123-4567"
                       />
                     </div>
                   </div>

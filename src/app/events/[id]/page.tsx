@@ -30,6 +30,7 @@ import { useQuery } from '@tanstack/react-query';
 import AddSpeakerModal from './speakers/AddSpeakerModal';
 import { Plus, Download, Users } from 'lucide-react';
 import { useParticipants, downloadParticipantsCSV, type Participant } from '@/hooks/useParticipants';
+import AchievementCelebration from '@/components/AchievementCelebration';
 
 dotenv.config();
 
@@ -63,6 +64,9 @@ const Eventid = () => {
     applicationStatus: 'open',
     posterUrl: '',
     eventHeader: '',
+    whatsappLink: '',
+    eventWebsite: '',
+    form: '',
   });
 
   const router = useRouter();
@@ -70,6 +74,8 @@ const Eventid = () => {
   const [forkedUpId, setForkedUpId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [showWhatsappModal, setShowWhatsappModal] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
     'overview' | 'speakers' | 'schedule' | 'gallery' | 'announcement' | 'attendees'
@@ -246,10 +252,10 @@ const Eventid = () => {
               res.data.response.posterUrl ||
               res.data.response.eventHeaderImage ||
               '',
-              
+            whatsappLink: res.data.response.whatsappLink || res.data.response.whatsappGroupLink || '',
+            eventWebsite: res.data.response.eventWebsite || res.data.response.EventUrl || '',
+            form: res.data.response.form || res.data.response.registrationForm || '',
           });
-          
-          
         }
       } catch (error) {
         console.error('Error fetching event data:', error);
@@ -286,12 +292,19 @@ const Eventid = () => {
       );
 
       if (resp && resp.status === 200) {
-        alert(resp.data.msg);
         setForkedUpId(resp.data.ForkedUpId);
+        // Show celebration modal
+        setShowCelebration(true);
+        // Show WhatsApp modal after celebration closes if link is available
+        if (data.whatsappLink) {
+          setTimeout(() => {
+            setShowWhatsappModal(true);
+          }, 2500);
+        }
       }
     } catch (error) {
       console.error('Registration error:', error);
-      alert('Registration failed. Please try again.');
+      toast.error('Registration failed. Please try again.');
     } finally {
       setIsRegistering(false);
     }
@@ -321,6 +334,17 @@ const Eventid = () => {
     () => (data?.EventMode || '').toLowerCase().includes('online'),
     [data.EventMode]
   );
+
+  // Check if event has ended
+  const isEventEnded = useMemo(() => {
+    if (!data.endDate) return false;
+    return new Date(data.endDate) < new Date();
+  }, [data.endDate]);
+
+  // Check if registration is disabled (event ended or applications closed)
+  const isRegistrationDisabled = useMemo(() => {
+    return isEventEnded || data.applicationStatus !== 'open';
+  }, [isEventEnded, data.applicationStatus]);
 
   const googleCalendarHref = useMemo(() => {
     // Build a Google Calendar event URL (best-effort if dates exist)
@@ -443,19 +467,22 @@ const Eventid = () => {
                         <span>You're attending</span>
                       </div>
                     ) : (
-                      <Button
-                        onClick={handleRegistration}
-                        disabled={
-                          isRegistering || data.applicationStatus !== 'open'
-                        }
-                        className={`rounded-lg px-5 py-2 font-medium ${
-                          isRegistering || data.applicationStatus !== 'open'
-                            ? 'bg-gray-800 text-gray-400 cursor-not-allowed'
-                            : 'bg-yellow-400 hover:bg-yellow-500 text-black'
-                        }`}
-                      >
-                        {isRegistering ? 'Registering...' : 'Register Now'}
-                      </Button>
+                      <>
+                        <Button
+                          onClick={handleRegistration}
+                          disabled={isRegistering || isRegistrationDisabled}
+                          className={`rounded-lg px-5 py-2 font-medium ${
+                            isRegistering || isRegistrationDisabled
+                              ? 'bg-gray-800 text-gray-400 cursor-not-allowed'
+                              : 'bg-yellow-400 hover:bg-yellow-500 text-black'
+                          }`}
+                        >
+                          {isRegistering ? 'Registering...' : isEventEnded ? 'Event Ended' : 'Register Now'}
+                        </Button>
+                        {isEventEnded && (
+                          <p className="text-xs text-red-400">This event has already ended</p>
+                        )}
+                      </>
                     )
                   ) : (
                     <Button
@@ -563,6 +590,72 @@ const Eventid = () => {
                   {data.description ||
                     'Event description will be available soon...'}
                 </p>
+
+                {/* WhatsApp Group Link - Only show if user is registered */}
+                {data.whatsappLink && userAttendedEventIds.includes(id) && (
+                  <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="text-green-400 text-lg">💬</div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-green-400 mb-2">Join Our WhatsApp Group</h3>
+                        <p className="text-gray-300 text-sm mb-3">Connect with other participants and stay updated with event announcements.</p>
+                        <a
+                          href={data.whatsappLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
+                        >
+                          <span>Join WhatsApp Group</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Event Website Link */}
+                {data.eventWebsite && (
+                  <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="text-blue-400 text-lg">🌐</div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-blue-400 mb-2">Event Website</h3>
+                        <p className="text-gray-300 text-sm mb-3">Visit the official event website for more information.</p>
+                        <a
+                          href={data.eventWebsite}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+                        >
+                          <span>Visit Website</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Registration Form Link */}
+                {data.form && (
+                  <div className="mb-6 p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="text-purple-400 text-lg">📋</div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-purple-400 mb-2">Registration Form</h3>
+                        <p className="text-gray-300 text-sm mb-3">Fill out the registration form to participate in this event.</p>
+                        <a
+                          href={data.form}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors"
+                        >
+                          <span>Open Form</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Details Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-800">
@@ -675,13 +768,42 @@ const Eventid = () => {
               </div>
             )}
 
+            {activeTab === 'schedule' && (
+              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-yellow-400">
+                    Event Schedule
+                  </h2>
+                  <a
+                    href={`/events/${id}/schedule`}
+                    className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-black font-medium rounded-lg transition-colors inline-flex items-center gap-2"
+                  >
+                    <span>Full Schedule</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </a>
+                </div>
+                <p className="text-gray-400">
+                  Click "Full Schedule" to view the complete event timeline and manage sessions.
+                </p>
+              </div>
+            )}
+
             {activeTab === 'gallery' && (
               <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6">
-                <h2 className="text-xl font-bold text-yellow-400 mb-4">
-                  Gallery
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-yellow-400">
+                    Gallery
+                  </h2>
+                  <a
+                    href={`/events/${id}/gallery`}
+                    className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-black font-medium rounded-lg transition-colors inline-flex items-center gap-2"
+                  >
+                    <span>View Gallery</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </a>
+                </div>
                 <p className="text-gray-400">
-                  Photos and videos will appear here after the event.
+                  Click "View Gallery" to see photos and media from the event.
                 </p>
               </div>
             )}
@@ -924,6 +1046,45 @@ const Eventid = () => {
         onClose={() => setIsAddSpeakerModalOpen(false)}
         eventId={id}
       />
+
+      {/* Achievement Celebration Modal */}
+      <AchievementCelebration
+        isOpen={showCelebration}
+        onClose={() => setShowCelebration(false)}
+        eventName={data.EventName || 'Event'}
+      />
+
+      {/* WhatsApp Group Modal */}
+      {showWhatsappModal && data.whatsappLink && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-[#0B0B0B] border border-gray-800 rounded-xl p-8 max-w-md w-full mx-4">
+            <div className="text-center">
+              <div className="text-6xl mb-4">💚</div>
+              <h2 className="text-2xl font-bold text-white mb-2">Join WhatsApp Group!</h2>
+              <p className="text-gray-300 mb-6">
+                You've successfully registered! Join our WhatsApp group to stay updated with event announcements and connect with other participants.
+              </p>
+              <div className="space-y-3">
+                <a
+                  href={data.whatsappLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold transition-colors"
+                >
+                  <span>Open WhatsApp Group</span>
+                  <ChevronRight className="w-5 h-5" />
+                </a>
+                <button
+                  onClick={() => setShowWhatsappModal(false)}
+                  className="w-full px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-semibold transition-colors"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
