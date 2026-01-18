@@ -68,6 +68,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     contactEmail: '',
     contactPhone: '',
     form: '',
+    whatsappLink: '',
   });
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -76,6 +77,15 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
  const [lockedUniversity, setLockedUniversity] = useState<string>('');
  const [clubName, setClubName] = useState<string>('');
+
+  // Helper function to get today's date in YYYY-MM-DD format
+  const getTodayDateString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
   useEffect(() => {
     const tok = localStorage.getItem('token');
     if (tok) setToken(tok);
@@ -235,6 +245,25 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         if (!formData.eventEndDate)
           newErrors.eventEndDate = 'Event end date is required';
         
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Validate start date is not in the past
+        if (formData.eventStartDate) {
+          const startDate = new Date(formData.eventStartDate);
+          if (startDate < today) {
+            newErrors.eventStartDate = 'Event start date cannot be in the past';
+          }
+        }
+        
+        // Validate application start date is not in the past
+        if (formData.applicationStartDate) {
+          const appStartDate = new Date(formData.applicationStartDate);
+          if (appStartDate < today) {
+            newErrors.applicationStartDate = 'Application start date cannot be in the past';
+          }
+        }
+        
         // Validate end date is not before start date
         if (formData.eventStartDate && formData.eventEndDate) {
           const startDate = new Date(formData.eventStartDate);
@@ -258,6 +287,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         if (!formData.contactPhone?.trim())
           newErrors.contactPhone = 'Contact phone is required';
         break;
+
+      case 4:
+        // Step 4 validation - Image is required
+        if (!img) {
+          newErrors.image = 'Event image is required';
+        }
+        break;
     }
 
     setErrors(newErrors);
@@ -267,6 +303,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const nextStep = () => {
     if (validateStep()) {
       setStep((prev) => Math.min(prev + 1, 4));
+    } else {
+      console.log('Validation failed for step:', step);
+      console.log('Current errors:', errors);
     }
   };
 
@@ -279,6 +318,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const handleSubmit = async () => {
     if (!token) {
       toast('please login or signup');
+      return;
+    }
+    if (!clubName) {
+      toast('You haven\'t created any club yet. Please create a club first.');
       return;
     }
     if (!validateStep()) return;
@@ -331,6 +374,44 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   };
  
   if (!isOpen) return null;
+
+  // Check if user has created a club
+  if (!clubName) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-transparent">
+        <Card className="flex min-h-full items-center justify-center p-4 bg-transparent shadow-none">
+          <MagicCard className="group relative bg-gray-900 rounded-xl w-full max-w-md transition-all duration-300 hover:scale-[1.01] border border-transparent hover:border-transparent">
+            <div className="absolute inset-0 rounded-xl -z-10 bg-gray-900" />
+
+            <div className="p-8 text-center">
+              <div className="text-5xl mb-4">🏢</div>
+              <h2 className="text-2xl font-bold text-white mb-3">No Club Found</h2>
+              <p className="text-gray-300 mb-6">
+                You haven't created any club yet. Please create a club first before creating an event.
+              </p>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => {
+                    onClose();
+                    router.push('/clubs');
+                  }}
+                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-lg"
+                >
+                  Create Club Now
+                </Button>
+                <Button
+                  onClick={onClose}
+                  className="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-3 rounded-lg"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </MagicCard>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-transparent">
@@ -735,6 +816,32 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       Add a link to your registration form (Google Forms, Typeform, etc.)
                     </p>
                   </div>
+
+                  <div>
+                    <label
+                      htmlFor="whatsappLink"
+                      className="block text-sm font-medium text-yellow-400 mb-1"
+                    >
+                      WhatsApp Group Link (optional)
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Globe className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        id="whatsappLink"
+                        name="whatsappLink"
+                        type="url"
+                        value={formData.whatsappLink || ''}
+                        onChange={handleChange}
+                        className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
+                        placeholder="https://chat.whatsapp.com/..."
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-gray-400">
+                      Share WhatsApp group link with registered participants
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
@@ -765,6 +872,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                           type="date"
                           value={formData.eventStartDate}
                           onChange={handleChange}
+                          min={getTodayDateString()}
                           className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -822,9 +930,15 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                           type="date"
                           value={formData.applicationStartDate}
                           onChange={handleChange}
+                          min={getTodayDateString()}
                           className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
                         />
                       </div>
+                      {errors.applicationStartDate && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.applicationStartDate}
+                        </p>
+                      )}
                     </div>
 
                     <div>
