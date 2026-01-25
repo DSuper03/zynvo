@@ -243,14 +243,23 @@ const Eventid = () => {
         );
 
         if (res && res.status === 200) {
+          // Map backend field names to frontend expected names
+          // Backend uses: isPaid, qrCodeUrl
+          // Frontend expects: isPaidEvent, paymentQRCode
+          const isPaid = (res.data.response as any).isPaid ?? res.data.response.isPaidEvent ?? false;
+          const qrCodeUrl = (res.data.response as any).qrCodeUrl || res.data.response.paymentQRCode || '';
+          const paymentAmount = res.data.response.paymentAmount || 0;
+          
           console.log('Event data received:', {
+            isPaid: (res.data.response as any).isPaid,
             isPaidEvent: res.data.response.isPaidEvent,
+            qrCodeUrl: (res.data.response as any).qrCodeUrl,
             paymentQRCode: res.data.response.paymentQRCode,
-            paymentAmount: res.data.response.paymentAmount,
+            paymentAmount: paymentAmount,
           });
           
-          // If paymentQRCode exists, treat as paid event even if isPaidEvent flag is not set
-          const hasPaidEvent = res.data.response.isPaidEvent || !!res.data.response.paymentQRCode;
+          // If paymentQRCode/qrCodeUrl exists, treat as paid event even if isPaid/isPaidEvent flag is not set
+          const hasPaidEvent = isPaid || !!qrCodeUrl;
           
           setData({
             EventName: res.data.response.EventName || '',
@@ -270,8 +279,8 @@ const Eventid = () => {
             eventWebsite: res.data.response.eventWebsite || res.data.response.EventUrl || '',
             form: res.data.response.form || res.data.response.registrationForm || '',
             isPaidEvent: hasPaidEvent,
-            paymentQRCode: res.data.response.paymentQRCode || '',
-            paymentAmount: res.data.response.paymentAmount || 0,
+            paymentQRCode: qrCodeUrl,
+            paymentAmount: paymentAmount,
           });
         }
       } catch (error) {
@@ -291,15 +300,38 @@ const Eventid = () => {
       return;
     }
 
-    console.log('handleRegistration called, isPaidEvent:', data.isPaidEvent);
+    // Debug: Log all payment-related data
+    console.log('=== Registration Debug ===');
+    console.log('data.isPaidEvent:', data.isPaidEvent, typeof data.isPaidEvent);
+    console.log('data.paymentQRCode:', data.paymentQRCode, 'length:', data.paymentQRCode?.length);
+    console.log('data.paymentAmount:', data.paymentAmount, typeof data.paymentAmount);
+    console.log('Full data object:', JSON.stringify({
+      isPaidEvent: data.isPaidEvent,
+      paymentQRCode: data.paymentQRCode,
+      paymentAmount: data.paymentAmount
+    }, null, 2));
 
     // If it's a paid event, show payment modal instead of registering immediately
-    if (data.isPaidEvent) {
-      console.log('Showing payment modal...');
+    // Check multiple indicators: isPaidEvent flag, paymentQRCode, or paymentAmount > 0
+    // Use the same logic as the UI check (line 533) for consistency
+    const hasQRCode = !!data.paymentQRCode && data.paymentQRCode.trim().length > 0;
+    const hasPaymentAmount = data.paymentAmount !== undefined && data.paymentAmount !== null && Number(data.paymentAmount) > 0;
+    // Check isPaidEvent first (same as UI), then fallback to other indicators
+    const isPaidEvent = Boolean(data.isPaidEvent) || hasQRCode || hasPaymentAmount;
+    
+    console.log('Check results:');
+    console.log('  Boolean(data.isPaidEvent):', Boolean(data.isPaidEvent));
+    console.log('  hasQRCode:', hasQRCode);
+    console.log('  hasPaymentAmount:', hasPaymentAmount);
+    console.log('  isPaidEvent (final):', isPaidEvent);
+    
+    if (isPaidEvent) {
+      console.log('✓ Showing payment modal...');
       setShowPaymentModal(true);
       return;
     }
 
+    console.log('✗ Proceeding with direct registration (free event)');
     // For free events, proceed with registration
     await completeRegistration();
   };
@@ -480,7 +512,12 @@ const Eventid = () => {
                   {data.university && (
                     <div className="flex items-center gap-2 text-gray-300">
                       <MapPin className="w-4 h-4 text-yellow-400" />
-                      <span>{data.university}</span>
+                      <span>
+                        {data.university}
+                        { data.paymentAmount && (
+                          <span className="text-yellow-400 font-semibold ml-2">• ₹{data.paymentAmount}</span>
+                        )}
+                      </span>
                     </div>
                   )}
                   <div className="flex items-center gap-2 text-gray-300">
@@ -1164,7 +1201,7 @@ const Eventid = () => {
 
       {/* Payment Proof Modal for Paid Events */}
       <PaymentProofModal
-        isOpen={showPaymentModal && (data.isPaidEvent ?? false)}
+        isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
         onProofSubmitted={handlePaymentProofSubmitted}
         qrCodeUrl={data.paymentQRCode || ''}

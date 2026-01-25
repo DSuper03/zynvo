@@ -466,7 +466,9 @@ export interface EventByIdResponse {
     form?: string; // Optional registration form
     registrationForm?: string; // Alternative field name for registration form
     isPaidEvent?: boolean; // Flag to indicate if event requires payment
+    isPaid?: boolean; // Alternative field name from backend (maps to isPaidEvent)
     paymentQRCode?: string; // QR code image URL for payment
+    qrCodeUrl?: string; // Alternative field name from backend (maps to paymentQRCode)
     paymentAmount?: number; // Payment amount required for event
   };
 }

@@ -38,7 +38,7 @@ const PaymentProofModal: React.FC<PaymentProofModalProps> = ({
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const maxBytes = 5 * 1024 * 1024; // 5MB for screenshot
+      const maxBytes = 5 * 1024 * 1024; 
 
       let processed = file;
       if (file.size > maxBytes) {
