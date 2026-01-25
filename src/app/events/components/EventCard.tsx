@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapPin, Calendar, Share2 } from 'lucide-react';
+import { MapPin, Calendar, Share2, CreditCard } from 'lucide-react';
 import { Modal, ModalTrigger } from '@/components/ui/animated-modal';
 import { eventData } from '@/types/global-Interface';
 import Image from 'next/legacy/image';
@@ -186,6 +186,15 @@ export default function EventCard({
                     className="w-full h-48 sm:h-40 object-cover"
                     priority={false}
                   />
+                  
+                  {/* Paid Event Badge */}
+                  {event.isPaidEvent && (
+                    <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                      <CreditCard size={14} />
+                      Paid (₹{event.paymentAmount})
+                    </div>
+                  )}
+                  
                   {/* subtle glow on hover */}
                   <motion.div
                     aria-hidden

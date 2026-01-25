@@ -19,6 +19,7 @@ export interface Participant {
   joinedAt: string;
   passId: string | null;
   user: ParticipantUser;
+  paymentProofUrl?: string; // For paid events - payment screenshot URL
 }
 
 export interface ParticipantsResponse {
