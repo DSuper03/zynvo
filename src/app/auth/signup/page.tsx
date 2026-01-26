@@ -138,40 +138,59 @@ export default function SignUp() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isLoaded) {
-      alert("Clerk is still loading, please wait a moment.");
+      toast("Security check loading, please wait...");
       return;
     };
-    
- 
+
     if (!agreeToTerms || !formData.collegeName) return;
 
     setIsCreatingAccount(true);
 
     try {
+      // 1. Create the user
       await signUp.create({
         emailAddress: formData.email,
         password: formData.password,
         firstName: formData.name.split(" ")[0],
         lastName: formData.name.split(" ")[1] || "",
       });
+
+      // 2. Prepare Verification
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
 
-      // 3. Switch UI to Verification Mode
+      // 3. Switch UI
       setVerifying(true); 
-      toast("Verification code sent to your email!");
+      toast.success("Verification code sent to your email!");
       
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
-      const errorMessage = err.errors?.[0]?.message || "Error creating account";
-      toast.error(errorMessage);
+
+      // --- SPECIFIC ERROR HANDLING ---
+      
+      // Check for "Pwned Password" error
+      const pwnedError = err.errors?.find((e: any) => e.code === "form_password_pwned");
+      
+      // Check for "Captcha" error (if div is missing)
+      const captchaError = err.errors?.find((e: any) => e.code === "captcha_invalid");
+
+      if (pwnedError) {
+        toast.error("Security Alert: This password was found in a data breach. Please choose a different one.");
+        // Optional: Clear the password field
+        // setFormData(prev => ({ ...prev, password: '' })); 
+      } else if (captchaError) {
+        toast.error("Please verify you are not a robot.");
+      } else {
+        // Fallback for other errors (e.g., Email already taken)
+        const errorMessage = err.errors?.[0]?.message || "Error creating account";
+        toast.error(errorMessage);
+      }
     } finally {
       setIsCreatingAccount(false);
     }
   };
-
 
   const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,16 +207,21 @@ export default function SignUp() {
         // 2. Set the session active in Clerk
         await setActive({ session: completeSignUp.createdSessionId });
         
+        alert("Email verified successfully!");
         // 3. Get Token & Sync with Backend
         const token = await getToken() as string // Gets the new session token
         const decodedToken: any = jwtDecode(token);
         
+        alert(decodedToken)
+
         console.log("Decoded Clerk Token:", decodedToken);
 
+
         const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`, {
-           clerkId: decodedToken.clerk_id,
+           clerkId: decodedToken.sub,
            collegeName: formData.collegeName,
            avatarUrl: formData.avatarUrl,
+           password: formData.password,
           name: formData.name,
           email: formData.email,
           imgUrl : ""
@@ -205,6 +229,7 @@ export default function SignUp() {
 
         // 4. Save YOUR Custom JWT & Redirect
         localStorage.setItem('token', res.data.token);
+        sessionStorage.setItem('activeSession', 'true');
         toast.success("Account created & Verified!");
         router.push("/dashboard");
       }
@@ -533,7 +558,7 @@ export default function SignUp() {
                     </Link>
                   </label>
                 </div>
-
+                      <div id="clerk-captcha" className="my-4"></div>
                 <div className="flex space-x-4">
                   <motion.button
                     type="button"
