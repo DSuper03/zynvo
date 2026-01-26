@@ -13,6 +13,7 @@
     "build:optimized": "next build && next-sitemap"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.36.10",
     "@google/genai": "^1.15.0",
     "@imagekit/next": "^2.1.2",
     "@radix-ui/react-avatar": "^1.1.10",

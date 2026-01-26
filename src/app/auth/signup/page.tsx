@@ -21,10 +21,15 @@ import { signupRes } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import CollegeSearchSelect from '@/components/colleges/collegeSelect';
 import { Button } from '@/components/ui/button';
+import { useSignUp, useAuth } from "@clerk/nextjs";
+import { jwtDecode } from "jwt-decode";
+import { de } from 'date-fns/locale';
 
 dotenv.config();
 
 export default function SignUp() {
+  const { isLoaded, signUp, setActive } = useSignUp();
+  const { getToken } = useAuth();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -37,6 +42,8 @@ export default function SignUp() {
   });
   const [agreeToTerms, setAgree] = useState(false);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+  const [code, setCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
   // Inline validation error for college select
   const [collegeError, setCollegeError] = useState<string>('');
@@ -95,7 +102,10 @@ export default function SignUp() {
     setCurrentStep(2);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+
+
+//deprecated - use clerk method
+  const handle_Submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsCreatingAccount(true);
     // Validate college selection before submitting
@@ -127,6 +137,112 @@ export default function SignUp() {
       setIsCreatingAccount(false);
     }
   };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!isLoaded) {
+      alert("Clerk is still loading, please wait a moment.");
+      return;
+    };
+    
+ 
+    if (!agreeToTerms || !formData.collegeName) return;
+
+    setIsCreatingAccount(true);
+
+    try {
+      await signUp.create({
+        emailAddress: formData.email,
+        password: formData.password,
+        firstName: formData.name.split(" ")[0],
+        lastName: formData.name.split(" ")[1] || "",
+      });
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+
+      // 3. Switch UI to Verification Mode
+      setVerifying(true); 
+      toast("Verification code sent to your email!");
+      
+    } catch (err: any) {
+      console.error(JSON.stringify(err, null, 2));
+      const errorMessage = err.errors?.[0]?.message || "Error creating account";
+      toast.error(errorMessage);
+    } finally {
+      setIsCreatingAccount(false);
+    }
+  };
+
+
+  const handleVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isLoaded) return;
+
+    try {
+      // 1. Verify the code using the EXISTING signUp object
+      // Clerk remembers the email from Step A
+      const completeSignUp = await signUp.attemptEmailAddressVerification({
+        code, 
+      });
+
+      if (completeSignUp.status === "complete") {
+        // 2. Set the session active in Clerk
+        await setActive({ session: completeSignUp.createdSessionId });
+        
+        // 3. Get Token & Sync with Backend
+        const token = await getToken() as string // Gets the new session token
+        const decodedToken: any = jwtDecode(token);
+        
+        console.log("Decoded Clerk Token:", decodedToken);
+
+        const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`, {
+           clerkId: decodedToken.clerk_id,
+           collegeName: formData.collegeName,
+           avatarUrl: formData.avatarUrl,
+          name: formData.name,
+          email: formData.email,
+          imgUrl : ""
+        });
+
+        // 4. Save YOUR Custom JWT & Redirect
+        localStorage.setItem('token', res.data.token);
+        toast.success("Account created & Verified!");
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      console.error(JSON.stringify(err, null, 2));
+      toast.error("Invalid Code or Verification Failed");
+    }
+  };
+
+
+
+
+  if (verifying) {
+    return (
+      <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center">
+         <div className="w-full max-w-md p-8 bg-gray-900 rounded-xl border border-gray-800">
+            <h2 className="text-2xl font-bold text-white mb-4">Verify Email</h2>
+            <p className="text-gray-400 mb-6">Enter the code sent to {formData.email}</p>
+            
+            <form onSubmit={handleVerification}>
+               <input
+                 type="text"
+                 value={code}
+                 onChange={(e) => setCode(e.target.value)}
+                 className="w-full bg-gray-800 text-white p-3 rounded-lg mb-4 text-center text-xl tracking-widest focus:ring-2 focus:ring-yellow-500 outline-none"
+                 placeholder="######"
+               />
+               <button 
+                 type="submit"
+                 className="w-full bg-yellow-500 text-black font-bold py-3 rounded-lg hover:bg-yellow-400"
+               >
+                 Verify & Complete
+               </button>
+            </form>
+         </div>
+      </div>
+    );
+  }
 
   return (
     <>

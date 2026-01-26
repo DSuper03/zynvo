@@ -9,6 +9,9 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
 import { QueryProvider } from '@/providers/QueryProvider';
 import FloatingPWAInstall from '@/components/FloatingPWAInstall';
+import { ClerkProvider } from '@clerk/nextjs'
+import dotenv from 'dotenv';
+dotenv.config();
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -112,7 +115,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
   return (
+    <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -131,5 +136,6 @@ export default function RootLayout({
         </ErrorBoundary>
       </body>
     </html>
+    </ClerkProvider>
   );
 }
