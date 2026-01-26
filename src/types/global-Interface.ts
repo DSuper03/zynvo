@@ -37,6 +37,9 @@ export interface EventFormData {
   contactPhone: string;
   form?: string; // Registration/Application form URL (Google Forms, Typeform, etc.)
   whatsappLink?: string; // Optional WhatsApp group link for clubhead to share
+  isPaidEvent?: boolean; // Flag to indicate if event requires payment
+  paymentQRCode?: string; // QR code image URL for payment
+  paymentAmount?: number; // Payment amount required for event
   // image: string;
 }
 
@@ -377,6 +380,9 @@ export interface eventData {
   endDate: Date | null;
   posterUrl?: string;
   univerisity : string;
+  isPaidEvent?: boolean;
+  paymentQRCode?: string;
+  paymentAmount?: number;
 }
 
 export interface respnseUseState {
@@ -394,6 +400,9 @@ export interface respnseUseState {
   whatsappLink?: string;
   eventWebsite?: string;
   form?: string;
+  isPaidEvent?: boolean;
+  paymentQRCode?: string;
+  paymentAmount?: number;
 }
 export interface PostData {
  
@@ -456,6 +465,11 @@ export interface EventByIdResponse {
     eventWebsite?: string; // Optional event website
     form?: string; // Optional registration form
     registrationForm?: string; // Alternative field name for registration form
+    isPaidEvent?: boolean; // Flag to indicate if event requires payment
+    isPaid?: boolean; // Alternative field name from backend (maps to isPaidEvent)
+    paymentQRCode?: string; // QR code image URL for payment
+    qrCodeUrl?: string; // Alternative field name from backend (maps to paymentQRCode)
+    paymentAmount?: number; // Payment amount required for event
   };
 }
 
