@@ -10,6 +10,8 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
 import { QueryProvider } from '@/providers/QueryProvider';
 import FloatingPWAInstall from '@/components/FloatingPWAInstall';
+import { ClerkKeyDebug } from '@/components/ClerkKeyDebug';
+import { ClerkProvider } from '@clerk/nextjs'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -113,7 +115,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
   return (
+    <ClerkProvider
+      appearance={{
+        elements: {
+          rootBox: "mx-auto",
+        },
+      }}
+    >
     <html lang="en">
        <head>
         <Script
@@ -132,6 +142,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
       >
+        <ClerkKeyDebug />
         <ErrorBoundary>
           <QueryProvider>
             <WarmupProvider>
@@ -146,5 +157,6 @@ export default function RootLayout({
         </ErrorBoundary>
       </body>
     </html>
+    </ClerkProvider>
   );
 }
