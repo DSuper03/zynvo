@@ -22,7 +22,7 @@ import { signupRes } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import CollegeSearchSelect from '@/components/colleges/collegeSelect';
 import { Button } from '@/components/ui/button';
-import { useSignUp, useAuth } from "@clerk/nextjs";
+import { useSignUp, useAuth , useSignIn} from "@clerk/nextjs";
 import { jwtDecode } from "jwt-decode";
 import { de } from 'date-fns/locale';
 
@@ -30,6 +30,7 @@ dotenv.config();
 
 export default function SignUp() {
   const { isLoaded, signUp, setActive } = useSignUp();
+  const { isLoaded: authIsLoaded, signIn } = useSignIn();
   const { getToken } = useAuth();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -46,6 +47,7 @@ export default function SignUp() {
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [code, setCode] = useState("");
   const [verifying, setVerifying] = useState(false);
+  const [collegeSearch, setCollegeSearch] = useState<string>('');
 
   // Inline validation error for college select
   const [collegeError, setCollegeError] = useState<string>('');
@@ -226,7 +228,8 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
            password: formData.password,
           name: formData.name,
           email: formData.email,
-          imgUrl : ""
+          imgUrl : "",
+          phone : formData.phone || '',
         });
 
         // 4. Save YOUR Custom JWT & Redirect
@@ -241,6 +244,25 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     }
   };
 
+
+  const handleGoogleVerification = async () => {
+    if (!authIsLoaded || !signIn) {
+      toast('Security check loading, please wait...');
+      return;
+    }
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/auth/sso-callback",
+        redirectUrlComplete: "/auth/sso-callback",
+      });
+      localStorage.setItem('sso_college', collegeSearch);
+    } catch (err) {
+      console.error('SSO redirect error', err);
+      toast.error('Failed to initiate Google sign-in');
+    }
+  };
+  
 
 
 
@@ -379,15 +401,54 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                 </Link>
               </p>
             </div>
+{/* 
+            <div className="mb-6">
+              <div className="flex items-center justify-center space-x-3">
+              <button
+                type="button"
+                onClick={() => {
+                  handleGoogleVerification();
+                }}
+                className="flex items-center justify-center w-full max-w-xs bg-white text-black py-2 px-4 rounded-lg shadow hover:opacity-90 transition"
+                aria-label="Sign in with Google"
+              >
+                <FaGoogle className="mr-3" />
+                Sign in with Google
+              </button>
+             
+              </div>
+              <div>
+                <label
+                  htmlFor="collegeSelectTop"
+                  className="block text-gray-300 text-sm font-medium mb-2"
+                >
+                  College/University
+                </label>
+                <CollegeSearchSelect
+                  colleges={collegesWithClubs.sort((a, b) =>
+                    a.college.localeCompare(b.college)
+                  )}
+                  value={collegeSearch}
+                  onChange={(value) => {
+                    setCollegeSearch(value);
+                    if (value && value.trim()) setCollegeError('');
+                  }}
+                  placeholder="Search and select your college/university"
+                />
+                {collegeError && (
+                  <p className="text-red-400 text-xs mt-1">{collegeError}</p>
+                )}
+              </div>
+            </div> */}
 
             {/* Step 1: Account Information */}
             {currentStep === 1 && (
               <>
-                <div className="flex items-center justify-center mb-6">
+                {/* <div className="flex items-center justify-center mb-6">
                   <div className="h-px bg-gray-700 flex-1"></div>
                   <p className="mx-4 text-gray-400 text-sm">OR</p>
                   <div className="h-px bg-gray-700 flex-1"></div>
-                </div>
+                </div> */}
 
                 {/* Sign-Up Form Step 1 */}
                 <form onSubmit={handleNextStep} className="space-y-6">
