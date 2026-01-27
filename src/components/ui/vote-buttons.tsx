@@ -80,6 +80,16 @@ const AnimatedCounter = ({
 const themeColors = {
   upvote: ['#eab308', '#facc15', '#fde047', '#fef08a', '#ca8a04'],
   downvote: ['#ef4444', '#f87171', '#fca5a5', '#dc2626', '#b91c1c'],
+  // Multicolored graffiti palette
+  graffiti: [
+    '#eab308', '#facc15', '#fde047', // Yellows
+    '#3b82f6', '#60a5fa', '#93c5fd', // Blues
+    '#10b981', '#34d399', '#6ee7b7', // Greens
+    '#a855f7', '#c084fc', '#d8b4fe', // Purples
+    '#ec4899', '#f472b6', '#fbcfe8', // Pinks
+    '#f59e0b', '#fbbf24', '#fcd34d', // Oranges
+    '#ef4444', '#f87171', '#fca5a5', // Reds
+  ],
 };
 
 const sizeConfig = {
@@ -367,9 +377,55 @@ export function VoteButtonsCompact({
     initialUserVote,
   });
 
+  // Graffiti-style particle effect for compact upvote
+  const [particles, setParticles] = useState<
+    Array<{ id: number; style: React.CSSProperties; color: string }>
+  >([]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const createGraffiti = () => {
+    if (!containerRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const colors = themeColors.graffiti; // Use multicolored palette
+
+    // More particles for richer effect
+    const newParticles = Array.from({ length: 20 }, (_, i) => {
+      const angle = (i / 20) * Math.PI * 2 + Math.random() * 1.2;
+      // Faster particles - increased velocity
+      const velocity = 60 + Math.random() * 50; // Increased from ~40-60 to 60-110
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      return {
+        id: Date.now() + i,
+        color,
+        style: {
+          left: centerX,
+          top: centerY,
+          '--tx': `${Math.cos(angle) * velocity}px`,
+          '--ty': `${Math.sin(angle) * velocity - 30}px`, // More upward bias
+        } as React.CSSProperties,
+      };
+    });
+
+    setParticles(newParticles);
+    // Faster cleanup - reduced from 600ms to 400ms
+    setTimeout(() => setParticles([]), 400);
+  };
+
   const handleUpvote = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!loading) await upvote();
+    if (loading) return;
+
+    const wasUpvoted = userVote === 'upvote';
+    await upvote();
+
+    // Trigger graffiti-like confetti when newly upvoted
+    if (!wasUpvoted) {
+      createGraffiti();
+    }
   };
 
   const handleDownvote = async (e: React.MouseEvent) => {
@@ -379,8 +435,9 @@ export function VoteButtonsCompact({
 
   return (
     <div
+      ref={containerRef}
       className={cn(
-        'inline-flex items-center gap-1 px-2 py-1 rounded-lg',
+        'relative inline-flex items-center gap-1 px-2 py-1 rounded-lg',
         'bg-gray-800/50 border border-gray-700/50',
         className
       )}
@@ -423,6 +480,15 @@ export function VoteButtonsCompact({
       >
         <DownvoteIcon className="w-4 h-4" filled={userVote === 'downvote'} />
       </button>
+
+      {/* Graffiti particles for compact variant */}
+      {particles.map((particle) => (
+        <Particle
+          key={particle.id}
+          style={particle.style}
+          color={particle.color}
+        />
+      ))}
     </div>
   );
 }

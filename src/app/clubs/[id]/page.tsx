@@ -448,173 +448,172 @@ useEffect(() => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
-      {/* Navigation Header */}
-      
-
-      {/* Hero Section */}
-      {/* Club Header Section with Hero Image */}
-      <div className="relative h-72 md:h-96 w-full pb-6">
-        {/* Background image with gradient overlay */}
-        <div className="absolute inset-0 z-0">
-          <div className="relative w-full h-full">
-            <Image
-              src={club.image || '/banners/profilebanner.jpg'}
-              alt={club.name}
-              width={1600}
-              height={600}
-              className="object-cover w-full h-full"
-              priority
-            />
-            <div className="absolute"></div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 w-full h-full">
+      {/* Hero Section - Compact & Minimalist */}
+      <div className="relative w-full bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
         </div>
 
-        {/* Centered Club Image */}
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          <div className="relative h-40 w-40 md:h-56 md:w-56 rounded-xl overflow-hidden border-4 border-yellow-500 shadow-2xl shadow-black/60 bg-gray-900/60">
-            <Image
-              src={club.image || '/logozynvo.jpg'}
-              alt={club.name}
-              width={224}
-              height={224}
-              className="object-cover w-full h-full"
-              priority
-            />
-          </div>
-        </div>
+        {/* Compact Header with Club Info */}
+        <div className="relative max-w-7xl mx-auto px-4 pt-8 pb-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            {/* Club Logo - Compact */}
+            <div className="relative flex-shrink-0">
+              <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-yellow-400/30 shadow-lg bg-gray-900/50 backdrop-blur-sm">
+                <Image
+                  src={club.image || '/logozynvo.jpg'}
+                  alt={club.name}
+                  width={128}
+                  height={128}
+                  className="object-cover w-full h-full"
+                  priority
+                />
+              </div>
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 rounded-2xl bg-yellow-400/10 blur-xl -z-10"></div>
+            </div>
 
-        {/* College Name */}
-        <div className="absolute top-8 left-4 md:left-8 z-10">
-          <div className="flex items-center">
-            <MapPin size={16} className="text-yellow-400 mr-2" />
-            <span className="text-white text-sm font-medium">
-              {club.collegeName}
-            </span>
+            {/* Club Info Section */}
+            <div className="flex-1 min-w-0">
+              {/* College Name - Compact */}
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin size={14} className="text-yellow-400 flex-shrink-0" />
+                <span className="text-gray-300 text-sm font-medium truncate">
+                  {club.collegeName}
+                </span>
+              </div>
+
+              {/* Club Name */}
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 leading-tight">
+                {club.name}
+              </h1>
+
+              {/* Quick Stats - Compact */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center text-gray-300 bg-gray-800/50 px-2.5 py-1 rounded-lg text-xs">
+                  <Users size={12} className="mr-1.5 text-yellow-400" />
+                  <span>{getMemberCount(club)} members</span>
+                </div>
+                <span className="bg-gray-800/50 text-gray-200 px-2.5 py-1 rounded-lg text-xs border border-gray-700/50">
+                  {String(club.category || club.type || 'general').toString()}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Club Details */}
-      <div className="max-w-7xl mx-auto px-4 pt-8 md:pt-12">
-        {/* Club Name and Basic Info */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
-            {/* Club Name Section */}
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                  {club.name}
-                </h1>
+      {/* Club Details - Compact Layout */}
+      <div className="max-w-7xl mx-auto px-4 pt-6 pb-4">
+        <div className="flex flex-col lg:flex-row gap-6 mb-6">
+          {/* Left: Description & Info */}
+          <div className="flex-1 space-y-4">
+            {/* Description */}
+            <div className="bg-gray-900/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800/50">
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <h3 className="text-sm font-semibold text-yellow-400 uppercase tracking-wide">About</h3>
                 <button
                   onClick={() => setOpenCriteriaModal(true)}
-                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-400/40 text-yellow-300 text-xs hover:bg-yellow-500/20 transition-colors"
+                  className="text-xs text-yellow-400/80 hover:text-yellow-300 transition-colors"
                   title="View membership criteria"
                 >
-                  Membership Criteria
+                  Membership Criteria →
                 </button>
               </div>
-              
-              <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-3">
-                <div className="flex items-center text-gray-300 bg-gray-800/50 px-3 py-1.5 rounded-full text-sm">
-                  <Users size={16} className="mr-1.5 text-yellow-400" />
-                  <span>{getMemberCount(club)} members</span>
-                </div>
-
-                <span className="bg-gray-800 text-gray-200 px-3 py-1.5 rounded-full text-sm border border-gray-700 font-medium">
-                  {String(club.category || club.type || 'general').toString()}
-                </span>
-
-                {club.isPopular && (
-                  <span className="bg-yellow-500/20 text-yellow-400 px-3 py-1.5 rounded-full text-sm border border-yellow-400/30 font-medium">
-                    Popular
-                  </span>
-                )}
-
-                {club.isNew && (
-                  <span className="bg-yellow-500 text-black px-3 py-1.5 rounded-full text-sm font-medium">
-                    New
-                  </span>
-                )}
-              </div>
-
-              <div>
-                <p
-                  className="text-gray-300 max-w-3xl text-sm md:text-base leading-relaxed"
-                  style={
-                    isDescriptionExpanded
-                      ? undefined
-                      : {
-                          display: '-webkit-box',
-                          WebkitBoxOrient: 'vertical' as any,
-                          WebkitLineClamp: 4,
-                          overflow: 'hidden',
-                        }
-                  }
+              <p
+                className="text-gray-300 text-sm leading-relaxed"
+                style={
+                  isDescriptionExpanded
+                    ? undefined
+                    : {
+                        display: '-webkit-box',
+                        WebkitBoxOrient: 'vertical' as any,
+                        WebkitLineClamp: 3,
+                        overflow: 'hidden',
+                      }
+                }
+              >
+                {club.description || 'No description available.'}
+              </p>
+              {club?.description && club.description.length > 150 && (
+                <button
+                  onClick={() => setIsDescriptionExpanded((v) => !v)}
+                  className="mt-2 text-xs text-yellow-400 hover:text-yellow-300 font-medium transition-colors"
                 >
-                  {club.description}
-                </p>
-                {club?.description && club.description.length > 0 && (
-                  <button
-                    onClick={() => setIsDescriptionExpanded((v) => !v)}
-                    className="mt-2 text-yellow-400 hover:text-yellow-300 font-medium"
-                  >
-                    {isDescriptionExpanded ? 'Show less' : 'Read more'}
-                  </button>
-                )}
-              </div>
+                  {isDescriptionExpanded ? 'Show less' : 'Read more'}
+                </button>
+              )}
             </div>
 
-            {/* Action Buttons Section */}
-            <div className="flex flex-col sm:flex-row gap-3 md:flex-col md:min-w-[200px]">
-              {usersClub ? (
-                <div className="w-full sm:w-auto md:w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/10 border border-green-500/40 text-green-300 font-medium">
-                
-                  Hi member
-                </div>
-              ) : (
-                <Button
-                  onClick={handleJoinClick}
-                  className="w-full sm:w-auto md:w-full bg-yellow-500 hover:bg-yellow-400 text-black font-medium py-2.5 transition-all shadow-lg shadow-yellow-500/20"
-                >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Join Club
-                </Button>
+            {/* Additional Info Tags */}
+            <div className="flex flex-wrap gap-2">
+              {club.isPopular && (
+                <span className="bg-yellow-500/20 text-yellow-400 px-2.5 py-1 rounded-lg text-xs border border-yellow-400/30 font-medium">
+                  Popular
+                </span>
               )}
-
-              {isAdmin && (
-                <Link href={`/admin/${id}`}>
-                  <Button
-                    variant="outline"
-                    className="w-full sm:w-auto md:w-full bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/50 text-blue-400 hover:text-blue-300 font-medium py-2.5 transition-all"
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Admin Controls
-                  </Button>
-                </Link>
+              {club.isNew && (
+                <span className="bg-yellow-500 text-black px-2.5 py-1 rounded-lg text-xs font-medium">
+                  New
+                </span>
               )}
+            </div>
+          </div>
 
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleShare}
-                  variant="outline"
-                  className="flex-1 bg-gray-800 hover:bg-gray-700 text-white border-gray-700 transition-colors"
-                  title="Share this club"
-                >
-                  <Share2 size={18} />
-                </Button>
-
-                <Button 
-                  variant="outline"
-                  className="flex-1 bg-gray-800 hover:bg-gray-700 text-white border-gray-700 transition-colors"
-                  title="Report club"
-                >
-                  <Flag size={18} />
-                </Button>
+          {/* Right: Action Buttons - Compact */}
+          <div className="flex flex-col gap-3 lg:min-w-[200px]">
+            {usersClub ? (
+              <div className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/10 border border-green-500/40 text-green-300 text-sm font-medium">
+                <UserCheck className="w-4 h-4" />
+                Hi member
               </div>
+            ) : (
+              <Button
+                onClick={handleJoinClick}
+                className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-medium py-2.5 transition-all shadow-lg shadow-yellow-500/20"
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Join Club
+              </Button>
+            )}
+
+            {isAdmin && (
+              <Link href={`/admin/${id}`}>
+                <Button
+                  variant="outline"
+                  className="w-full bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/50 text-blue-400 hover:text-blue-300 font-medium py-2.5 transition-all text-sm"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Admin Controls
+                </Button>
+              </Link>
+            )}
+
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleShare}
+                variant="outline"
+                size="icon"
+                className="flex-1 bg-gray-800/50 hover:bg-gray-700/50 text-white border-gray-700/50 transition-colors"
+                title="Share this club"
+              >
+                <Share2 size={18} />
+              </Button>
+              <Button 
+                variant="outline"
+                size="icon"
+                className="flex-1 bg-gray-800/50 hover:bg-gray-700/50 text-white border-gray-700/50 transition-colors"
+                title="Report club"
+              >
+                <Flag size={18} />
+              </Button>
             </div>
           </div>
         </div>
+      </div>
 
        {/* Navigation Tabs - Responsive Design */}
        <div className="sticky top-0 z-40 backdrop-blur-xl mt-6 sm:mt-8">
@@ -728,7 +727,7 @@ useEffect(() => {
        </div>
 
       {/* Main Content - Responsive Design */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-4 sm:py-6 md:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-4 sm:py-6 md:py-8 bg-gradient-to-br from-gray-900 via-black to-gray-900">
         {/* Tab Content */}
         <div className="space-y-4 sm:space-y-6 md:space-y-8">
           {/* Events Tab */}
@@ -1078,7 +1077,7 @@ useEffect(() => {
       </div>
 
       {/* Footer - Mobile Optimized */}
-      <footer className="bg-black/50 mt-8 sm:mt-12 md:mt-16">
+      <footer className="bg-black/80 backdrop-blur-sm mt-8 sm:mt-12 md:mt-16 border-t border-gray-800/50 w-full">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6">
             <div className="flex items-center gap-2 sm:gap-3">
@@ -1150,7 +1149,6 @@ useEffect(() => {
       )}
 
       <NoTokenModal isOpen={isAuthModalOpen} onOpenChange={setIsAuthModalOpen} hasToken={hasTokenForModal} />
-    </div>
     </div>
   );
 }

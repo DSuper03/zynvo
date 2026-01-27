@@ -92,7 +92,7 @@ const nextConfig = {
     ],
   },
   
-  reactStrictMode: false,
+  reactStrictMode: true,
   // swcMinify is enabled by default in Next.js 15
   eslint: {
     ignoreDuringBuilds: false,
@@ -125,6 +125,55 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
+  
+  // Webpack optimizations for better bundle splitting
+  webpack: (config, { dev, isServer }) => {
+    // Optimize bundle splitting in production
+    if (!dev && !isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Framework chunk (React, Next.js)
+            framework: {
+              chunks: 'all',
+              name: 'framework',
+              test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+              priority: 40,
+              enforce: true,
+            },
+            // UI libraries chunk
+            ui: {
+              name: 'ui',
+              chunks: 'all',
+              test: /[\\/]node_modules[\\/](@radix-ui|lucide-react|framer-motion)[\\/]/,
+              priority: 30,
+            },
+            // Vendor chunk
+            vendor: {
+              name: 'vendor',
+              chunks: 'all',
+              test: /node_modules/,
+              priority: 20,
+            },
+            // Common chunk
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              priority: 10,
+              reuseExistingChunk: true,
+            },
+          },
+        },
+      };
+    }
+    return config;
+  },
+  
   async rewrites() {
     return [
       {

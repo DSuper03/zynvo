@@ -11,7 +11,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing prompt' }, { status: 400 });
     }
 
-    const apiKey = (process.env.GOOGLE_AI_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || '').trim();
+    // SECURITY: Only use server-side environment variable, never NEXT_PUBLIC_ prefix for API keys
+    const apiKey = (process.env.GOOGLE_AI_API_KEY || '').trim();
     if (!apiKey) {
       return NextResponse.json({ error: 'Missing GOOGLE_AI_API_KEY' }, { status: 500 });
     }

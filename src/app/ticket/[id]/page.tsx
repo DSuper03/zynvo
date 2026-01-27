@@ -5,7 +5,6 @@ import EventBadgeCard from '@/components/ticket';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
-import * as htmlToImage from 'html-to-image';
 
 export default function Page() {
   const params = useParams();
@@ -49,6 +48,8 @@ export default function Page() {
   // Download badge as PNG
   const handleDownload = async () => {
     if (badgeRef.current) {
+      // Lazy load html-to-image only when needed
+      const htmlToImage = await import('html-to-image');
       const dataUrl = await htmlToImage.toPng(badgeRef.current, {
         cacheBust: true,
         skipFonts: false,

@@ -1,4 +1,4 @@
-
+'use client';
 
 import React, { useState } from 'react';
 import {
@@ -350,3 +350,4 @@ const PaymentProofModal: React.FC<PaymentProofModalProps> = ({
 };
 
 export default PaymentProofModal;
+

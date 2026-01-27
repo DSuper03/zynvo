@@ -226,8 +226,11 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       availablePeeps.push(peep);
     };
 
+    let rafId: number | null = null;
+    let isVisible = true;
+
     const render = () => {
-      if (!canvas) return;
+      if (!canvas || !isVisible) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
       ctx.scale(devicePixelRatio, devicePixelRatio);
@@ -237,6 +240,11 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       });
 
       ctx.restore();
+      
+      // Continue animation loop only if visible
+      if (isVisible) {
+        rafId = requestAnimationFrame(render);
+      }
     };
 
     const resize = () => {
@@ -260,18 +268,41 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     const init = () => {
       createPeeps();
       resize();
-      gsap.ticker.add(render);
+      // Start animation loop
+      rafId = requestAnimationFrame(render);
     };
 
     img.onload = init;
     img.src = config.src;
 
-    const handleResize = () => resize();
+    // Throttle resize handler
+    let resizeTimeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => resize(), 200);
+    };
+    
+    // Pause animation when page is hidden
+    const handleVisibilityChange = () => {
+      isVisible = !document.hidden;
+      if (isVisible && !rafId) {
+        rafId = requestAnimationFrame(render);
+      } else if (!isVisible && rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    };
+
     window.addEventListener("resize", handleResize);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      gsap.ticker.remove(render);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      clearTimeout(resizeTimeout);
       crowd.forEach((peep) => {
         if (peep.walk) peep.walk.kill();
       });

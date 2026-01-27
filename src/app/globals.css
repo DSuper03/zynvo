@@ -346,3 +346,19 @@
   transform: translateY(-4px) rotateX(2deg);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(250, 204, 21, 0.2);
 }
+
+/* Fast graffiti particle animation */
+@keyframes particle {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx, 0), var(--ty, 0)) scale(0);
+    opacity: 0;
+  }
+}
+
+.animate-particle {
+  animation: particle 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

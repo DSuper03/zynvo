@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import {  useQueryClient, useMutation } from '@tanstack/react-query';
+import { useState, useCallback, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL ;
 
 export type VoteType = 'upvote' | 'downvote' | null;
@@ -32,6 +32,7 @@ export function useVote({
   initialDownvotes = 0,
   initialUserVote = null,
 }: UseVoteOptions): UseVoteReturn {
+  const queryClient = useQueryClient();
   const [upvotes, setUpvotes] = useState(initialUpvotes);
   const [downvotes, setDownvotes] = useState(initialDownvotes);
   const [userVote, setUserVote] = useState<VoteType>(initialUserVote);
@@ -39,6 +40,39 @@ export function useVote({
   const [error, setError] = useState<string | null>(null);
 
   const score = upvotes - downvotes;
+
+  // Hydrate user vote from localStorage on first load (per-post persistence across reloads)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // If backend already told us what the user voted, prefer that
+    if (initialUserVote) return;
+
+    try {
+      const stored = window.localStorage.getItem(`post-vote:${postId}`);
+      if (stored === 'upvote' || stored === 'downvote') {
+        setUserVote(stored as VoteType);
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  }, [postId, initialUserVote]);
+
+  // Persist the current user vote so it survives full page reloads
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const key = `post-vote:${postId}`;
+    try {
+      if (userVote === 'upvote' || userVote === 'downvote') {
+        window.localStorage.setItem(key, userVote);
+      } else {
+        window.localStorage.removeItem(key);
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  }, [postId, userVote]);
 
   const vote = useCallback(async (voteType: 'upvote' | 'downvote') => {
     if (loading) return;
@@ -97,6 +131,13 @@ export function useVote({
     setDownvotes(newDownvotes);
     setUserVote(newUserVote);
 
+    // Share the optimistic state via TanStack Query so other components stay in sync
+    queryClient.setQueryData(['post-votes', postId], {
+      upvotes: newUpvotes,
+      downvotes: newDownvotes,
+      userVote: newUserVote,
+    });
+
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       
@@ -140,6 +181,14 @@ export function useVote({
         if (data.userVote !== undefined) {
           setUserVote(data.userVote);
         }
+
+        // Sync query cache with canonical server state
+        queryClient.setQueryData(['post-votes', postId], {
+          upvotes: typeof data.upvoteCount === 'number' ? data.upvoteCount : newUpvotes,
+          downvotes:
+            typeof data.downvoteCount === 'number' ? data.downvoteCount : newDownvotes,
+          userVote: data.userVote ?? newUserVote,
+        });
       }
     } catch (err) {
       // Rollback optimistic update on failure

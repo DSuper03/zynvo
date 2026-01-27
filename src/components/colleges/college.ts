@@ -3234,6 +3234,10 @@ State: 'Punjab',
     State: 'West Bengal',
   },
   {
+    college:' VMMC and Safdarjung Hospital, Delhi',
+    State: 'Delhi',
+  },
+  {
     college: 'Maulana Azad College, Kolkata',
     State: 'West Bengal',
   },
