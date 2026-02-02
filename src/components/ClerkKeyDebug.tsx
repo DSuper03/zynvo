@@ -9,9 +9,10 @@ export function ClerkKeyDebug() {
     const tail = hasKey ? key!.trim().slice(-6) : null;
 
     // Intentionally don't log the full key.
-    console.log('[Clerk] publishable key present:', hasKey, hasKey ? `(…${tail})` : '');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[Clerk] publishable key present:', hasKey, hasKey ? `(…${tail})` : '');
+    }
   }, []);
 
   return null;
 }
-
