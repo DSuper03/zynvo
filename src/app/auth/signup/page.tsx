@@ -210,13 +210,11 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       if (completeSignUp.status === "complete") {
         // 2. Set the session active in Clerk
         await setActive({ session: completeSignUp.createdSessionId });
-        
-        alert("Email verified successfully!");
+
+        toast.success("Email verified successfully!");
         // 3. Get Token & Sync with Backend
         const token = await getToken() as string // Gets the new session token
         const decodedToken: any = jwtDecode(token);
-        
-        alert(decodedToken)
 
         console.log("Decoded Clerk Token:", decodedToken);
 
