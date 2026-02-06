@@ -957,9 +957,9 @@ export default function ZynvoDashboard() {
                     <Link href={`/clubs/${userData.clubId}`}>
                       <div className="inline-flex items-center gap-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/50 text-yellow-400 px-4 py-2 rounded-full transition-all duration-200 hover:scale-105 cursor-pointer">
                         <Building className="w-4 h-4 flex-shrink-0" />
-                        <span className="text-sm sm:text-base font-medium truncate max-w-[200px] sm:max-w-none">
+                        <p className="text-sm sm:text-base font-medium truncate max-w-[200px] sm:max-w-none">
                           {userData.clubName}
-                        </span>
+                        </p>
                       </div>
                     </Link>
                     <Button
@@ -1476,7 +1476,8 @@ export default function ZynvoDashboard() {
                   clubName={ticketData.clubName || ''}
                   profileImage={ticketData.profilePic || ''}
                   qrCodeImage={selectedEventId ? `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://zynvo.social/verify-event/${selectedEventId}` : undefined}
-                  style={{ backgroundColor: '#1e293b', textColor: 'white', overlayOpacity: 0.6 }}
+                  
+                 
                 />
               </div>
               <div className="mt-3 flex justify-end">
