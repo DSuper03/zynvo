@@ -533,19 +533,26 @@ export default function Feed() {
         onClose={() => setIsPostModalOpen(false)}
       />
 
-      {/* Image Modal */}
+      {/* Image Modal - click backdrop to close */}
       {isImageModalOpen && selectedImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 p-4">
-          <div className="relative max-w-7xl max-h-full w-full h-full flex items-center justify-center">
-            {/* Close Button */}
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={closeImageModal}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image preview"
+        >
+          <div
+            className="relative max-w-7xl max-h-full w-full h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Button
               onClick={closeImageModal}
               className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white border border-gray-600 hover:border-gray-500 rounded-full p-2 transition-all duration-200"
+              aria-label="Close preview"
             >
               <X className="w-6 h-6" />
             </Button>
-            
-            {/* Image Container */}
             <div className="relative w-full h-full flex items-center justify-center">
               <Image
                 src={selectedImage.src}
@@ -556,12 +563,6 @@ export default function Feed() {
                 priority
               />
             </div>
-            
-            {/* Click outside to close */}
-            <div 
-              className="absolute inset-0 -z-10"
-              onClick={closeImageModal}
-            />
           </div>
         </div>
       )}

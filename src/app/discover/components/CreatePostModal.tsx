@@ -292,7 +292,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       });
 
       if (submit.status === 200 && submit.data.id) {
-        toast(`${submit.data.msg} & here is your post id : ${submit.data.id}`);
+        toast.success('Post created!', {
+          description: 'Your post is now live on the feed.',
+          action: {
+            label: 'View feed',
+            onClick: () => router.push('/discover'),
+          },
+        });
         // Fire a local notification with title, college and club
         try {
           if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -382,12 +388,12 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
           <div className="absolute inset-0 rounded-2xl -z-10 bg-neutral-950" />
           <div className="absolute inset-0 bg-[radial-gradient(800px_400px_at_50%_-20%,rgba(250,204,21,0.15),transparent)] pointer-events-none" />
 
-          {/* Gradient border effect */}
+          {/* Subtle yellow border on hover (matches modal accent) */}
           <div
             className="absolute -z-10 inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             style={{
-              background:
-                'linear-gradient(90deg, #ff5bff 0%, #ff3131 50%, #38ff4c 100%)',
+              
+               
               padding: '1px',
               maskImage:
                 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
