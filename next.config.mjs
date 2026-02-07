@@ -37,6 +37,8 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Next 16 uses Turbopack by default; empty config acknowledges plugins may add webpack
+  turbopack: {},
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
@@ -93,10 +95,7 @@ const nextConfig = {
   },
   
   reactStrictMode: true,
-  // swcMinify is enabled by default in Next.js 15
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
+  // ESLint is configured via next lint / eslint config (not in next.config in Next 15+)
   experimental: {
     // optimizeCss requires critters package - disabled for now
     optimizeCss: false,
