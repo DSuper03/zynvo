@@ -1,6 +1,8 @@
+import { AnyARecord } from 'dns';
 import Image from 'next/image';
 
 type EventBadgeProps = {
+
   eventName: string;
   eventTimings: string;
   collegeName: string;
@@ -19,7 +21,7 @@ const EventBadgeCard: React.FC<EventBadgeProps> = ({
   qrCodeImage,
   status = 'upcoming',
 }) => {
-  const badgeStyles: Record<EventBadgeProps['status'], { label: string; color: string; bg: string }> = {
+  const badgeStyles: Record<NonNullable<EventBadgeProps['status']>, { label: string; color: string; bg: string }> = {
     upcoming: { label: 'Upcoming', color: 'text-yellow-300', bg: 'bg-yellow-500/10' },
     active: { label: 'Active', color: 'text-green-300', bg: 'bg-green-500/10' },
     past: { label: 'Past', color: 'text-gray-300', bg: 'bg-gray-500/10' },

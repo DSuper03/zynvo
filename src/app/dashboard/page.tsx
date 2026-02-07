@@ -39,7 +39,7 @@ interface Event {
   EventName: string;
   startDate: string;
   id: string;
-  endDate: string;
+  
 }
 
 export interface UserData {

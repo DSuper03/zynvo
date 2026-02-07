@@ -292,7 +292,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       });
 
       if (submit.status === 200 && submit.data.id) {
-        toast(`${submit.data.msg} & here is your post id : ${submit.data.id}`);
+        toast.success('Post created!', {
+          description: 'Your post is now live on the feed.',
+          action: {
+            label: 'View feed',
+            onClick: () => router.push('/discover'),
+          },
+        });
         // Fire a local notification with title, college and club
         try {
           if (typeof window !== 'undefined' && 'Notification' in window) {
