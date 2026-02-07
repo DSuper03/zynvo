@@ -39,6 +39,7 @@ interface Event {
   EventName: string;
   startDate: string;
   id: string;
+  endDate: string;
 }
 
 export interface UserData {
@@ -1413,9 +1414,15 @@ export default function ZynvoDashboard() {
                           <h4 className="text-gray-200 font-medium text-xs sm:text-sm truncate leading-relaxed">
                             {event.EventName}
                           </h4>
-                          <p className="text-xs text-gray-400 mt-1">
-                            {new Date(event.startDate).toLocaleDateString()}
-                          </p>
+                          {/* <p className="text-xs text-gray-400 mt-1">
+                            {new Date(event.startDate).toLocaleString('default', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p> */}
                         </div>
                         <div className="ml-2 flex-shrink-0 flex items-center gap-2">
                           <button
