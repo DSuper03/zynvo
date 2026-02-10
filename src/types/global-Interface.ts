@@ -385,6 +385,7 @@ export interface respnseUseState {
   EventMode: string;
   startDate: any;
   endDate: any;
+  prizes?: string;
   contactEmail: string;
   contactPhone: string;
   university: string;

@@ -21,6 +21,7 @@ import {
   Menu,
   Sparkles,
   ArrowLeft,
+  Trophy,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import EventAnnouncements from '../components/eventAnnouncement';
@@ -58,6 +59,7 @@ const Eventid = () => {
     EventMode: '',
     startDate: '',
     endDate: '',
+    prizes: '',
     contactEmail: '',
     contactPhone: '',
     university: '',
@@ -244,6 +246,7 @@ const Eventid = () => {
             EventMode: res.data.response.EventMode || '',
             startDate: res.data.response.startDate || '',
             endDate: res.data.response.endDate || '',
+            prizes: res.data.response.prizes || '',
             university: res.data.response.university || '',
             contactEmail: res.data.response.contactEmail || '',
             contactPhone: res.data.response.contactPhone || '',
@@ -392,7 +395,7 @@ const Eventid = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-black via-[#02040A] to-black text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Back Button */}
         <Link
@@ -404,7 +407,7 @@ const Eventid = () => {
         </Link>
 
         {/* Hero Section - Compact Design */}
-        <div className="relative rounded-2xl bg-[#0B0B0B] border border-gray-800 overflow-hidden mb-6">
+        <div className="relative rounded-2xl bg-gradient-to-br from-[#0b0b0f] via-[#050508] to-[#050507] border border-yellow-500/20 shadow-[0_0_40px_rgba(234,179,8,0.08)] overflow-hidden mb-6">
           {/* Subtle glow effects */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 rounded-full blur-3xl -z-0" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-400/5 rounded-full blur-3xl -z-0" />
@@ -414,48 +417,52 @@ const Eventid = () => {
               {/* Left: Event Info */}
               <div className="lg:col-span-2 space-y-4">
                 <div>
-                  <p className="text-gray-400 text-sm mb-2">Event</p>
-                  <h1 className="text-3xl md:text-4xl font-bold text-yellow-400 leading-tight">
+                  <p className="text-gray-400 text-xs uppercase tracking-[0.18em] mb-2">
+                    Featured Event
+                  </p>
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-yellow-400 leading-tight drop-shadow-[0_0_25px_rgba(250,204,21,0.35)]">
                     {data.EventName || 'Event Title'}
                   </h1>
                 </div>
 
-                {/* Event Details - Compact */}
-                <div className="flex flex-wrap gap-4 text-sm">
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <CalendarIcon className="w-4 h-4 text-yellow-400" />
-                    <span>{formatDateRange(data.startDate, data.endDate)}</span>
+                {/* Event Meta Chips */}
+                <div className="flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm mt-2">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-black/50 border border-gray-800/80 px-3 py-1">
+                    <CalendarIcon className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
+                    <span className="text-gray-200">
+                      {formatDateRange(data.startDate, data.endDate)}
+                    </span>
                   </div>
                   {data.university && (
-                    <div className="flex items-center gap-2 text-gray-300">
-                      <MapPin className="w-4 h-4 text-yellow-400" />
-                      <span>{data.university}</span>
+                    <div className="inline-flex items-center gap-2 rounded-full bg-black/50 border border-gray-800/80 px-3 py-1">
+                      <MapPin className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
+                      <span className="text-gray-200">{data.university}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2 text-gray-300">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-black/50 border border-gray-800/80 px-3 py-1">
                     {isOnline ? (
-                      <Globe className="w-4 h-4 text-yellow-400" />
+                      <Globe className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
                     ) : (
-                      <Square className="w-4 h-4 text-yellow-400" />
+                      <Square className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
                     )}
-                    <span>{isOnline ? 'Online' : data.EventMode || 'TBD'}</span>
+                    <span className="text-gray-200">
+                      {isOnline ? 'Online' : data.EventMode || 'Mode TBA'}
+                    </span>
                   </div>
-                </div>
-
-                {/* Status Badge */}
-                <div>
-                  <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                  <div
+                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1 border text-xs md:text-sm ${
                       data.applicationStatus === 'open'
-                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                        : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                        ? 'border-emerald-400/60 bg-emerald-500/10 text-emerald-300'
+                        : 'border-red-400/60 bg-red-500/10 text-red-300'
                     }`}
                   >
-                    {data.applicationStatus === 'open' ? (
-                      <CheckSquare className="w-3 h-3 mr-1.5" />
-                    ) : null}
-                    Applications {data.applicationStatus}
-                  </span>
+                    {data.applicationStatus === 'open' && (
+                      <CheckSquare className="w-3 h-3" />
+                    )}
+                    <span>
+                      Applications {data.applicationStatus || 'status TBA'}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Action Buttons */}
@@ -658,17 +665,23 @@ const Eventid = () => {
                 )}
 
                 {/* Details Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-800">
                   <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Location</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">
+                      Location
+                    </p>
                     <p className="text-white">{data.university || 'TBD'}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Mode</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">
+                      Mode
+                    </p>
                     <p className="text-white">{data.EventMode || 'TBD'}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Start Date</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">
+                      Start Date
+                    </p>
                     <p className="text-white">
                       {data.startDate
                         ? new Date(data.startDate).toLocaleDateString()
@@ -676,11 +689,68 @@ const Eventid = () => {
                     </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">End Date</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">
+                      End Date
+                    </p>
                     <p className="text-white">
                       {data.endDate
                         ? new Date(data.endDate).toLocaleDateString()
                         : 'TBD'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Prizes & Highlights */}
+                {data.prizes && data.prizes.trim().length > 0 && (
+                  <div className="mt-6 rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles className="w-4 h-4 text-yellow-400" />
+                      <h3 className="text-sm font-semibold text-yellow-400 uppercase tracking-wide">
+                        Prizes & Highlights
+                      </h3>
+                    </div>
+                    <div className="text-sm text-gray-100 whitespace-pre-line leading-relaxed">
+                      {data.prizes}
+                    </div>
+                  </div>
+                )}
+
+                {/* Why you should join */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="rounded-lg border border-gray-800 bg-black/40 p-4 space-y-2">
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-500/15 text-yellow-300">
+                      <Trophy className="w-4 h-4" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-white">
+                      Compete & Win
+                    </h3>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Show off your skills, build your portfolio and take a shot
+                      at exclusive campus-level prizes.
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-gray-800 bg-black/40 p-4 space-y-2">
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500/15 text-emerald-300">
+                      <Users className="w-4 h-4" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-white">
+                      Meet Smart People
+                    </h3>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Connect with organisers, speakers and participants from
+                      across your campus network.
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-gray-800 bg-black/40 p-4 space-y-2">
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-500/15 text-sky-300">
+                      <AlarmClock className="w-4 h-4" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-white">
+                      Make Memories
+                    </h3>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Turn a normal week into something memorable with matches,
+                      photos and late‑night prep with your friends.
                     </p>
                   </div>
                 </div>

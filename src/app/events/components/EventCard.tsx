@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapPin, Calendar, Share2 } from 'lucide-react';
+import { MapPin, Calendar, Share2, Club, ClubIcon, Castle, House, HouseIcon } from 'lucide-react';
 import { Modal, ModalTrigger } from '@/components/ui/animated-modal';
 import { eventData } from '@/types/global-Interface';
 import Image from 'next/legacy/image';
@@ -214,11 +214,11 @@ export default function EventCard({
                       </span>
                     </div>
                     <div className="flex items-center text-gray-300 text-sm">
-                      <MapPin className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
+                      <HouseIcon className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
                       <span className="truncate">
                         {event.univerisity
                           ? event.univerisity
-                          : `${event.clubName}'s College`}
+                          : `${event.clubName} Club`}
                       </span>
                     </div>
                   </div>
