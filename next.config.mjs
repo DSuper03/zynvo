@@ -3,11 +3,13 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline';
+      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://eager-bonefish-30.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://challenges.cloudflare.com;
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com https://api.qrserver.com;
-      connect-src 'self' data: http://localhost:* https://backend.zynvo.social https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com https://zynvo-backend-1.onrender.com https://zynvo-backend.onrender.com https://api.dicebear.com https://api.qrserver.com;
+      img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com https://api.qrserver.com https://img.clerk.com;
+      connect-src 'self' data: http://localhost:* https://backend.zynvo.social https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com https://zynvo-backend-1.onrender.com https://zynvo-backend.onrender.com https://api.dicebear.com https://api.qrserver.com https://eager-bonefish-30.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com;
       font-src 'self' data:;
+      frame-src 'self' https://eager-bonefish-30.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://challenges.cloudflare.com;
+      worker-src 'self' blob:;
     `
       .replace(/\s{2,}/g, ' ')
       .trim(),
@@ -35,6 +37,8 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Next 16 uses Turbopack by default; empty config acknowledges plugins may add webpack
+  turbopack: {},
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
@@ -91,13 +95,11 @@ const nextConfig = {
   },
   
   reactStrictMode: true,
-  // swcMinify is enabled by default in Next.js 15
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
+  // ESLint is configured via next lint / eslint config (not in next.config in Next 15+)
   experimental: {
     // optimizeCss requires critters package - disabled for now
     optimizeCss: false,
+    externalDir: true,
   },
   
   // Performance optimizations

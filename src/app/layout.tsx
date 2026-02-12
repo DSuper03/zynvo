@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
+import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@/components/ui/sonner';
@@ -9,6 +10,8 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
 import { QueryProvider } from '@/providers/QueryProvider';
 import FloatingPWAInstall from '@/components/FloatingPWAInstall';
+import { ClerkKeyDebug } from '@/components/ClerkKeyDebug';
+import { ClerkProvider } from '@clerk/nextjs'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -112,11 +115,34 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
   return (
+    <ClerkProvider
+      appearance={{
+        elements: {
+          rootBox: "mx-auto",
+        },
+      }}
+    >
     <html lang="en">
+       <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-0E7B1VF3JX"
+          strategy="afterInteractive"
+        />
+        <Script id="ga" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-0E7B1VF3JX');
+          `}
+        </Script>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
       >
+        <ClerkKeyDebug />
         <ErrorBoundary>
           <QueryProvider>
             <WarmupProvider>
@@ -131,5 +157,6 @@ export default function RootLayout({
         </ErrorBoundary>
       </body>
     </html>
+    </ClerkProvider>
   );
 }

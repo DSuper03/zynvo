@@ -353,28 +353,57 @@ export default function PublicUserProfile() {
     try {
       setSelectedEventId(eventId);
       const safeId = encodeURIComponent(eventId);
-      const url = `/api/events/event-details?id=${safeId}`;
+      const base = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
+      const url = base
+        ? `${base}/api/v1/events/event-details?id=${safeId}`
+        : `/api/v1/events/event-details?id=${safeId}`;
+
       const headers: Record<string, string> = {};
       if (typeof window !== 'undefined') {
         const tok = localStorage.getItem('token');
         if (tok) headers['authorization'] = `Bearer ${tok}`;
       }
-      const resp = await axios.get<{
-        data: {
-          eventName: string;
-          clubName: string;
-          collegeName: string;
-          startDate: Date;
-          profilePic: string;
-        };
-      }>(url, { headers });
-      if (resp && resp.data && resp.data.data) {
-        const d = resp.data.data;
+
+      let resolvedData:
+        | {
+            eventName: string;
+            clubName: string;
+            collegeName: string;
+            startDate: Date;
+            profilePic: string;
+          }
+        | null = null;
+
+      try {
+        const resp = await axios.get<{ data: any }>(url, { headers });
+        if (resp?.data?.data) {
+          resolvedData = resp.data.data;
+        }
+      } catch (err) {
+        // fall through to local data; avoid blocking on 404
+      }
+
+      if (!resolvedData && userData?.events) {
+        const fallback = userData.events.find((e) => e.id === eventId);
+        if (fallback) {
+          resolvedData = {
+            eventName: fallback.EventName,
+            clubName: userData.clubName || 'Club',
+            collegeName: userData.collegeName || 'College',
+            startDate: new Date(fallback.startDate),
+            profilePic: userData.profileAvatar,
+          };
+        }
+      }
+
+      if (resolvedData) {
         setTicketData({
-          ...d,
-          startDate: new Date(d.startDate).toLocaleString(),
+          ...resolvedData,
+          startDate: new Date(resolvedData.startDate).toLocaleString(),
         });
         setShowTicketModal(true);
+      } else {
+        toast('Unable to load ticket');
       }
     } catch (e: any) {
       console.error('Ticket fetch failed', e);
@@ -801,7 +830,7 @@ export default function PublicUserProfile() {
                   clubName={ticketData.clubName || ''}
                   profileImage={ticketData.profilePic || ''}
                   qrCodeImage={selectedEventId ? `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://zynvo.social/verify-event/${selectedEventId}` : undefined}
-                  style={{ backgroundColor: '#1e293b', textColor: 'white', overlayOpacity: 0.6 }}
+                  
                 />
               </div>
               <div className="mt-3 flex justify-end">

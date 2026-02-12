@@ -1,3 +1,5 @@
+//Deprecated - use auth.controller.new.ts for new code
+
 "use client";
 import { forgot } from '@/hooks/useForgotPassword';
 import { NextPage } from 'next';

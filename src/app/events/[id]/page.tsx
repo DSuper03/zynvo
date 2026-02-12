@@ -21,6 +21,7 @@ import {
   Menu,
   Sparkles,
   ArrowLeft,
+  CreditCard,
   Trophy,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -29,6 +30,7 @@ import NoTokenModal from '@/components/modals/remindModal';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import AddSpeakerModal from './speakers/AddSpeakerModal';
+import PaymentProofModal from '@/components/PaymentProofModal';
 import { Plus, Download, Users } from 'lucide-react';
 import { useParticipants, downloadParticipantsCSV, type Participant } from '@/hooks/useParticipants';
 import AchievementCelebration from '@/components/AchievementCelebration';
@@ -69,8 +71,10 @@ const Eventid = () => {
     whatsappLink: '',
     eventWebsite: '',
     form: '',
+    isPaidEvent: false,
+    paymentQRCode: '',
+    paymentAmount: 0,
   });
-
   const router = useRouter();
 
   const [forkedUpId, setForkedUpId] = useState<string | null>(null);
@@ -78,6 +82,7 @@ const Eventid = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [showWhatsappModal, setShowWhatsappModal] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
     'overview' | 'speakers' | 'schedule' | 'gallery' | 'announcement' | 'attendees'
@@ -240,6 +245,24 @@ const Eventid = () => {
         );
 
         if (res && res.status === 200) {
+          // Map backend field names to frontend expected names
+          // Backend uses: isPaid, qrCodeUrl
+          // Frontend expects: isPaidEvent, paymentQRCode
+          const isPaid = (res.data.response as any).isPaid ?? res.data.response.isPaidEvent ?? false;
+          const qrCodeUrl = (res.data.response as any).qrCodeUrl || res.data.response.paymentQRCode || '';
+          const paymentAmount = res.data.response.paymentAmount || 0;
+          
+          console.log('Event data received:', {
+            isPaid: (res.data.response as any).isPaid,
+            isPaidEvent: res.data.response.isPaidEvent,
+            qrCodeUrl: (res.data.response as any).qrCodeUrl,
+            paymentQRCode: res.data.response.paymentQRCode,
+            paymentAmount: paymentAmount,
+          });
+          
+          // If paymentQRCode/qrCodeUrl exists, treat as paid event even if isPaid/isPaidEvent flag is not set
+          const hasPaidEvent = isPaid || !!qrCodeUrl;
+          
           setData({
             EventName: res.data.response.EventName || '',
             description: res.data.response.description || '',
@@ -258,6 +281,9 @@ const Eventid = () => {
             whatsappLink: res.data.response.whatsappLink || res.data.response.whatsappGroupLink || '',
             eventWebsite: res.data.response.eventWebsite || res.data.response.EventUrl || '',
             form: res.data.response.form || res.data.response.registrationForm || '',
+            isPaidEvent: hasPaidEvent,
+            paymentQRCode: qrCodeUrl,
+            paymentAmount: paymentAmount,
           });
         }
       } catch (error) {
@@ -277,9 +303,51 @@ const Eventid = () => {
       return;
     }
 
+    // Debug: Log all payment-related data
+    console.log('=== Registration Debug ===');
+    console.log('data.isPaidEvent:', data.isPaidEvent, typeof data.isPaidEvent);
+    console.log('data.paymentQRCode:', data.paymentQRCode, 'length:', data.paymentQRCode?.length);
+    console.log('data.paymentAmount:', data.paymentAmount, typeof data.paymentAmount);
+    console.log('Full data object:', JSON.stringify({
+      isPaidEvent: data.isPaidEvent,
+      paymentQRCode: data.paymentQRCode,
+      paymentAmount: data.paymentAmount
+    }, null, 2));
+
+    // If it's a paid event, show payment modal instead of registering immediately
+    // Check multiple indicators: isPaidEvent flag, paymentQRCode, or paymentAmount > 0
+    // Use the same logic as the UI check (line 533) for consistency
+    const hasQRCode = !!data.paymentQRCode && data.paymentQRCode.trim().length > 0;
+    const hasPaymentAmount = data.paymentAmount !== undefined && data.paymentAmount !== null && Number(data.paymentAmount) > 0;
+    // Check isPaidEvent first (same as UI), then fallback to other indicators
+    const isPaidEvent = Boolean(data.isPaidEvent) || hasQRCode || hasPaymentAmount;
+    
+    console.log('Check results:');
+    console.log('  Boolean(data.isPaidEvent):', Boolean(data.isPaidEvent));
+    console.log('  hasQRCode:', hasQRCode);
+    console.log('  hasPaymentAmount:', hasPaymentAmount);
+    console.log('  isPaidEvent (final):', isPaidEvent);
+    
+    if (isPaidEvent) {
+      console.log('✓ Showing payment modal...');
+      setShowPaymentModal(true);
+      return;
+    }
+
+    console.log('✗ Proceeding with direct registration (free event)');
+    // For free events, proceed with registration
+    await completeRegistration();
+  };
+
+  const completeRegistration = async (paymentProofUrl?: string) => {
     try {
       setIsRegistering(true);
-      const bodyData = { eventId: id };
+      console.log('completeRegistration called with paymentProofUrl:', paymentProofUrl);
+      const bodyData = { 
+        eventId: id,
+        ...(paymentProofUrl && { paymentProofUrl })
+      };
+      console.log('Sending registration request with body:', bodyData);
 
       const resp = await axios.post<{
         msg: string;
@@ -295,6 +363,7 @@ const Eventid = () => {
       );
 
       if (resp && resp.status === 200) {
+        console.log('Registration successful');
         setForkedUpId(resp.data.ForkedUpId);
         // Show celebration modal
         setShowCelebration(true);
@@ -311,6 +380,11 @@ const Eventid = () => {
     } finally {
       setIsRegistering(false);
     }
+  };
+
+  const handlePaymentProofSubmitted = async (proofUrl: string) => {
+    setShowPaymentModal(false);
+    await completeRegistration(proofUrl);
   };
 
   // Helper function to check if user is attending this event
@@ -464,6 +538,22 @@ const Eventid = () => {
                     </span>
                   </div>
                 </div>
+
+                {/* Payment Info for Paid Events */}
+                {data.isPaidEvent && (
+                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CreditCard className="w-4 h-4 text-yellow-400" />
+                      <span className="font-semibold text-yellow-400">Payment Required</span>
+                    </div>
+                    <p className="text-sm text-gray-300">
+                      This is a paid event. After clicking register, you'll need to scan the QR code and upload your payment screenshot.
+                    </p>
+                    <p className="text-sm font-semibold text-yellow-400 mt-2">
+                      Amount: ₹{data.paymentAmount}
+                    </p>
+                  </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-3 pt-2">
@@ -660,6 +750,54 @@ const Eventid = () => {
                           <ChevronRight className="w-4 h-4" />
                         </a>
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Paid Event Details - Only for Event Founders */}
+                {isFounder && data.isPaidEvent && (
+                  <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-yellow-400 flex items-center gap-2">
+                        <span className="text-lg">💳</span>
+                        Payment Details
+                      </h3>
+                      
+                      {/* Payment Amount */}
+                      <div className="bg-yellow-900/20 p-3 rounded border border-yellow-500/20">
+                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Payment Amount</p>
+                        <p className="text-2xl font-bold text-yellow-400">₹{data.paymentAmount}</p>
+                      </div>
+
+                      {/* QR Code Display */}
+                      {data.paymentQRCode ? (
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-400">Payment QR Code</p>
+                          <div className="bg-white p-3 rounded-lg inline-block">
+                            <Image
+                              src={data.paymentQRCode}
+                              alt="Payment QR Code"
+                              width={200}
+                              height={200}
+                              className="w-auto h-auto"
+                              priority={false}
+                            />
+                          </div>
+                          <a
+                            href={data.paymentQRCode}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-xs text-yellow-400 hover:text-yellow-300 transition-colors"
+                          >
+                            View Full Size
+                            <ChevronRight className="w-3 h-3" />
+                          </a>
+                        </div>
+                      ) : (
+                        <div className="bg-gray-800/50 p-4 rounded border border-dashed border-gray-700 text-center">
+                          <p className="text-gray-400 text-sm">QR Code not available</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1115,6 +1253,17 @@ const Eventid = () => {
         isOpen={isAddSpeakerModalOpen}
         onClose={() => setIsAddSpeakerModalOpen(false)}
         eventId={id}
+      />
+
+      {/* Payment Proof Modal for Paid Events */}
+      <PaymentProofModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onProofSubmitted={handlePaymentProofSubmitted}
+        qrCodeUrl={data.paymentQRCode || ''}
+        eventName={data.EventName}
+        paymentAmount={data.paymentAmount || 0}
+        isSubmitting={isRegistering}
       />
 
       {/* Achievement Celebration Modal */}

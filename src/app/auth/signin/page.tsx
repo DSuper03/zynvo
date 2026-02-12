@@ -50,59 +50,57 @@ export default function SignIn() {
       return;
     }
     setLoading(true);
-    setTimeout(async () => {
-      try {
-        const msg = await axios.post<signinRes>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/login`,
-          formData
-        );
-        setLoading(false);
-        
-        if (!msg || !msg.data) {
-          toast.error('Some Internal Server Error Occurred');
-          return;
-        }
+    try {
+      const msg = await axios.post<signinRes>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/login`,
+        formData
+      );
 
-        // Check for invalid email or password
-        if (
-          msg.data.msg === 'Invalid email or password' ||
-          msg.data.msg === '{"msg":"Invalid email or password","token":"no token"}' ||
-          msg.data.msg?.includes('Invalid email or password')
-        ) {
-          toast.error('Invalid email or password. Please check your credentials and try again.');
-          return;
-        }
-
-        // Check for login success
-        if (msg.data.msg === 'login success') {
-          localStorage.setItem('token', msg.data.token);
-          sessionStorage.setItem('activeSession', 'true');
-          toast.success('Login successful!');
-          router.push('/dashboard');
-          return;
-        }
-
-        // Handle other error messages
-        if (msg.data.msg && msg.data.msg !== 'login success') {
-          toast.error(msg.data.msg);
-        }
-      } catch (error: any) {
-        setLoading(false);
-        // Handle axios errors
-        if (error.response) {
-          const errorMsg = error.response.data?.msg || error.response.data?.message || 'Invalid email or password';
-          if (errorMsg.includes('Invalid email or password') || errorMsg.includes('Invalid')) {
-            toast.error('Invalid email or password. Please check your credentials and try again.');
-          } else {
-            toast.error(errorMsg);
-          }
-        } else if (error.request) {
-          toast.error('Network error. Please check your connection and try again.');
-        } else {
-          toast.error('An unexpected error occurred. Please try again.');
-        }
+      if (!msg || !msg.data) {
+        toast.error('Some Internal Server Error Occurred');
+        return;
       }
-    }, 5000);
+
+      // Check for invalid email or password
+      if (
+        msg.data.msg === 'Invalid email or password' ||
+        msg.data.msg === '{"msg":"Invalid email or password","token":"no token"}' ||
+        msg.data.msg?.includes('Invalid email or password')
+      ) {
+        toast.error('Invalid email or password. Please check your credentials and try again.');
+        return;
+      }
+
+      // Check for login success
+      if (msg.data.msg === 'login success') {
+        localStorage.setItem('token', msg.data.token);
+        sessionStorage.setItem('activeSession', 'true');
+        toast.success('Login successful!');
+        router.push('/dashboard');
+        return;
+      }
+
+      // Handle other error messages
+      if (msg.data.msg && msg.data.msg !== 'login success') {
+        toast.error(msg.data.msg);
+      }
+    } catch (error: any) {
+      // Handle axios errors
+      if (error.response) {
+        const errorMsg = error.response.data?.msg || error.response.data?.message || 'Invalid email or password';
+        if (errorMsg.includes('Invalid email or password') || errorMsg.includes('Invalid')) {
+          toast.error('Invalid email or password. Please check your credentials and try again.');
+        } else {
+          toast.error(errorMsg);
+        }
+      } else if (error.request) {
+        toast.error('Network error. Please check your connection and try again.');
+      } else {
+        toast.error('An unexpected error occurred. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
