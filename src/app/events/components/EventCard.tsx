@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapPin, Calendar, Share2, Club, ClubIcon, Castle, House, HouseIcon } from 'lucide-react';
+import { MapPin, Calendar, Share2, Club, ClubIcon, Castle, House, HouseIcon, CreditCard } from 'lucide-react';
 import { Modal, ModalTrigger } from '@/components/ui/animated-modal';
 import { eventData } from '@/types/global-Interface';
 import Image from 'next/legacy/image';
