@@ -32,13 +32,13 @@ import { FaSchool } from 'react-icons/fa';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import EventBadgeCard from '@/components/ticket';
 import TextWithLinks from '@/components/TextWithLinks';
-import { headers } from 'next/headers';
 
 
 interface Event {
   EventName: string;
   startDate: string;
   id: string;
+  passId?: string | null;
   
 }
 
@@ -79,6 +79,8 @@ export interface ApiResponse {
     linkedin: string | null;
     clubId: string | null;
     eventAttended: {
+      passId?: string | null;
+      uniquePassId?: string | null;
       event: {
         id: string;
         EventName: string;
@@ -667,6 +669,7 @@ export default function ZynvoDashboard() {
                 EventName: eve.event.EventName,
                 startDate: eve.event.startDate,
                 id: eve.event.id,
+                passId: eve.uniquePassId ?? eve.passId ?? null,
               })) || [];
 
             setUserData({
@@ -1410,6 +1413,12 @@ export default function ZynvoDashboard() {
                             <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
                               Attended
                             </Badge>
+                            <span className="text-[10px] sm:text-xs text-gray-400">
+                              Pass ID:{' '}
+                              <span className="font-mono text-gray-200">
+                                {event.passId || '—'}
+                              </span>
+                            </span>
                           </div>
                           <h4 className="text-gray-200 font-medium text-xs sm:text-sm truncate leading-relaxed">
                             {event.EventName}
