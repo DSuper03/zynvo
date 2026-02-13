@@ -580,6 +580,7 @@ export default function ZynvoDashboard() {
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [ticketData, setTicketData] = useState<any>({});
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
 
   // NEW: compact UI controls
@@ -821,9 +822,35 @@ export default function ZynvoDashboard() {
     setUpdate(true);
   };
 
-  const openTicketModal = async (eventId: string) => {
+  const generateQrCode = async (value: string | null | undefined) => {
+    if (!value) {
+      setQrCodeDataUrl(null);
+      return;
+    }
+    try {
+      const QRCode = await import('qrcode');
+      const toDataURL =
+        (QRCode as any).toDataURL || (QRCode as any).default?.toDataURL;
+      if (!toDataURL) {
+        throw new Error('QR toDataURL not available');
+      }
+      const dataUrl = await toDataURL(value, {
+        margin: 1,
+        width: 160,
+      });
+      setQrCodeDataUrl(dataUrl);
+    } catch (e) {
+      console.error('QR generation failed', e);
+      setQrCodeDataUrl(null);
+    }
+  };
+
+  const openTicketModal = async (eventId: string, passId?: string | null) => {
     try {
       setSelectedEventId(eventId);
+      setTicketData({});
+      setShowTicketModal(true);
+      await generateQrCode(passId || eventId);
       const safeId = encodeURIComponent(eventId);
       const url = `/api/events/event-details?id=${safeId}`;
       const headers: Record<string, string> = {};
@@ -846,7 +873,6 @@ export default function ZynvoDashboard() {
           ...d,
           startDate: new Date(d.startDate).toLocaleString(),
         });
-        setShowTicketModal(true);
       }
     } catch (e: any) {
       console.error('Ticket fetch failed', e);
@@ -1435,7 +1461,7 @@ export default function ZynvoDashboard() {
                         </div>
                         <div className="ml-2 flex-shrink-0 flex items-center gap-2">
                           <button
-                            onClick={() => openTicketModal(event.id)}
+                            onClick={() => openTicketModal(event.id, event.passId)}
                             className="text-[10px] sm:text-xs px-2 py-1 rounded-md bg-yellow-400 text-gray-900 hover:bg-yellow-300"
                           >
                             View Ticket
@@ -1491,7 +1517,7 @@ export default function ZynvoDashboard() {
                   collegeName={ticketData.collegeName || ''}
                   clubName={ticketData.clubName || ''}
                   profileImage={ticketData.profilePic || ''}
-                  qrCodeImage={selectedEventId ? `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://zynvo.social/verify-event/${selectedEventId}` : undefined}
+                  qrCodeImage={qrCodeDataUrl || undefined}
                   
                  
                 />
