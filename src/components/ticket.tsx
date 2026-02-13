@@ -9,6 +9,7 @@ type EventBadgeProps = {
   clubName: string;
   profileImage?: string;
   qrCodeImage?: string;
+  onQrClick?: () => void;
   status?: 'upcoming' | 'active' | 'past';
 };
 
@@ -19,6 +20,7 @@ const EventBadgeCard: React.FC<EventBadgeProps> = ({
   clubName,
   profileImage,
   qrCodeImage,
+  onQrClick,
   status = 'upcoming',
 }) => {
   const badgeStyles: Record<NonNullable<EventBadgeProps['status']>, { label: string; color: string; bg: string }> = {
@@ -73,7 +75,18 @@ const EventBadgeCard: React.FC<EventBadgeProps> = ({
             </div>
             {qrCodeImage && (
               <div className="h-16 w-16 rounded-xl bg-white flex items-center justify-center shadow-inner">
-                <img src={qrCodeImage} alt="QR Code" crossOrigin="anonymous" className="h-14 w-14" />
+                {onQrClick ? (
+                  <button
+                    type="button"
+                    onClick={onQrClick}
+                    aria-label="Expand QR code"
+                    className="h-14 w-14 flex items-center justify-center cursor-zoom-in"
+                  >
+                    <img src={qrCodeImage} alt="QR Code" crossOrigin="anonymous" className="h-14 w-14" />
+                  </button>
+                ) : (
+                  <img src={qrCodeImage} alt="QR Code" crossOrigin="anonymous" className="h-14 w-14" />
+                )}
               </div>
             )}
           </div>

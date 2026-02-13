@@ -581,6 +581,7 @@ export default function ZynvoDashboard() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [ticketData, setTicketData] = useState<any>({});
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
+  const [qrPreviewOpen, setQrPreviewOpen] = useState(false);
   const badgeRef = useRef<HTMLDivElement>(null);
 
   // NEW: compact UI controls
@@ -850,29 +851,65 @@ export default function ZynvoDashboard() {
       setSelectedEventId(eventId);
       setTicketData({});
       setShowTicketModal(true);
+      setQrPreviewOpen(false);
       await generateQrCode(passId || eventId);
       const safeId = encodeURIComponent(eventId);
-      const url = `/api/events/event-details?id=${safeId}`;
+      const base = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
+      const url = base
+        ? `${base}/api/v1/events/event-details?id=${safeId}`
+        : `/api/v1/events/event-details?id=${safeId}`;
       const headers: Record<string, string> = {};
       if (typeof window !== 'undefined') {
         const tok = localStorage.getItem('token');
         if (tok) headers['authorization'] = `Bearer ${tok}`;
       }
-      const resp = await axios.get<{
-        data: {
-          eventName: string;
-          clubName: string;
-          collegeName: string;
-          startDate: Date;
-          profilePic: string;
-        };
-      }>(url, { headers });
-      if (resp && resp.data && resp.data.data) {
-        const d = resp.data.data;
+      let payload: any = null;
+      try {
+        const resp = await axios.get<{ data: any }>(url, { headers });
+        payload = resp?.data?.data ?? null;
+      } catch (err) {
+        // fall back to local event info
+      }
+
+      const fallback = userData?.events?.find((e) => e.id === eventId);
+      const eventName =
+        payload?.eventName ??
+        payload?.EventName ??
+        payload?.event?.eventName ??
+        payload?.event?.EventName ??
+        fallback?.EventName ??
+        'Event';
+      const clubName =
+        payload?.clubName ??
+        payload?.club?.name ??
+        payload?.event?.clubName ??
+        userData?.clubName ??
+        '';
+      const collegeName =
+        payload?.collegeName ??
+        payload?.university ??
+        payload?.univerisity ??
+        payload?.event?.collegeName ??
+        userData?.collegeName ??
+        '';
+      const startDateRaw = payload?.startDate ?? payload?.event?.startDate ?? fallback?.startDate;
+      const profilePic =
+        payload?.profilePic ??
+        payload?.profileAvatar ??
+        payload?.event?.profilePic ??
+        userData?.profileAvatar ??
+        '';
+
+      if (eventName || startDateRaw || clubName || collegeName) {
         setTicketData({
-          ...d,
-          startDate: new Date(d.startDate).toLocaleString(),
+          eventName,
+          clubName,
+          collegeName,
+          startDate: startDateRaw ? new Date(startDateRaw).toLocaleString() : '',
+          profilePic,
         });
+      } else {
+        toast('Unable to load ticket');
       }
     } catch (e: any) {
       console.error('Ticket fetch failed', e);
@@ -1503,7 +1540,10 @@ export default function ZynvoDashboard() {
             <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800">
               <div className="text-sm font-semibold text-gray-900 dark:text-white">Your Ticket</div>
               <button
-                onClick={() => setShowTicketModal(false)}
+                onClick={() => {
+                  setShowTicketModal(false);
+                  setQrPreviewOpen(false);
+                }}
                 className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
                 ✕
@@ -1518,6 +1558,7 @@ export default function ZynvoDashboard() {
                   clubName={ticketData.clubName || ''}
                   profileImage={ticketData.profilePic || ''}
                   qrCodeImage={qrCodeDataUrl || undefined}
+                  onQrClick={qrCodeDataUrl ? () => setQrPreviewOpen(true) : undefined}
                   
                  
                 />
@@ -1527,6 +1568,29 @@ export default function ZynvoDashboard() {
                   Download
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {qrPreviewOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4">
+          <div className="bg-white dark:bg-neutral-950 rounded-2xl w-full max-w-sm border border-neutral-800 shadow-xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800">
+              <div className="text-sm font-semibold text-gray-900 dark:text-white">QR Code</div>
+              <button
+                onClick={() => setQrPreviewOpen(false)}
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+              >
+                X
+              </button>
+            </div>
+            <div className="p-4 flex items-center justify-center">
+              {qrCodeDataUrl ? (
+                <img src={qrCodeDataUrl} alt="QR Code" className="h-64 w-64" />
+              ) : (
+                <div className="text-sm text-gray-500">QR code not available</div>
+              )}
             </div>
           </div>
         </div>
