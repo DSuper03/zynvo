@@ -71,7 +71,15 @@ export default function SignUp() {
       // Handle interest checkboxes
       // interests deleted
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      // Normalise some fields before saving to state
+      let nextValue = value;
+
+      // For email, trim accidental spaces and lowercase
+      if (name === 'email') {
+        nextValue = value.trim().toLowerCase();
+      }
+
+      setFormData((prev) => ({ ...prev, [name]: nextValue }));
 
       // NEW: validate password as user types
       if (name === 'password') {
@@ -201,10 +209,13 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     if (!isLoaded) return;
 
     try {
+      // Normalise verification code to avoid issues with accidental spaces
+      const cleanedCode = code.replace(/\s+/g, '');
+
       // 1. Verify the code using the EXISTING signUp object
       // Clerk remembers the email from Step A
       const completeSignUp = await signUp.attemptEmailAddressVerification({
-        code, 
+        code: cleanedCode, 
       });
 
       if (completeSignUp.status === "complete") {
@@ -275,7 +286,10 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                <input
                  type="text"
                  value={code}
-                 onChange={(e) => setCode(e.target.value)}
+                 onChange={(e) =>
+                   // Strip any accidental spaces; keep original casing
+                   setCode(e.target.value.replace(/\s+/g, ''))
+                 }
                  className="w-full bg-gray-800 text-white p-3 rounded-lg mb-4 text-center text-xl tracking-widest focus:ring-2 focus:ring-yellow-500 outline-none"
                  placeholder="######"
                />
