@@ -853,7 +853,7 @@ export default function ZynvoDashboard() {
       setTicketData({});
       setShowTicketModal(true);
       setQrPreviewOpen(false);
-      await generateQrCode(passId || eventId);
+      await generateQrCode(passId ?? eventId);
       const safeId = encodeURIComponent(eventId);
       const base = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
       const url = base
