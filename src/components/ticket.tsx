@@ -9,6 +9,7 @@ type EventBadgeProps = {
   clubName: string;
   profileImage?: string;
   qrCodeImage?: string;
+  isQrLoading?: boolean;
   onQrClick?: () => void;
   status?: 'upcoming' | 'active' | 'past';
 };
@@ -20,6 +21,7 @@ const EventBadgeCard: React.FC<EventBadgeProps> = ({
   clubName,
   profileImage,
   qrCodeImage,
+  isQrLoading = false,
   onQrClick,
   status = 'upcoming',
 }) => {
@@ -29,6 +31,7 @@ const EventBadgeCard: React.FC<EventBadgeProps> = ({
     past: { label: 'Past', color: 'text-gray-300', bg: 'bg-gray-500/10' },
   };
   const tone = badgeStyles[status];
+  const showQr = isQrLoading || !!qrCodeImage;
 
   return (
     <div className="flex items-center justify-center">
@@ -73,9 +76,14 @@ const EventBadgeCard: React.FC<EventBadgeProps> = ({
                 <div className="text-xs text-gray-400">Show this at the gate</div>
               </div>
             </div>
-            {qrCodeImage && (
+            {showQr && (
               <div className="h-16 w-16 rounded-xl bg-white flex items-center justify-center shadow-inner">
-                {onQrClick ? (
+                {isQrLoading ? (
+                  <div className="flex flex-col items-center justify-center text-[10px] text-gray-600">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-yellow-400" />
+                    <span className="mt-1">Generating</span>
+                  </div>
+                ) : onQrClick ? (
                   <button
                     type="button"
                     onClick={onQrClick}

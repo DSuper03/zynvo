@@ -581,6 +581,7 @@ export default function ZynvoDashboard() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [ticketData, setTicketData] = useState<any>({});
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
+  const [isQrGenerating, setIsQrGenerating] = useState(false);
   const [qrPreviewOpen, setQrPreviewOpen] = useState(false);
   const badgeRef = useRef<HTMLDivElement>(null);
 
@@ -823,11 +824,20 @@ export default function ZynvoDashboard() {
     setUpdate(true);
   };
 
+  const buildPassUrl = (passId: string) => {
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/verify-pass/${encodeURIComponent(passId)}`;
+    }
+    return `/verify-pass/${encodeURIComponent(passId)}`;
+  };
+
   const generateQrCode = async (value: string | null | undefined) => {
     if (!value) {
       setQrCodeDataUrl(null);
+      setIsQrGenerating(false);
       return;
     }
+    setIsQrGenerating(true);
     try {
       const QRCode = await import('qrcode');
       const toDataURL =
@@ -843,6 +853,8 @@ export default function ZynvoDashboard() {
     } catch (e) {
       console.error('QR generation failed', e);
       setQrCodeDataUrl(null);
+    } finally {
+      setIsQrGenerating(false);
     }
   };
 
@@ -852,7 +864,8 @@ export default function ZynvoDashboard() {
       setTicketData({});
       setShowTicketModal(true);
       setQrPreviewOpen(false);
-      await generateQrCode(passId || eventId);
+      const qrValue = passId ? buildPassUrl(passId) : buildPassUrl(eventId);
+      await generateQrCode(qrValue);
       const safeId = encodeURIComponent(eventId);
       const base = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
       const url = base
@@ -1543,6 +1556,7 @@ export default function ZynvoDashboard() {
                 onClick={() => {
                   setShowTicketModal(false);
                   setQrPreviewOpen(false);
+                  setIsQrGenerating(false);
                 }}
                 className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
@@ -1559,6 +1573,7 @@ export default function ZynvoDashboard() {
                   profileImage={ticketData.profilePic || ''}
                   qrCodeImage={qrCodeDataUrl || undefined}
                   onQrClick={qrCodeDataUrl ? () => setQrPreviewOpen(true) : undefined}
+                  isQrLoading={isQrGenerating}
                   
                  
                 />
