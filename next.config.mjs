@@ -1,267 +1,151 @@
+import bundleAnalyzer from "@next/bundle-analyzer";
+import withPWA from "next-pwa";
+
+/* ---------------- SECURITY HEADERS ---------------- */
 const securityHeaders = [
   {
-    key: 'Content-Security-Policy',
+    key: "Content-Security-Policy",
     value: `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://eager-bonefish-30.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://challenges.cloudflare.com;
+      script-src 'self' 'unsafe-eval' 'unsafe-inline'
+        https://eager-bonefish-30.clerk.accounts.dev
+        https://clerk.accounts.dev
+        https://clerk.com
+        https://challenges.cloudflare.com;
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com https://api.qrserver.com https://img.clerk.com;
-      connect-src 'self' data: http://localhost:* https://backend.zynvo.social https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com https://zynvo-backend-1.onrender.com https://zynvo-backend.onrender.com https://api.dicebear.com https://api.qrserver.com https://eager-bonefish-30.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com;
+      img-src 'self' data: blob:
+        https://i.pinimg.com
+        https://images.unsplash.com
+        https://source.unsplash.com
+        https://i.pravatar.cc
+        https://ik.imagekit.io
+        https://api.dicebear.com
+        https://api.qrserver.com
+        https://img.clerk.com;
+      connect-src 'self' data:
+        http://localhost:*
+        https://backend.zynvo.social
+        https://upload.imagekit.io
+        https://zynvo-backend.onrender.com
+        https://zynvo-backend-1.onrender.com
+        https://api.dicebear.com
+        https://api.qrserver.com
+        https://clerk.accounts.dev;
       font-src 'self' data:;
-      frame-src 'self' https://eager-bonefish-30.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://challenges.cloudflare.com;
+      frame-src 'self'
+        https://clerk.accounts.dev
+        https://challenges.cloudflare.com;
       worker-src 'self' blob:;
-    `
-      .replace(/\s{2,}/g, ' ')
-      .trim(),
+    `.replace(/\s{2,}/g, " ").trim(),
   },
-  {
-    key: 'X-Frame-Options',
-    value: 'DENY',
-  },
-  {
-    key: 'X-Content-Type-Options',
-    value: 'nosniff',
-  },
-  {
-    key: 'Referrer-Policy',
-    value: 'strict-origin-when-cross-origin',
-  },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
 ];
 
-import bundleAnalyzer from '@next/bundle-analyzer';
-import withPWA from 'next-pwa';
-
+/* ---------------- BUNDLE ANALYZER ---------------- */
 const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
+  enabled: process.env.ANALYZE === "true",
 });
 
-/** @type {import('next').NextConfig} */
+/* ---------------- NEXT CONFIG ---------------- */
 const nextConfig = {
-  // Next 16 uses Turbopack by default; empty config acknowledges plugins may add webpack
-  turbopack: {},
-  images: {
-    dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'source.unsplash.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.pravatar.cc',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'ik.imagekit.io',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'api.dicebear.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'example.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.pinimg.com',
-        port: '',
-        pathname: '/**',
-      },{
-        protocol: 'https',
-        hostname: 'api.qrserver.com',
-        port: '',
-        pathname: '/**',
-      }
-    ],
-  },
-  
   reactStrictMode: true,
-  // ESLint is configured via next lint / eslint config (not in next.config in Next 15+)
-  experimental: {
-    // optimizeCss requires critters package - disabled for now
-    optimizeCss: false,
-    externalDir: true,
-  },
-  
-  // Performance optimizations
-  compiler: {
-    // Remove console.log in production
-    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
-  },
-  
-  // Tree-shake icon libraries for smaller bundles
-  modularizeImports: {
-    'lucide-react': {
-      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
-    },
-    '@tabler/icons-react': {
-      transform: '@tabler/icons-react/dist/esm/icons/{{member}}',
-    },
-    'react-icons/?(((\\w*)?/?)*)': {
-      transform: 'react-icons/{{ matches.[1] }}/{{ member }}',
-    },
-  },
-  
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
-  
-  // Webpack optimizations for better bundle splitting
+
+  images: {
+    dangerouslyAllowSVG: true,
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "source.unsplash.com" },
+      { protocol: "https", hostname: "i.pravatar.cc" },
+      { protocol: "https", hostname: "ik.imagekit.io" },
+      { protocol: "https", hostname: "api.dicebear.com" },
+      { protocol: "https", hostname: "api.qrserver.com" },
+      { protocol: "https", hostname: "i.pinimg.com" },
+    ],
+  },
+
+  experimental: {
+    externalDir: true,
+  },
+
+  compiler: {
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? { exclude: ["error", "warn"] }
+        : false,
+    modularizeImports: {
+      "lucide-react": {
+        transform: "lucide-react/icons/{{member}}",
+      },
+      "@tabler/icons-react": {
+        transform: "@tabler/icons-react/{{member}}",
+      },
+      "react-icons": {
+        transform: "react-icons/{{member}}",
+      },
+    },
+  },
+
+  /** ✅ Webpack-only optimizations (NO Turbopack) */
   webpack: (config, { dev, isServer }) => {
-    // Optimize bundle splitting in production
     if (!dev && !isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Framework chunk (React, Next.js)
-            framework: {
-              chunks: 'all',
-              name: 'framework',
-              test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
-              priority: 40,
-              enforce: true,
-            },
-            // UI libraries chunk
-            ui: {
-              name: 'ui',
-              chunks: 'all',
-              test: /[\\/]node_modules[\\/](@radix-ui|lucide-react|framer-motion)[\\/]/,
-              priority: 30,
-            },
-            // Vendor chunk
-            vendor: {
-              name: 'vendor',
-              chunks: 'all',
-              test: /node_modules/,
-              priority: 20,
-            },
-            // Common chunk
-            common: {
-              name: 'common',
-              minChunks: 2,
-              chunks: 'all',
-              priority: 10,
-              reuseExistingChunk: true,
-            },
+      config.optimization.splitChunks = {
+        chunks: "all",
+        cacheGroups: {
+          framework: {
+            test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+            name: "framework",
+            priority: 40,
+            enforce: true,
+          },
+          ui: {
+            test: /[\\/]node_modules[\\/](lucide-react|framer-motion|@radix-ui)[\\/]/,
+            name: "ui",
+            priority: 30,
+          },
+          vendor: {
+            test: /node_modules/,
+            name: "vendor",
+            priority: 20,
           },
         },
       };
     }
     return config;
   },
-  
+
   async rewrites() {
     return [
       {
-        source: '/proxy/:path*',
-        destination: 'https://zynvo-backend-1.onrender.com/:path*',
-      },
-    ];
-  },
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Platform-Type',
-            value: 'Agentic Social Media Platform',
-          },
-          {
-            key: 'X-Platform-Name',
-            value: 'Zynvo',
-          },
-          {
-            key: 'X-Platform-Category',
-            value: 'AI-Powered Campus Networking',
-          },
-          {
-            key: 'X-Content-Classification',
-            value: 'Intelligent Social Media Platform',
-          },
-          ...securityHeaders,
-        ],
-      },
-      {
-        source: '/sitemap.xml',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=86400, s-maxage=86400',
-          },
-          {
-            key: 'Content-Type',
-            value: 'application/xml',
-          },
-        ],
-      },
-      {
-        source: '/robots.txt',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=86400, s-maxage=86400',
-          },
-          {
-            key: 'Content-Type',
-            value: 'text/plain',
-          },
-        ],
+        source: "/proxy/:path*",
+        destination: "https://zynvo-backend-1.onrender.com/:path*",
       },
     ];
   },
 
-  async redirects() {
+  async headers() {
     return [
       {
-        source: '/campus-social-media',
-        destination: '/',
-        permanent: true,
-      },
-      {
-        source: '/ai-social-platform',
-        destination: '/',
-        permanent: true,
-      },
-      {
-        source: '/intelligent-networking',
-        destination: '/',
-        permanent: true,
+        source: "/(.*)",
+        headers: [
+          { key: "X-Platform-Name", value: "Zynvo" },
+          { key: "X-Platform-Type", value: "Agentic Social Platform" },
+          ...securityHeaders,
+        ],
       },
     ];
   },
 };
 
-// Apply PWA configuration
+/* ---------------- PWA ---------------- */
 const pwaConfig = withPWA({
-  dest: "public",         // destination directory for the PWA files
-  disable: false,        // enable PWA in all environments
-  register: true,         // register the PWA service worker
-  skipWaiting: true,      // skip waiting for service worker activation
+  dest: "public",
+  register: true,
+  skipWaiting: true,
 })(nextConfig);
 
-// Apply bundle analyzer and export
 export default withBundleAnalyzer(pwaConfig);
