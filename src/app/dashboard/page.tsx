@@ -889,7 +889,6 @@ export default function ZynvoDashboard() {
       const collegeName =
         payload?.collegeName ??
         payload?.university ??
-        payload?.univerisity ??
         payload?.event?.collegeName ??
         userData?.collegeName ??
         '';
