@@ -860,12 +860,16 @@ export default function ZynvoDashboard() {
   };
 
   const openTicketModal = async (eventId: string, passId?: string | null) => {
+    if (!passId) {
+      toast('Pass ID not available for this event yet.');
+      return;
+    }
     try {
       setSelectedEventId(eventId);
       setTicketData({});
       setShowTicketModal(true);
       setQrPreviewOpen(false);
-      const qrValue = passId ? buildPassUrl(passId) : buildPassUrl(eventId);
+      const qrValue = buildPassUrl(passId);
       await generateQrCode(qrValue);
       const safeId = encodeURIComponent(eventId);
       const base = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
