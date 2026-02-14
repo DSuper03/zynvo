@@ -850,8 +850,9 @@ export default function ZynvoDashboard() {
         width: 160,
       });
       setQrCodeDataUrl(dataUrl);
-    } catch (e) {
+    } catch (e: any) {
       console.error('QR generation failed', e);
+      toast(e?.message || 'Failed to generate QR code. Please try again.');
       setQrCodeDataUrl(null);
     } finally {
       setIsQrGenerating(false);
@@ -901,7 +902,6 @@ export default function ZynvoDashboard() {
       const collegeName =
         payload?.collegeName ??
         payload?.university ??
-        payload?.univerisity ??
         payload?.event?.collegeName ??
         userData?.collegeName ??
         '';
@@ -1596,6 +1596,7 @@ export default function ZynvoDashboard() {
               <button
                 onClick={() => setQrPreviewOpen(false)}
                 className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                aria-label="Close QR Code preview"
               >
                 X
               </button>

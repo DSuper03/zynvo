@@ -77,6 +77,17 @@ const nextConfig = {
       process.env.NODE_ENV === "production"
         ? { exclude: ["error", "warn"] }
         : false,
+    modularizeImports: {
+      "lucide-react": {
+        transform: "lucide-react/icons/{{member}}",
+      },
+      "@tabler/icons-react": {
+        transform: "@tabler/icons-react/{{member}}",
+      },
+      "react-icons": {
+        transform: "react-icons/{{member}}",
+      },
+    },
   },
 
   /** ✅ Webpack-only optimizations (NO Turbopack) */
