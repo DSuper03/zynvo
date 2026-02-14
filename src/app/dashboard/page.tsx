@@ -840,8 +840,9 @@ export default function ZynvoDashboard() {
         width: 160,
       });
       setQrCodeDataUrl(dataUrl);
-    } catch (e) {
+    } catch (e: any) {
       console.error('QR generation failed', e);
+      toast(e?.message || 'Failed to generate QR code. Please try again.');
       setQrCodeDataUrl(null);
     }
   };
