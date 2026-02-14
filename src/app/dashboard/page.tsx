@@ -1581,6 +1581,7 @@ export default function ZynvoDashboard() {
               <button
                 onClick={() => setQrPreviewOpen(false)}
                 className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                aria-label="Close QR Code preview"
               >
                 X
               </button>
