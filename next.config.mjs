@@ -245,7 +245,6 @@ const nextConfig = {
 
 const pwaConfig = withPWA({
   dest: "public",
-  disable: false,
   register: true,
   skipWaiting: true,
 })(nextConfig);
