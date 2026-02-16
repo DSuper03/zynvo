@@ -97,6 +97,8 @@ const nextConfig = {
   
   reactStrictMode: true,
   experimental: {
+    // NOTE: CSS optimization is intentionally disabled due to known issues with Turbopack/CSS in this project.
+    // Re-enable by removing this line or setting `optimizeCss: true` once the underlying issue is resolved.
     optimizeCss: false,
     externalDir: true,
   },
