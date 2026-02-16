@@ -25,6 +25,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://zynvo.social'),
   manifest: "/manifest.json",
   title:
     'Zynvo - Agentic Social Media Platform for Campus Communities | Student Network',
