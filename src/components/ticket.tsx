@@ -12,6 +12,8 @@ type EventBadgeProps = {
   isQrLoading?: boolean;
   onQrClick?: () => void;
   status?: 'upcoming' | 'active' | 'past';
+  attendeeName?: string;
+  attendeeCollege?: string;
 };
 
 const EventBadgeCard: React.FC<EventBadgeProps> = ({
@@ -24,6 +26,8 @@ const EventBadgeCard: React.FC<EventBadgeProps> = ({
   isQrLoading = false,
   onQrClick,
   status = 'upcoming',
+  attendeeName,
+  attendeeCollege,
 }) => {
   const badgeStyles: Record<NonNullable<EventBadgeProps['status']>, { label: string; color: string; bg: string }> = {
     upcoming: { label: 'Upcoming', color: 'text-yellow-300', bg: 'bg-yellow-500/10' },
@@ -72,8 +76,8 @@ const EventBadgeCard: React.FC<EventBadgeProps> = ({
                 </div>
               )}
               <div className="text-sm text-gray-200">
-                <div className="font-semibold text-white">Entry Holder</div>
-                <div className="text-xs text-gray-400">Show this at the gate</div>
+                <div className="font-semibold text-white">{attendeeName || 'Entry Holder'}</div>
+                <div className="text-xs text-gray-400">{attendeeCollege || 'Show this at the gate'}</div>
               </div>
             </div>
             {showQr && (
