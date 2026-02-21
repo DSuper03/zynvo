@@ -6,7 +6,7 @@ const securityHeaders = [
       script-src 'self' 'unsafe-eval' 'unsafe-inline' https://eager-bonefish-30.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://challenges.cloudflare.com https://www.googletagmanager.com;
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com https://api.qrserver.com https://img.clerk.com https://www.googletagmanager.com https://www.google-analytics.com;
-      connect-src 'self' data: http://localhost:* https://backend.zynvo.social https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com https://zynvo-backend-1.onrender.com https://zynvo-backend.onrender.com https://api.dicebear.com https://api.qrserver.com https://eager-bonefish-30.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://www.google-analytics.com https://www.googletagmanager.com;
+      connect-src 'self' data: http://localhost:* https://backend.zynvo.social https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com https://zynvo-backend-1.onrender.com https://zynvo-backend.onrender.com https://zynvo-be-31292664726.asia-south1.run.app https://api.dicebear.com https://api.qrserver.com https://eager-bonefish-30.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://www.google-analytics.com https://www.googletagmanager.com;
       font-src 'self' data:;
       frame-src 'self' https://eager-bonefish-30.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://challenges.cloudflare.com;
       worker-src 'self' blob:;
