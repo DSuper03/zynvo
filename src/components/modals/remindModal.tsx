@@ -87,10 +87,12 @@ export default function NoTokenModal({
               <li>Sync across devices</li>
             </ul>
           </div>
-          {/* Image Section */}
-          <img
+          {/* Image Section — PERFORMANCE: next/image for optimization */}
+          <Image
             src="/modal/legomodalreminder.png"
             alt="Sign in illustration"
+            width={160}
+            height={160}
             className="w-40 h-40 object-contain"
           />
         </div>
