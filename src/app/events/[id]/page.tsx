@@ -65,6 +65,7 @@ const Eventid = () => {
     contactEmail: '',
     contactPhone: '',
     university: '',
+    collegeStudentsOnly: false,
     applicationStatus: 'open',
     posterUrl: '',
     eventHeader: '',
@@ -84,6 +85,7 @@ const Eventid = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [registrationNotice, setRegistrationNotice] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
     'overview' | 'speakers' | 'schedule' | 'gallery' | 'announcement' | 'attendees'
   >('overview');
@@ -271,6 +273,7 @@ const Eventid = () => {
             endDate: res.data.response.endDate || '',
             prizes: res.data.response.prizes || '',
             university: res.data.response.university || '',
+            collegeStudentsOnly: res.data.response.collegeStudentsOnly ?? false,
             contactEmail: res.data.response.contactEmail || '',
             contactPhone: res.data.response.contactPhone || '',
             applicationStatus: res.data.response.applicationStatus || 'open',
@@ -300,6 +303,23 @@ const Eventid = () => {
   const handleRegistration = async () => {
     if (!token) {
       alert('Please login to register for this event');
+      return;
+    }
+
+    setRegistrationNotice(null);
+    if (isCollegeRestrictionBlocking) {
+      if (isCollegeNameMissing) {
+        toast('Complete your profile to register.', {
+          action: {
+            label: 'Update profile',
+            onClick: () => router.push('/dashboard'),
+          },
+        });
+      } else {
+        const message = 'Only students from organizer college can register.';
+        setRegistrationNotice(message);
+        toast.error(message);
+      }
       return;
     }
 
@@ -376,7 +396,17 @@ const Eventid = () => {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      toast.error('Registration failed. Please try again.');
+      const axiosError = error as any;
+      if (axiosError?.response?.status === 403) {
+        const message = 'Only students from organizer college can register.';
+        setRegistrationNotice(message);
+        toast.error(message);
+      } else {
+        toast.error(
+          axiosError?.response?.data?.message ||
+            'Registration failed. Please try again.'
+        );
+      }
     } finally {
       setIsRegistering(false);
     }
@@ -418,10 +448,43 @@ const Eventid = () => {
     return new Date(data.endDate) < new Date();
   }, [data.endDate]);
 
+  const normalizedUserCollege = useMemo(
+    () => (currentUser?.collegeName || '').trim().toLowerCase(),
+    [currentUser?.collegeName]
+  );
+
+  const normalizedEventUniversity = useMemo(
+    () => (data.university || '').trim().toLowerCase(),
+    [data.university]
+  );
+
+  const isCollegeRestricted = useMemo(
+    () => Boolean(data.collegeStudentsOnly),
+    [data.collegeStudentsOnly]
+  );
+
+  const isCollegeNameMissing = isCollegeRestricted && !normalizedUserCollege;
+  const isCollegeMismatch =
+    isCollegeRestricted &&
+    !!normalizedUserCollege &&
+    !!normalizedEventUniversity &&
+    normalizedUserCollege !== normalizedEventUniversity;
+  const isCollegeUnknown =
+    isCollegeRestricted &&
+    !!normalizedUserCollege &&
+    !normalizedEventUniversity;
+
+  const isCollegeRestrictionBlocking =
+    isCollegeNameMissing || isCollegeMismatch || isCollegeUnknown;
+
   // Check if registration is disabled (event ended or applications closed)
   const isRegistrationDisabled = useMemo(() => {
-    return isEventEnded || data.applicationStatus !== 'open';
-  }, [isEventEnded, data.applicationStatus]);
+    return (
+      isEventEnded ||
+      data.applicationStatus !== 'open' ||
+      isCollegeRestrictionBlocking
+    );
+  }, [isEventEnded, data.applicationStatus, isCollegeRestrictionBlocking]);
 
   const googleCalendarHref = useMemo(() => {
     // Build a Google Calendar event URL (best-effort if dates exist)
@@ -578,6 +641,30 @@ const Eventid = () => {
                         </Button>
                         {isEventEnded && (
                           <p className="text-xs text-red-400">This event has already ended</p>
+                        )}
+                        {isCollegeNameMissing && (
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-yellow-300">
+                            <span>
+                              Complete your profile to register (add your college
+                              name).
+                            </span>
+                            <Button
+                              onClick={() => router.push('/dashboard')}
+                              className="bg-yellow-400/90 hover:bg-yellow-400 text-black px-3 py-1 text-xs"
+                            >
+                              Complete profile
+                            </Button>
+                          </div>
+                        )}
+                        {!isCollegeNameMissing && isCollegeRestrictionBlocking && (
+                          <p className="text-xs text-red-400">
+                            Only students from organizer college can register.
+                          </p>
+                        )}
+                        {!isCollegeRestrictionBlocking && registrationNotice && (
+                          <p className="text-xs text-red-400">
+                            {registrationNotice}
+                          </p>
                         )}
                       </>
                     )

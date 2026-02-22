@@ -395,6 +395,7 @@ export interface respnseUseState {
   contactEmail: string;
   contactPhone: string;
   university: string;
+  collegeStudentsOnly: boolean;
   applicationStatus: string;
   posterUrl?: string;
   eventHeader?: string;
