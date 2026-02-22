@@ -19,9 +19,10 @@ import {
 } from '@/components/DynamicComponents';
 export default function Home() {
   const heroRef = useRef(null);
+  // PERFORMANCE: Store timeout IDs so we can clear on unmount and avoid leaks + setState after unmount
+  const floatingTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
-    // Animation for background floating elements
     const createFloatingElement = () => {
       const element = document.createElement('div');
       element.classList.add('floating-element');
@@ -32,34 +33,33 @@ export default function Home() {
       element.style.height = `${Math.random() * 100 + 50}px`;
       element.style.opacity = `${Math.random() * 0.3 + 0.2}`;
 
-      // Add to the background container
       const container = document.querySelector('.background-animation');
       if (container) {
         container.appendChild(element);
       }
 
-      // Animate
-      const duration = Math.random() * 50 + 30; // 30-80 seconds
+      const duration = Math.random() * 50 + 30;
       element.style.animation = `float ${duration}s infinite linear`;
 
-      // Remove after animation completes
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         if (element.parentNode) {
           element.parentNode.removeChild(element);
         }
       }, duration * 1000);
+      floatingTimeoutsRef.current.push(timeoutId);
     };
 
-    // Create initial elements
     for (let i = 0; i < 5; i++) {
       createFloatingElement();
     }
 
-    // Continue creating elements
     const interval = setInterval(createFloatingElement, 5000);
 
-    // Clean up
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      floatingTimeoutsRef.current.forEach((id) => clearTimeout(id));
+      floatingTimeoutsRef.current = [];
+    };
   }, []);
 
   return (

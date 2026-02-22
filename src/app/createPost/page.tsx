@@ -131,15 +131,8 @@ export default function CreatePostModal() {
     if (e) e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
+    // Simulate API call — DEBUG: console removed for production performance
     setTimeout(() => {
-      console.log({
-        postText,
-        selectedClub,
-        selectedCollege,
-        images,
-      });
-
       // Reset form
       setPostText('');
       setSelectedClub('');
