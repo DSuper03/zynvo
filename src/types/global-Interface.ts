@@ -53,6 +53,32 @@ export interface EventType {
   image?: string;
   time?: string;
   title?: string;
+  Venue?: string;
+  university?: string;
+  tagline?: string;
+  EventMode?: string;
+  EventType?: string;
+  EventUrl?: string;
+  TeamSize?: number;
+  clubId?: string;
+  prizes?: string;
+  startDate?: string;
+  endDate?: string;
+  applicationStartDate?: string;
+  applicationEndDate?: string;
+  collegeStudentsOnly?: boolean;
+  contactEmail?: string;
+  contactPhone?: string | null;
+  participationFee?: boolean;
+  posterUrl?: string;
+  link1?: string | null;
+  link2?: string | null;
+  link3?: string | null;
+  whatsappLink?: string;
+  isPaid?: boolean;
+  Fees?: string;
+  qrCodeUrl?: string;
+  paymentAmount?: string | number;
 }
 
 // axios post data interface ( register event button )
@@ -238,8 +264,30 @@ export interface EventResponse {
     posterUrl?: string | null;
     prizes: string;
     clubId: string;
-    createdAt: Date;
-    endDate: Date | null;
+    createdAt: Date | string;
+    endDate: Date | string | null;
+    startDate?: string;
+    tagline?: string;
+    EventMode?: string;
+    EventType?: string;
+    EventUrl?: string;
+    Venue?: string;
+    TeamSize?: number;
+    applicationStartDate?: string;
+    applicationEndDate?: string;
+    university?: string;
+    collegeStudentsOnly?: boolean;
+    contactEmail?: string;
+    contactPhone?: string | null;
+    participationFee?: boolean;
+    link1?: string | null;
+    link2?: string | null;
+    link3?: string | null;
+    whatsappLink?: string;
+    isPaid?: boolean;
+    Fees?: string;
+    qrCodeUrl?: string;
+    paymentAmount?: string | number;
   }[];
 }
 

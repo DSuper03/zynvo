@@ -1,16 +1,12 @@
-import bundleAnalyzer from '@next/bundle-analyzer';
-import withPWA from 'next-pwa';
-
-/** @type {import('next').NextConfig} */
 const securityHeaders = [
   {
     key: 'Content-Security-Policy',
     value: `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://eager-bonefish-30.clerk.accounts.dev https://advanced-shiner-24.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://challenges.cloudflare.com;
+      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://eager-bonefish-30.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://challenges.cloudflare.com https://www.googletagmanager.com;
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com https://api.qrserver.com https://img.clerk.com;
-      connect-src 'self' data: http://localhost:* https://backend.zynvo.social https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com https://zynvo-backend-1.onrender.com https://zynvo-backend.onrender.com https://api.dicebear.com https://api.qrserver.com https://eager-bonefish-30.clerk.accounts.dev https://advanced-shiner-24.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com;
+      img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com https://api.qrserver.com https://img.clerk.com https://www.googletagmanager.com https://www.google-analytics.com;
+      connect-src 'self' data: http://localhost:* https://backend.zynvo.social https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com https://zynvo-backend-1.onrender.com https://zynvo-backend.onrender.com https://zynvo-be-31292664726.asia-south1.run.app https://api.dicebear.com https://api.qrserver.com https://eager-bonefish-30.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://www.google-analytics.com https://www.googletagmanager.com;
       font-src 'self' data:;
       frame-src 'self' https://eager-bonefish-30.clerk.accounts.dev https://advanced-shiner-24.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://challenges.cloudflare.com;
       worker-src 'self' blob:;
@@ -32,12 +28,16 @@ const securityHeaders = [
   },
 ];
 
+import bundleAnalyzer from '@next/bundle-analyzer';
+import withPWA from 'next-pwa';
+
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Next 16 uses Turbopack by default
+  // Next 16 uses Turbopack by default; empty config acknowledges plugins may add webpack
   turbopack: {},
   images: {
     dangerouslyAllowSVG: true,
@@ -85,8 +85,7 @@ const nextConfig = {
         hostname: 'i.pinimg.com',
         port: '',
         pathname: '/**',
-      },
-      {
+      },{
         protocol: 'https',
         hostname: 'api.qrserver.com',
         port: '',
@@ -96,18 +95,22 @@ const nextConfig = {
   },
   
   reactStrictMode: true,
+  // ESLint is configured via next lint / eslint config (not in next.config in Next 15+)
   experimental: {
-    // NOTE: CSS optimization is intentionally disabled due to known issues with Turbopack/CSS in this project.
-    // Re-enable by removing this line or setting `optimizeCss: true` once the underlying issue is resolved.
+    // optimizeCss requires critters package - disabled for now
     optimizeCss: false,
     externalDir: true,
   },
   
+  // Performance optimizations
   compiler: {
+    // Remove console.log in production
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
   
-  // FIXED: Removed react-icons from here to stop the module resolution error
+  // Tree-shake some icon libraries for smaller bundles
+  // NOTE: React Icons is left as-is because its package layout
+  // does not support per-icon deep imports like "react-icons/fa/FaSchool".
   modularizeImports: {
     'lucide-react': {
       transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
@@ -121,7 +124,9 @@ const nextConfig = {
   poweredByHeader: false,
   generateEtags: true,
   
+  // Webpack optimizations for better bundle splitting
   webpack: (config, { dev, isServer }) => {
+    // Optimize bundle splitting in production
     if (!dev && !isServer) {
       config.optimization = {
         ...config.optimization,
@@ -130,6 +135,7 @@ const nextConfig = {
           cacheGroups: {
             default: false,
             vendors: false,
+            // Framework chunk (React, Next.js)
             framework: {
               chunks: 'all',
               name: 'framework',
@@ -137,18 +143,21 @@ const nextConfig = {
               priority: 40,
               enforce: true,
             },
+            // UI libraries chunk
             ui: {
               name: 'ui',
               chunks: 'all',
               test: /[\\/]node_modules[\\/](@radix-ui|lucide-react|framer-motion)[\\/]/,
               priority: 30,
             },
+            // Vendor chunk
             vendor: {
               name: 'vendor',
               chunks: 'all',
               test: /node_modules/,
               priority: 20,
             },
+            // Common chunk
             common: {
               name: 'common',
               minChunks: 2,
@@ -245,10 +254,13 @@ const nextConfig = {
   },
 };
 
+// Apply PWA configuration
 const pwaConfig = withPWA({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
+  dest: "public",         // destination directory for the PWA files
+  disable: false,        // enable PWA in all environments
+  register: true,         // register the PWA service worker
+  skipWaiting: true,      // skip waiting for service worker activation
 })(nextConfig);
 
+// Apply bundle analyzer and export
 export default withBundleAnalyzer(pwaConfig);

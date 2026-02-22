@@ -22,6 +22,7 @@ export default function Page() {
   const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
   const [data, setData] = useState<EventData | null>(null);
+  const [userData, setUserData] = useState<{ name: string | null; collegeName: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -50,6 +51,25 @@ export default function Page() {
               ? 'active'
               : 'past';
           setData({ ...eventData, startDate: start, status });
+        }
+        
+        // Fetch user details if logged in
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const userRes = await axios.get(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+              { headers: { authorization: `Bearer ${token}` } }
+            );
+            if (userRes.data?.user) {
+              setUserData({
+                name: userRes.data.user.name,
+                collegeName: userRes.data.user.collegeName
+              });
+            }
+          } catch (e) {
+            console.error('Failed to fetch user details', e);
+          }
         }
       } catch (err) {
         setError('Unable to load ticket. Please try again.');
@@ -212,6 +232,8 @@ export default function Page() {
                     profileImage={filteredVisible.profilePic || 'https://i.pravatar.cc/300'}
                     qrCodeImage={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://zynvo.social/verify-event/${id}`}
                     status={filteredVisible.status}
+                    attendeeName={userData?.name || undefined}
+                    attendeeCollege={userData?.collegeName || undefined}
                   />
                 </div>
               )}
@@ -334,6 +356,8 @@ export default function Page() {
                 profileImage={filteredVisible.profilePic}
                 qrCodeImage={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://zynvo.social/verify-event/${id}`}
                 status={filteredVisible.status}
+                attendeeName={userData?.name || undefined}
+                attendeeCollege={userData?.collegeName || undefined}
               />
               <div className="flex flex-wrap gap-3 w-full">
                 <Button
