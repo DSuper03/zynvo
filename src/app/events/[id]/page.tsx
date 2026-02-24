@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import dotenv from 'dotenv';
 import Image from 'next/image';
 import {
@@ -28,11 +28,17 @@ import { toast } from 'sonner';
 import EventAnnouncements from '../components/eventAnnouncement';
 import NoTokenModal from '@/components/modals/remindModal';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import AddSpeakerModal from './speakers/AddSpeakerModal';
 import PaymentProofModal from '@/components/PaymentProofModal';
-import { Plus, Download, Users } from 'lucide-react';
-import { useParticipants, downloadParticipantsCSV, type Participant } from '@/hooks/useParticipants';
+import { Plus, Download, Users, RefreshCw } from 'lucide-react';
+import {
+  useParticipants,
+  downloadParticipantsCSV,
+  syncParticipantsCsv,
+  InvalidSinceError,
+  type Participant,
+} from '@/hooks/useParticipants';
 import AchievementCelebration from '@/components/AchievementCelebration';
 
 dotenv.config();
@@ -94,6 +100,76 @@ const Eventid = () => {
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
   const [isAddSpeakerModalOpen, setIsAddSpeakerModalOpen] = useState(false);
   const [isFounder, setIsFounder] = useState(false);
+
+  // CSV sync state: lastSince (newest joinedAt), etag, last updated time, sync in progress, badge count
+  const [csvLastSince, setCsvLastSince] = useState<string | null>(null);
+  const [csvEtag, setCsvEtag] = useState<string | null>(null);
+  const [lastCsvUpdatedAt, setLastCsvUpdatedAt] = useState<Date | null>(null);
+  const [csvSyncInProgress, setCsvSyncInProgress] = useState(false);
+  const [csvAppendedCount, setCsvAppendedCount] = useState(0);
+  const [syncBackoffMs, setSyncBackoffMs] = useState(0);
+  const queryClient = useQueryClient();
+  const csvLastSinceRef = useRef(csvLastSince);
+  const csvEtagRef = useRef(csvEtag);
+  csvLastSinceRef.current = csvLastSince;
+  csvEtagRef.current = csvEtag;
+
+  const runCsvSync = React.useCallback(async () => {
+    if (!id || !isFounder) return;
+    setCsvSyncInProgress(true);
+    const currentLastSince = csvLastSinceRef.current;
+    const currentEtag = csvEtagRef.current;
+    try {
+      const result = await syncParticipantsCsv(id, currentLastSince, currentEtag, token);
+      setCsvLastSince(result.lastSince);
+      setCsvEtag(result.etag);
+      setLastCsvUpdatedAt(new Date());
+      setSyncBackoffMs(0);
+      if (result.appended > 0) {
+        setCsvAppendedCount((c) => c + result.appended);
+        queryClient.invalidateQueries({ queryKey: ['participants', id] });
+      }
+    } catch (err) {
+      if (err instanceof InvalidSinceError) {
+        setCsvLastSince(null);
+        setCsvEtag(null);
+        setSyncBackoffMs(0);
+        try {
+          const result = await syncParticipantsCsv(id, null, null, token);
+          setCsvLastSince(result.lastSince);
+          setCsvEtag(result.etag);
+          setLastCsvUpdatedAt(new Date());
+          if (result.appended > 0) {
+            setCsvAppendedCount((c) => c + result.appended);
+            queryClient.invalidateQueries({ queryKey: ['participants', id] });
+          }
+        } finally {
+          setCsvSyncInProgress(false);
+        }
+        return;
+      }
+      const is5xx = err instanceof Error && /^Server error 5\d\d/.test(err.message);
+      if (is5xx) {
+        setSyncBackoffMs((prev) => Math.min((prev || 5000) * 1.5, 60000));
+        toast.error('Server busy. Retrying with backoff.');
+      } else {
+        toast.error(err instanceof Error ? err.message : 'Sync failed');
+      }
+    } finally {
+      setCsvSyncInProgress(false);
+    }
+  }, [id, isFounder, token, queryClient]);
+
+  useEffect(() => {
+    if (activeTab !== 'attendees' || !isFounder || !id) return;
+    const intervalMs = Math.max(15000, Math.min(60000, syncBackoffMs || 30000));
+    const initial = setTimeout(runCsvSync, 300);
+    const poll = setInterval(runCsvSync, intervalMs);
+    return () => {
+      clearTimeout(initial);
+      clearInterval(poll);
+    };
+  }, [activeTab, isFounder, id, syncBackoffMs, runCsvSync]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -1027,25 +1103,51 @@ const Eventid = () => {
 
             {activeTab === 'attendees' && (
               <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6 space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-yellow-400 flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    Attendees
-                  </h2>
+                <div className="flex flex-col gap-2 mb-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h2 className="text-xl font-bold text-yellow-400 flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Attendees
+                      {csvAppendedCount > 0 && (
+                        <span className="text-xs font-normal bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                          {csvAppendedCount} new
+                        </span>
+                      )}
+                    </h2>
+                    {isFounder && (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={() => {
+                            setCsvAppendedCount(0);
+                            runCsvSync();
+                          }}
+                          disabled={csvSyncInProgress}
+                          className="px-4 py-2 bg-gray-700 text-white font-medium rounded-lg hover:bg-gray-600 transition-all flex items-center gap-2 disabled:opacity-50"
+                        >
+                          <RefreshCw className={`w-4 h-4 ${csvSyncInProgress ? 'animate-spin' : ''}`} />
+                          Sync
+                        </Button>
+                        <Button
+                          onClick={async () => {
+                            try {
+                              await downloadParticipantsCSV(id, token);
+                            } catch (error) {
+                              console.error('Error downloading CSV:', error);
+                            }
+                          }}
+                          disabled={csvSyncInProgress}
+                          className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2 disabled:opacity-50"
+                        >
+                          <Download className="w-4 h-4" />
+                          Download CSV
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                   {isFounder && (
-                    <Button
-                      onClick={async () => {
-                        try {
-                          await downloadParticipantsCSV(id, token);
-                        } catch (error) {
-                          console.error('Error downloading CSV:', error);
-                        }
-                      }}
-                      className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download CSV
-                    </Button>
+                    <p className="text-gray-500 text-sm">
+                      Last updated at {lastCsvUpdatedAt ? lastCsvUpdatedAt.toLocaleTimeString() : '—'}
+                    </p>
                   )}
                 </div>
 
