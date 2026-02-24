@@ -317,7 +317,6 @@ const Eventid = () => {
         });
       } else {
         const message = 'Only students from organizer college can register.';
-        setRegistrationNotice(message);
         toast.error(message);
       }
       return;
