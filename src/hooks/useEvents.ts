@@ -189,7 +189,13 @@ export const useRegisterForEvent = () => {
     onError: (error: Error) => {
       logger.error('Error registering for event:', error);
       const axiosError = error as any;
-      toast.error(axiosError.response?.data?.message || 'Failed to register for event');
+      if (axiosError?.response?.status === 403) {
+        toast.error('Only students from organizer college can register.');
+        return;
+      }
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to register for event'
+      );
     },
   });
 };
