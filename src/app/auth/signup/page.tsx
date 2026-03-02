@@ -13,7 +13,6 @@ import {
   FiPhone,
 } from 'react-icons/fi';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
-import dotenv from 'dotenv';
 import DiceBearAvatar from '@/components/DicebearAvatars';
 import { collegesWithClubs } from '@/components/colleges/college';
 import axios from 'axios';
@@ -25,8 +24,7 @@ import { Button } from '@/components/ui/button';
 import { useSignUp, useAuth , useSignIn} from "@clerk/nextjs";
 import { jwtDecode } from "jwt-decode";
 import { de } from 'date-fns/locale';
-
-dotenv.config();
+ 
 
 export default function SignUp() {
   const { isLoaded, signUp, setActive } = useSignUp();
