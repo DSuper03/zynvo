@@ -45,6 +45,7 @@ export default function SignUp() {
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [code, setCode] = useState("");
   const [verifying, setVerifying] = useState(false);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [collegeSearch, setCollegeSearch] = useState<string>('');
 
   // Inline validation error for college select
@@ -205,50 +206,88 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
   const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded) return;
+
+    if (!isLoaded || !signUp) {
+      toast("Verification is still loading, please wait...");
+      return;
+    }
+
+    // Prevent double submits while a request is in flight
+    if (isVerifyingCode) return;
+
+    const cleanedCode = code.replace(/\s+/g, '');
+    if (!cleanedCode) {
+      toast.error("Please enter the verification code from your email.");
+      return;
+    }
+
+    setIsVerifyingCode(true);
+
+    let completeSignUp: any;
 
     try {
-      // Normalise verification code to avoid issues with accidental spaces
-      const cleanedCode = code.replace(/\s+/g, '');
-
       // 1. Verify the code using the EXISTING signUp object
-      // Clerk remembers the email from Step A
-      const completeSignUp = await signUp.attemptEmailAddressVerification({
-        code: cleanedCode, 
+      completeSignUp = await signUp.attemptEmailAddressVerification({
+        code: cleanedCode,
       });
 
-      if (completeSignUp.status === "complete") {
-        // 2. Set the session active in Clerk
-        await setActive({ session: completeSignUp.createdSessionId });
-
-        toast.success("Email verified successfully!");
-        // 3. Get Token & Sync with Backend
-        const token = await getToken() as string // Gets the new session token
-        const decodedToken: any = jwtDecode(token);
-
-        console.log("Decoded Clerk Token:", decodedToken);
-
-
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`, {
-           clerkId: decodedToken.sub,
-           collegeName: formData.collegeName,
-           avatarUrl: formData.avatarUrl,
-           password: formData.password,
-          name: formData.name,
-          email: formData.email,
-          imgUrl : "",
-          phone : formData.phone || '',
-        });
-
-        // 4. Save YOUR Custom JWT & Redirect
-        localStorage.setItem('token', res.data.token);
-        sessionStorage.setItem('activeSession', 'true');
-        toast.success("Account created & Verified!");
-        router.push("/dashboard");
+      if (completeSignUp.status !== "complete") {
+        toast.error("Verification not complete. Please check the code and try again.");
+        return;
       }
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
-      toast.error("Invalid Code or Verification Failed, Click Again");
+
+      const clerkError = err?.errors?.[0];
+      const clerkCode = clerkError?.code;
+
+      if (clerkCode === "verification_code_invalid" || clerkCode === "verification_code_expired") {
+        toast.error("Invalid or expired verification code. Please request a new one and try again.");
+      } else {
+        const message = clerkError?.message || "Verification failed. Please try again.";
+        toast.error(message);
+      }
+
+      setIsVerifyingCode(false);
+      return;
+    }
+
+    try {
+      // 2. Set the session active in Clerk
+      await setActive({ session: completeSignUp.createdSessionId });
+
+      toast.success("Email verified successfully!");
+
+      // 3. Get Token & Sync with Backend
+      const token = (await getToken()) as string; // Gets the new session token
+      const decodedToken: any = jwtDecode(token);
+
+      console.log("Decoded Clerk Token:", decodedToken);
+
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
+        {
+          clerkId: decodedToken.sub,
+          collegeName: formData.collegeName,
+          avatarUrl: formData.avatarUrl,
+          password: formData.password,
+          name: formData.name,
+          email: formData.email,
+          imgUrl: "",
+          phone: formData.phone || "",
+        }
+      );
+
+      // 4. Save YOUR Custom JWT & Redirect
+      localStorage.setItem('token', res.data.token);
+      sessionStorage.setItem('activeSession', 'true');
+      toast.success("Account created & Verified!");
+      router.push("/dashboard");
+    } catch (err: any) {
+      console.error("Post-verification sync failed:", JSON.stringify(err, null, 2));
+      toast.error("Email verified, but we couldn't complete signup. Please try again.");
+    } finally {
+      setIsVerifyingCode(false);
     }
   };
 
@@ -294,9 +333,10 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                />
                <button 
                  type="submit"
-                 className="w-full bg-yellow-500 text-black font-bold py-3 rounded-lg hover:bg-yellow-400"
+                 className="w-full bg-yellow-500 text-black font-bold py-3 rounded-lg hover:bg-yellow-400 disabled:opacity-60 disabled:cursor-not-allowed"
+                 disabled={isVerifyingCode}
                >
-                 Verify & Complete
+                 {isVerifyingCode ? "Verifying..." : "Verify & Complete"}
                </button>
             </form>
          </div>
