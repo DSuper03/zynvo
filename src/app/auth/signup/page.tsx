@@ -151,7 +151,7 @@ export default function SignUp() {
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isLoaded) {
-      toast("Security check loading, please wait...");
+      toast("Security check new  loading, please wait...");
       return;
     };
 
@@ -254,7 +254,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
   const handleGoogleVerification = async () => {
     if (!authIsLoaded || !signIn) {
-      toast('Security check loading, please wait...');
+      toast('Security check old loading, please wait...');
       return;
     }
     try {
