@@ -151,6 +151,7 @@ export default function SignUp() {
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isLoaded) {
+
       toast("Security check new  loading, please wait...");
       return;
     };
@@ -247,7 +248,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       }
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
-      toast.error("Invalid Code or Verification Failed");
+      toast.error("Invalid Code or Verification Failed, Click Again");
     }
   };
 
