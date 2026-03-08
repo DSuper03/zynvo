@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { collegesWithClubs } from '@/components/colleges/college'; // Import colleges data
 
 export default function CreatePostModal() {
@@ -81,7 +82,7 @@ export default function CreatePostModal() {
 
   const handleImageUpload = (e: any) => {
     if (images.length >= 4) {
-      alert('Maximum 4 images allowed');
+      toast('Maximum 4 images allowed');
       return;
     }
 
@@ -103,7 +104,7 @@ export default function CreatePostModal() {
       );
       const valid = processed.filter(Boolean) as File[];
       if (valid.length === 0) {
-        alert('Could not compress images under 2 MB. Try smaller images.');
+        toast('Could not compress images under 2 MB. Try smaller images.');
         return;
       }
       setImages([...images, ...valid]);
@@ -142,7 +143,7 @@ export default function CreatePostModal() {
       setIsLoading(false);
 
       // Success message
-      alert('Post created successfully!');
+      toast.success('Post created successfully!');
     }, 1500);
   };
 

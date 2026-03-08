@@ -5,7 +5,7 @@ import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import dotenv from 'dotenv';
+
 import Image from 'next/image';
 import {
   Calendar as CalendarIcon,
@@ -40,8 +40,6 @@ import {
   type Participant,
 } from '@/hooks/useParticipants';
 import AchievementCelebration from '@/components/AchievementCelebration';
-
-dotenv.config();
 
 interface Speaker {
   id: number;
@@ -367,7 +365,7 @@ const Eventid = () => {
         }
       } catch (error) {
         console.error('Error fetching event data:', error);
-        alert('Error loading event data');
+        toast.error('Error loading event data');
       } finally {
         setIsLoading(false);
       }
@@ -378,7 +376,7 @@ const Eventid = () => {
 
   const handleRegistration = async () => {
     if (!token) {
-      alert('Please login to register for this event');
+      toast.error('Please login to register for this event');
       return;
     }
 

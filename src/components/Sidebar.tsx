@@ -15,11 +15,8 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import dotenv from 'dotenv';
 import { FaBahai, FaUsers } from 'react-icons/fa';
 import { useWarmup } from './WarmupProvider';
-
-dotenv.config();
 
 interface SidebarProps {
   isOpen?: boolean;

@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAddSpeaker } from '@/hooks/useAddSpeaker';
 import { uploadImageDirectly, compressImageToUnder2MB } from '@/lib/imgkit';
 import { X, Upload, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import Image from 'next/legacy/image';
 
 interface AddSpeakerModalProps {
@@ -47,7 +48,7 @@ export default function AddSpeakerModal({
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast('Please select an image file');
       return;
     }
 
@@ -64,7 +65,7 @@ export default function AddSpeakerModal({
       reader.readAsDataURL(compressedFile);
     } catch (error) {
       console.error('Error processing image:', error);
-      alert('Error processing image. Please try again.');
+      toast.error('Error processing image. Please try again.');
     }
   };
 

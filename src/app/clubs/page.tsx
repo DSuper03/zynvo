@@ -32,13 +32,10 @@ import { response } from '@/types/global-Interface';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import dotenv from 'dotenv';
 import './responsive.css';
 import NoTokenModal from '@/components/modals/remindModal';
 import { useRouter } from 'next/navigation';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
-
-dotenv.config();
 
 const getTypeClasses = (rawType: string) => {
   const type = String(rawType || '').toLowerCase();
@@ -307,7 +304,7 @@ const ClubsPage = () => {
   const handleJoinClub = (club: response['resp'][0]) => {
     setSelectedClub({
       name: club.name,
-      image: club.profilePicUrl || 'https://via.placeholder.com/150',
+      image: club.profilePicUrl || '/default-club-image.jpg',
       id: club.id,
       requirements: club.requirements || undefined,
     });
@@ -626,7 +623,7 @@ const ClubsPage = () => {
                           <Image
                             src={
                               club.profilePicUrl ||
-                              'https://via.placeholder.com/150'
+                              '/default-club-image.jpg'
                             }
                             alt={club.name}
                             width={200}

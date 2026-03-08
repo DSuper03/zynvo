@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useRef, use } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   Calendar,
   BarChart2,
@@ -711,12 +711,12 @@ export default function ZynvoDashboard() {
             // Set selected predefined tags
             setSelectedPredefinedTags(tags || []);
           } else {
-            alert('Error fetching in details');
+            toast.error('Error fetching user details');
             navigate.push('/auth/signin');
           }
         } catch (error) {
           console.error('API Error:', error);
-          alert('Error fetching in details');
+          toast.error('Error fetching user details');
           navigate.push('/auth/signin');
         }
       } catch (error) {
@@ -757,8 +757,6 @@ export default function ZynvoDashboard() {
       sessionStorage.setItem('founder', isfounder.data.founder )
       setFounder(isfounder.data.founder);
      } else {
-      // remove in production
-      alert('check console')
       console.log(isfounder.data.msg);
      }
      return;
@@ -1075,7 +1073,7 @@ export default function ZynvoDashboard() {
                             }
                           );
                           toast.success(leave.data.message || leave.data.msg || 'Successfully left the club');
-                          setTimeout(() => window.location.reload(), 1000);
+                          setTimeout(() => navigate.refresh(), 1000);
                         } catch (error: any) {
                           toast.error(error.response?.data?.message || error.response?.data?.msg || 'Error leaving club');
                         }

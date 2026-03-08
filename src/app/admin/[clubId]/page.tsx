@@ -81,7 +81,7 @@ export default function ClubAdminPage() {
         hasShownToast.current = true;
       }
     } catch {
-      alert('Error fetching club data');
+      toast.error('Error fetching club data');
     } finally {
       setLoading(false);
     }
@@ -96,7 +96,7 @@ export default function ClubAdminPage() {
       );
       toast(res.data.msg);
     } catch {
-      alert('Error updating club links');
+      toast.error('Error updating club links');
     }
   };
 
@@ -109,7 +109,7 @@ export default function ClubAdminPage() {
       );
       toast(res.data.msg);
     } catch {
-      alert('Error adding core members');
+      toast.error('Error adding core members');
     }
   };
 
@@ -122,7 +122,7 @@ export default function ClubAdminPage() {
       );
       toast(res.data.msg);
     } catch {
-      alert('Error adding wings');
+      toast.error('Error adding wings');
     }
   };
 
@@ -135,7 +135,7 @@ export default function ClubAdminPage() {
       );
       toast(res.data.msg);
     } catch {
-      alert('Error removing member');
+      toast.error('Error removing member');
     }
   };
 
@@ -148,7 +148,7 @@ export default function ClubAdminPage() {
       );
       toast(res.data.msg);
     } catch {
-      alert('Error transferring ownership');
+      toast.error('Error transferring ownership');
     }
   };
 
@@ -161,7 +161,7 @@ export default function ClubAdminPage() {
       );
       toast(res.data.msg);
     } catch {
-      alert('Error removing core members');
+      toast.error('Error removing core members');
     }
   };
 

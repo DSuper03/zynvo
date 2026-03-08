@@ -13,15 +13,13 @@ import {
   FiLoader,
 } from 'react-icons/fi';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
-import dotenv from 'dotenv';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { signinRes } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 
-dotenv.config();
-// const BASE_URL = process.env.BASE_URL
+
 
 export default function SignIn() {
   const router = useRouter();
