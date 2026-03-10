@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaUsers, FaSearch, FaCalendarAlt, FaRocket } from 'react-icons/fa';
-import Image from 'next/legacy/image';
+import Image from 'next/image';
 
 // How It Works Section
 const HowItWorks = () => {

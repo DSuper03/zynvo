@@ -11,6 +11,7 @@ import {
   NotebookText,
   Trophy,
   Newspaper,
+  MapPin,
   MapPinCheck,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -42,6 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
       href: '/resources',
     },
     {
+      icon: <MapPin size={22} />, label: 'Campus Map', href: '/cmap'
       icon: <MapPinCheck />, label: 'Campus Map', href: '/cmap'
     },
     { icon: <Trophy size={22} />, label: 'Leaderboard', href: '/leaderboard' },
