@@ -1,3 +1,7 @@
+import bundleAnalyzer from '@next/bundle-analyzer';
+import withPWA from 'next-pwa';
+
+/** @type {import('next').NextConfig} */
 const securityHeaders = [
   {
     key: 'Content-Security-Policy',
@@ -28,16 +32,12 @@ const securityHeaders = [
   },
 ];
 
-import bundleAnalyzer from '@next/bundle-analyzer';
-import withPWA from 'next-pwa';
-
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Next 16 uses Turbopack by default; empty config acknowledges plugins may add webpack
+  // Next 16 uses Turbopack by default
   turbopack: {},
   images: {
     dangerouslyAllowSVG: true,
@@ -85,7 +85,8 @@ const nextConfig = {
         hostname: 'i.pinimg.com',
         port: '',
         pathname: '/**',
-      },{
+      },
+      {
         protocol: 'https',
         hostname: 'api.qrserver.com',
         port: '',
@@ -95,20 +96,16 @@ const nextConfig = {
   },
   
   reactStrictMode: true,
-  // ESLint is configured via next lint / eslint config (not in next.config in Next 15+)
   experimental: {
-    // optimizeCss requires critters package - disabled for now
     optimizeCss: false,
     externalDir: true,
   },
   
-  // Performance optimizations
   compiler: {
-    // Remove console.log in production
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
   
-  // Tree-shake icon libraries for smaller bundles
+  // FIXED: Removed react-icons from here to stop the module resolution error
   modularizeImports: {
     'lucide-react': {
       transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
@@ -116,18 +113,13 @@ const nextConfig = {
     '@tabler/icons-react': {
       transform: '@tabler/icons-react/dist/esm/icons/{{member}}',
     },
-    'react-icons/?(((\\w*)?/?)*)': {
-      transform: 'react-icons/{{ matches.[1] }}/{{ member }}',
-    },
   },
   
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
   
-  // Webpack optimizations for better bundle splitting
   webpack: (config, { dev, isServer }) => {
-    // Optimize bundle splitting in production
     if (!dev && !isServer) {
       config.optimization = {
         ...config.optimization,
@@ -136,7 +128,6 @@ const nextConfig = {
           cacheGroups: {
             default: false,
             vendors: false,
-            // Framework chunk (React, Next.js)
             framework: {
               chunks: 'all',
               name: 'framework',
@@ -144,21 +135,18 @@ const nextConfig = {
               priority: 40,
               enforce: true,
             },
-            // UI libraries chunk
             ui: {
               name: 'ui',
               chunks: 'all',
               test: /[\\/]node_modules[\\/](@radix-ui|lucide-react|framer-motion)[\\/]/,
               priority: 30,
             },
-            // Vendor chunk
             vendor: {
               name: 'vendor',
               chunks: 'all',
               test: /node_modules/,
               priority: 20,
             },
-            // Common chunk
             common: {
               name: 'common',
               minChunks: 2,
@@ -255,13 +243,11 @@ const nextConfig = {
   },
 };
 
-// Apply PWA configuration
 const pwaConfig = withPWA({
-  dest: "public",         // destination directory for the PWA files
-  disable: false,        // enable PWA in all environments
-  register: true,         // register the PWA service worker
-  skipWaiting: true,      // skip waiting for service worker activation
+  dest: "public",
+  disable: false,
+  register: true,
+  skipWaiting: true,
 })(nextConfig);
 
-// Apply bundle analyzer and export
 export default withBundleAnalyzer(pwaConfig);

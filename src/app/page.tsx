@@ -10,12 +10,12 @@ import {
 } from 'react-icons/fa';
 
 import LandingHeader from '@/components/landingHeader';
-import { 
-  Hero, 
-  Features, 
-  HowItWorks, 
-  Events, 
-  Footer 
+import {
+  Hero,
+  Features,
+  HowItWorks,
+  Events,
+  Footer,
 } from '@/components/DynamicComponents';
 export default function Home() {
   const heroRef = useRef(null);
@@ -204,6 +204,7 @@ export default function Home() {
         <LandingHeader />
 
         <Hero />
+
         {/*     
         <ZynvoDashboard /> */}
         <Features />

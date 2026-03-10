@@ -69,3 +69,9 @@ export const FAQSection = dynamic(() => import('./FAQSection'), {
   loading: () => <LoadingSpinner />,
   ssr: false
 });
+
+// Peeps Canvas
+export const PeepsCanvas = dynamic(() => import('./PeepsCanvas'), {
+  loading: () => <LoadingSpinner />,
+  ssr: false
+});
