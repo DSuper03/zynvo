@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaUsers, FaSearch, FaCalendarAlt, FaRocket } from 'react-icons/fa';

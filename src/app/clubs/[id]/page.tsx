@@ -262,6 +262,7 @@ export default function ClubPage() {
               createdAt: new Date(e.createdAt), // Convert string to Date
               image: imageUrl,
               title: e.EventName,
+              Venue: e.Venue,
             };
           });
 
@@ -768,9 +769,10 @@ useEffect(() => {
               ) : (
                 <div className="space-y-4">
                   {event.map((eventItem: EventType) => (
-                    <div
+                    <Link
                       key={eventItem.id}
-                      className="group bg-gray-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl transition-all duration-300 overflow-hidden"
+                      href={`/events/${eventItem.id}`}
+                      className="block group bg-gray-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl transition-all duration-300 overflow-hidden hover:ring-2 hover:ring-yellow-400/50 cursor-pointer"
                     >
                       <div className="flex flex-col md:flex-row">
                         {/* Event Image - Mobile Optimized */}
@@ -798,7 +800,11 @@ useEffect(() => {
                                 <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-yellow-400 transition-colors leading-tight">
                                   {eventItem.EventName}
                                 </h3>
-                                <button className="p-1.5 sm:p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white transition-all touch-manipulation">
+                                <button
+                                  type="button"
+                                  onClick={(e) => e.preventDefault()}
+                                  className="p-1.5 sm:p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white transition-all touch-manipulation"
+                                >
                                   <Bookmark className="w-3 h-3 sm:w-4 sm:h-4" />
                                 </button>
                               </div>
@@ -809,8 +815,8 @@ useEffect(() => {
 
                               <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm text-gray-400">
                                 <div className="flex items-center gap-1 sm:gap-2">
-                                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                                  <span className="truncate">{club.collegeName}</span>
+                                   <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                  <span className="truncate">{eventItem.Venue}</span> 
                                 </div>
                                 <div className="flex items-center gap-1 sm:gap-2">
                                   <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -818,12 +824,11 @@ useEffect(() => {
                                   <span className="sm:hidden">{eventItem.createdAt.toLocaleDateString()}</span>
                                 </div>
                                 <div className="flex items-center gap-1 sm:gap-2">
-                                  <Users className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                                  <span>0 attending</span>
+                                  
                                 </div>
                                 <div className="flex items-center gap-1 sm:gap-2">
                                   <Eye className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                                  <span>24 views</span>
+                                  
                                 </div>
                               </div>
                             </div>
@@ -831,30 +836,48 @@ useEffect(() => {
                             {/* Event Actions - Mobile Optimized */}
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 pt-3 sm:pt-4">
                               <div className="flex items-center gap-2 sm:gap-3">
-                                <button className="px-4 py-2 sm:px-6 sm:py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    router.push(`/events/${eventItem.id}`);
+                                  }}
+                                  className="px-4 py-2 sm:px-6 sm:py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation"
+                                >
                                   <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
                                   RSVP
                                 </button>
-                                <button 
-                                  onClick={handleShare}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleShare();
+                                  }}
                                   className="px-3 py-2 sm:px-4 sm:py-2 bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-white rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm transition-all touch-manipulation"
                                   title="Share this event"
                                 >
                                   <Share className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
                                   <span className="hidden sm:inline">Share</span>
                                 </button>
-                                <button className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-red-400 transition-all touch-manipulation">
+                                <button
+                                  type="button"
+                                  onClick={(e) => e.preventDefault()}
+                                  className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-red-400 transition-all touch-manipulation"
+                                >
                                   <ThumbsUp className="w-3 h-3 sm:w-4 sm:h-4" />
                                 </button>
                               </div>
-                              <button className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white transition-all touch-manipulation self-end sm:self-auto">
+                              <span
+                                className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white transition-all touch-manipulation self-end sm:self-auto inline-flex"
+                                title="View event"
+                              >
                                 <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
-                              </button>
+                              </span>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}

@@ -13,7 +13,6 @@ import {
   FiPhone,
 } from 'react-icons/fi';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
-import dotenv from 'dotenv';
 import DiceBearAvatar from '@/components/DicebearAvatars';
 import { collegesWithClubs } from '@/components/colleges/college';
 import axios from 'axios';
@@ -25,8 +24,7 @@ import { Button } from '@/components/ui/button';
 import { useSignUp, useAuth , useSignIn} from "@clerk/nextjs";
 import { jwtDecode } from "jwt-decode";
 import { de } from 'date-fns/locale';
-
-dotenv.config();
+ 
 
 export default function SignUp() {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -47,6 +45,7 @@ export default function SignUp() {
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [code, setCode] = useState("");
   const [verifying, setVerifying] = useState(false);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [collegeSearch, setCollegeSearch] = useState<string>('');
 
   // Inline validation error for college select
@@ -71,7 +70,15 @@ export default function SignUp() {
       // Handle interest checkboxes
       // interests deleted
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      // Normalise some fields before saving to state
+      let nextValue = value;
+
+      // For email, trim accidental spaces and lowercase
+      if (name === 'email') {
+        nextValue = value.trim().toLowerCase();
+      }
+
+      setFormData((prev) => ({ ...prev, [name]: nextValue }));
 
       // NEW: validate password as user types
       if (name === 'password') {
@@ -145,7 +152,8 @@ export default function SignUp() {
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isLoaded) {
-      toast("Security check loading, please wait...");
+
+      toast("Security check new  loading, please wait...");
       return;
     };
 
@@ -198,54 +206,95 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
   const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded) return;
+
+    if (!isLoaded || !signUp) {
+      toast("Verification is still loading, please wait...");
+      return;
+    }
+
+    // Prevent double submits while a request is in flight
+    if (isVerifyingCode) return;
+
+    const cleanedCode = code.replace(/\s+/g, '');
+    if (!cleanedCode) {
+      toast.error("Please enter the verification code from your email.");
+      return;
+    }
+
+    setIsVerifyingCode(true);
+
+    let completeSignUp: any;
 
     try {
       // 1. Verify the code using the EXISTING signUp object
-      // Clerk remembers the email from Step A
-      const completeSignUp = await signUp.attemptEmailAddressVerification({
-        code, 
+      completeSignUp = await signUp.attemptEmailAddressVerification({
+        code: cleanedCode,
       });
 
-      if (completeSignUp.status === "complete") {
-        // 2. Set the session active in Clerk
-        await setActive({ session: completeSignUp.createdSessionId });
-
-        toast.success("Email verified successfully!");
-        // 3. Get Token & Sync with Backend
-        const token = await getToken() as string // Gets the new session token
-        const decodedToken: any = jwtDecode(token);
-
-        console.log("Decoded Clerk Token:", decodedToken);
-
-
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`, {
-           clerkId: decodedToken.sub,
-           collegeName: formData.collegeName,
-           avatarUrl: formData.avatarUrl,
-           password: formData.password,
-          name: formData.name,
-          email: formData.email,
-          imgUrl : "",
-          phone : formData.phone || '',
-        });
-
-        // 4. Save YOUR Custom JWT & Redirect
-        localStorage.setItem('token', res.data.token);
-        sessionStorage.setItem('activeSession', 'true');
-        toast.success("Account created & Verified!");
-        router.push("/dashboard");
+      if (completeSignUp.status !== "complete") {
+        toast.error("Verification not complete. Please check the code and try again.");
+        return;
       }
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
-      toast.error("Invalid Code or Verification Failed");
+
+      const clerkError = err?.errors?.[0];
+      const clerkCode = clerkError?.code;
+
+      if (clerkCode === "verification_code_invalid" || clerkCode === "verification_code_expired") {
+        toast.error("Invalid or expired verification code. Please request a new one and try again.");
+      } else {
+        const message = clerkError?.message || "Verification failed. Please try again.";
+        toast.error(message);
+      }
+
+      setIsVerifyingCode(false);
+      return;
+    }
+
+    try {
+      // 2. Set the session active in Clerk
+      await setActive({ session: completeSignUp.createdSessionId });
+
+      toast.success("Email verified successfully!");
+
+      // 3. Get Token & Sync with Backend
+      const token = (await getToken()) as string; // Gets the new session token
+      const decodedToken: any = jwtDecode(token);
+
+      console.log("Decoded Clerk Token:", decodedToken);
+
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
+        {
+          clerkId: decodedToken.sub,
+          collegeName: formData.collegeName,
+          avatarUrl: formData.avatarUrl,
+          password: formData.password,
+          name: formData.name,
+          email: formData.email,
+          imgUrl: "",
+          phone: formData.phone || "",
+        }
+      );
+
+      // 4. Save YOUR Custom JWT & Redirect
+      localStorage.setItem('token', res.data.token);
+      sessionStorage.setItem('activeSession', 'true');
+      toast.success("Account created & Verified!");
+      router.push("/dashboard");
+    } catch (err: any) {
+      console.error("Post-verification sync failed:", JSON.stringify(err, null, 2));
+      toast.error("Email verified, but we couldn't complete signup. Please try again.");
+    } finally {
+      setIsVerifyingCode(false);
     }
   };
 
 
   const handleGoogleVerification = async () => {
     if (!authIsLoaded || !signIn) {
-      toast('Security check loading, please wait...');
+      toast('Security check old loading, please wait...');
       return;
     }
     try {
@@ -275,15 +324,19 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                <input
                  type="text"
                  value={code}
-                 onChange={(e) => setCode(e.target.value)}
+                 onChange={(e) =>
+                   // Strip any accidental spaces; keep original casing
+                   setCode(e.target.value.replace(/\s+/g, ''))
+                 }
                  className="w-full bg-gray-800 text-white p-3 rounded-lg mb-4 text-center text-xl tracking-widest focus:ring-2 focus:ring-yellow-500 outline-none"
                  placeholder="######"
                />
                <button 
                  type="submit"
-                 className="w-full bg-yellow-500 text-black font-bold py-3 rounded-lg hover:bg-yellow-400"
+                 className="w-full bg-yellow-500 text-black font-bold py-3 rounded-lg hover:bg-yellow-400 disabled:opacity-60 disabled:cursor-not-allowed"
+                 disabled={isVerifyingCode}
                >
-                 Verify & Complete
+                 {isVerifyingCode ? "Verifying..." : "Verify & Complete"}
                </button>
             </form>
          </div>

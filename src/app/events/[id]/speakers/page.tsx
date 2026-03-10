@@ -10,12 +10,9 @@ import Image from 'next/legacy/image';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import dotenv from 'dotenv';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import AddSpeakerModal from './AddSpeakerModal';
-
-dotenv.config();
 
 interface speakers {
   id: number;

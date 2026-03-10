@@ -1,4 +1,4 @@
-'use client';
+//'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
@@ -12,14 +12,12 @@ import {
   Trophy,
   Newspaper,
   MapPin,
+  MapPinCheck,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import dotenv from 'dotenv';
 import { FaBahai, FaUsers } from 'react-icons/fa';
 import { useWarmup } from './WarmupProvider';
-
-dotenv.config();
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -46,6 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     },
     {
       icon: <MapPin size={22} />, label: 'Campus Map', href: '/cmap'
+      icon: <MapPinCheck />, label: 'Campus Map', href: '/cmap'
     },
     { icon: <Trophy size={22} />, label: 'Leaderboard', href: '/leaderboard' },
     { icon: <User size={22} />, label: 'Profile', href: '/dashboard' },

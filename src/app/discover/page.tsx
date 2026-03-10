@@ -109,7 +109,7 @@ export default function Feed() {
     setSelectedImage(null);
   }, []);
 
-  // Handle escape key to close modal
+  // Handle escape key to close modal — PERFORMANCE: cleanup always runs; closeImageModal in deps for stable handler
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isImageModalOpen) {
@@ -119,14 +119,14 @@ export default function Feed() {
 
     if (isImageModalOpen) {
       document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+      document.body.style.overflow = 'hidden';
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
     };
-  }, [isImageModalOpen]);
+  }, [isImageModalOpen, closeImageModal]);
 
 
   // Function to handle post sharing - memoized
@@ -148,7 +148,7 @@ export default function Feed() {
         toast('Post link copied to clipboard!');
       }
     } catch (error) {
-      console.error('Error sharing post:', error);
+      // Error already surfaced via toast fallbacks
       // Fallback method for older browsers
       try {
         const postUrl = `${window.location.origin}/post/${postId}`;

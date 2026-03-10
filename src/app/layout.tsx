@@ -25,6 +25,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://zynvo.social'),
   manifest: "/manifest.json",
   title:
     'Zynvo - Agentic Social Media Platform for Campus Communities | Student Network',
@@ -76,11 +77,7 @@ export const metadata: Metadata = {
   },
   category: 'Social Media',
   classification: 'Agentic Social Media Platform',
-  verification: {
-    google: 'your-google-verification-code',
-    yandex: 'your-yandex-verification-code',
-    yahoo: 'your-yahoo-verification-code',
-  },
+
   icons: {
     icon: [
       {
@@ -125,7 +122,10 @@ export default function RootLayout({
       }}
     >
     <html lang="en">
-       <head>
+       <head />
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
+      >
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-0E7B1VF3JX"
           strategy="afterInteractive"
@@ -138,10 +138,6 @@ export default function RootLayout({
             gtag('config', 'G-0E7B1VF3JX');
           `}
         </Script>
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
-      >
         <ClerkKeyDebug />
         <ErrorBoundary>
           <QueryProvider>

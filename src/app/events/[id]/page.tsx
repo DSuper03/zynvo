@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useEffect, useMemo, useState } from 'react';
-import dotenv from 'dotenv';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+
 import Image from 'next/image';
 import {
   Calendar as CalendarIcon,
@@ -22,19 +22,24 @@ import {
   Sparkles,
   ArrowLeft,
   CreditCard,
+  Trophy,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import EventAnnouncements from '../components/eventAnnouncement';
 import NoTokenModal from '@/components/modals/remindModal';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import AddSpeakerModal from './speakers/AddSpeakerModal';
 import PaymentProofModal from '@/components/PaymentProofModal';
-import { Plus, Download, Users } from 'lucide-react';
-import { useParticipants, downloadParticipantsCSV, type Participant } from '@/hooks/useParticipants';
+import { Plus, Download, Users, RefreshCw } from 'lucide-react';
+import {
+  useParticipants,
+  downloadParticipantsCSV,
+  syncParticipantsCsv,
+  InvalidSinceError,
+  type Participant,
+} from '@/hooks/useParticipants';
 import AchievementCelebration from '@/components/AchievementCelebration';
-
-dotenv.config();
 
 interface Speaker {
   id: number;
@@ -60,9 +65,11 @@ const Eventid = () => {
     EventMode: '',
     startDate: '',
     endDate: '',
+    prizes: '',
     contactEmail: '',
     contactPhone: '',
     university: '',
+    collegeStudentsOnly: false,
     applicationStatus: 'open',
     posterUrl: '',
     eventHeader: '',
@@ -82,6 +89,7 @@ const Eventid = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [registrationNotice, setRegistrationNotice] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
     'overview' | 'speakers' | 'schedule' | 'gallery' | 'announcement' | 'attendees'
   >('overview');
@@ -92,6 +100,76 @@ const Eventid = () => {
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
   const [isAddSpeakerModalOpen, setIsAddSpeakerModalOpen] = useState(false);
   const [isFounder, setIsFounder] = useState(false);
+
+  // CSV sync state: lastSince (newest joinedAt), etag, last updated time, sync in progress, badge count
+  const [csvLastSince, setCsvLastSince] = useState<string | null>(null);
+  const [csvEtag, setCsvEtag] = useState<string | null>(null);
+  const [lastCsvUpdatedAt, setLastCsvUpdatedAt] = useState<Date | null>(null);
+  const [csvSyncInProgress, setCsvSyncInProgress] = useState(false);
+  const [csvAppendedCount, setCsvAppendedCount] = useState(0);
+  const [syncBackoffMs, setSyncBackoffMs] = useState(0);
+  const queryClient = useQueryClient();
+  const csvLastSinceRef = useRef(csvLastSince);
+  const csvEtagRef = useRef(csvEtag);
+  csvLastSinceRef.current = csvLastSince;
+  csvEtagRef.current = csvEtag;
+
+  const runCsvSync = React.useCallback(async () => {
+    if (!id || !isFounder) return;
+    setCsvSyncInProgress(true);
+    const currentLastSince = csvLastSinceRef.current;
+    const currentEtag = csvEtagRef.current;
+    try {
+      const result = await syncParticipantsCsv(id, currentLastSince, currentEtag, token);
+      setCsvLastSince(result.lastSince);
+      setCsvEtag(result.etag);
+      setLastCsvUpdatedAt(new Date());
+      setSyncBackoffMs(0);
+      if (result.appended > 0) {
+        setCsvAppendedCount((c) => c + result.appended);
+        queryClient.invalidateQueries({ queryKey: ['participants', id] });
+      }
+    } catch (err) {
+      if (err instanceof InvalidSinceError) {
+        setCsvLastSince(null);
+        setCsvEtag(null);
+        setSyncBackoffMs(0);
+        try {
+          const result = await syncParticipantsCsv(id, null, null, token);
+          setCsvLastSince(result.lastSince);
+          setCsvEtag(result.etag);
+          setLastCsvUpdatedAt(new Date());
+          if (result.appended > 0) {
+            setCsvAppendedCount((c) => c + result.appended);
+            queryClient.invalidateQueries({ queryKey: ['participants', id] });
+          }
+        } finally {
+          setCsvSyncInProgress(false);
+        }
+        return;
+      }
+      const is5xx = err instanceof Error && /^Server error 5\d\d/.test(err.message);
+      if (is5xx) {
+        setSyncBackoffMs((prev) => Math.min((prev || 5000) * 1.5, 60000));
+        toast.error('Server busy. Retrying with backoff.');
+      } else {
+        toast.error(err instanceof Error ? err.message : 'Sync failed');
+      }
+    } finally {
+      setCsvSyncInProgress(false);
+    }
+  }, [id, isFounder, token, queryClient]);
+
+  useEffect(() => {
+    if (activeTab !== 'attendees' || !isFounder || !id) return;
+    const intervalMs = Math.max(15000, Math.min(60000, syncBackoffMs || 30000));
+    const initial = setTimeout(runCsvSync, 300);
+    const poll = setInterval(runCsvSync, intervalMs);
+    return () => {
+      clearTimeout(initial);
+      clearInterval(poll);
+    };
+  }, [activeTab, isFounder, id, syncBackoffMs, runCsvSync]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -267,7 +345,9 @@ const Eventid = () => {
             EventMode: res.data.response.EventMode || '',
             startDate: res.data.response.startDate || '',
             endDate: res.data.response.endDate || '',
+            prizes: res.data.response.prizes || '',
             university: res.data.response.university || '',
+            collegeStudentsOnly: res.data.response.collegeStudentsOnly ?? false,
             contactEmail: res.data.response.contactEmail || '',
             contactPhone: res.data.response.contactPhone || '',
             applicationStatus: res.data.response.applicationStatus || 'open',
@@ -285,7 +365,7 @@ const Eventid = () => {
         }
       } catch (error) {
         console.error('Error fetching event data:', error);
-        alert('Error loading event data');
+        toast.error('Error loading event data');
       } finally {
         setIsLoading(false);
       }
@@ -296,7 +376,23 @@ const Eventid = () => {
 
   const handleRegistration = async () => {
     if (!token) {
-      alert('Please login to register for this event');
+      toast.error('Please login to register for this event');
+      return;
+    }
+
+    setRegistrationNotice(null);
+    if (isCollegeRestrictionBlocking) {
+      if (isCollegeNameMissing) {
+        toast('Complete your profile to register.', {
+          action: {
+            label: 'Update profile',
+            onClick: () => router.push('/dashboard'),
+          },
+        });
+      } else {
+        const message = 'Only students from organizer college can register.';
+        toast.error(message);
+      }
       return;
     }
 
@@ -373,7 +469,17 @@ const Eventid = () => {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      toast.error('Registration failed. Please try again.');
+      const axiosError = error as any;
+      if (axiosError?.response?.status === 403) {
+        const message = 'Only students from organizer college can register.';
+        setRegistrationNotice(message);
+        toast.error(message);
+      } else {
+        toast.error(
+          axiosError?.response?.data?.message ||
+            'Registration failed. Please try again.'
+        );
+      }
     } finally {
       setIsRegistering(false);
     }
@@ -415,10 +521,43 @@ const Eventid = () => {
     return new Date(data.endDate) < new Date();
   }, [data.endDate]);
 
+  const normalizedUserCollege = useMemo(
+    () => (currentUser?.collegeName || '').trim().toLowerCase(),
+    [currentUser?.collegeName]
+  );
+
+  const normalizedEventUniversity = useMemo(
+    () => (data.university || '').trim().toLowerCase(),
+    [data.university]
+  );
+
+  const isCollegeRestricted = useMemo(
+    () => Boolean(data.collegeStudentsOnly),
+    [data.collegeStudentsOnly]
+  );
+
+  const isCollegeNameMissing = isCollegeRestricted && !normalizedUserCollege;
+  const isCollegeMismatch =
+    isCollegeRestricted &&
+    !!normalizedUserCollege &&
+    !!normalizedEventUniversity &&
+    normalizedUserCollege !== normalizedEventUniversity;
+  const isCollegeUnknown =
+    isCollegeRestricted &&
+    !!normalizedUserCollege &&
+    !normalizedEventUniversity;
+
+  const isCollegeRestrictionBlocking =
+    isCollegeNameMissing || isCollegeMismatch || isCollegeUnknown;
+
   // Check if registration is disabled (event ended or applications closed)
   const isRegistrationDisabled = useMemo(() => {
-    return isEventEnded || data.applicationStatus !== 'open';
-  }, [isEventEnded, data.applicationStatus]);
+    return (
+      isEventEnded ||
+      data.applicationStatus !== 'open' ||
+      isCollegeRestrictionBlocking
+    );
+  }, [isEventEnded, data.applicationStatus, isCollegeRestrictionBlocking]);
 
   const googleCalendarHref = useMemo(() => {
     // Build a Google Calendar event URL (best-effort if dates exist)
@@ -466,7 +605,7 @@ const Eventid = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-black via-[#02040A] to-black text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Back Button */}
         <Link
@@ -478,7 +617,7 @@ const Eventid = () => {
         </Link>
 
         {/* Hero Section - Compact Design */}
-        <div className="relative rounded-2xl bg-[#0B0B0B] border border-gray-800 overflow-hidden mb-6">
+        <div className="relative rounded-2xl bg-gradient-to-br from-[#0b0b0f] via-[#050508] to-[#050507] border border-yellow-500/20 shadow-[0_0_40px_rgba(234,179,8,0.08)] overflow-hidden mb-6">
           {/* Subtle glow effects */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 rounded-full blur-3xl -z-0" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-400/5 rounded-full blur-3xl -z-0" />
@@ -488,62 +627,52 @@ const Eventid = () => {
               {/* Left: Event Info */}
               <div className="lg:col-span-2 space-y-4">
                 <div>
-                  <p className="text-gray-400 text-sm mb-2">Event</p>
-                  <div className="flex items-center gap-3">
-                    <h1 className="text-3xl md:text-4xl font-bold text-yellow-400 leading-tight">
-                      {data.EventName || 'Event Title'}
-                    </h1>
-                    {/* Paid Event Badge */}
-                    {data.isPaidEvent && (
-                      <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 whitespace-nowrap h-fit">
-                        <CreditCard size={16} />
-                        Paid Event
-                      </div>
-                    )}
-                  </div>
+                  <p className="text-gray-400 text-xs uppercase tracking-[0.18em] mb-2">
+                    Featured Event
+                  </p>
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-yellow-400 leading-tight drop-shadow-[0_0_25px_rgba(250,204,21,0.35)]">
+                    {data.EventName || 'Event Title'}
+                  </h1>
                 </div>
 
-                {/* Event Details - Compact */}
-                <div className="flex flex-wrap gap-4 text-sm">
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <CalendarIcon className="w-4 h-4 text-yellow-400" />
-                    <span>{formatDateRange(data.startDate, data.endDate)}</span>
+                {/* Event Meta Chips */}
+                <div className="flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm mt-2">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-black/50 border border-gray-800/80 px-3 py-1">
+                    <CalendarIcon className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
+                    <span className="text-gray-200">
+                      {formatDateRange(data.startDate, data.endDate)}
+                    </span>
                   </div>
                   {data.university && (
-                    <div className="flex items-center gap-2 text-gray-300">
-                      <MapPin className="w-4 h-4 text-yellow-400" />
-                      <span>
-                        {data.university}
-                        { data.paymentAmount && (
-                          <span className="text-yellow-400 font-semibold ml-2">• ₹{data.paymentAmount}</span>
-                        )}
-                      </span>
+                    <div className="inline-flex items-center gap-2 rounded-full bg-black/50 border border-gray-800/80 px-3 py-1">
+                      <MapPin className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
+                      <span className="text-gray-200">{data.university}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2 text-gray-300">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-black/50 border border-gray-800/80 px-3 py-1">
                     {isOnline ? (
-                      <Globe className="w-4 h-4 text-yellow-400" />
+                      <Globe className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
                     ) : (
-                      <Square className="w-4 h-4 text-yellow-400" />
+                      <Square className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
                     )}
-                    <span>{isOnline ? 'Online' : data.EventMode || 'TBD'}</span>
+                    <span className="text-gray-200">
+                      {isOnline ? 'Online' : data.EventMode || 'Mode TBA'}
+                    </span>
                   </div>
-                </div>
-
-                {/* Status Badge */}
-                <div>
-                  <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                  <div
+                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1 border text-xs md:text-sm ${
                       data.applicationStatus === 'open'
-                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                        : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                        ? 'border-emerald-400/60 bg-emerald-500/10 text-emerald-300'
+                        : 'border-red-400/60 bg-red-500/10 text-red-300'
                     }`}
                   >
-                    {data.applicationStatus === 'open' ? (
-                      <CheckSquare className="w-3 h-3 mr-1.5" />
-                    ) : null}
-                    Applications {data.applicationStatus}
-                  </span>
+                    {data.applicationStatus === 'open' && (
+                      <CheckSquare className="w-3 h-3" />
+                    )}
+                    <span>
+                      Applications {data.applicationStatus || 'status TBA'}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Payment Info for Paid Events */}
@@ -585,6 +714,30 @@ const Eventid = () => {
                         </Button>
                         {isEventEnded && (
                           <p className="text-xs text-red-400">This event has already ended</p>
+                        )}
+                        {isCollegeNameMissing && (
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-yellow-300">
+                            <span>
+                              Complete your profile to register (add your college
+                              name).
+                            </span>
+                            <Button
+                              onClick={() => router.push('/dashboard')}
+                              className="bg-yellow-400/90 hover:bg-yellow-400 text-black px-3 py-1 text-xs"
+                            >
+                              Complete profile
+                            </Button>
+                          </div>
+                        )}
+                        {!isCollegeNameMissing && isCollegeRestrictionBlocking && (
+                          <p className="text-xs text-red-400">
+                            Only students from organizer college can register.
+                          </p>
+                        )}
+                        {!isCollegeRestrictionBlocking && registrationNotice && (
+                          <p className="text-xs text-red-400">
+                            {registrationNotice}
+                          </p>
                         )}
                       </>
                     )
@@ -810,17 +963,23 @@ const Eventid = () => {
                 )}
 
                 {/* Details Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-800">
                   <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Location</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">
+                      Location
+                    </p>
                     <p className="text-white">{data.university || 'TBD'}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Mode</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">
+                      Mode
+                    </p>
                     <p className="text-white">{data.EventMode || 'TBD'}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Start Date</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">
+                      Start Date
+                    </p>
                     <p className="text-white">
                       {data.startDate
                         ? new Date(data.startDate).toLocaleDateString()
@@ -828,11 +987,68 @@ const Eventid = () => {
                     </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">End Date</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">
+                      End Date
+                    </p>
                     <p className="text-white">
                       {data.endDate
                         ? new Date(data.endDate).toLocaleDateString()
                         : 'TBD'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Prizes & Highlights */}
+                {data.prizes && data.prizes.trim().length > 0 && (
+                  <div className="mt-6 rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles className="w-4 h-4 text-yellow-400" />
+                      <h3 className="text-sm font-semibold text-yellow-400 uppercase tracking-wide">
+                        Prizes & Highlights
+                      </h3>
+                    </div>
+                    <div className="text-sm text-gray-100 whitespace-pre-line leading-relaxed">
+                      {data.prizes}
+                    </div>
+                  </div>
+                )}
+
+                {/* Why you should join */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="rounded-lg border border-gray-800 bg-black/40 p-4 space-y-2">
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-500/15 text-yellow-300">
+                      <Trophy className="w-4 h-4" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-white">
+                      Compete & Win
+                    </h3>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Show off your skills, build your portfolio and take a shot
+                      at exclusive campus-level prizes.
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-gray-800 bg-black/40 p-4 space-y-2">
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500/15 text-emerald-300">
+                      <Users className="w-4 h-4" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-white">
+                      Meet Smart People
+                    </h3>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Connect with organisers, speakers and participants from
+                      across your campus network.
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-gray-800 bg-black/40 p-4 space-y-2">
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-500/15 text-sky-300">
+                      <AlarmClock className="w-4 h-4" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-white">
+                      Make Memories
+                    </h3>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Turn a normal week into something memorable with matches,
+                      photos and late‑night prep with your friends.
                     </p>
                   </div>
                 </div>
@@ -971,25 +1187,51 @@ const Eventid = () => {
 
             {activeTab === 'attendees' && (
               <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6 space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-yellow-400 flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    Attendees
-                  </h2>
+                <div className="flex flex-col gap-2 mb-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h2 className="text-xl font-bold text-yellow-400 flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Attendees
+                      {csvAppendedCount > 0 && (
+                        <span className="text-xs font-normal bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                          {csvAppendedCount} new
+                        </span>
+                      )}
+                    </h2>
+                    {isFounder && (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={() => {
+                            setCsvAppendedCount(0);
+                            runCsvSync();
+                          }}
+                          disabled={csvSyncInProgress}
+                          className="px-4 py-2 bg-gray-700 text-white font-medium rounded-lg hover:bg-gray-600 transition-all flex items-center gap-2 disabled:opacity-50"
+                        >
+                          <RefreshCw className={`w-4 h-4 ${csvSyncInProgress ? 'animate-spin' : ''}`} />
+                          Sync
+                        </Button>
+                        <Button
+                          onClick={async () => {
+                            try {
+                              await downloadParticipantsCSV(id, token);
+                            } catch (error) {
+                              console.error('Error downloading CSV:', error);
+                            }
+                          }}
+                          disabled={csvSyncInProgress}
+                          className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2 disabled:opacity-50"
+                        >
+                          <Download className="w-4 h-4" />
+                          Download CSV
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                   {isFounder && (
-                    <Button
-                      onClick={async () => {
-                        try {
-                          await downloadParticipantsCSV(id, token);
-                        } catch (error) {
-                          console.error('Error downloading CSV:', error);
-                        }
-                      }}
-                      className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download CSV
-                    </Button>
+                    <p className="text-gray-500 text-sm">
+                      Last updated at {lastCsvUpdatedAt ? lastCsvUpdatedAt.toLocaleTimeString() : '—'}
+                    </p>
                   )}
                 </div>
 

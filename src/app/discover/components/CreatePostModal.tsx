@@ -18,14 +18,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import dotenv from 'dotenv';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { uploadImageDirectly } from '@/lib/imgkit';
 import { fetchClubsByCollege } from '@/app/api/hooks/useClubs';
 import { useRouter } from 'next/navigation';
-
-dotenv.config();
 
 interface CreatePostModalProps {
   isOpen: boolean;

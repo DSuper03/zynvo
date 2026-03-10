@@ -73,10 +73,10 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
       }
     );
     if (res.status == 200) {
-      alert(res.data.msg);
+      toast.success(res.data.msg);
       onClose();
     } else {
-      alert(res.data.msg);
+      toast.error(res.data.msg);
     }
     // console.log('Join request data:', formData);
   };

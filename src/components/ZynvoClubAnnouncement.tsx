@@ -48,9 +48,8 @@ const ZynvoClubAnnouncement: React.FC<ZynvoClubAnnouncementProps> = ({ club }) =
 
     setIsPosting(true);
     
-    // Simulate API call
+    // Simulate API call — DEBUG: console removed for production performance
     setTimeout(() => {
-      console.log('Announcement posted:', announcement);
       setAnnouncement({ title: '', description: '', notifyAll: true, hasAttachment: false });
       setIsPosting(false);
       // You can add success notification here

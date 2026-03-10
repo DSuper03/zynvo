@@ -86,6 +86,129 @@ export function useParticipants({
   });
 }
 
+const PARTICIPANTS_CSV_PATH = (eventId: string) =>
+  `${BASE_URL}/api/v1/events/participants/${eventId}`;
+
+/**
+ * Parse CSV text into rows of objects (header row determines keys).
+ * Handles quoted fields and returns the last row's joinedAt for incremental sync.
+ */
+export function parseCsv(csvText: string): { joinedAt?: string; [k: string]: string | undefined }[] {
+  const lines = csvText.trim().split(/\r?\n/).filter(Boolean);
+  if (lines.length === 0) return [];
+  const header = lines[0].split(',').map((h) => h.replace(/^"|"$/g, '').trim());
+  const rows: { joinedAt?: string; [k: string]: string | undefined }[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const values = parseCsvLine(lines[i]);
+    const row: { joinedAt?: string; [k: string]: string | undefined } = {};
+    header.forEach((key, j) => {
+      row[key] = values[j];
+      if (key.toLowerCase() === 'joinedat') row.joinedAt = values[j];
+    });
+    rows.push(row);
+  }
+  return rows;
+}
+
+function parseCsvLine(line: string): string[] {
+  const out: string[] = [];
+  let i = 0;
+  while (i < line.length) {
+    if (line[i] === '"') {
+      let val = '';
+      i++;
+      while (i < line.length) {
+        if (line[i] === '"') {
+          i++;
+          if (line[i] === '"') {
+            val += '"';
+            i++;
+          } else break;
+        } else {
+          val += line[i];
+          i++;
+        }
+      }
+      out.push(val);
+      if (line[i] === ',') i++;
+    } else {
+      const comma = line.indexOf(',', i);
+      if (comma === -1) {
+        out.push(line.slice(i).trim());
+        break;
+      }
+      out.push(line.slice(i, comma).trim());
+      i = comma + 1;
+    }
+  }
+  return out;
+}
+
+export interface SyncCsvResult {
+  appended: number;
+  etag: string | null;
+  lastSince: string | null;
+}
+
+export class InvalidSinceError extends Error {
+  constructor() {
+    super('Invalid since');
+    this.name = 'InvalidSinceError';
+  }
+}
+
+/**
+ * Sync participants CSV: initial fetch (no since/etag) or incremental (since + If-None-Match).
+ * On 304 returns unchanged. On 200 parses new rows and returns newest joinedAt and etag.
+ * On 400 Invalid since, throws InvalidSinceError so caller can reset lastSince and refetch full.
+ */
+export async function syncParticipantsCsv(
+  eventId: string,
+  lastSince: string | null,
+  etag: string | null,
+  token?: string | null
+): Promise<SyncCsvResult> {
+  const params = new URLSearchParams({ format: 'csv' });
+  if (lastSince) params.set('since', lastSince);
+  const url = `${PARTICIPANTS_CSV_PATH(eventId)}?${params}`;
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (etag) headers['If-None-Match'] = etag;
+
+  const res = await fetch(url, { method: 'GET', headers });
+
+  if (res.status === 304) {
+    return { appended: 0, etag, lastSince };
+  }
+
+  if (res.status === 400) {
+    const text = await res.text().catch(() => '');
+    if (/invalid|since/i.test(text)) throw new InvalidSinceError();
+    throw new Error(`Failed ${res.status}: ${text || res.statusText}`);
+  }
+
+  if (res.status >= 500) {
+    throw new Error(`Server error ${res.status}`);
+  }
+
+  if (!res.ok) {
+    throw new Error(`Failed ${res.status}: ${res.statusText}`);
+  }
+
+  const newCsv = await res.text();
+  const newEtag = res.headers.get('etag') ?? etag;
+  const appendedRows = parseCsv(newCsv);
+  const newestJoinedAt = appendedRows.length
+    ? (appendedRows.at(-1)?.joinedAt ?? lastSince)
+    : lastSince;
+
+  return {
+    appended: appendedRows.length,
+    etag: newEtag,
+    lastSince: newestJoinedAt,
+  };
+}
+
 /**
  * Downloads participants data as CSV
  */
@@ -100,7 +223,7 @@ export async function downloadParticipantsCSV(
     }
 
     const response = await fetch(
-      `${BASE_URL}/api/v1/events/participants/${eventId}?format=csv`,
+      `${PARTICIPANTS_CSV_PATH(eventId)}?format=csv`,
       {
         method: 'GET',
         headers,

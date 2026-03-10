@@ -43,6 +43,30 @@ export const sampleNotifications: Notification[] = [
     image: 'https://api.dicebear.com/7.x/shapes/svg?seed=aiml&backgroundColor=3b82f6',
     type: 'upcoming',
   },
+  {
+    id: 'srijan-2026',
+    title: '🎉 Srijan 2026',
+    subtitle: 'Annual tech and cultural fest of TMSL. Three days of events, competitions, and performances.',
+    date: '2026-03-01T09:00:00.000Z',
+    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=srijan2026&backgroundColor=a855f7',
+    type: 'upcoming',
+  },
+  {
+    id: 'double-slash-2026',
+    title: '💻 Double Slash 2026',
+    subtitle: 'Flagship coding and development contest series by CSE/IT clubs.',
+    date: '2026-03-06T09:00:00.000Z',
+    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=doubleslash&backgroundColor=22c55e',
+    type: 'upcoming',
+  },
+  {
+    id: 'intra-cup-2026',
+    title: '🏆 Intra Cup 2026',
+    subtitle: 'Inter-department sports tournament with cricket, football, and more across three days.',
+    date: '2026-03-09T09:00:00.000Z',
+    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=intracup&backgroundColor=f97316',
+    type: 'upcoming',
+  },
 ];
 
 /**

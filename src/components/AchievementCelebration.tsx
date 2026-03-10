@@ -1,7 +1,10 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import { Trophy, Star } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Trophy, X, Share2, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import confetti from 'canvas-confetti';
 
 interface AchievementCelebrationProps {
   isOpen: boolean;
@@ -14,216 +17,206 @@ const AchievementCelebration: React.FC<AchievementCelebrationProps> = ({
   onClose,
   eventName,
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (isOpen) {
+      // Trigger confetti explosion
+      const duration = 3 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+      const randomInRange = (min: number, max: number) => {
+        return Math.random() * (max - min) + min;
+      };
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+      const interval: any = setInterval(function () {
+        const timeLeft = animationEnd - Date.now();
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
 
-    interface Particle {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      life: number;
-      size: number;
-      rotation: number;
-      rotationSpeed: number;
-      type: string;
+        const particleCount = 50 * (timeLeft / duration);
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+        });
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+        });
+      }, 250);
+
+      return () => clearInterval(interval);
     }
-
-    const particles: Particle[] = [];
-
-    // Create particles
-    const createParticles = () => {
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-
-      // Create confetti particles
-      for (let i = 0; i < 80; i++) {
-        const angle = (Math.PI * 2 * i) / 80;
-        const velocity = 5 + Math.random() * 5;
-        particles.push({
-          x: centerX,
-          y: centerY,
-          vx: Math.cos(angle) * velocity,
-          vy: Math.sin(angle) * velocity - 2,
-          life: 1,
-          size: 8 + Math.random() * 8,
-          rotation: Math.random() * Math.PI * 2,
-          rotationSpeed: (Math.random() - 0.5) * 0.2,
-          type: ['confetti', 'star'][Math.floor(Math.random() * 2)],
-        });
-      }
-
-      // Create crackers (fast particles)
-      for (let i = 0; i < 40; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const velocity = 8 + Math.random() * 6;
-        particles.push({
-          x: centerX,
-          y: centerY,
-          vx: Math.cos(angle) * velocity,
-          vy: Math.sin(angle) * velocity,
-          life: 0.8,
-          size: 4 + Math.random() * 4,
-          rotation: Math.random() * Math.PI * 2,
-          rotationSpeed: (Math.random() - 0.5) * 0.3,
-          type: 'cracker',
-        });
-      }
-    };
-
-    const colors = ['#FFD700', '#FFA500', '#FF69B4', '#00BFFF', '#32CD32', '#FF1493'];
-
-    const drawParticle = (particle: Particle) => {
-      ctx.save();
-      ctx.globalAlpha = particle.life;
-      ctx.translate(particle.x, particle.y);
-      ctx.rotate(particle.rotation);
-
-      const color = colors[Math.floor(Math.random() * colors.length)];
-      ctx.fillStyle = color;
-      ctx.strokeStyle = color;
-
-      if (particle.type === 'star') {
-        // Draw star
-        ctx.beginPath();
-        for (let i = 0; i < 5; i++) {
-          const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
-          const x = Math.cos(angle) * particle.size;
-          const y = Math.sin(angle) * particle.size;
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.closePath();
-        ctx.fill();
-      } else if (particle.type === 'cracker') {
-        // Draw small circle
-        ctx.beginPath();
-        ctx.arc(0, 0, particle.size, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        // Draw confetti rectangle
-        ctx.fillRect(-particle.size / 2, -particle.size / 4, particle.size, particle.size / 2);
-      }
-
-      ctx.restore();
-    };
-
-    const animate = () => {
-      // Clear canvas with fade effect
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Update and draw particles
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.15; // gravity
-        p.life -= 0.01;
-        p.rotation += p.rotationSpeed;
-
-        if (p.life <= 0) {
-          particles.splice(i, 1);
-        } else {
-          drawParticle(p);
-        }
-      }
-
-      if (particles.length > 0) {
-        requestAnimationFrame(animate);
-      }
-    };
-
-    createParticles();
-    animate();
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] overflow-hidden pointer-events-none">
-      {/* Confetti Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0"
-      />
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
+          {/* Backdrop with blur */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+          />
 
-      {/* Achievement Modal */}
-      <div className="fixed inset-0 flex items-center justify-center pointer-events-auto">
-        <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl p-12 shadow-2xl border border-yellow-500/50 max-w-md w-full mx-4 animate-in fade-in scale-in duration-500">
-          {/* Trophy Icon with Animation */}
-          <div className="flex justify-center mb-6">
-            <div className="relative">
-              <div className="absolute inset-0 bg-yellow-400 rounded-full blur-lg opacity-50 animate-pulse" />
-              <Trophy className="w-20 h-20 text-yellow-400 relative z-10 animate-bounce" />
-            </div>
-          </div>
+          {/* Card Container */}
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="relative w-full max-w-sm mx-auto perspective-1000"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            {/* The Card */}
+            <div className="relative overflow-hidden rounded-3xl bg-neutral-900 border border-white/10 shadow-2xl">
+              {/* Animated Gradient Background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-purple-500/5 to-blue-500/10 opacity-50" />
+              
+              {/* Noise Texture Overlay */}
+              <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
 
-          {/* Success Text */}
-          <div className="text-center">
-            <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-300 mb-3">
-              Wooh! 🎉
-            </h2>
-            <p className="text-xl text-white font-semibold mb-2">
-              You've Successfully Registered!
-            </p>
-            <p className="text-gray-300 mb-6">
-              for <span className="text-yellow-400 font-bold">{eventName}</span>
-            </p>
+              {/* Shine Effect */}
+              <motion.div
+                animate={{
+                  x: ['-100%', '200%'],
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 3,
+                  ease: 'linear',
+                  repeatDelay: 1,
+                }}
+                className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12"
+              />
 
-            {/* Achievement Badges */}
-            <div className="grid grid-cols-3 gap-3 mb-8">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-3 flex flex-col items-center justify-center">
-                <Star className="w-5 h-5 text-white mb-1" />
-                <span className="text-xs text-white font-semibold">Registered</span>
+              {/* Content */}
+              <div className="relative p-8 flex flex-col items-center text-center">
+                {/* Close Button */}
+                <button
+                  onClick={onClose}
+                  className="absolute top-4 right-4 text-neutral-500 hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+
+                {/* Trophy Icon Container */}
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', damping: 15, delay: 0.2 }}
+                  className="relative mb-6"
+                >
+                  <div className="absolute inset-0 bg-yellow-500/30 blur-2xl rounded-full" />
+                  <div className="relative w-24 h-24 bg-gradient-to-b from-neutral-800 to-neutral-950 rounded-2xl border border-white/10 flex items-center justify-center shadow-xl group">
+                    <Trophy className="w-12 h-12 text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" />
+                    
+                    {/* Floating particles around trophy */}
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                      className="absolute inset-0 rounded-2xl border border-yellow-500/20 border-dashed"
+                    />
+                  </div>
+                  
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="absolute -bottom-2 -right-2 bg-green-500 text-black p-1.5 rounded-full border-2 border-neutral-900"
+                  >
+                    <CheckCircle2 size={16} strokeWidth={3} />
+                  </motion.div>
+                </motion.div>
+
+                {/* Text Content */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="space-y-2 mb-8"
+                >
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs font-medium uppercase tracking-wider mb-2">
+                    <Sparkles size={12} />
+                    <span>Registration Confirmed</span>
+                  </div>
+                  
+                  <h2 className="text-3xl font-bold text-white tracking-tight">
+                    You're In!
+                  </h2>
+                  
+                  <p className="text-neutral-400 text-sm leading-relaxed max-w-[260px] mx-auto">
+                    You've successfully secured your spot for <span className="text-white font-medium">{eventName}</span>.
+                  </p>
+                </motion.div>
+
+                {/* Ticket Stub Visual */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="w-full bg-neutral-950/50 rounded-xl border border-white/5 p-4 mb-6 flex items-center justify-between group hover:border-white/10 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center text-xl">
+                      🎟️
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs text-neutral-500 uppercase tracking-wider font-medium">Ticket Status</div>
+                      <div className="text-sm text-white font-medium">Confirmed • 1 Attendee</div>
+                    </div>
+                  </div>
+                  <div className="h-8 w-[1px] bg-white/10" />
+                  <div className="text-right">
+                    <div className="text-xs text-neutral-500">ID</div>
+                    <div className="text-sm font-mono text-yellow-500">#8X29</div>
+                  </div>
+                </motion.div>
+
+                {/* Action Buttons */}
+                <div className="grid grid-cols-2 gap-3 w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full bg-transparent border-white/10 hover:bg-white/5 text-white hover:text-white h-11 rounded-xl"
+                    onClick={() => {}}
+                  >
+                    <Share2 size={16} className="mr-2" />
+                    Share
+                  </Button>
+                  <Button
+                    className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold h-11 rounded-xl shadow-[0_0_20px_rgba(250,204,21,0.2)] hover:shadow-[0_0_30px_rgba(250,204,21,0.4)] transition-all duration-300"
+                    onClick={onClose}
+                  >
+                    Continue
+                  </Button>
+                </div>
+
+                {/* Footer Tip */}
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="mt-6 text-[10px] text-neutral-500 font-medium"
+                >
+                  Tip: Click on <span className="text-yellow-500 font-bold">Zynced It</span> to get your event tickets
+                </motion.p>
               </div>
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-3 flex flex-col items-center justify-center">
-                <Trophy className="w-5 h-5 text-white mb-1" />
-                <span className="text-xs text-white font-semibold">Achiever</span>
-              </div>
-              <div className="bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg p-3 flex flex-col items-center justify-center">
-                <span className="text-xl mb-1">⚡</span>
-                <span className="text-xs text-white font-semibold">Ready!</span>
-              </div>
             </div>
-
-            {/* Success Message */}
-            <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-6">
-              <p className="text-green-400 text-sm font-medium">
-                ✓ You are all set for this exciting event ahead. Keep an eye on your email for further updates!
-              </p>
-            </div>
-
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
-            >
-              Let's Go! 🚀
-            </button>
-          </div>
-
-          {/* Decorative Elements */}
-          <div className="absolute top-4 right-4 text-2xl animate-spin" style={{ animationDuration: '3s' }}>
-            ✨
-          </div>
-          <div className="absolute bottom-4 left-4 text-2xl animate-pulse">
-            🎊
-          </div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 };
 
