@@ -64,7 +64,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className=" bg-gray-900 text-white relative">
+    <div className="bg-yellow-300 text-black relative">
       {/* Fixed Background Image */}
 
       <title>
@@ -199,7 +199,7 @@ export default function Home() {
         }}
       />
 
-      {/* Content Container (above animations) - Made scrollable with semi-transparent overlay */}
+      {/* Content Container */}
       <div className="content-overlay relative min-h-screen">
         {/* Navigation */}
         <LandingHeader />
@@ -210,7 +210,7 @@ export default function Home() {
         <ZynvoDashboard /> */}
         <Features />
 
-        <HowItWorks />
+        
         {/* Testimonials Section */}
         {/* <Testimonials /> */}
 
