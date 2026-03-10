@@ -38,7 +38,7 @@ const MenuItem = ({
       <Link href={href}>
         <motion.p
           transition={{ duration: 0.3 }}
-          className="cursor-pointer text-gray-300 hover:text-white transition-colors font-medium"
+          className="cursor-pointer text-black font-bold transition-colors text-lg outline-dashed"
         >
           {item}
         </motion.p>
@@ -117,11 +117,11 @@ const LandingHeader = () => {
     <header
       className={`fixed w-full top-0 left-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'backdrop-blur-md bg-black/80 py-2 shadow-lg border-b border-yellow-500/10'
-          : 'backdrop-blur-sm bg-black/40 py-4'
+          ? 'backdrop-blur-md  py-2 shadow-lg border-b border-yellow-500/10'
+          : 'backdrop-blur-sm py-1'
       }`}
     >
-      <div className="container mx-auto px-4 lg:px-8">
+      <div className="container mx-auto px-3 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo section */}
           <div className="flex items-center">
@@ -129,7 +129,7 @@ const LandingHeader = () => {
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg group-hover:shadow-yellow-500/50 transition-shadow">
                 <span className="text-black font-bold text-xl">Z</span>
               </div>
-              <span className="text-white font-bold text-xl hidden sm:inline">ynvo</span>
+              <span className="text-black font-bold text-xl hidden sm:inline">ynvo</span>
             </Link>
           </div>
 
@@ -286,7 +286,7 @@ const LandingHeader = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className="relative mx-4 mt-20 rounded-3xl bg-gradient-to-br from-gray-900 via-black to-gray-900 border border-yellow-500/30 shadow-[0_0_80px_rgba(234,179,8,0.25)] overflow-hidden"
+              className="relative mx-4 mt-20 rounded-3xl bg-gradient-to-br from-gray-00 via-black to-gray-900 border border-yellow-500/30 shadow-[0_0_80px_rgba(234,179,8,0.25)] overflow-hidden"
               role="dialog"
               aria-modal="true"
             >
@@ -299,7 +299,7 @@ const LandingHeader = () => {
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg">
                     <span className="text-black font-bold text-lg">Z</span>
                   </div>
-                  <span className="text-white font-bold text-xl">ynvo</span>
+                  <span className="text-black font-bold text-xl">ynvo</span>
                 </div>
                 <button
                   aria-label="Close menu"

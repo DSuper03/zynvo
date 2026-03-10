@@ -2,6 +2,13 @@
 
 import { gsap } from "gsap";
 import React, { useEffect, useRef } from "react";
+import { Rock_Salt } from "next/font/google";
+import Link from "next/link";
+import { Button } from "./ui/button";
+const rockSalt = Rock_Salt({
+  subsets: ["latin"],
+  weight: ["400"],
+});
 
 interface CrowdCanvasProps {
   src: string;
@@ -309,23 +316,70 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     };
   }, []);
   return (
-    <canvas ref={canvasRef} className="absolute bottom-0 h-[90vh] w-full" />
+    <canvas
+      ref={canvasRef}
+      className="absolute bottom-0 h-[50vh] w-full sm:h-[60vh] md:h-[70vh] lg:h-[80vh]"
+    />
   );
 };
 
 const Skiper39 = () => {
+  const headlineRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!headlineRef.current) return;
+
+    gsap.fromTo(
+      headlineRef.current,
+      { y: 120, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 1,
+        ease: "power3.out",
+        delay: 0.4,
+      },
+    );
+  }, []);
+
   return (
-    <div className="relative w-full h-[90vh] bg-yellow-300 text-black overflow-hidden">
+    <div className="relative w-full min-h-[70vh] bg-yellow-300 text-black overflow-visible md:h-[90vh] md:overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.5),_transparent_60%),_radial-gradient(circle_at_bottom,_rgba(234,179,8,0.6),_transparent_60%)] opacity-70" />
 
-      <div className="relative z-10 top-16 left-1/2 grid -translate-x-1/2 content-start justify-items-center gap-4 text-center text-black">
-        <span className="relative max-w-[16ch] text-[10px] tracking-[0.2em] uppercase leading-tight opacity-70 after:absolute after:left-1/2 after:top-full after:h-16 after:w-px after:bg-gradient-to-b after:from-black/60 after:to-transparent after:content-['']">
-          Crowd Canvas • Skiper39
-        </span>
+      <div
+        ref={headlineRef}
+        className="relative z-10 top-16 left-1/2 grid -translate-x-1/2 content-start justify-items-center gap-3 text-center text-black"
+      >
+        <p
+          className={`${rockSalt.className} tracking-tight text-3xl sm:text-4xl md:text-5xl leading-tight`}
+        >
+          Zynvo Social
+        </p>
+        <p className="text-xs sm:text-sm md:text-2xl font-mono font-bold tracking-wide">
+          Your one place for campus, clubs and events.
+        </p>
+        <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link href="/auth/signin">
+            <Button className="w-full rounded-full bg-black px-6 py-2 text-sm font-semibold text-yellow-300 hover:bg-black/90 sm:w-auto">
+              Login
+            </Button>
+          </Link>
+          <Link href="/auth/signup">
+            <Button
+              variant="outline"
+              className="w-full rounded-full border-black bg-yellow-200/80 px-6 py-2 text-sm font-semibold text-black hover:bg-yellow-300 sm:w-auto"
+            >
+              Sign up
+            </Button>
+          </Link>
+        </div>
       </div>
-
-      <div className="absolute bottom-0 h-full w-screen">
-        <CrowdCanvas src="/images/peeps/all-peeps.png" rows={15} cols={7} />
+      <div className="absolute bottom-0 h-full w-screen pb-14">
+        <CrowdCanvas
+          src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/175711/open-peeps-sheet.png"
+          rows={15}
+          cols={7}
+        />
       </div>
     </div>
   );

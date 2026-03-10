@@ -10,12 +10,13 @@ import {
 } from 'react-icons/fa';
 
 import LandingHeader from '@/components/landingHeader';
-import { 
-  Hero, 
-  Features, 
-  HowItWorks, 
-  Events, 
-  Footer 
+import { Skiper39 } from '@/components/SkipperLanding';
+import {
+  Hero,
+  Features,
+  HowItWorks,
+  Events,
+  Footer,
 } from '@/components/DynamicComponents';
 export default function Home() {
   const heroRef = useRef(null);
@@ -63,7 +64,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className=" bg-gray-900 text-white relative">
+    <div className="bg-yellow-300 text-black relative">
       {/* Fixed Background Image */}
 
       <title>
@@ -198,17 +199,18 @@ export default function Home() {
         }}
       />
 
-      {/* Content Container (above animations) - Made scrollable with semi-transparent overlay */}
+      {/* Content Container */}
       <div className="content-overlay relative min-h-screen">
         {/* Navigation */}
         <LandingHeader />
 
+        <Skiper39 />
         <Hero />
         {/*     
         <ZynvoDashboard /> */}
         <Features />
 
-        <HowItWorks />
+        
         {/* Testimonials Section */}
         {/* <Testimonials /> */}
 

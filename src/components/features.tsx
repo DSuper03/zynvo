@@ -9,61 +9,124 @@ import {
   Calendar,
   BookOpen,
   Sparkles,
-  ArrowRight,
   Star,
   TrendingUp,
   Globe,
   BadgeCheck,
   MessageCircle,
   Activity,
+  Search,
+  Zap,
+  Heart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import Image from 'next/legacy/image';
-import { AuroraText } from './magicui/aurora-text';
+import Image from 'next/image';
 
 // Custom Skeletons for Bento Grid Items
+
 const HeroSkeleton = () => {
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative w-full h-full rounded-lg overflow-hidden bg-yellow-200"
+      className="relative flex h-full min-h-[380px] w-full flex-col justify-between overflow-hidden rounded-3xl bg-[#FEF6D6] p-5 text-left shadow-lg transition-shadow hover:shadow-xl"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-yellow-200/20 to-yellow-500" />
-      <Image
-        src="/banners/featurebanner1.jpg"
-        alt="Hero Image"
-        layout="fill"
-        objectFit="cover"
-      />
-      <div className="absolute inset-0 flex flex-col justify-center items-center p-6 text-center"></div>
+      <div className="flex items-start justify-between">
+        <div className="">
+          <p className="text-xs font-bold uppercase tracking-widest text-yellow-600">
+            Discover
+          </p>
+          <h3 className="text-lg font-bold text-slate-900">Campus Clubs</h3>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Explore tech, dance, gaming, and more.
+          </p>
+        </div>
+        <div className="flex items-center  rounded-full bg-yellow-400/20 px-2  text-[10px] font-bold text-yellow-700 shrink-0">
+          <Zap className="h-3 w-3" />
+          <span>142 Active</span>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className=" flex items-center  rounded-xl bg-white/60 p-2 shadow-sm backdrop-blur-sm shrink-0">
+        <Search className="  text-slate-400" />
+        <span className="text-xs text-slate-500">Search clubs…</span>
+      </div>
+
+      {/* Club List - always visible */}
+      <div className=" min-h-[140px] space-y-2 overflow-y-auto pr-1">
+        {[
+          { name: 'Tech Society', members: '8.2K', accent: 'bg-blue-500', icon: '💻' },
+          { name: 'Dance Club', members: '4.1K', accent: 'bg-pink-500', icon: '💃' },
+          { name: 'Entrepreneurs', members: '2.7K', accent: 'bg-amber-500', icon: '🚀' },
+          { name: 'Gaming Squad', members: '3.8K', accent: 'bg-emerald-500', icon: '🎮' },
+          { name: 'Debate Team', members: '1.2K', accent: 'bg-purple-500', icon: '🎙️' },
+        ].map((club) => (
+          <motion.div
+            key={club.name}
+            whileHover={{ scale: 0.95 }}
+            className="flex items-center justify-between rounded-xl bg-white p-2 shadow-sm"
+          >
+            <div className="flex items-center gap-3">
+              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${club.accent} text-xs text-white shadow-sm`}>
+                {club.icon}
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-800">{club.name}</p>
+                <p className="text-[10px] text-slate-500">{club.members} members</p>
+              </div>
+            </div>
+            <button className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600 hover:bg-yellow-400 hover:text-black transition-colors shrink-0">
+              Join
+            </button>
+          </motion.div>
+        ))}
+      </div>
+      
+      {/* Avatars - 4 only, bigger size */}
+      <div className="mt-3 flex items-center justify-between border-t border-yellow-500/10 pt-3 shrink-0">
+        <div className="flex -space-x-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-16 w-16 overflow-hidden rounded-full border-2 border-[#FEF6D6] bg-white shadow-md">
+              <Image
+                src={`/avatars/avatar${i}.png`}
+                alt="Avatar"
+                width={64}
+                height={64}
+                className="object-cover"
+              />
+            </div>
+          ))}
+        </div>
+        <p className="text-[10px] font-medium text-slate-500">+2.4k joined</p>
+      </div>
     </motion.div>
   );
 };
 
 const StatsSkeleton = () => {
   const stats = [
-    { value: '8.5K', label: 'Students', icon: <Users className="w-4 h-4" /> },
-    { value: '142', label: 'Events', icon: <Calendar className="w-4 h-4" /> },
-    { value: '95%', label: 'Satisfaction', icon: <Star className="w-4 h-4" /> },
-    { value: '36', label: 'Colleges', icon: <Globe className="w-4 h-4" /> },
+    { value: '8.5K+', label: 'Students', icon: <Users className="h-4 w-4" />, color: 'text-blue-500', bg: 'bg-blue-50' },
+    { value: '142', label: 'Events', icon: <Calendar className="h-4 w-4" />, color: 'text-pink-500', bg: 'bg-pink-50' },
+    { value: '98%', label: 'Happy', icon: <Heart className="h-4 w-4" />, color: 'text-red-500', bg: 'bg-red-50' },
+    { value: '36', label: 'Campus', icon: <Globe className="h-4 w-4" />, color: 'text-emerald-500', bg: 'bg-emerald-50' },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 w-full h-full">
+    <div className="grid h-full w-full grid-cols-2 gap-3">
       {stats.map((stat, idx) => (
         <motion.div
           key={idx}
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: idx * 0.1 }}
-          className="bg-black/30 rounded-lg p-3 border border-gray-800"
+          whileHover={{ scale: 1.05 }}
+          className="flex flex-col justify-center rounded-2xl bg-white p-3 shadow-sm border border-slate-100"
         >
-          <div className="text-xl font-bold text-white">{stat.value}</div>
-          <div className="flex items-center text-xs text-gray-400">
-            <span className="mr-1 text-yellow-500">{stat.icon}</span>
+          <div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-full ${stat.bg} ${stat.color}`}>
+            {stat.icon}
+          </div>
+          <div className="text-lg font-bold text-slate-900">{stat.value}</div>
+          <div className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">
             {stat.label}
           </div>
         </motion.div>
@@ -77,24 +140,40 @@ const EventSkeleton = () => {
     <motion.div
       initial={{ y: 0 }}
       whileHover={{ y: -5 }}
-      className="relative w-full h-full rounded-lg overflow-hidden"
+      className="relative h-full w-full overflow-hidden rounded-3xl bg-slate-900 shadow-lg group"
     >
       <Image
         src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/photo_2025-05-23_20-16-14.jpg?updatedAt=1748011606544"
         alt="Tech Fest"
-        className="object-cover"
-        width={400}
-        height={300}
+        layout="fill"
+        objectFit="cover"
+        className="opacity-80 transition-opacity group-hover:opacity-60"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 p-4">
-        <div className="inline-block bg-yellow-500 text-black text-xs font-medium px-2 py-1 rounded-full mb-2">
-          MAY 25
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+      
+      <div className="absolute top-4 right-4 rounded-xl bg-white/10 px-3 py-1 text-center backdrop-blur-md border border-white/20">
+        <p className="text-[10px] font-bold uppercase text-white/80">May</p>
+        <p className="text-lg font-bold text-white">25</p>
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0 p-5">
+        <div className="mb-2 flex items-center gap-2">
+          <span className="rounded-md bg-yellow-400 px-2 py-0.5 text-[10px] font-bold text-black">
+            FEATURED
+          </span>
+          <span className="text-[10px] font-medium text-white/80 flex items-center gap-1">
+            <Globe className="h-3 w-3" /> Online
+          </span>
         </div>
-        <h3 className="text-white font-bold">Tech Fest 2025</h3>
-        <p className="text-gray-300 text-xs">
-          Connect with innovative tech clubs
+        <h3 className="text-lg font-bold text-white leading-tight">
+          Tech Fest 2025
+        </h3>
+        <p className="mt-1 text-xs text-slate-300 line-clamp-2">
+          Join the biggest campus tech festival. Hackathons, workshops, and networking.
         </p>
+        <button className="mt-3 w-full rounded-lg bg-white/10 py-2 text-xs font-bold text-white backdrop-blur-sm hover:bg-white hover:text-black transition-colors">
+          Register Now
+        </button>
       </div>
     </motion.div>
   );
@@ -102,59 +181,54 @@ const EventSkeleton = () => {
 
 const FeaturesSkeleton = () => {
   const features = [
-    { title: 'Club Discovery', icon: <BookOpen className="w-5 h-5" /> },
-    { title: 'Event Management', icon: <Calendar className="w-5 h-5" /> },
-    { title: 'Network Builder', icon: <Users className="w-5 h-5" /> },
-    { title: 'Growth Analytics', icon: <TrendingUp className="w-5 h-5" /> },
+    { title: 'Club Discovery', icon: <BookOpen className="h-4 w-4" />, color: 'bg-blue-100 text-blue-600' },
+    { title: 'Event Manager', icon: <Calendar className="h-4 w-4" />, color: 'bg-purple-100 text-purple-600' },
+    { title: 'Networking', icon: <Users className="h-4 w-4" />, color: 'bg-green-100 text-green-600' },
+    { title: 'Analytics', icon: <TrendingUp className="h-4 w-4" />, color: 'bg-orange-100 text-orange-600' },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 w-full h-full">
-      {features.map((feature, idx) => (
-        <motion.div
-          key={idx}
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          whileHover={{ scale: 1.05 }}
-          transition={{ delay: idx * 0.1 }}
-          className="bg-black/30 border border-gray-800 rounded-lg p-3 flex flex-col items-center justify-center"
-        >
-          <div className="h-10 w-10 rounded-full bg-yellow-500/10 flex items-center justify-center mb-2">
-            <div className="text-yellow-500">{feature.icon}</div>
+    <div className="relative flex h-full w-full flex-col justify-between overflow-hidden rounded-3xl bg-[#F4ECFF] p-5 shadow-md">
+      <div className="grid grid-cols-2 gap-3">
+        {features.map((feature, idx) => (
+          <motion.div
+            key={idx}
+            whileHover={{ scale: 1.05 }}
+            className="flex flex-col items-center justify-center rounded-2xl bg-white p-3 text-center shadow-sm"
+          >
+            <div className={`mb-2 rounded-full p-2 ${feature.color}`}>
+              {feature.icon}
+            </div>
+            <span className="text-[10px] font-bold text-black leading-tight">
+              {feature.title}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+      
+      {/* Chat Bubble UI */}
+      <div className="mt-4 rounded-2xl bg-white p-3 shadow-sm border border-purple-100">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="h-14 w-14 overflow-hidden rounded-full border-2 border-purple-100">
+               <Image
+                  src={`/avatars/avatar1.png`}
+                  alt="Avatar"
+                  width={56}
+                  height={56}
+                />
+            </div>
+            <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
           </div>
-          <span className="text-white text-sm font-medium">
-            {feature.title}
-          </span>
-        </motion.div>
-      ))}
-    </div>
-  );
-};
-
-const CollegesSkeleton = () => {
-  const colleges = [
-    'Tyler School of Martial Arts',
-    'Nikumb College of Design',
-    'Ved School of Drama',
-    'Barney Stinson College',
-    'B99 Army College',
-  ];
-
-  return (
-    <div className="w-full h-full flex flex-col space-y-2">
-      {colleges.map((college, idx) => (
-        <motion.div
-          key={idx}
-          initial={{ x: -10, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          whileHover={{ x: 5 }}
-          transition={{ delay: idx * 0.1 }}
-          className="bg-black/20 rounded-lg p-2 flex items-center"
-        >
-          <BadgeCheck className="w-4 h-4 text-yellow-500 mr-2" />
-          <span className="text-white text-sm truncate">{college}</span>
-        </motion.div>
-      ))}
+          <div className="flex-1">
+             <div className="flex items-center justify-between">
+               <p className="text-xs font-bold text-slate-800">Sarah from Design</p>
+               <span className="text-[10px] text-slate-400">2m</span>
+             </div>
+             <p className="text-[10px] text-slate-500 mt-0.5">Anyone up for a collab?</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -164,34 +238,43 @@ const ClubRoomSkeleton = () => {
     <motion.div
       initial={{ opacity: 0.8 }}
       whileHover={{ opacity: 1 }}
-      className="relative w-full h-full rounded-lg overflow-hidden bg-gradient-to-br from-yellow-500/20 to-black/80 flex items-center justify-center"
+      className="relative flex h-full w-full flex-col justify-between overflow-hidden rounded-3xl bg-[#FFECEF] p-6 shadow-md"
     >
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative">
-          <div className="absolute -top-6 -left-6 w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center">
-            <MessageCircle className="w-6 h-6 text-black" />
-          </div>
-          <div className="w-32 h-20 bg-gray-800 rounded-lg border border-gray-700 flex items-center justify-center">
-            <span className="text-yellow-500 text-sm font-medium">
-              Club Rooms
-            </span>
+      <div className="flex flex-col items-center text-center">
+        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 text-rose-500 shadow-inner">
+          <MessageCircle className="h-8 w-8" />
+        </div>
+        <h3 className="text-lg font-bold text-slate-900">Club Rooms</h3>
+        <p className="mt-1 text-xs text-slate-600">
+          Private spaces for your community discussions.
+        </p>
+      </div>
+      
+      <div className="mt-4">
+        <div className="flex justify-center -space-x-4">
+          {[1, 2, 3].map((i) => (
+            <motion.div 
+              key={i} 
+              whileHover={{ y: -5, zIndex: 10 }}
+              className="h-16 w-16 overflow-hidden rounded-full border-4 border-white shadow-md"
+            >
+              <Image
+                src={`/avatars/avatar${i}.png`}
+                alt="Avatar"
+                width={64}
+                height={64}
+                className="object-cover"
+              />
+            </motion.div>
+          ))}
+          <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-rose-100 text-xs font-bold text-rose-600 shadow-md">
+            +42
           </div>
         </div>
+        <button className="mt-4 w-full rounded-xl bg-rose-500 py-2 text-xs font-bold text-white shadow-md shadow-rose-200 hover:bg-rose-600 transition-colors">
+          Start a Room
+        </button>
       </div>
-    </motion.div>
-  );
-};
-
-const CtaSkeleton = () => {
-  return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-yellow-500/20 to-black rounded-lg p-6"
-    >
-      <h3 className="text-white font-bold text-xl mb-3">Ready to join?</h3>
-      <Button className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-md">
-        <Link href="/auth/signup">Sign Up Today</Link>
-      </Button>
     </motion.div>
   );
 };
@@ -224,107 +307,126 @@ const Features = () => {
   // Define BentoGrid items
   const items = [
     {
-      title: 'Welcome to Zynvo',
+      title: 'Discover Clubs',
       description: (
-        <span className="text-sm text-neutral-50">
-          Your ultimate campus connection platform
+        <span className="text-sm text-white">
+          Find and join communities that match your vibe.
         </span>
       ),
       header: <HeroSkeleton />,
-      className: 'md:col-span-2',
-      icon: <Sparkles className="h-5 w-5 text-neutral-50" />,
+      className: 'md:col-span-2 md:row-span-2',
+      icon: <Sparkles className="h-4 w-4 text-yellow-600" />,
     },
     {
-      title: 'Platform Stats',
+      title: 'Campus Pulse',
       description: (
-        <span className="text-sm text-neutral-50">
-          Growing network of students and colleges
+        <span className="text-sm text-slate-600">
+          Live stats from your campus.
         </span>
       ),
       header: <StatsSkeleton />,
       className: 'md:col-span-1',
-      icon: <Activity className="h-5 w-5 text-neutral-50" />,
+      icon: <Activity className="h-4 w-4 text-sky-500" />,
     },
     {
-      title: 'Tech Fest 2025',
+      title: 'Never Miss Events',
       description: (
-        <span className="text-sm">
-          Join the upcoming campus-wide tech festival
+        <span className="text-sm text-slate-600">
+          All your campus events in one place.
         </span>
       ),
       header: <EventSkeleton />,
       className: 'md:col-span-1',
-      icon: <Calendar className="h-5 w-5 text-neutral-50" />,
+      icon: <Calendar className="h-4 w-4 text-pink-500" />,
     },
     {
-      title: 'Create Club Rooms',
+      title: 'Find Your Tribe',
       description: (
-        <span className="text-sm">
-          Host virtual meetings and discussions instantly
+        <span className="text-sm text-slate-600">
+          Connect with like-minded peers.
         </span>
       ),
       header: <ClubRoomSkeleton />,
       className: 'md:col-span-1',
-      icon: <MessageCircle className="h-5 w-5 text-neutral-50" />,
+      icon: <Users className="h-4 w-4 text-rose-500" />,
     },
     {
-      title: 'Key Features',
+      title: 'Club Chat & Tools',
       description: (
-        <span className="text-sm text-neutral-50 ">
-          Tools designed for campus networking
+        <span className="text-sm text-slate-600 ">
+          Powerful tools to manage your community.
         </span>
       ),
       header: <FeaturesSkeleton />,
       className: 'md:col-span-1',
-      icon: <BookOpen className="h-5 w-5 text-neutral-50" />,
+      icon: <Zap className="h-4 w-4 text-purple-500" />,
+    },
+    {
+      title: 'Your Campus Community',
+      description: (
+        <span className="text-sm text-slate-600">
+          Thousands of students connecting every day.
+        </span>
+      ),
+      header: (
+        <div className="relative h-full w-full overflow-hidden rounded-3xl">
+          <Image
+            src="/avatars/crowd1.png"
+            alt="Campus community"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 33vw"
+          />
+        </div>
+      ),
+      className: 'md:col-span-1',
+      icon: <Users className="h-4 w-4 text-yellow-600" />,
     },
   ];
 
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen py-10 sm:py-16 md:py-24 overflow-hidden bg-black"
-      style={{
-        backgroundImage: 'url(/featureLanding.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-      }}
+      className="relative min-h-screen overflow-hidden bg-yellow-300 py-10 sm:py-16 md:py-24"
     >
-      {/* Background overlay */}
-      <div className="absolute inset-0 bg-black/70 z-0"></div>
-
-      {/* Background elements */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 to-transparent"></div>
-        <div className="absolute bottom-0 right-0 w-full h-1 bg-gradient-to-l from-yellow-500 to-transparent"></div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-        <div className="text-center mb-8 sm:mb-12">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="mb-12 space-y-4 text-center sm:mb-16">
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="flex items-center justify-center gap-2 mb-4"
+            className="flex items-center justify-center gap-2"
           >
-            <span className="text-xl font-semibold text-yellow-500">Zynvo</span>
+            <span className="rounded-full bg-black px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-yellow-300 shadow-lg">
+              The Campus Super App
+            </span>
           </motion.div>
 
           <motion.h1
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white"
+            transition={{ delay: 0.1 }}
+            className="text-balance text-3xl font-black text-slate-900 sm:text-5xl md:text-6xl"
           >
-            Your Campus{' '}
-            <span className=" text-yellow-500  to-yellow-900">
-              Connection Hub
+            Everything happening on campus.
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-600">
+              Finally in one place.
             </span>
           </motion.h1>
+
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-800 sm:text-lg"
+          >
+            Discover clubs, register for events, find your community, and make college
+            more than just classes.
+          </motion.p>
         </div>
 
         {/* Responsive BentoGrid */}
-        <BentoGrid className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto md:auto-rows-[20rem] text-neutral-100">
+        <BentoGrid className="mx-auto grid max-w-6xl grid-cols-1 gap-6 text-black sm:grid-cols-2 md:auto-rows-[24rem] md:grid-cols-3">
           {items.map((item, i) => (
             <BentoGridItem
               key={i}
@@ -332,7 +434,7 @@ const Features = () => {
               description={item.description}
               header={item.header}
               className={cn(
-                '[&>p:text-base] sm:[&>p:text-lg] rounded-lg text-neutral-100',
+                '[&>p:text-sm] sm:[&>p:text-base] rounded-3xl bg-black border-none shadow-none hover:bg-white/60 transition-colors duration-300',
                 item.className
               )}
               icon={item.icon}
