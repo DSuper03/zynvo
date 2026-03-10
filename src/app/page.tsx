@@ -10,12 +10,13 @@ import {
 } from 'react-icons/fa';
 
 import LandingHeader from '@/components/landingHeader';
-import { 
-  Hero, 
-  Features, 
-  HowItWorks, 
-  Events, 
-  Footer 
+import { Skiper39 } from '@/components/SkipperLanding';
+import {
+  Hero,
+  Features,
+  HowItWorks,
+  Events,
+  Footer,
 } from '@/components/DynamicComponents';
 export default function Home() {
   const heroRef = useRef(null);
@@ -203,6 +204,7 @@ export default function Home() {
         {/* Navigation */}
         <LandingHeader />
 
+        <Skiper39 />
         <Hero />
         {/*     
         <ZynvoDashboard /> */}
