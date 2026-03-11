@@ -376,7 +376,7 @@ const Skiper39 = () => {
       {/* FIX: balanced padding for comfortable spacing */}
       <div
         ref={headlineRef}
-        className="relative z-10 flex flex-col items-center justify-center px-4 pt-12  text-center text-black sm:pb-24 md:pb-28"
+        className="relative z-10 -mb-4 flex flex-col items-center justify-center px-4 pt-12 pb-2 text-center text-black sm:mb-0 sm:pb-24 md:pb-28"
       >
         <div className="flex flex-col items-center justify-center gap-3">
           <p
@@ -439,7 +439,7 @@ const Skiper39 = () => {
 
       {/* FIX: balanced canvas height */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[56vh] sm:h-[52vh] md:h-[56vh] lg:h-[60vh]"
         
       >
         {/* FIX: balanced gradient height */}
