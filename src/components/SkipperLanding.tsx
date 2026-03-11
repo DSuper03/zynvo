@@ -47,7 +47,9 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     // TWEEN FACTORIES
     const resetPeep = ({ stage, peep }: { stage: any; peep: any }) => {
       const direction = Math.random() > 0.5 ? 1 : -1;
-      const offsetY = 100 - 250 * gsap.parseEase("power2.in")(Math.random());
+      const heightRatio = Math.min(1, stage.height / 380);
+      const offsetY =
+        (100 - 250 * gsap.parseEase("power2.in")(Math.random())) * heightRatio;
       const startY = stage.height - peep.height + offsetY;
       let startX: number;
       let endX: number;
@@ -109,6 +111,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     type Peep = {
       image: HTMLImageElement;
       rect: number[];
+      naturalRect: number[];
       width: number;
       height: number;
       drawArgs: any[];
@@ -117,7 +120,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       anchorY: number;
       scaleX: number;
       walk: any;
-      setRect: (rect: number[]) => void;
+      setRect: (rect: number[], scale?: number) => void;
       render: (ctx: CanvasRenderingContext2D) => void;
     };
 
@@ -132,6 +135,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       const peep: Peep = {
         image,
         rect: [],
+        naturalRect: [],
         width: 0,
         height: 0,
         drawArgs: [],
@@ -140,10 +144,11 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
         anchorY: 0,
         scaleX: 1,
         walk: null,
-        setRect: (rect: number[]) => {
+        setRect: (rect: number[], scale: number = 1) => {
+          peep.naturalRect = rect;
           peep.rect = rect;
-          peep.width = rect[2];
-          peep.height = rect[3];
+          peep.width = rect[2] * scale;
+          peep.height = rect[3] * scale;
           peep.drawArgs = [peep.image, ...rect, 0, 0, peep.width, peep.height];
         },
         render: (ctx: CanvasRenderingContext2D) => {
@@ -152,10 +157,10 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
           ctx.scale(peep.scaleX, 1);
           ctx.drawImage(
             peep.image,
-            peep.rect[0],
-            peep.rect[1],
-            peep.rect[2],
-            peep.rect[3],
+            peep.naturalRect[0],
+            peep.naturalRect[1],
+            peep.naturalRect[2],
+            peep.naturalRect[3],
             0,
             0,
             peep.width,
@@ -249,8 +254,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       });
 
       ctx.restore();
-      
-      // Continue animation loop only if visible
+
       if (isVisible) {
         rafId = requestAnimationFrame(render);
       }
@@ -259,10 +263,23 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     const resize = () => {
       if (!canvas) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      stage.width = canvas.clientWidth;
-      stage.height = canvas.clientHeight;
+      stage.width = canvas.clientWidth || canvas.offsetWidth || 300;
+      stage.height = canvas.clientHeight || canvas.offsetHeight || 200;
       canvas.width = stage.width * dpr;
       canvas.height = stage.height * dpr;
+
+      const isMobile = stage.width < 640;
+      const baseHeight = isMobile ? 280 : 380;
+      const baseFactor = Math.min(stage.width / 640, stage.height / baseHeight);
+
+      // FIX: bumped mobile min from 0.18→0.25 and max from 0.45→0.5
+      const scaleFactor = isMobile
+        ? Math.max(0.25, Math.min(0.5, baseFactor))
+        : Math.max(0.45, Math.min(1, baseFactor));
+
+      allPeeps.forEach((peep) => {
+        peep.setRect(peep.naturalRect, scaleFactor);
+      });
 
       crowd.forEach((peep) => {
         peep.walk.kill();
@@ -278,21 +295,24 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     const init = () => {
       createPeeps();
       resize();
-      // Start animation loop
       rafId = requestAnimationFrame(render);
     };
 
     img.onload = init;
     img.src = config.src;
 
-    // Throttle resize handler
-    let resizeTimeout: NodeJS.Timeout;
+    let resizeTimeout: ReturnType<typeof setTimeout>;
     const handleResize = () => {
       clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => resize(), 200);
+      resizeTimeout = setTimeout(() => resize(), 150);
     };
-    
-    // Pause animation when page is hidden
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(handleResize);
+      resizeObserver.observe(canvas);
+    }
+
     const handleVisibilityChange = () => {
       isVisible = !document.hidden;
       if (isVisible && !rafId) {
@@ -309,6 +329,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     return () => {
       window.removeEventListener("resize", handleResize);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      resizeObserver?.disconnect();
       if (rafId) {
         cancelAnimationFrame(rafId);
       }
@@ -318,10 +339,12 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       });
     };
   }, [src, rows, cols]);
+
   return (
     <canvas
       ref={canvasRef}
-      className="h-full w-full"
+      className="h-full w-full block"
+      style={{ display: "block" }}
     />
   );
 };
@@ -350,9 +373,10 @@ const Skiper39 = () => {
     <div className="relative w-full min-h-screen overflow-hidden bg-yellow-300 text-black">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.5),_transparent_60%),_radial-gradient(circle_at_bottom,_rgba(234,179,8,0.6),_transparent_60%)] opacity-70" />
 
+      {/* FIX: balanced padding for comfortable spacing */}
       <div
         ref={headlineRef}
-        className="relative z-10 flex flex-col items-center justify-center px-4 pt-16 pb-32 text-center text-black sm:pb-36 md:pb-40 md:pt-20"
+        className="relative z-10 flex flex-col items-center justify-center px-4 pt-12 pb-6 text-center text-black sm:pb-24 md:pb-28"
       >
         <div className="flex flex-col items-center justify-center gap-3">
           <p
@@ -363,7 +387,7 @@ const Skiper39 = () => {
           <p className="text-xs sm:text-base md:text-lg lg:text-2xl font-mono font-bold tracking-wide">
             Your one place for campus, clubs and events.
           </p>
-          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+          <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 sm:mt-6">
             {user ? (
               <div className="flex flex-col items-center gap-4">
                 <p className="font-mono text-sm sm:text-base font-bold tracking-wide">
@@ -374,23 +398,23 @@ const Skiper39 = () => {
                   ! Ready to explore?
                 </p>
                 <div className="flex items-center gap-3">
-                <Button
-                  onClick={login}
-                  className="bg-black p-0 rounded-full w-12 h-12 flex items-center justify-center transition-all hover:scale-105 shadow-lg hover:shadow-black/40"
-                >
-                  <img
-                    src={user.pfp}
-                    alt="profile"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                </Button>
-                <button
-                  onClick={hardLogout}
-                  className="rounded-full bg-black px-5 py-2 text-xs sm:text-sm font-semibold text-yellow-300 hover:bg-black/80 transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
+                  <Button
+                    onClick={login}
+                    className="bg-black p-0 rounded-full w-12 h-12 flex items-center justify-center transition-all hover:scale-105 shadow-lg hover:shadow-black/40"
+                  >
+                    <img
+                      src={user.pfp}
+                      alt="profile"
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  </Button>
+                  <button
+                    onClick={hardLogout}
+                    className="rounded-full bg-black px-5 py-2 text-xs sm:text-sm font-semibold text-yellow-300 hover:bg-black/80 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
               </div>
             ) : (
               <>
@@ -412,7 +436,14 @@ const Skiper39 = () => {
           </div>
         </div>
       </div>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh]">
+
+      {/* FIX: balanced canvas height */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0"
+        style={{ height: "clamp(200px, 42vh, 55vh)" }}
+      >
+        {/* FIX: balanced gradient height */}
+        <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-yellow-300 to-transparent z-10 pointer-events-none" />
         <CrowdCanvas
           src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/175711/open-peeps-sheet.png"
           rows={15}
@@ -430,7 +461,7 @@ export { CrowdCanvas, Skiper39 };
  * Inspired by and adapted from https://codepen.io/zadvorsky/pen/xxwbBQV
  * illustration by https://www.openpeeps.com/
  * We respect the original creators. This is an inspired rebuild with our own taste and does not claim any ownership.
- * These animations aren’t associated with the codepen.io . They’re independent recreations meant to study interaction design
+ * These animations aren't associated with the codepen.io . They're independent recreations meant to study interaction design
  *
  * License & Usage:
  * - Free to use and modify in both personal and commercial projects.
