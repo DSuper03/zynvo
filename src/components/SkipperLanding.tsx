@@ -5,6 +5,7 @@ import React, { useEffect, useRef } from "react";
 import { Rock_Salt } from "next/font/google";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { useAuth } from "@/context/authContex";
 const rockSalt = Rock_Salt({
   subsets: ["latin"],
   weight: ["400"],
@@ -239,8 +240,9 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     const render = () => {
       if (!canvas || !isVisible) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const dpr = window.devicePixelRatio || 1;
       ctx.save();
-      ctx.scale(devicePixelRatio, devicePixelRatio);
+      ctx.scale(dpr, dpr);
 
       crowd.forEach((peep) => {
         peep.render(ctx);
@@ -256,10 +258,11 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
 
     const resize = () => {
       if (!canvas) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
       stage.width = canvas.clientWidth;
       stage.height = canvas.clientHeight;
-      canvas.width = stage.width * devicePixelRatio;
-      canvas.height = stage.height * devicePixelRatio;
+      canvas.width = stage.width * dpr;
+      canvas.height = stage.height * dpr;
 
       crowd.forEach((peep) => {
         peep.walk.kill();
@@ -314,17 +317,18 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
         if (peep.walk) peep.walk.kill();
       });
     };
-  }, []);
+  }, [src, rows, cols]);
   return (
     <canvas
       ref={canvasRef}
-      className="absolute bottom-0 h-[50vh] w-full sm:h-[60vh] md:h-[70vh] lg:h-[80vh]"
+      className="h-full w-full"
     />
   );
 };
 
 const Skiper39 = () => {
   const headlineRef = useRef<HTMLDivElement | null>(null);
+  const { user, login, hardLogout } = useAuth();
 
   useEffect(() => {
     if (!headlineRef.current) return;
@@ -343,38 +347,72 @@ const Skiper39 = () => {
   }, []);
 
   return (
-    <div className="relative w-full min-h-[70vh] bg-yellow-300 text-black overflow-visible md:h-[90vh] md:overflow-hidden">
+    <div className="relative w-full min-h-screen overflow-hidden bg-yellow-300 text-black">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.5),_transparent_60%),_radial-gradient(circle_at_bottom,_rgba(234,179,8,0.6),_transparent_60%)] opacity-70" />
 
       <div
         ref={headlineRef}
-        className="relative z-10 top-16 left-1/2 grid -translate-x-1/2 content-start justify-items-center gap-3 text-center text-black"
+        className="relative z-10 flex flex-col items-center justify-center px-4 pt-16 pb-32 text-center text-black sm:pb-36 md:pb-40 md:pt-20"
       >
-        <p
-          className={`${rockSalt.className} tracking-tight text-3xl sm:text-4xl md:text-5xl leading-tight`}
-        >
-          Zynvo Social
-        </p>
-        <p className="text-xs sm:text-sm md:text-2xl font-mono font-bold tracking-wide">
-          Your one place for campus, clubs and events.
-        </p>
-        <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link href="/auth/signin">
-            <Button className="w-full rounded-full bg-black px-6 py-2 text-sm font-semibold text-yellow-300 hover:bg-black/90 sm:w-auto">
-              Login
-            </Button>
-          </Link>
-          <Link href="/auth/signup">
-            <Button
-              variant="outline"
-              className="w-full rounded-full border-black bg-yellow-200/80 px-6 py-2 text-sm font-semibold text-black hover:bg-yellow-300 sm:w-auto"
-            >
-              Sign up
-            </Button>
-          </Link>
+        <div className="flex flex-col items-center justify-center gap-3">
+          <p
+            className={`${rockSalt.className} tracking-tight text-2xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight`}
+          >
+            Zynvo Social
+          </p>
+          <p className="text-xs sm:text-base md:text-lg lg:text-2xl font-mono font-bold tracking-wide">
+            Your one place for campus, clubs and events.
+          </p>
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+            {user ? (
+              <div className="flex flex-col items-center gap-4">
+                <p className="font-mono text-sm sm:text-base font-bold tracking-wide">
+                  👋 Hey there,{" "}
+                  <span className="underline underline-offset-4 decoration-black/40">
+                    {user.name?.split(" ")[0] ?? "there"}
+                  </span>
+                  ! Ready to explore?
+                </p>
+                <div className="flex items-center gap-3">
+                <Button
+                  onClick={login}
+                  className="bg-black p-0 rounded-full w-12 h-12 flex items-center justify-center transition-all hover:scale-105 shadow-lg hover:shadow-black/40"
+                >
+                  <img
+                    src={user.pfp}
+                    alt="profile"
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                </Button>
+                <button
+                  onClick={hardLogout}
+                  className="rounded-full bg-black px-5 py-2 text-xs sm:text-sm font-semibold text-yellow-300 hover:bg-black/80 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+              </div>
+            ) : (
+              <>
+                <Link href="/auth/signin">
+                  <Button className="rounded-full bg-black px-6 py-2 text-xs sm:text-sm font-semibold text-yellow-300 hover:bg-black/90 transition-colors">
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button
+                    variant="outline"
+                    className="rounded-full border-2 border-black bg-yellow-200/80 px-6 py-2 text-xs sm:text-sm font-semibold text-black hover:bg-yellow-300 transition-colors"
+                  >
+                    Sign up
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
-      <div className="absolute bottom-0 h-full w-screen pb-14">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh]">
         <CrowdCanvas
           src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/175711/open-peeps-sheet.png"
           rows={15}

@@ -38,7 +38,7 @@ const MenuItem = ({
       <Link href={href}>
         <motion.p
           transition={{ duration: 0.3 }}
-          className="cursor-pointer text-black font-bold transition-colors text-lg outline-dashed"
+          className="cursor-pointer text-black font-bold transition-colors text-lg hover:text-black/70"
         >
           {item}
         </motion.p>
@@ -224,7 +224,7 @@ const LandingHeader = () => {
                 </Link>
                 <Link
                   href="/auth/signin"
-                  className="bg-white/10 text-white hover:bg-white/20 border border-white/20 px-6 py-2.5 rounded-lg font-semibold transition-all"
+                  className="bg-black/10 text-black hover:bg-black/20 border border-black/20 px-6 py-2.5 rounded-lg font-semibold transition-all"
                 >
                   Sign In
                 </Link>

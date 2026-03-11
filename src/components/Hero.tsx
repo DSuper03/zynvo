@@ -64,9 +64,7 @@ const Hero = () => {
         </div>
 
         <div className="relative h-[340px] w-full md:h-[520px]">
-          <div
-            className="absolute inset-0"
-          >
+          <div className="absolute inset-0">
             <Image
               src="/posters/openpeeps.png"
               alt="Illustrated crowd of students"
