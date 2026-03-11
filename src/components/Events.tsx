@@ -2,7 +2,7 @@ import React from "react";
 import { FaUsers } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import Image from "next/legacy/image";
+import Image from "next/image";
 import { Button } from "./ui/button";
 
 const events = [
@@ -67,7 +67,7 @@ const Events = () => {
         </div>
 
         {/* Events Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mb-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
 
           {events.map((event, index) => (
             <motion.div
@@ -84,8 +84,9 @@ const Events = () => {
                 <Image
                   src={event.image}
                   alt={event.title}
-                  layout="fill"
-                  objectFit="cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
 
                 <div className="absolute top-4 left-4 bg-yellow-500 text-black text-xs font-semibold px-3 py-1 rounded-full">
