@@ -12,7 +12,7 @@ const mockEvent = {
   id: '1',
   title: 'Techno Innovators Summit 2025',
   organizer: 'Zynvo Tech Club',
-  date: '2024-12-15',
+  date: '2026-12-15',
   time: '10:00 AM – 5:00 PM',
   venue: 'University Auditorium',
   description: 'Explore the future of technology and innovation. Join workshops, expert talks, and hackathons!',

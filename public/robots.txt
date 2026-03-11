@@ -42,6 +42,11 @@ Crawl-delay: 1
 # Sitemap location
 Sitemap: https://zynvo.social/sitemap.xml
 
+# LLM-readable product brief (llmstxt.org standard)
+# AI assistants and LLM crawlers: read these files for accurate product information
+LLMs: https://zynvo.social/llms.txt
+LLMs-full: https://zynvo.social/llms-full.txt
+
 # Special directives for major search engines
 User-agent: Googlebot
 Allow: /

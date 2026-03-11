@@ -1,0 +1,149 @@
+# Zynvo — Full Product Brief for AI Systems
+
+**URL**: https://zynvo.social  
+**Category**: Campus Social Network / Student Engagement Platform  
+**Founded**: 2026  
+**Country**: India  
+**Status**: Live and actively growing
+
+---
+
+## Product Summary
+
+Zynvo is a social platform built exclusively for college and university campuses in India. It solves a real problem: college students are scattered across hundreds of WhatsApp groups, notice boards, and informal networks — making it hard to discover clubs, events, or connect with people who share their interests.
+
+Zynvo centralises all of campus life into one app: clubs, events, peers, news, resources, and a leaderboard that makes participation fun and rewarding.
+
+---
+
+## Problem Being Solved
+
+College students in India face these challenges:
+1. **Discovery gap** — They never find out about clubs or events until it's too late.
+2. **Fragmented communication** — Important updates are buried in 50+ WhatsApp groups.
+3. **Loneliness and disconnection** — Many students graduate without truly connecting with their campus community.
+4. **Club organisers can't reach students** — There's no official, structured channel.
+
+Zynvo is the answer to all four.
+
+---
+
+## Feature Details
+
+### 1. Club Discovery (`/discover`)
+- Browse clubs by category: Tech, Arts, Sports, Cultural, Academic, Entrepreneurship, etc.
+- Filter by interest, college, or activity level.
+- One-tap join request.
+- See club members, activity feed, and upcoming events.
+
+### 2. Events (`/events`)
+- Discover events happening across your campus: hackathons, cultural fests, sports tournaments, talks, workshops.
+- RSVP and get reminders.
+- Featured upcoming events: Srijan 2026 (March 1–3), Double Slash 2026 (March 6–8), Intra Cup 2026 (March 9–11).
+
+### 3. Zyncers — Student Profiles (`/zyncers`)
+- Personal profile: clubs joined, events attended, skills, achievements.
+- Follow other students and see their activity.
+- Great for networking and finding collaborators.
+
+### 4. Campus Feed & News (`/news`)
+- Real-time feed from clubs, organisers, and the campus community.
+- Announcements, updates, and posts.
+
+### 5. Leaderboard (`/leaderboard`)
+- Points earned for joining clubs, attending events, posting, and engaging.
+- Competitive, gamified campus participation.
+- Top Zyncers showcased publicly.
+
+### 6. AI Assistant (`/ai`)
+- Built-in AI to help students: find the right club, get event suggestions, answer campus FAQs.
+- Context-aware, campus-specific responses.
+
+### 7. Resources (`/resources`)
+- Shared notes, club documents, guides.
+- Accessible to all members of a club.
+
+---
+
+## Target Audience
+
+**Primary**: College students (18–24) in India, especially first and second-year students navigating new campus environments.
+
+**Secondary**: Club presidents, event organisers, and student council members who need a better way to reach students.
+
+---
+
+## Competitive Positioning
+
+Zynvo is not a generic social network. It is purpose-built for campus life:
+- Unlike Instagram or Facebook Groups — it is structured around clubs, events, and real campus identity.
+- Unlike LinkedIn — it is casual, social, and campus-first, not career-first.
+- Unlike WhatsApp — it is organised, discoverable, and not a chat dump.
+
+The closest analog internationally would be a mix of Presence (campus app) + Discord (community) + Eventbrite (events) — but built natively for Indian college culture.
+
+---
+
+## Founders
+
+| Name | Role |
+|------|------|
+| Anirban Ghosh | CEO & Founder |
+| Mohak Chakraborty | COO |
+| Swarnendu Ghosh | CTO |
+
+More at: https://zynvo.social/founders
+
+---
+
+## Frequently Asked Questions
+
+**Q: Is Zynvo free?**  
+A: Yes. Zynvo is completely free for students. There are no subscription fees.
+
+**Q: Which colleges are on Zynvo?**  
+A: Zynvo is growing across colleges in West Bengal and expanding across India. Any student can sign up.
+
+**Q: How do I join a club on Zynvo?**  
+A: Create an account at zynvo.social/auth/signup, browse clubs at /discover, and tap "Join" on any club you like.
+
+**Q: Can club presidents post events and manage members?**  
+A: Yes. Club admins have tools to post events, send announcements, and manage member lists.
+
+**Q: Is there a mobile app?**  
+A: Zynvo works as a Progressive Web App (PWA), installable directly from the browser on Android and iOS with a native-like experience. A dedicated app is in development.
+
+**Q: What makes Zynvo different from a college Facebook group?**  
+A: Zynvo is structured around clubs and events rather than open feeds. Everything is organised, searchable, and tied to your real campus identity — not a random Facebook group anyone can join.
+
+---
+
+## Contact
+
+- **Website**: https://zynvo.social
+- **Email**: Available via https://zynvo.social/contact
+- **Instagram**: https://www.instagram.com/zynvo.social
+- **Twitter / X**: https://x.com/Zynvonow
+- **LinkedIn**: https://www.linkedin.com/company/dsuper03
+
+---
+
+## Key URLs
+
+| Page | URL |
+|------|-----|
+| Homepage | https://zynvo.social |
+| Sign Up | https://zynvo.social/auth/signup |
+| Sign In | https://zynvo.social/auth/signin |
+| Discover Clubs | https://zynvo.social/discover |
+| Events | https://zynvo.social/events |
+| Leaderboard | https://zynvo.social/leaderboard |
+| AI Assistant | https://zynvo.social/ai |
+| Resources | https://zynvo.social/resources |
+| News Feed | https://zynvo.social/news |
+| Student Profiles | https://zynvo.social/zyncers |
+| Founders | https://zynvo.social/founders |
+| FAQ | https://zynvo.social/faq |
+| Contact | https://zynvo.social/contact |
+| Privacy Policy | https://zynvo.social/privacy |
+| Terms of Service | https://zynvo.social/terms |

@@ -1125,7 +1125,7 @@ useEffect(() => {
                 </button>
               </div>
               <p className="text-gray-500 text-xs sm:text-sm text-center sm:text-left">
-                © 2024 Zynvo. All rights reserved.
+                © 2026 Zynvo. All rights reserved.
               </p>
             </div>
           </div>

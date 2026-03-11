@@ -1,0 +1,53 @@
+# Zynvo
+
+> Zynvo is a social platform built exclusively for college and university campuses. It connects students with clubs, societies, campus events, and peers — all in one place.
+
+## What is Zynvo?
+
+Zynvo (https://zynvo.social) is a campus social network designed for college students in India. It helps students discover and join clubs, find events happening on their campus, meet like-minded peers, and stay connected to campus life — replacing scattered WhatsApp groups and notice boards with a single, organised platform.
+
+Think of it as "the social layer of your college" — a place where students actually find their tribe, join communities, and make college worth it.
+
+## Core Features
+
+- **Club Discovery**: Browse and join 100+ student clubs across tech, arts, sports, debate, entrepreneurship, and more.
+- **Events**: Find, RSVP to, and get reminders for college festivals, hackathons, cultural nights, and department events.
+- **Zyncers (Student Profiles)**: Create a profile showcasing clubs, skills, and achievements. Connect with students across departments.
+- **Campus Feed & News**: Stay updated with announcements, college news, and community posts from clubs.
+- **Leaderboard & Challenges**: Gamified participation — earn points for joining clubs, attending events, and engaging with the community.
+- **AI Assistant**: A built-in AI that helps students navigate campus life, find opportunities, and answer questions.
+- **Resources**: Shared study notes, club resources, and campus guides.
+
+## Who Is It For?
+
+- **College students** who want to get more involved in campus life
+- **Club presidents and organisers** who want to reach more students
+- **Campus communities** looking to replace fragmented group chats with a structured platform
+
+## Founders
+
+- **Anirban Ghosh** — CEO & Founder
+- **Mohak Chakraborty** — COO
+- **Swarnendu Ghosh** — CTO
+
+Founded in 2026. Based in India.
+
+## Key URLs
+
+- Homepage: https://zynvo.social
+- Discover Clubs: https://zynvo.social/discover
+- Events: https://zynvo.social/events
+- Sign Up: https://zynvo.social/auth/signup
+- Founders: https://zynvo.social/founders
+- FAQ: https://zynvo.social/faq
+- Contact: https://zynvo.social/contact
+
+## Social Media
+
+- Instagram: https://www.instagram.com/zynvo.social
+- Twitter / X: https://x.com/Zynvonow
+- LinkedIn: https://www.linkedin.com/company/dsuper03
+
+## Optional: Full Details
+
+- Full product brief: https://zynvo.social/llms-full.txt

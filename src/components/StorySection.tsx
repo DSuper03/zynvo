@@ -5,7 +5,7 @@ import { BackgroundElements } from './TeamSection';
 import LandingHeader from './landingHeader';
 const timeline = [
   {
-    year: '2024',
+    year: '2026',
     title: 'The Beginning',
     description:
       'Born from a shared frustration with fragmented campus communication, three college students came together with a vision to revolutionize how campus communities connect.',
