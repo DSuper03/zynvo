@@ -376,20 +376,20 @@ const Skiper39 = () => {
       {/* FIX: balanced padding for comfortable spacing */}
       <div
         ref={headlineRef}
-        className="relative z-10 -mb-4 flex flex-col items-center justify-center px-4 pt-12 pb-2 text-center text-black sm:mb-0 sm:pb-24 md:pb-28"
+        className="relative z-10 3mb-4 flex flex-col items-center justify-center px-4 pt-12 pb-2 text-center text-black sm:mb-0 sm:pb-24 md:pb-28"
       >
-        <div className="flex flex-col items-center justify-center gap-3">
+        <div className="flex flex-col items-center justify-center gap-3 pt-3">
           <p
-            className={`${rockSalt.className} tracking-tight text-2xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight`}
+            className={`${rockSalt.className} tracking-tight text-2xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight `}
           >
             Zynvo Social
           </p>
           <p className="text-xs sm:text-base md:text-lg lg:text-2xl font-mono font-bold tracking-wide">
             Your one place for campus, clubs and events.
           </p>
-          <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 sm:mt-6">
+          <div className="mt-4 flex flex-col items-center justify-center  sm:flex-row sm:gap-4 sm:mt-6">
             {user ? (
-              <div className="flex flex-col items-center gap-4">
+              <div className="flex flex-col items-center gap-2">
                 <p className="font-mono text-sm sm:text-base font-bold tracking-wide">
                   👋 Hey there,{" "}
                   <span className="underline underline-offset-4 decoration-black/40">
@@ -439,7 +439,7 @@ const Skiper39 = () => {
 
       {/* FIX: balanced canvas height */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[56vh] sm:h-[52vh] md:h-[56vh] lg:h-[60vh]"
+        className="pointer-events-none  absolute inset-x-0 bottom-0 h-[56vh] sm:h-[52vh] md:h-[56vh] lg:h-[60vh]"
         
       >
         {/* FIX: balanced gradient height */}
