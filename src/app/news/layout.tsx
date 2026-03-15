@@ -45,7 +45,7 @@ export default function NewsLayout({
 
       <div
         className={`
-          ${isMobileMenuOpen ? 'fixed inset-0 z-40 bg-black/60 backdrop-blur-sm' : 'hidden'} 
+          ${isMobileMenuOpen ? 'fixed inset-0 z-40 bg-black' : 'hidden'} 
           md:relative md:block md:bg-transparent
         `}
         onClick={() => isMobileView && setIsMobileMenuOpen(false)}

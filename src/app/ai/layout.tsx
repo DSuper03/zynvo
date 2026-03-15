@@ -43,8 +43,8 @@ export default function RootLayout({
           className={`${
             isMobileMenuOpen
               ? 'bg-black/80 text-yellow-400 border border-yellow-400/30'
-              : 'bg-gradient-to-br from-yellow-400 to-yellow-500 text-gray-900 border border-yellow-300/40'
-          } fixed top-4 left-4 z-50 h-12 w-12 rounded-full shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200 backdrop-blur-sm`}
+              : 'bg-transparent text-gray-900 border border-yellow-300/40'
+          } fixed top-4 left-4 z-50 h-12 w-12  shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200 backdrop-blur-sm`}
           aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
           aria-pressed={isMobileMenuOpen}
         >
@@ -55,7 +55,7 @@ export default function RootLayout({
       {/* Sidebar - hidden on mobile by default, shown when toggled */}
       <div
         className={`
-          ${isMobileMenuOpen ? 'fixed inset-0 z-40 bg-black/60 backdrop-blur-sm' : 'hidden'} 
+          ${isMobileMenuOpen ? 'fixed inset-0 z-40 bg-black' : 'hidden'} 
           md:relative md:block md:bg-transparent
         `}
         onClick={() => isMobileView && setIsMobileMenuOpen(false)}
