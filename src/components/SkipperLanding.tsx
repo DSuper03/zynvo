@@ -376,41 +376,41 @@ const Skiper39 = () => {
       {/* FIX: balanced padding for comfortable spacing */}
       <div
         ref={headlineRef}
-        className="relative z-10 3mb-4 flex flex-col items-center justify-center px-4 pt-12 pb-2 text-center text-black sm:mb-0 sm:pb-24 md:pb-10"
+        className="relative z-10 flex flex-col items-center justify-center px-4 pt-8 pb-1 text-center text-black sm:pb-16 md:pb-8"
       >
-        <div className=" mt-20 flex flex-col items-center justify-center gap-3 pt-3">
+        <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:gap-3 pt-0">
           <p
-            className={`${rockSalt.className} tracking-tight text-2xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight `}
+            className={`${rockSalt.className} tracking-tight text-xl sm:text-3xl md:text-5xl lg:text-6xl leading-tight `}
           >
             Zynvo Social
           </p>
-          <p className="text-xs sm:text-base md:text-lg lg:text-2xl font-mono font-bold tracking-wide">
+          <p className="text-xs sm:text-sm md:text-lg lg:text-xl font-mono font-bold tracking-wide px-2">
             Your one place for campus, clubs and events.
           </p>
-          <div className="mt-4 flex flex-col items-center justify-center  sm:flex-row sm:gap-4 sm:mt-6">
+          <div className="mt-2 sm:mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
             {user ? (
-              <div className="flex flex-col items-center gap-2">
-                <p className="font-mono text-sm sm:text-base font-bold tracking-wide">
+              <div className="flex flex-col items-center gap-2 w-full">
+                <p className="font-mono text-xs sm:text-sm md:text-base font-bold tracking-wide">
                   👋 Hey there,{" "}
                   <span className="underline underline-offset-4 decoration-black/40">
                     {user.name?.split(" ")[0] ?? "there"}
                   </span>
                   ! Ready to explore?
                 </p>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <Button
                     onClick={login}
-                    className="bg-black p-0 rounded-full w-12 h-12 flex items-center justify-center transition-all hover:scale-105 shadow-lg hover:shadow-black/40"
+                    className="bg-black p-0 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center transition-all hover:scale-105 shadow-lg hover:shadow-black/40"
                   >
                     <img
                       src={user.pfp}
                       alt="profile"
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover"
                     />
                   </Button>
                   <button
                     onClick={hardLogout}
-                    className="rounded-full bg-black px-5 py-2 text-xs sm:text-sm font-semibold text-yellow-300 hover:bg-black/80 transition-colors"
+                    className="rounded-full bg-black px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-yellow-300 hover:bg-black/80 transition-colors whitespace-nowrap"
                   >
                     Logout
                   </button>
@@ -419,14 +419,14 @@ const Skiper39 = () => {
             ) : (
               <>
                 <Link href="/auth/signin">
-                  <Button className="rounded-full bg-black px-6 py-2 text-xs sm:text-sm font-semibold text-yellow-300 hover:bg-black/90 transition-colors">
+                  <Button className="rounded-full bg-black px-5 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-yellow-300 hover:bg-black/90 transition-colors w-full sm:w-auto">
                     Login
                   </Button>
                 </Link>
                 <Link href="/auth/signup">
                   <Button
                     variant="outline"
-                    className="rounded-full border-2 border-black bg-yellow-200/80 px-6 py-2 text-xs sm:text-sm font-semibold text-black hover:bg-yellow-300 transition-colors"
+                    className="rounded-full border-2 border-black bg-yellow-200/80 px-5 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-black hover:bg-yellow-300 transition-colors w-full sm:w-auto"
                   >
                     Sign up
                   </Button>
