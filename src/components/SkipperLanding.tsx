@@ -376,9 +376,9 @@ const Skiper39 = () => {
       {/* FIX: balanced padding for comfortable spacing */}
       <div
         ref={headlineRef}
-        className="relative z-10 3mb-4 flex flex-col items-center justify-center px-4 pt-12 pb-2 text-center text-black sm:mb-0 sm:pb-24 md:pb-28"
+        className="relative z-10 3mb-4 flex flex-col items-center justify-center px-4 pt-12 pb-2 text-center text-black sm:mb-0 sm:pb-24 md:pb-10"
       >
-        <div className="flex flex-col items-center justify-center gap-3 pt-3">
+        <div className=" mt-20 flex flex-col items-center justify-center gap-3 pt-3">
           <p
             className={`${rockSalt.className} tracking-tight text-2xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight `}
           >
