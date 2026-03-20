@@ -370,16 +370,16 @@ const Skiper39 = () => {
   }, []);
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-yellow-300 text-black flex flex-col">
+    <div className="relative w-full h-screen overflow-hidden bg-yellow-300 text-black flex flex-col">
       {/* Soft white shadow at the top - fades gradually */}
-      <div className="absolute inset-x-0 top-0 h-20 sm:h-24 md:h-32 bg-gradient-to-b from-white/30 via-white/10 to-transparent z-20 pointer-events-none" />
+      <div className="absolute inset-x-0 top-0 h-16 sm:h-20 md:h-24 bg-gradient-to-b from-white/30 via-white/10 to-transparent z-20 pointer-events-none" />
 
       {/* Hero Section - Compact mobile layout */}
       <div
         ref={headlineRef}
-        className="relative z-10 flex flex-col items-center justify-center px-4 py-5 sm:py-8 md:py-10 text-center text-black"
+        className="relative z-10 flex flex-col items-center justify-center px-4 py-4 sm:py-6 md:py-8 text-center text-black flex-shrink-0"
       >
-        <div className="mt-60 flex flex-col items-center justify-center gap-0 sm:gap-2 md:gap-3">
+        <div className="mt-40 flex flex-col items-center justify-center gap-0 sm:gap-2 md:gap-3">
           <p
             className={`${rockSalt.className} tracking-tight text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight font-bold`}
           >
@@ -388,7 +388,7 @@ const Skiper39 = () => {
           <p className="text-xs sm:text-sm md:text-base lg:text-lg font-mono font-bold tracking-wide px-2">
             Your one place for campus, clubs and events.
           </p>
-          <div className="mt-1.5 sm:mt-2 md:mt-3 flex flex-col items-center justify-center gap-2 sm:gap-3 sm:flex-row sm:gap-4">
+          <div className="mt-1 sm:mt-2 md:mt-3 flex flex-col items-center justify-center gap-2 sm:gap-3 sm:flex-row sm:gap-4">
             {user ? (
               <div className="flex flex-col items-center gap-1.5 w-full sm:w-auto">
                 <p className="font-mono text-xs sm:text-sm md:text-base font-bold tracking-wide">
@@ -440,13 +440,40 @@ const Skiper39 = () => {
 
       {/* Peep Canvas Section - Minimal gap, no extra overlay */}
       <div
-        className="relative z-0 w-full flex-shrink-0 h-[42vh] sm:h-[44vh] md:h-[48vh] lg:h-[52vh] overflow-hidden mt-0"
+        className="relative z-0 w-full flex-1 h-auto md:h-[45vh] overflow-hidden"
       >
         <CrowdCanvas
           src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/175711/open-peeps-sheet.png"
           rows={15}
           cols={7}
         />
+      </div>
+
+      {/* Running Chain Text - zynvo.social */}
+      <div className="relative z-0 w-full bg-yellow-300 flex-shrink-0 py-2 sm:py-3 md:py-4 overflow-hidden border-t border-yellow-400">
+        <style>{`
+          @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .scroll-container {
+            display: flex;
+            animation: scroll 10s linear infinite;
+          }
+          .scroll-item {
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-width: 50%;
+          }
+        `}</style>
+        <div className="scroll-container">
+          <div className="scroll-item font-mono text-xs sm:text-sm md:text-base font-bold text-black tracking-wider px-4">
+            ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦
+          </div>
+          <div className="scroll-item font-mono text-xs sm:text-sm md:text-base font-bold text-black tracking-wider px-4">
+            ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦
+          </div>
+        </div>
       </div>
     </div>
   );
