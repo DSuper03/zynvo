@@ -378,9 +378,9 @@ const Skiper39 = () => {
         ref={headlineRef}
         className="relative z-10 flex flex-col items-center justify-center px-4 pt-8 pb-1 text-center text-black sm:pb-16 md:pb-8"
       >
-        <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:gap-3 pt-0">
+        <div className="mt-40 flex flex-col items-center justify-center gap-2 sm:gap-3 pt-0">
           <p
-            className={`${rockSalt.className} tracking-tight text-xl sm:text-3xl md:text-5xl lg:text-6xl leading-tight `}
+            className={`${rockSalt.className} tracking-tight text-xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight `}
           >
             Zynvo Social
           </p>
