@@ -370,47 +370,47 @@ const Skiper39 = () => {
   }, []);
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-yellow-300 text-black">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.5),_transparent_60%),_radial-gradient(circle_at_bottom,_rgba(234,179,8,0.6),_transparent_60%)] opacity-70" />
+    <div className="relative w-full min-h-screen overflow-hidden bg-yellow-300 text-black flex flex-col">
+      {/* Removed yellow gradient overlay - now the background is clean */}
 
-      {/* FIX: balanced padding for comfortable spacing */}
+      {/* Hero Section - Compact mobile layout */}
       <div
         ref={headlineRef}
-        className="relative z-10 flex flex-col items-center justify-center px-4 pt-8 pb-1 text-center text-black sm:pb-16 md:pb-8"
+        className="relative z-10 flex flex-col items-center justify-center flex-1 px-4 py-3 sm:py-6 md:py-8 text-center text-black"
       >
-        <div className="mt-40 flex flex-col items-center justify-center gap-2 sm:gap-3 pt-0">
+        <div className="flex flex-col items-center justify-center gap-0 sm:gap-2 md:gap-3">
           <p
-            className={`${rockSalt.className} tracking-tight text-xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight `}
+            className={`${rockSalt.className} tracking-tight text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight font-bold`}
           >
             Zynvo Social
           </p>
-          <p className="text-xs sm:text-sm md:text-lg lg:text-xl font-mono font-bold tracking-wide px-2">
+          <p className="text-xs sm:text-sm md:text-base lg:text-lg font-mono font-bold tracking-wide px-2">
             Your one place for campus, clubs and events.
           </p>
-          <div className="mt-2 sm:mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+          <div className="mt-2 sm:mt-3 md:mt-4 flex flex-col items-center justify-center gap-2 sm:gap-3 sm:flex-row sm:gap-4">
             {user ? (
-              <div className="flex flex-col items-center gap-2 w-full">
+              <div className="flex flex-col items-center gap-1.5 w-full sm:w-auto">
                 <p className="font-mono text-xs sm:text-sm md:text-base font-bold tracking-wide">
                   👋 Hey there,{" "}
-                  <span className="underline underline-offset-4 decoration-black/40">
+                  <span className="underline underline-offset-2 decoration-black/40">
                     {user.name?.split(" ")[0] ?? "there"}
                   </span>
                   ! Ready to explore?
                 </p>
-                <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <Button
                     onClick={login}
-                    className="bg-black p-0 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center transition-all hover:scale-105 shadow-lg hover:shadow-black/40"
+                    className="bg-black p-0 rounded-full w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center transition-all hover:scale-105 shadow-lg hover:shadow-black/40"
                   >
                     <img
                       src={user.pfp}
                       alt="profile"
-                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover"
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover"
                     />
                   </Button>
                   <button
                     onClick={hardLogout}
-                    className="rounded-full bg-black px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-yellow-300 hover:bg-black/80 transition-colors whitespace-nowrap"
+                    className="rounded-full bg-black px-3 sm:px-4 py-1 sm:py-1.5 text-xs font-semibold text-yellow-300 hover:bg-black/80 transition-colors whitespace-nowrap"
                   >
                     Logout
                   </button>
@@ -418,15 +418,15 @@ const Skiper39 = () => {
               </div>
             ) : (
               <>
-                <Link href="/auth/signin">
-                  <Button className="rounded-full bg-black px-5 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-yellow-300 hover:bg-black/90 transition-colors w-full sm:w-auto">
+                <Link href="/auth/signin" className="w-full sm:w-auto">
+                  <Button className="rounded-full bg-black px-4 sm:px-5 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-yellow-300 hover:bg-black/90 transition-colors w-full">
                     Login
                   </Button>
                 </Link>
-                <Link href="/auth/signup">
+                <Link href="/auth/signup" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
-                    className="rounded-full border-2 border-black bg-yellow-200/80 px-5 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-black hover:bg-yellow-300 transition-colors w-full sm:w-auto"
+                    className="rounded-full border-2 border-black bg-yellow-200/80 px-4 sm:px-5 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-black hover:bg-yellow-300 transition-colors w-full"
                   >
                     Sign up
                   </Button>
@@ -437,13 +437,10 @@ const Skiper39 = () => {
         </div>
       </div>
 
-      {/* FIX: balanced canvas height */}
+      {/* Peep Canvas Section - No extra yellow overlay */}
       <div
-        className="pointer-events-none  absolute inset-x-0 bottom-0 h-[56vh] sm:h-[52vh] md:h-[56vh] lg:h-[60vh]"
-        
+        className="relative z-0 w-full flex-shrink-0 h-[38vh] sm:h-[42vh] md:h-[48vh] lg:h-[52vh] overflow-hidden"
       >
-        {/* FIX: balanced gradient height */}
-        <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-yellow-300 to-transparent z-10 pointer-events-none" />
         <CrowdCanvas
           src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/175711/open-peeps-sheet.png"
           rows={15}
