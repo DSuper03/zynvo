@@ -47,9 +47,14 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     // TWEEN FACTORIES
     const resetPeep = ({ stage, peep }: { stage: any; peep: any }) => {
       const direction = Math.random() > 0.5 ? 1 : -1;
-      const heightRatio = Math.min(1, stage.height / 380);
+      const isMobile = stage.width < 640;
+      const heightRatio = Math.min(1, stage.height / (isMobile ? 280 : 380));
+      
+      const baseOffset = isMobile ? 0 : 100;
+      const spread = isMobile ? 350 : 250;
       const offsetY =
-        (100 - 250 * gsap.parseEase("power2.in")(Math.random())) * heightRatio;
+        (baseOffset - spread * gsap.parseEase("power2.in")(Math.random())) * heightRatio;
+        
       const startY = stage.height - peep.height + offsetY;
       let startX: number;
       let endX: number;
@@ -272,9 +277,9 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       const baseHeight = isMobile ? 280 : 380;
       const baseFactor = Math.min(stage.width / 640, stage.height / baseHeight);
 
-      // FIX: bumped mobile min from 0.18→0.25 and max from 0.45→0.5
+      // INCREASED scale on mobile so they uplift and fill the empty space better
       const scaleFactor = isMobile
-        ? Math.max(0.25, Math.min(0.5, baseFactor))
+        ? Math.max(0.5, Math.min(1.0, baseFactor * 1.2))
         : Math.max(0.45, Math.min(1, baseFactor));
 
       allPeeps.forEach((peep) => {
@@ -377,11 +382,11 @@ const Skiper39 = () => {
       {/* Hero Section - Compact mobile layout */}
       <div
         ref={headlineRef}
-        className="relative z-10 flex flex-col items-center justify-center px-4 py-4 sm:py-6 md:py-8 text-center text-black flex-shrink-0"
+        className="relative z-10 flex flex-col items-center justify-center px-4 py-8 sm:py-12 md:py-16 text-center text-black flex-shrink-0"
       >
-        <div className="mt-40 flex flex-col items-center justify-center gap-0 sm:gap-2 md:gap-3">
+        <div className="mt-20 flex flex-col items-center justify-center gap-0 sm:gap-2 md:gap-3">
           <p
-            className={`${rockSalt.className} tracking-tight text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight font-bold`}
+            className={`${rockSalt.className} tracking-tight text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-tight font-bold`}
           >
             Zynvo Social
           </p>
@@ -440,7 +445,7 @@ const Skiper39 = () => {
 
       {/* Peep Canvas Section - Minimal gap, no extra overlay */}
       <div
-        className="relative z-0 w-full flex-1 h-auto md:h-[45vh] overflow-hidden"
+        className="mt-70 mb-70 relative z-0 w-full flex-1 min-h-[40vh] md:h-[45vh] overflow-hidden"
       >
         <CrowdCanvas
           src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/175711/open-peeps-sheet.png"
@@ -467,10 +472,10 @@ const Skiper39 = () => {
           }
         `}</style>
         <div className="scroll-container">
-          <div className="scroll-item font-mono text-xs sm:text-sm md:text-base font-bold text-black tracking-wider px-4">
+          <div className="scroll-item font-mono text-sm sm:text-base md:text-lg font-bold text-black tracking-wider px-4">
             ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦
           </div>
-          <div className="scroll-item font-mono text-xs sm:text-sm md:text-base font-bold text-black tracking-wider px-4">
+          <div className="scroll-item font-mono text-sm sm:text-base md:text-lg font-bold text-black tracking-wider px-4">
             ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦
           </div>
         </div>
