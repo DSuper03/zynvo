@@ -12,10 +12,8 @@ import {
   FiEyeOff,
   FiLoader,
 } from 'react-icons/fi';
-import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { signinRes } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 
@@ -49,44 +47,31 @@ export default function SignIn() {
     }
     setLoading(true);
     try {
-      const msg = await axios.post<signinRes>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/login`,
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/syncWithClerk`,
         formData
       );
 
-      if (!msg || !msg.data) {
+      if (!res || !res.data) {
         toast.error('Some Internal Server Error Occurred');
         return;
       }
 
-      // Check for invalid email or password
-      if (
-        msg.data.msg === 'Invalid email or password' ||
-        msg.data.msg === '{"msg":"Invalid email or password","token":"no token"}' ||
-        msg.data.msg?.includes('Invalid email or password')
-      ) {
-        toast.error('Invalid email or password. Please check your credentials and try again.');
-        return;
-      }
-
-      // Check for login success
-      if (msg.data.msg === 'login success') {
-        localStorage.setItem('token', msg.data.token);
+      if (res.data.msg === 'login success') {
+        localStorage.setItem('token', res.data.token);
         sessionStorage.setItem('activeSession', 'true');
         toast.success('Login successful!');
         router.push('/dashboard');
         return;
       }
 
-      // Handle other error messages
-      if (msg.data.msg && msg.data.msg !== 'login success') {
-        toast.error(msg.data.msg);
-      }
+      toast.error(res.data.msg || 'Login failed. Please try again.');
     } catch (error: any) {
-      // Handle axios errors
       if (error.response) {
-        const errorMsg = error.response.data?.msg || error.response.data?.message || 'Invalid email or password';
-        if (errorMsg.includes('Invalid email or password') || errorMsg.includes('Invalid')) {
+        const errorMsg = error.response.data?.msg || 'Login failed';
+        if (error.response.status === 404) {
+          toast.error('No account found with this email. Please sign up first.');
+        } else if (errorMsg.includes('Invalid email or password')) {
           toast.error('Invalid email or password. Please check your credentials and try again.');
         } else {
           toast.error(errorMsg);
