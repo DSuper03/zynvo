@@ -622,7 +622,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                     College/University Name
                   </label>
                   <CollegeSearchSelect
-                        colleges={collegesWithClubs.sort((a, b) => a.college.localeCompare(b.college))}
+                        colleges={[...collegesWithClubs].sort((a, b) => a.college.localeCompare(b.college))}
                         value={formData.collegeName}
                         onChange={(value) => {
                           setFormData((prev) => ({ ...prev, collegeName: value }));

@@ -22,21 +22,13 @@ export function useAuth() {
     name?: string;
     pfp?: string;
   } | null>(null);
-  const [token, setToken] = useState('');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const tok = localStorage.getItem('token');
-      if (tok) setToken(tok);
-    }
-  }, []);
 
   const loadUser = useCallback(() => {
-    const token = localStorage.getItem('token');
+    const tok = localStorage.getItem('token');
 
-    if (token) {
+    if (tok) {
       try {
-        const decoded: DecodedToken = jwtDecode(token);
+        const decoded: DecodedToken = jwtDecode(tok);
         if (decoded.id) {
           setUser({
             id: decoded.id,
@@ -73,7 +65,8 @@ export function useAuth() {
   };
 
   const login = () => {
-    if (!token) {
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) {
       toast('Please login manually');
       router.push('/auth/signin');
       return;

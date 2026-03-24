@@ -153,7 +153,7 @@ export default function SSOCallback() {
                 College/University
               </label>
               <CollegeSearchSelect
-                colleges={collegesWithClubs.sort((a, b) => a.college.localeCompare(b.college))}
+                colleges={[...collegesWithClubs].sort((a, b) => a.college.localeCompare(b.college))}
                 value={collegeName}
                 onChange={(value) => setCollegeName(value)}
                 placeholder="Search and select your college/university"
