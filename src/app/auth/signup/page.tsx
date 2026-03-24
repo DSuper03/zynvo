@@ -299,6 +299,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     }
     try {
       localStorage.setItem('sso_source', 'signup');
+      sessionStorage.setItem('clerk_oauth_pending', '1');
       const callbackUrl = `${window.location.origin}/auth/sso-callback`;
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
