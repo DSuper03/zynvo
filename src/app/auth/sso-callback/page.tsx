@@ -31,14 +31,31 @@ export default function SSOCallback() {
     if (!clerk.loaded || callbackHandled.current) return;
     callbackHandled.current = true;
 
-    // If already signed in (e.g. page reload after callback), skip
-    if (clerk.session) return;
+    // If already signed in (e.g. page reload after callback), skip — Step 2 will handle it
+    if (clerk.session) {
+      console.warn("SSO Callback: Session already exists, skipping handleRedirectCallback");
+      return;
+    }
 
-    console.log("SSO Callback: Processing OAuth callback...");
+    console.warn("SSO Callback: Processing OAuth callback...");
     clerk.handleRedirectCallback({}).catch((err: any) => {
       console.error("SSO Callback: handleRedirectCallback error", err);
+      toast.error("Authentication failed. Redirecting...");
+      setTimeout(() => router.push('/auth/signin'), 2000);
     });
-  }, [clerk]);
+  }, [clerk, router]);
+
+  // Timeout fallback: if stuck on spinner for too long, redirect
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!hasProcessed.current && !needsCollege) {
+        console.error("SSO Callback: Timed out waiting for auth state");
+        toast.error("Authentication timed out. Please try again.");
+        router.push('/auth/signin');
+      }
+    }, 15000);
+    return () => clearTimeout(timeout);
+  }, [router, needsCollege]);
 
   // Step 2: Once signed in, sync with backend
   useEffect(() => {
@@ -47,7 +64,7 @@ export default function SSOCallback() {
       if (!authLoaded || !userLoaded || !isSignedIn) return;
 
       hasProcessed.current = true;
-      console.log("SSO Callback: User signed in", { userId: user?.id });
+      console.warn("SSO Callback: User signed in", { userId: user?.id });
 
       const email = user?.emailAddresses[0]?.emailAddress;
       const clerkId = user?.id;
@@ -63,7 +80,7 @@ export default function SSOCallback() {
       }
 
       const ssoSource = localStorage.getItem("sso_source") || "signup";
-      console.log("SSO Callback: sso_source =", ssoSource, "| email =", email);
+      console.warn("SSO Callback: sso_source =", ssoSource, "| email =", email);
       localStorage.removeItem("sso_source");
 
       if (ssoSource === "signin") {
