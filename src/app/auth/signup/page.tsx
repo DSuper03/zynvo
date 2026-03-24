@@ -456,6 +456,8 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             </div>
             <div className="mb-6">
               <div className="flex items-center justify-center space-x-3">
+                {/* Clerk Smart CAPTCHA mount point */}
+                <div id="clerk-captcha" />
                 <button
                   type="button"
                   onClick={() => handleGoogleVerification()}

@@ -206,6 +206,9 @@ export default function SignIn() {
               </p>
             </div>
 
+            {/* Clerk Smart CAPTCHA mount point — required for bot protection */}
+            <div id="clerk-captcha" />
+
             <div className="mb-6">
               <div className="flex items-center justify-center">
                 <button
