@@ -12,14 +12,17 @@ import {
   FiEyeOff,
   FiLoader,
 } from 'react-icons/fi';
+import { FaGoogle } from 'react-icons/fa';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useSignIn } from '@clerk/nextjs';
 
 
 
 export default function SignIn() {
+  const { isLoaded: authIsLoaded, signIn } = useSignIn();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -35,6 +38,27 @@ export default function SignIn() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (!authIsLoaded || !signIn) {
+      toast('Authentication loading, please wait...');
+      console.log('Clerk not loaded yet:', { authIsLoaded, signIn: !!signIn });
+      return;
+    }
+    try {
+      console.log('Starting Google OAuth redirect...');
+      localStorage.setItem('sso_source', 'signin');
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: '/auth/sso-callback',
+        redirectUrlComplete: '/auth/sso-callback',
+      });
+    } catch (err: any) {
+      console.error('SSO redirect error:', err);
+      console.error('SSO error details:', JSON.stringify(err?.errors, null, 2));
+      toast.error(err?.errors?.[0]?.message || 'Failed to initiate Google sign-in');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -178,6 +202,25 @@ export default function SignIn() {
                   Create an account
                 </Link>
               </p>
+            </div>
+
+            <div className="mb-6">
+              <div className="flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => handleGoogleSignIn()}
+                  disabled={!authIsLoaded}
+                  className={`flex items-center justify-center w-full max-w-xs py-2 px-4 rounded-lg shadow transition ${
+                    !authIsLoaded
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : 'bg-white text-black hover:opacity-90'
+                  }`}
+                  aria-label="Sign in with Google"
+                >
+                  <FaGoogle className="mr-3" />
+                  {authIsLoaded ? 'Sign in with Google' : 'Loading...'}
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center justify-center mb-6">

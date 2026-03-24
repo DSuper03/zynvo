@@ -356,7 +356,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
 
 const Skiper39 = () => {
   const headlineRef = useRef<HTMLDivElement | null>(null);
-  const { user, login, hardLogout } = useAuth();
+  const { user, login, hardLogout, isLoggedIn } = useAuth();
 
   useEffect(() => {
     if (!headlineRef.current) return;
@@ -394,12 +394,12 @@ const Skiper39 = () => {
             Your one place for campus, clubs and events.
           </p>
           <div className="mt-1 sm:mt-2 md:mt-3 flex flex-col items-center justify-center gap-2 sm:gap-3 sm:flex-row sm:gap-4">
-            {user ? (
+            {isLoggedIn ? (
               <div className="flex flex-col items-center gap-1.5 w-full sm:w-auto">
                 <p className="font-mono text-xs sm:text-sm md:text-base font-bold tracking-wide">
                   👋 Hey there,{" "}
                   <span className="underline underline-offset-2 decoration-black/40">
-                    {user.name?.split(" ")[0] ?? "there"}
+                    {user?.name?.split(" ")[0] ?? "there"}
                   </span>
                   ! Ready to explore?
                 </p>
@@ -408,11 +408,17 @@ const Skiper39 = () => {
                     onClick={login}
                     className="bg-black p-0 rounded-full w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center transition-all hover:scale-105 shadow-lg hover:shadow-black/40"
                   >
-                    <img
-                      src={user.pfp}
-                      alt="profile"
-                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover"
-                    />
+                    {user?.pfp ? (
+                      <img
+                        src={user.pfp}
+                        alt="profile"
+                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-sm font-bold uppercase text-yellow-300">
+                        {user?.name?.charAt(0) ?? 'U'}
+                      </span>
+                    )}
                   </Button>
                   <button
                     onClick={hardLogout}

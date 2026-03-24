@@ -294,16 +294,16 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
   const handleGoogleVerification = async () => {
     if (!authIsLoaded || !signIn) {
-      toast('Security check old loading, please wait...');
+      toast('Security check loading, please wait...');
       return;
     }
     try {
+      localStorage.setItem('sso_source', 'signup');
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: "/auth/sso-callback",
         redirectUrlComplete: "/auth/sso-callback",
       });
-      localStorage.setItem('sso_college', collegeSearch);
     } catch (err) {
       console.error('SSO redirect error', err);
       toast.error('Failed to initiate Google sign-in');
@@ -452,45 +452,19 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                 </Link>
               </p>
             </div>
-{/* 
             <div className="mb-6">
               <div className="flex items-center justify-center space-x-3">
-              <button
-                type="button"
-                onClick={() => {
-                  handleGoogleVerification();
-                }}
-                className="flex items-center justify-center w-full max-w-xs bg-white text-black py-2 px-4 rounded-lg shadow hover:opacity-90 transition"
-                aria-label="Sign in with Google"
-              >
-                <FaGoogle className="mr-3" />
-                Sign in with Google
-              </button>
-             
-              </div>
-              <div>
-                <label
-                  htmlFor="collegeSelectTop"
-                  className="block text-gray-300 text-sm font-medium mb-2"
+                <button
+                  type="button"
+                  onClick={() => handleGoogleVerification()}
+                  className="flex items-center justify-center w-full max-w-xs bg-white text-black py-2 px-4 rounded-lg shadow hover:opacity-90 transition"
+                  aria-label="Sign up with Google"
                 >
-                  College/University
-                </label>
-                <CollegeSearchSelect
-                  colleges={collegesWithClubs.sort((a, b) =>
-                    a.college.localeCompare(b.college)
-                  )}
-                  value={collegeSearch}
-                  onChange={(value) => {
-                    setCollegeSearch(value);
-                    if (value && value.trim()) setCollegeError('');
-                  }}
-                  placeholder="Search and select your college/university"
-                />
-                {collegeError && (
-                  <p className="text-red-400 text-xs mt-1">{collegeError}</p>
-                )}
+                  <FaGoogle className="mr-3" />
+                  Sign up with Google
+                </button>
               </div>
-            </div> */}
+            </div>
 
             {/* Step 1: Account Information */}
             {currentStep === 1 && (

@@ -115,6 +115,8 @@ export default function RootLayout({
   
   return (
     <ClerkProvider
+      signInFallbackRedirectUrl="/auth/sso-callback"
+      signUpFallbackRedirectUrl="/auth/sso-callback"
       appearance={{
         elements: {
           rootBox: "mx-auto",
