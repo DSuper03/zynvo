@@ -17,7 +17,7 @@ const navItems = [
 
 const LandingHeader = () => {
   const pathname = usePathname();
-  const { user, hardLogout, login } = useAuth();
+  const { user, hardLogout, login, isLoggedIn } = useAuth();
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -79,18 +79,18 @@ const LandingHeader = () => {
             </nav>
 
             <div className="hidden items-center gap-2 md:flex">
-              {user ? (
+              {isLoggedIn ? (
                 <>
                   <button
                     onClick={login}
                     className="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-yellow-400/40 bg-yellow-500/10 transition-all duration-200 hover:scale-105 hover:border-yellow-300"
                     aria-label="Open profile"
                   >
-                    {user.pfp ? (
+                    {user?.pfp ? (
                       <img src={user.pfp} alt="Profile" className="h-full w-full object-cover" />
                     ) : (
                       <span className="text-sm font-bold uppercase text-yellow-300">
-                        {user.name?.charAt(0) ?? 'U'}
+                        {user?.name?.charAt(0) ?? 'U'}
                       </span>
                     )}
                   </button>
@@ -196,7 +196,7 @@ const LandingHeader = () => {
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-2 border-t border-white/10 pt-4">
-                {user ? (
+                {isLoggedIn ? (
                   <>
                     <button
                       onClick={() => {
