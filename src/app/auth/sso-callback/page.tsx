@@ -31,9 +31,22 @@ export default function SSOCallback() {
     if (!clerk.loaded || callbackHandled.current) return;
     callbackHandled.current = true;
 
-    // If already signed in (e.g. page reload after callback), skip — Step 2 will handle it
+    // If already signed in (e.g. redirectUrlComplete sent us back here), skip
     if (clerk.session) {
       console.warn("SSO Callback: Session already exists, skipping handleRedirectCallback");
+      return;
+    }
+
+    // Only call handleRedirectCallback if there are OAuth params in the URL
+    const params = new URLSearchParams(window.location.search);
+    const hasOAuthParams =
+      params.has('__clerk_status') ||
+      params.has('__clerk_created_session') ||
+      params.has('code') ||
+      params.has('rotating_token_nonce');
+
+    if (!hasOAuthParams) {
+      console.warn("SSO Callback: No OAuth params in URL, skipping handleRedirectCallback");
       return;
     }
 

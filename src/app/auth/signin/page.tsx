@@ -49,10 +49,11 @@ export default function SignIn() {
     try {
       console.log('Starting Google OAuth redirect...');
       localStorage.setItem('sso_source', 'signin');
+      const callbackUrl = `${window.location.origin}/auth/sso-callback`;
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
-        redirectUrl: '/auth/sso-callback',
-        redirectUrlComplete: '/auth/sso-callback',
+        redirectUrl: callbackUrl,
+        redirectUrlComplete: callbackUrl,
       });
     } catch (err: any) {
       console.error('SSO redirect error:', err);

@@ -299,10 +299,11 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     }
     try {
       localStorage.setItem('sso_source', 'signup');
+      const callbackUrl = `${window.location.origin}/auth/sso-callback`;
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
-        redirectUrl: "/auth/sso-callback",
-        redirectUrlComplete: "/auth/sso-callback",
+        redirectUrl: callbackUrl,
+        redirectUrlComplete: callbackUrl,
       });
     } catch (err) {
       console.error('SSO redirect error', err);
