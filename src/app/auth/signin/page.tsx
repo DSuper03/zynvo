@@ -12,16 +12,17 @@ import {
   FiEyeOff,
   FiLoader,
 } from 'react-icons/fi';
-import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
+import { FaGoogle } from 'react-icons/fa';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { signinRes } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useSignIn } from '@clerk/nextjs';
 
 
 
 export default function SignIn() {
+  const { isLoaded: authIsLoaded, signIn } = useSignIn();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -39,6 +40,27 @@ export default function SignIn() {
     }));
   };
 
+  const handleGoogleSignIn = async () => {
+    if (!authIsLoaded || !signIn) {
+      toast('Authentication loading, please wait...');
+      console.log('Clerk not loaded yet:', { authIsLoaded, signIn: !!signIn });
+      return;
+    }
+    try {
+      console.log('Starting Google OAuth redirect...');
+      localStorage.setItem('sso_source', 'signin');
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: '/auth/sso-callback',
+        redirectUrlComplete: '/auth/sso-callback',
+      });
+    } catch (err: any) {
+      console.error('SSO redirect error:', err);
+      console.error('SSO error details:', JSON.stringify(err?.errors, null, 2));
+      toast.error(err?.errors?.[0]?.message || 'Failed to initiate Google sign-in');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!rememberMe) {
@@ -49,44 +71,31 @@ export default function SignIn() {
     }
     setLoading(true);
     try {
-      const msg = await axios.post<signinRes>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/login`,
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/syncWithClerk`,
         formData
       );
 
-      if (!msg || !msg.data) {
+      if (!res || !res.data) {
         toast.error('Some Internal Server Error Occurred');
         return;
       }
 
-      // Check for invalid email or password
-      if (
-        msg.data.msg === 'Invalid email or password' ||
-        msg.data.msg === '{"msg":"Invalid email or password","token":"no token"}' ||
-        msg.data.msg?.includes('Invalid email or password')
-      ) {
-        toast.error('Invalid email or password. Please check your credentials and try again.');
-        return;
-      }
-
-      // Check for login success
-      if (msg.data.msg === 'login success') {
-        localStorage.setItem('token', msg.data.token);
+      if (res.data.msg === 'login success') {
+        localStorage.setItem('token', res.data.token);
         sessionStorage.setItem('activeSession', 'true');
         toast.success('Login successful!');
         router.push('/dashboard');
         return;
       }
 
-      // Handle other error messages
-      if (msg.data.msg && msg.data.msg !== 'login success') {
-        toast.error(msg.data.msg);
-      }
+      toast.error(res.data.msg || 'Login failed. Please try again.');
     } catch (error: any) {
-      // Handle axios errors
       if (error.response) {
-        const errorMsg = error.response.data?.msg || error.response.data?.message || 'Invalid email or password';
-        if (errorMsg.includes('Invalid email or password') || errorMsg.includes('Invalid')) {
+        const errorMsg = error.response.data?.msg || 'Login failed';
+        if (error.response.status === 404) {
+          toast.error('No account found with this email. Please sign up first.');
+        } else if (errorMsg.includes('Invalid email or password')) {
           toast.error('Invalid email or password. Please check your credentials and try again.');
         } else {
           toast.error(errorMsg);
@@ -193,6 +202,25 @@ export default function SignIn() {
                   Create an account
                 </Link>
               </p>
+            </div>
+
+            <div className="mb-6">
+              <div className="flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => handleGoogleSignIn()}
+                  disabled={!authIsLoaded}
+                  className={`flex items-center justify-center w-full max-w-xs py-2 px-4 rounded-lg shadow transition ${
+                    !authIsLoaded
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : 'bg-white text-black hover:opacity-90'
+                  }`}
+                  aria-label="Sign in with Google"
+                >
+                  <FaGoogle className="mr-3" />
+                  {authIsLoaded ? 'Sign in with Google' : 'Loading...'}
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center justify-center mb-6">
