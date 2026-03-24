@@ -68,9 +68,7 @@ function BackendSync() {
       const email = user?.emailAddresses[0]?.emailAddress;
       const clerkId = user?.id;
       const name = user?.fullName || user?.firstName || "User";
-      const avatarUrl = user?.hasImage
-        ? user.imageUrl
-        : `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(name)}&size=128`;
+      const avatarUrl = `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(name)}&size=128`;
 
       if (!email || !clerkId) {
         toast.error("Missing required user information");
@@ -119,8 +117,8 @@ function BackendSync() {
 
   if (needsCollege) {
     const finalName = displayName.trim() || clerkUserInfo?.name || "User";
-    const finalAvatarUrl = clerkUserInfo?.avatarUrl ||
-      `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(finalName)}&size=128`;
+    // Always use DiceBear, seeded from the current display name so it updates live
+    const finalAvatarUrl = `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(finalName)}&size=128`;
 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
