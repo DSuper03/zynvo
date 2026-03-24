@@ -36,6 +36,8 @@ function BackendSync() {
 
   const [needsCollege, setNeedsCollege] = useState(false);
   const [collegeName, setCollegeName] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [clerkUserInfo, setClerkUserInfo] = useState<{
     email: string;
@@ -105,6 +107,8 @@ function BackendSync() {
           }
         }
       } else {
+        // New sign-up: pre-fill display name from Google profile
+        setDisplayName(name);
         setClerkUserInfo({ email, clerkId, name, avatarUrl });
         setNeedsCollege(true);
       }
@@ -114,48 +118,83 @@ function BackendSync() {
   }, [authLoaded, userLoaded, isSignedIn, user, router]);
 
   if (needsCollege) {
+    const finalName = displayName.trim() || clerkUserInfo?.name || "User";
+    const finalAvatarUrl = clerkUserInfo?.avatarUrl ||
+      `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(finalName)}&size=128`;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!collegeName.trim() || !clerkUserInfo) {
+        toast.error("Please select your college/university");
+        return;
+      }
+      setSubmitting(true);
+      try {
+        const res = await axios.post(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
+          {
+            clerkId: clerkUserInfo.clerkId,
+            email: clerkUserInfo.email,
+            name: finalName,
+            avatarUrl: finalAvatarUrl,
+            collegeName,
+            imgUrl: "",
+            phone: phone.trim(),
+          }
+        );
+        if (res.data.token) {
+          localStorage.setItem("token", res.data.token);
+          sessionStorage.setItem("activeSession", "true");
+          toast.success("Account created successfully!");
+          router.push("/dashboard");
+        } else {
+          throw new Error("No token received");
+        }
+      } catch (err: any) {
+        toast.error(err.response?.data?.msg || err.message || "Signup failed.");
+      } finally {
+        setSubmitting(false);
+      }
+    };
+
     return (
       <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center p-4">
         <div className="w-full max-w-md p-8 bg-gray-900 rounded-xl border border-gray-800">
-          <h2 className="text-2xl font-bold text-white mb-2">Almost there!</h2>
-          <p className="text-gray-400 mb-6">Select your college to complete signup.</p>
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            if (!collegeName.trim() || !clerkUserInfo) {
-              toast.error("Please select your college/university");
-              return;
-            }
-            setSubmitting(true);
-            try {
-              const res = await axios.post(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
-                {
-                  clerkId: clerkUserInfo.clerkId,
-                  email: clerkUserInfo.email,
-                  name: clerkUserInfo.name,
-                  avatarUrl: clerkUserInfo.avatarUrl,
-                  collegeName,
-                  imgUrl: "",
-                  phone: "",
-                }
-              );
-              if (res.data.token) {
-                localStorage.setItem("token", res.data.token);
-                sessionStorage.setItem("activeSession", "true");
-                toast.success("Account created successfully!");
-                router.push("/dashboard");
-              } else {
-                throw new Error("No token received");
-              }
-            } catch (err: any) {
-              toast.error(err.response?.data?.msg || err.message || "Signup failed.");
-            } finally {
-              setSubmitting(false);
-            }
-          }}>
-            <div className="mb-6">
-              <label className="block text-gray-300 text-sm font-medium mb-2">
-                College / University
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-6">
+            <img
+              src={finalAvatarUrl}
+              alt="avatar"
+              className="w-14 h-14 rounded-full object-cover border-2 border-yellow-500"
+            />
+            <div>
+              <h2 className="text-2xl font-bold text-white">Almost there!</h2>
+              <p className="text-gray-400 text-sm">{clerkUserInfo?.email}</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Display name — pre-filled from Google, editable */}
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-1">
+                Display name
+              </label>
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="How should we call you?"
+                className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-500"
+              />
+              <p className="text-gray-500 text-xs mt-1">
+                Pre-filled from Google — edit if you like.
+              </p>
+            </div>
+
+            {/* College — required */}
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-1">
+                College / University <span className="text-yellow-500">*</span>
               </label>
               <CollegeSearchSelect
                 colleges={[...collegesWithClubs].sort((a, b) =>
@@ -163,20 +202,36 @@ function BackendSync() {
                 )}
                 value={collegeName}
                 onChange={(v) => setCollegeName(v)}
-                placeholder="Search and select your college/university"
+                placeholder="Search and select your college"
                 required
               />
             </div>
+
+            {/* Phone — optional */}
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-1">
+                Phone number{" "}
+                <span className="text-gray-500 font-normal">(optional)</span>
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+91 98765 43210"
+                className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-500"
+              />
+            </div>
+
             <button
               type="submit"
               disabled={submitting || !collegeName.trim()}
-              className={`w-full py-3 rounded-lg font-medium transition duration-300 ${
+              className={`w-full py-3 rounded-lg font-semibold transition duration-300 ${
                 submitting || !collegeName.trim()
                   ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                   : "bg-yellow-500 text-black hover:bg-yellow-400"
               }`}
             >
-              {submitting ? "Creating account…" : "Complete Signup"}
+              {submitting ? "Creating your account…" : "Join Zynvo →"}
             </button>
           </form>
         </div>
