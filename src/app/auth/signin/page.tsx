@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
@@ -25,6 +25,13 @@ export default function SignIn() {
   const { isLoaded: authIsLoaded, signIn } = useSignIn();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+
+  // Clear any stale OAuth flags from abandoned flows
+  useEffect(() => {
+    sessionStorage.removeItem('clerk_oauth_pending');
+    sessionStorage.removeItem('sso_source');
+    localStorage.removeItem('sso_source');
+  }, []);
   const [formData, setFormData] = useState({
     email: '',
     password: '',

@@ -86,13 +86,14 @@ const LandingHeader = () => {
                     className="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-yellow-400/40 bg-yellow-500/10 transition-all duration-200 hover:scale-105 hover:border-yellow-300"
                     aria-label="Open profile"
                   >
-                    {user?.pfp ? (
-                      <img src={user.pfp} alt="Profile" className="h-full w-full object-cover" />
-                    ) : (
-                      <span className="text-sm font-bold uppercase text-yellow-300">
-                        {user?.name?.charAt(0) ?? 'U'}
-                      </span>
-                    )}
+                    <img
+                      src={
+                        user?.pfp ||
+                        `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(user?.name || 'user')}&size=64`
+                      }
+                      alt="Profile"
+                      className="h-full w-full object-cover"
+                    />
                   </button>
                   <button
                     onClick={hardLogout}
