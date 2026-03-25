@@ -332,7 +332,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       const origin = window.location.origin;
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
-        redirectUrl: `${origin}/auth/sso-callback`,
+        redirectUrl: `${origin}/auth/sso-callback?intent=signup`,
         redirectUrlComplete: `${origin}/auth/sso-callback?intent=signup`,
       });
     } catch (err) {

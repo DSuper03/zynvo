@@ -52,7 +52,7 @@ export default function SignIn() {
       const origin = window.location.origin;
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
-        redirectUrl: `${origin}/auth/sso-callback`,
+        redirectUrl: `${origin}/auth/sso-callback?intent=signin`,
         redirectUrlComplete: `${origin}/auth/sso-callback?intent=signin`,
       });
     } catch (err: any) {
