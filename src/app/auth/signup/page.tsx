@@ -157,8 +157,18 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       return;
     };
 
-    if (!agreeToTerms || !formData.collegeName) return;
+    if (!agreeToTerms) return;
 
+    // Validate college is selected from the actual list — blocks browser-autofilled garbage values
+    const validCollege = collegesWithClubs.some(
+      (c) => c.college === formData.collegeName
+    );
+    if (!formData.collegeName.trim() || !validCollege) {
+      setCollegeError('Please select your college/university from the list');
+      toast.error('Please select your college/university from the list');
+      return;
+    }
+    setCollegeError('');
     setIsCreatingAccount(true);
 
     try {

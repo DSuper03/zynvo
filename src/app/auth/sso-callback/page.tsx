@@ -208,6 +208,7 @@ function BackendSync() {
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="How should we call you?"
                 className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-500"
+                autoComplete="off"
               />
               <p className="text-gray-500 text-xs mt-1">
                 Pre-filled from Google — edit if you like.
@@ -242,6 +243,7 @@ function BackendSync() {
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+91 98765 43210"
                 className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-500"
+                autoComplete="off"
               />
             </div>
 
