@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { AuthenticateWithRedirectCallback, useAuth, useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
@@ -9,6 +9,21 @@ import CollegeSearchSelect from "@/components/colleges/collegeSelect";
 import { collegesWithClubs } from "@/components/colleges/college";
 
 export default function SSOCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-center text-white">
+          <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4" />
+          <p className="text-xl font-medium animate-pulse">Loading…</p>
+        </div>
+      }
+    >
+      <SSOCallbackContent />
+    </Suspense>
+  );
+}
+
+function SSOCallbackContent() {
   const { isLoaded: authLoaded, isSignedIn } = useAuth();
   const { user, isLoaded: userLoaded } = useUser();
   const router = useRouter();
