@@ -15,12 +15,23 @@ import { collegesWithClubs } from "@/components/colleges/college";
 // immediately so we don't get stuck waiting for a redirect that never comes.
 function ClerkOAuthHandler({ onSignedIn }: { onSignedIn: () => void }) {
   const { isLoaded, isSignedIn } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    if (isLoaded && isSignedIn) {
+    if (!isLoaded) return;
+    if (isSignedIn) {
+      // Session established — move to backend sync
       onSignedIn();
+    } else {
+      // Clerk loaded but user is NOT signed in — OAuth didn't complete, bail out
+      // Give AuthenticateWithRedirectCallback a short window to finish first
+      const t = setTimeout(() => {
+        toast.error("Google sign-in failed. Please try again.");
+        router.push("/auth/signin");
+      }, 8000);
+      return () => clearTimeout(t);
     }
-  }, [isLoaded, isSignedIn, onSignedIn]);
+  }, [isLoaded, isSignedIn, onSignedIn, router]);
 
   return (
     <>
@@ -85,7 +96,12 @@ function BackendSync() {
         return;
       }
 
-      const ssoSource = localStorage.getItem("sso_source") || "signup";
+      // Read from sessionStorage first (more reliable), fall back to localStorage
+      const ssoSource =
+        sessionStorage.getItem("sso_source") ||
+        localStorage.getItem("sso_source") ||
+        "signup";
+      sessionStorage.removeItem("sso_source");
       localStorage.removeItem("sso_source");
 
       if (ssoSource === "signin") {

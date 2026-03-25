@@ -49,6 +49,7 @@ export default function SignIn() {
     try {
       console.log('Starting Google OAuth redirect...');
       localStorage.setItem('sso_source', 'signin');
+      sessionStorage.setItem('sso_source', 'signin');
       sessionStorage.setItem('clerk_oauth_pending', '1');
       const callbackUrl = `${window.location.origin}/auth/sso-callback`;
       await signIn.authenticateWithRedirect({
