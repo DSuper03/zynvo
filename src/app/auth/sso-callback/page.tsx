@@ -96,37 +96,46 @@ function BackendSync() {
         return;
       }
 
-      // Always try to log in the existing user first.
-      // Only show the college form if the backend says user doesn't exist (404).
-      // This prevents the college form from appearing for existing users
-      // regardless of which page they clicked "Sign in with Google" from.
+      // Determine intent: "signin" goes straight to backend, "signup" shows college form.
+      // Flags are set right before the OAuth redirect and cleared on signin/signup page mount
+      // to prevent stale values from abandoned flows.
+      const ssoSource =
+        sessionStorage.getItem("sso_source") ||
+        localStorage.getItem("sso_source") ||
+        "signin";
       sessionStorage.removeItem("sso_source");
       localStorage.removeItem("sso_source");
 
-      try {
-        const res = await axios.post(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
-          { clerkId, email, name, avatarUrl, collegeName: "not joined" }
-        );
-        if (res.data.token) {
-          localStorage.setItem("token", res.data.token);
-          sessionStorage.setItem("activeSession", "true");
-          toast.success("Login successful!");
-          router.push("/dashboard");
-        } else {
-          throw new Error("No token received");
-        }
-      } catch (err: any) {
-        const status = err.response?.status;
-        if (status === 404) {
-          // User doesn't exist in our backend — show sign-up form
-          setDisplayName(name);
-          setClerkUserInfo({ email, clerkId, name, avatarUrl });
-          setNeedsCollege(true);
-        } else {
-          const msg = err.response?.data?.msg || "Something went wrong. Please try again.";
-          toast.error(msg);
-          setTimeout(() => router.push("/auth/signin"), 2000);
+      if (ssoSource === "signup") {
+        // New user — show the college + details form before hitting the backend
+        setDisplayName(name);
+        setClerkUserInfo({ email, clerkId, name, avatarUrl });
+        setNeedsCollege(true);
+      } else {
+        // Existing user — go straight to backend login
+        try {
+          const res = await axios.post(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
+            { clerkId, email, name, avatarUrl, collegeName: "not joined" }
+          );
+          if (res.data.token) {
+            localStorage.setItem("token", res.data.token);
+            sessionStorage.setItem("activeSession", "true");
+            toast.success("Login successful!");
+            router.push("/dashboard");
+          } else {
+            throw new Error("No token received");
+          }
+        } catch (err: any) {
+          const status = err.response?.status;
+          const msg = err.response?.data?.msg || "Login failed";
+          if (status === 404) {
+            toast.error("No account found. Please sign up first.");
+            setTimeout(() => router.push("/auth/signup"), 2000);
+          } else {
+            toast.error(msg);
+            setTimeout(() => router.push("/auth/signin"), 2000);
+          }
         }
       }
     };
