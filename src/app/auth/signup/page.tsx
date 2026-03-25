@@ -33,12 +33,6 @@ export default function SignUp() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
-  // Clear any stale OAuth flags from abandoned flows
-  useEffect(() => {
-    sessionStorage.removeItem('clerk_oauth_pending');
-    sessionStorage.removeItem('sso_source');
-    localStorage.removeItem('sso_source');
-  }, []);
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
@@ -335,14 +329,11 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       return;
     }
     try {
-      localStorage.setItem('sso_source', 'signup');
-      sessionStorage.setItem('sso_source', 'signup');
-      sessionStorage.setItem('clerk_oauth_pending', '1');
-      const callbackUrl = `${window.location.origin}/auth/sso-callback`;
+      const origin = window.location.origin;
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
-        redirectUrl: callbackUrl,
-        redirectUrlComplete: callbackUrl,
+        redirectUrl: `${origin}/auth/sso-callback`,
+        redirectUrlComplete: `${origin}/auth/sso-callback?intent=signup`,
       });
     } catch (err) {
       console.error('SSO redirect error', err);
