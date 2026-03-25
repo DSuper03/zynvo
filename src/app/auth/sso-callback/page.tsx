@@ -7,6 +7,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import CollegeSearchSelect from "@/components/colleges/collegeSelect";
 import { collegesWithClubs } from "@/components/colleges/college";
+import DiceBearAvatar from "@/components/DicebearAvatars";
 
 export default function SSOCallbackPage() {
   return (
@@ -38,6 +39,7 @@ function SSOCallbackContent() {
   const [collegeName, setCollegeName] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [phone, setPhone] = useState("");
+  const [customAvatarUrl, setCustomAvatarUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [clerkUserInfo, setClerkUserInfo] = useState<{
     email: string;
@@ -118,21 +120,16 @@ function SSOCallbackContent() {
   // ── College form (only for signup intent) ─────────────────────────────────
   if (needsCollege && clerkUserInfo) {
     const finalName = displayName.trim() || clerkUserInfo.name || "User";
-    const finalAvatarUrl = `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(finalName)}&size=128`;
+    const finalAvatarUrl =
+      customAvatarUrl ||
+      `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(finalName)}&size=128`;
 
     return (
       <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center p-4">
         <div className="w-full max-w-md p-8 bg-gray-900 rounded-xl border border-gray-800">
-          <div className="flex items-center gap-4 mb-6">
-            <img
-              src={finalAvatarUrl}
-              alt="avatar"
-              className="w-14 h-14 rounded-full object-cover border-2 border-yellow-500"
-            />
-            <div>
-              <h2 className="text-2xl font-bold text-white">Almost there!</h2>
-              <p className="text-gray-400 text-sm">{clerkUserInfo.email}</p>
-            </div>
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold text-white">Almost there!</h2>
+            <p className="text-gray-400 text-sm">{clerkUserInfo.email}</p>
           </div>
 
           <form
@@ -174,6 +171,13 @@ function SSOCallbackContent() {
             }}
             className="space-y-5"
           >
+            {/* Avatar picker */}
+            <DiceBearAvatar
+              name={finalName}
+              onAvatarChange={(url: string) => setCustomAvatarUrl(url)}
+            />
+
+            {/* Display name */}
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-1">
                 Display name
@@ -191,6 +195,7 @@ function SSOCallbackContent() {
               </p>
             </div>
 
+            {/* College — required */}
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-1">
                 College / University <span className="text-yellow-500">*</span>
@@ -206,6 +211,7 @@ function SSOCallbackContent() {
               />
             </div>
 
+            {/* Phone — optional */}
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-1">
                 Phone number{" "}
