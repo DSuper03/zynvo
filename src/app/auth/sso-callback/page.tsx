@@ -28,6 +28,10 @@ function SSOCallbackContent() {
   const { user, isLoaded: userLoaded } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Capture intent from URL on FIRST render, before AuthenticateWithRedirectCallback
+  // can strip query params. This ref never changes after mount.
+  const intentRef = useRef(searchParams.get("intent"));
   const hasProcessed = useRef(false);
 
   const [needsCollege, setNeedsCollege] = useState(false);
@@ -71,8 +75,9 @@ function SSOCallbackContent() {
       return;
     }
 
-    // Intent is encoded in the URL query param — survives all redirects
-    const intent = searchParams.get("intent");
+    // Intent was captured from the URL on first render (before AuthenticateWithRedirectCallback
+    // could strip query params)
+    const intent = intentRef.current;
 
     if (intent === "signup") {
       // New user from signup page — show the college/details form
@@ -108,7 +113,7 @@ function SSOCallbackContent() {
           }
         });
     }
-  }, [authLoaded, userLoaded, isSignedIn, user, router, searchParams]);
+  }, [authLoaded, userLoaded, isSignedIn, user, router]);
 
   // ── College form (only for signup intent) ─────────────────────────────────
   if (needsCollege && clerkUserInfo) {
