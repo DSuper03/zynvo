@@ -9,10 +9,19 @@ import CollegeSearchSelect from "@/components/colleges/collegeSelect";
 import { collegesWithClubs } from "@/components/colleges/college";
 
 // ── Phase 1: Clerk OAuth exchange ─────────────────────────────────────────────
-// Only rendered when we know we just came from an OAuth redirect.
-// AuthenticateWithRedirectCallback handles the token exchange and then
-// redirects back to this page (clean URL), triggering Phase 2.
-function ClerkOAuthHandler() {
+// Renders AuthenticateWithRedirectCallback to process OAuth tokens.
+// Also watches isSignedIn directly — if Clerk already established the session
+// before we rendered (causing "session already exists"), onSignedIn fires
+// immediately so we don't get stuck waiting for a redirect that never comes.
+function ClerkOAuthHandler({ onSignedIn }: { onSignedIn: () => void }) {
+  const { isLoaded, isSignedIn } = useAuth();
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      onSignedIn();
+    }
+  }, [isLoaded, isSignedIn, onSignedIn]);
+
   return (
     <>
       <AuthenticateWithRedirectCallback
@@ -270,7 +279,7 @@ export default function SSOCallbackPage() {
   }
 
   if (phase === 'oauth') {
-    return <ClerkOAuthHandler />;
+    return <ClerkOAuthHandler onSignedIn={() => setPhase('sync')} />;
   }
 
   return <BackendSync />;
