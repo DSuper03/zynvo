@@ -234,9 +234,14 @@ function SSOCallbackContent() {
   }
 
   // ── Loading / OAuth processing spinner ────────────────────────────────────
+  // Only render AuthenticateWithRedirectCallback when user is NOT yet signed in
+  // (i.e. OAuth tokens still need processing). Once signed in, just show spinner
+  // while the useEffect above handles backend sync.
+  const showOAuthHandler = authLoaded && !isSignedIn;
+
   return (
     <>
-      <AuthenticateWithRedirectCallback />
+      {showOAuthHandler && <AuthenticateWithRedirectCallback />}
       <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-center text-white">
         <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4" />
         <p className="text-xl font-medium animate-pulse">Verifying your account…</p>
