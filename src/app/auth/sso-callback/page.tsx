@@ -95,6 +95,8 @@ function SSOCallbackContent() {
           name,
           avatarUrl,
           collegeName: "not joined",
+          college: "not joined",
+          college_name: "not joined",
         })
         .then((res) => {
           if (res.data.token) {
@@ -141,6 +143,7 @@ function SSOCallbackContent() {
               }
               setSubmitting(true);
               try {
+                const college = collegeName.trim();
                 const res = await axios.post(
                   `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
                   {
@@ -148,7 +151,9 @@ function SSOCallbackContent() {
                     email: clerkUserInfo.email,
                     name: finalName,
                     avatarUrl: finalAvatarUrl,
-                    collegeName,
+                    collegeName: college,
+                    college,
+                    college_name: college,
                     imgUrl: "",
                     phone: phone.trim(),
                   }

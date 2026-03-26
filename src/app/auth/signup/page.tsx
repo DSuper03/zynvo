@@ -291,12 +291,15 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         formData.avatarUrl ||
         `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(formData.name || "user")}&size=128`;
 
-      // 4. Sync with backend
+      // 4. Sync with backend (send college under common key variants — some APIs only map `college` / `college_name`)
+      const college = formData.collegeName.trim();
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
         {
           clerkId,
-          collegeName: formData.collegeName,
+          collegeName: college,
+          college,
+          college_name: college,
           avatarUrl,
           password: formData.password,
           name: formData.name,
