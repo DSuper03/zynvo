@@ -86,6 +86,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [eventCount, setEventCount] = useState(0);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
   const [unlockedBadge, setUnlockedBadge] = useState<{ name: string; count: number; description: string } | null>(null);
+  const [closeAfterAchievement, setCloseAfterAchievement] = useState(false);
 
   // Helper function to get today's date in YYYY-MM-DD format
   const getTodayDateString = () => {
@@ -455,43 +456,47 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
     if (createEvent.status === 201 || createEvent.status === 200  ) {
       // Update event count
-      const newCount = eventCount + 1;
+      const previousCount = eventCount;
+      const newCount = previousCount + 1;
       setEventCount(newCount);
       
-      // Check for achievement unlocks
+      // Check for achievement unlocks (crossing thresholds)
       let badgeUnlocked = null;
-      if (newCount === 5) {
+      if (previousCount < 20 && newCount >= 20) {
         badgeUnlocked = {
-          name: 'Event Master',
-          count: 5,
-          description: 'You\'ve created 5 amazing events! You\'re on fire! 🔥',
+          name: 'Community Champion',
+          count: 20,
+          description: 'You\'ve created 20 events! You\'re the ultimate community champion! 🌟',
         };
-      } else if (newCount === 10) {
+      } else if (previousCount < 10 && newCount >= 10) {
         badgeUnlocked = {
           name: 'Event Legendary',
           count: 10,
           description: 'Wow! 10 events created! You\'re a true event legend! ⚡',
         };
-      } else if (newCount === 20) {
+      } else if (previousCount < 5 && newCount >= 5) {
         badgeUnlocked = {
-          name: 'Community Champion',
-          count: 20,
-          description: 'An incredible 20 events! You\'re the ultimate community champion! 🌟',
+          name: 'Event Master',
+          count: 5,
+          description: 'You\'ve created 5 amazing events! You\'re on fire! 🔥',
         };
       }
       
       if (badgeUnlocked) {
         setUnlockedBadge(badgeUnlocked);
         setShowAchievementModal(true);
+        setCloseAfterAchievement(true);
       }
       
       toast('Event created successfully! Start marketing now!!!');
       setIsSubmitting(false);
       
-      // Close after a short delay
-      setTimeout(() => {
-        onClose();
-      }, 500);
+      if (!badgeUnlocked) {
+        // Close after a short delay when no achievement modal is shown
+        setTimeout(() => {
+          onClose();
+        }, 500);
+      }
     } else {
       toast(createEvent.data.msg);
       setIsSubmitting(false);
@@ -1487,6 +1492,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           onClose={() => {
             setShowAchievementModal(false);
             setUnlockedBadge(null);
+            if (closeAfterAchievement) {
+              setCloseAfterAchievement(false);
+              onClose();
+            }
           }}
           badgeName={unlockedBadge.name}
           achievementCount={unlockedBadge.count}
