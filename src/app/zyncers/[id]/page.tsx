@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
-import { Calendar, BarChart2, User, ArrowLeft, Share2 } from 'lucide-react';
+import { Calendar, BarChart2, User, ArrowLeft, Share2, Trophy } from 'lucide-react';
 import axios from 'axios';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/hover-card';
 import { FaRestroom, FaUserGraduate } from 'react-icons/fa';
 import TextWithLinks from '@/components/TextWithLinks';
+import { UserBadgesDisplay } from '@/components/UserBadgesDisplay';
 
 // Define interfaces for better type checking
 interface Event {
@@ -459,6 +460,9 @@ export default function PublicUserProfile() {
     return null;
   }
 
+  const isFounder = Boolean(userData.clubName && userData.clubName.trim());
+  const eventCount = userData.events?.length || 0;
+
   return (
     <div className="min-h-screen bg-black text-gray-100">
       {/* Facebook-style Header */}
@@ -673,6 +677,20 @@ export default function PublicUserProfile() {
 
       {/* Content Sections */}
       <div className="px-4 space-y-4">
+        {/* Badges Section */}
+        <div className="bg-gray-900 rounded-lg p-4">
+          <div className="flex items-center gap-3 mb-4">
+            <Trophy className="w-5 h-5 text-yellow-400" />
+            <h3 className="text-lg font-bold text-white">Achievements</h3>
+          </div>
+          <UserBadgesDisplay
+            isFounder={isFounder}
+            eventCount={eventCount}
+            clubName={userData.clubName || ''}
+            userName={userData.name || 'User'}
+          />
+        </div>
+
         {/* Posts Section */}
         <div className="bg-gray-900 rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
