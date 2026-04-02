@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useSignIn } from '@clerk/nextjs';
+import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
 
 
 
@@ -50,6 +51,7 @@ export default function SignIn() {
     try {
       console.log('Starting Google OAuth redirect...');
       const origin = window.location.origin;
+      setSsoIntentBeforeOAuth('signin');
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
         redirectUrl: `${origin}/auth/sso-callback?intent=signin`,

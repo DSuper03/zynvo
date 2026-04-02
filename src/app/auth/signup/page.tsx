@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { useSignUp, useAuth , useSignIn} from "@clerk/nextjs";
 import { jwtDecode } from "jwt-decode";
 import { de } from 'date-fns/locale';
+import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
  
 
 export default function SignUp() {
@@ -333,6 +334,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     }
     try {
       const origin = window.location.origin;
+      setSsoIntentBeforeOAuth('signup');
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: `${origin}/auth/sso-callback?intent=signup`,

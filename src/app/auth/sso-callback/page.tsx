@@ -8,22 +8,17 @@ import { toast } from "sonner";
 import CollegeSearchSelect from "@/components/colleges/collegeSelect";
 import { collegesWithClubs } from "@/components/colleges/college";
 import DiceBearAvatar from "@/components/DicebearAvatars";
+import { resolveSsoIntentStable } from "@/lib/ssoIntent";
+import {
+  extractCollegeFromUserRecord,
+  shouldPromptForCollege,
+} from "@/lib/collegeProfile";
 
-/** True when backend has no real campus set (empty, or legacy placeholder from Google sign-in). */
-function isCollegeUnset(
-  collegeName: string | null | undefined,
-  collegeAlt?: string | null | undefined
-): boolean {
-  const raw = (collegeName || collegeAlt || "").trim().toLowerCase();
-  if (!raw) return true;
-  if (raw === "not joined") return true;
-  return false;
+function getBackendBase(): string | null {
+  const base = process.env.NEXT_PUBLIC_BACKEND_URL;
+  if (!base || base === "undefined") return null;
+  return base.replace(/\/$/, "");
 }
-
-type GetUserCollegeFields = {
-  collegeName?: string | null;
-  college?: string | null;
-};
 
 export default function SSOCallbackPage() {
   return (
@@ -46,19 +41,18 @@ function SSOCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Capture intent from URL on FIRST render, before AuthenticateWithRedirectCallback
-  // can strip query params. This ref never changes after mount.
-  const intentRef = useRef(searchParams.get("intent"));
-  const hasProcessed = useRef(false);
+  const intentQuery = searchParams.get("intent");
 
+  const oauthStartedRef = useRef(false);
   const [needsCollege, setNeedsCollege] = useState(false);
-  /** Google sign-in: user is logged in but profile has no campus — collect college before dashboard. */
   const [needsCollegeSignin, setNeedsCollegeSignin] = useState(false);
   const [collegeName, setCollegeName] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [phone, setPhone] = useState("");
   const [customAvatarUrl, setCustomAvatarUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  /** Backend JWT sync in progress (sign-in path). */
+  const [backendSyncing, setBackendSyncing] = useState(false);
   const [clerkUserInfo, setClerkUserInfo] = useState<{
     email: string;
     clerkId: string;
@@ -66,28 +60,30 @@ function SSOCallbackContent() {
     avatarUrl: string;
   } | null>(null);
 
-  // Timeout safety net
+  /** Only while backend sync runs after Clerk sign-in — do not time out during Google redirect. */
   useEffect(() => {
+    if (!backendSyncing) return;
     const t = setTimeout(() => {
-      if (!hasProcessed.current && !needsCollege) {
-        toast.error("Authentication timed out. Please try again.");
-        router.push("/auth/signin");
-      }
-    }, 20000);
+      toast.error("Could not sync your profile. Please try signing in again.");
+      router.push("/auth/signin");
+    }, 120000);
     return () => clearTimeout(t);
-  }, [router, needsCollege]);
+  }, [backendSyncing, router]);
 
-  // Main logic: runs once Clerk confirms the user is signed in
   useEffect(() => {
-    if (hasProcessed.current) return;
     if (!authLoaded || !userLoaded || !isSignedIn || !user) return;
+    if (oauthStartedRef.current) return;
+    oauthStartedRef.current = true;
 
-    hasProcessed.current = true;
+    let cancelled = false;
 
     const email = user.emailAddresses[0]?.emailAddress;
     const clerkId = user.id;
     const name = user.fullName || user.firstName || "User";
-    const avatarUrl = `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(name)}&size=128`;
+    const googleImage = user.imageUrl?.trim();
+    const avatarUrl =
+      googleImage ||
+      `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(name)}&size=128`;
 
     if (!email || !clerkId) {
       toast.error("Missing required user information");
@@ -95,81 +91,100 @@ function SSOCallbackContent() {
       return;
     }
 
-    // Intent was captured from the URL on first render (before AuthenticateWithRedirectCallback
-    // could strip query params)
-    const intent = intentRef.current;
+    const intent = resolveSsoIntentStable(intentQuery);
 
     if (intent === "signup") {
-      // New user from signup page — show the college/details form
       setDisplayName(name);
       setClerkUserInfo({ email, clerkId, name, avatarUrl });
       setNeedsCollege(true);
-    } else {
-      // Sign-in flow: sync with backend, then require college if profile has no campus
-      void (async () => {
-        const base = process.env.NEXT_PUBLIC_BACKEND_URL;
-        try {
-          const res = await axios.post(
-            `${base}/api/v2/user/auth/clerkLogin`,
-            {
-              clerkId,
-              email,
-              name,
-              avatarUrl,
-              collegeName: "not joined",
-              college: "not joined",
-              college_name: "not joined",
-            }
-          );
-
-          if (!res.data?.token) {
-            toast.error("Login failed: no session from server.");
-            setTimeout(() => router.push("/auth/signin"), 2000);
-            return;
-          }
-
-          const token = res.data.token as string;
-          localStorage.setItem("token", token);
-          sessionStorage.setItem("activeSession", "true");
-
-          let userPayload: GetUserCollegeFields | null = null;
-          try {
-            const userRes = await axios.get<{ user: GetUserCollegeFields }>(
-              `${base}/api/v1/user/getUser`,
-              { headers: { authorization: `Bearer ${token}` } }
-            );
-            userPayload = userRes.data?.user ?? null;
-          } catch {
-            toast.success("Login successful!");
-            router.push("/dashboard");
-            return;
-          }
-
-          const u = userPayload;
-          if (!u || isCollegeUnset(u.collegeName, u.college)) {
-            setClerkUserInfo({ email, clerkId, name, avatarUrl });
-            setDisplayName(name);
-            setNeedsCollegeSignin(true);
-            return;
-          }
-
-          toast.success("Login successful!");
-          router.push("/dashboard");
-        } catch (err: any) {
-          const status = err.response?.status;
-          if (status === 404) {
-            toast.error("No account found. Please sign up first.");
-            setTimeout(() => router.push("/auth/signup"), 2000);
-          } else {
-            toast.error(err.response?.data?.msg || "Login failed");
-            setTimeout(() => router.push("/auth/signin"), 2000);
-          }
-        }
-      })();
+      return;
     }
-  }, [authLoaded, userLoaded, isSignedIn, user, router]);
 
-  // ── College + profile form (signup intent: new Google account from signup page) ──
+    const base = getBackendBase();
+    if (!base) {
+      toast.error("App configuration error: backend URL is missing.");
+      router.push("/auth/signin");
+      return;
+    }
+
+    setBackendSyncing(true);
+
+    void (async () => {
+      try {
+        const res = await axios.post(`${base}/api/v2/user/auth/clerkLogin`, {
+          clerkId,
+          email,
+          name,
+          avatarUrl,
+          collegeName: "not joined",
+          college: "not joined",
+          college_name: "not joined",
+        });
+
+        if (cancelled) return;
+
+        if (!res.data?.token) {
+          toast.error("Login failed: no session from server.");
+          setTimeout(() => router.push("/auth/signin"), 2000);
+          return;
+        }
+
+        const token = res.data.token as string;
+        localStorage.setItem("token", token);
+        sessionStorage.setItem("activeSession", "true");
+
+        let profile: unknown = null;
+        try {
+          const userRes = await axios.get(`${base}/api/v1/user/getUser`, {
+            headers: { authorization: `Bearer ${token}` },
+          });
+          profile = userRes.data?.user ?? null;
+        } catch (e) {
+          console.warn("[sso-callback] getUser failed, will prompt for campus", e);
+        }
+
+        if (cancelled) return;
+
+        const collegeStr = extractCollegeFromUserRecord(profile);
+        const mustCollectCampus = shouldPromptForCollege(collegeStr);
+
+        if (mustCollectCampus) {
+          setClerkUserInfo({ email, clerkId, name, avatarUrl });
+          setDisplayName(name);
+          setNeedsCollegeSignin(true);
+          return;
+        }
+
+        toast.success("Login successful!");
+        router.push("/dashboard");
+      } catch (err: unknown) {
+        if (cancelled) return;
+        const ax = err as { response?: { status?: number; data?: { msg?: string } } };
+        const status = ax.response?.status;
+        if (status === 404) {
+          toast.error("No account found. Please sign up first.");
+          setTimeout(() => router.push("/auth/signup"), 2000);
+        } else {
+          toast.error(ax.response?.data?.msg || "Login failed");
+          setTimeout(() => router.push("/auth/signin"), 2000);
+        }
+      } finally {
+        if (!cancelled) setBackendSyncing(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    authLoaded,
+    userLoaded,
+    isSignedIn,
+    user,
+    router,
+    intentQuery,
+  ]);
+
   if (needsCollege && clerkUserInfo) {
     const finalName = displayName.trim() || clerkUserInfo.name || "User";
     const finalAvatarUrl =
@@ -187,27 +202,27 @@ function SSOCallbackContent() {
           <form
             onSubmit={async (e) => {
               e.preventDefault();
-              if (!collegeName.trim()) {
-                toast.error("Please select your college/university");
+              const college = collegeName.trim();
+              const validCollege = collegesWithClubs.some((c) => c.college === college);
+              if (!college || !validCollege) {
+                toast.error("Please select your college/university from the list");
                 return;
               }
               setSubmitting(true);
               try {
-                const college = collegeName.trim();
-                const res = await axios.post(
-                  `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
-                  {
-                    clerkId: clerkUserInfo.clerkId,
-                    email: clerkUserInfo.email,
-                    name: finalName,
-                    avatarUrl: finalAvatarUrl,
-                    collegeName: college,
-                    college,
-                    college_name: college,
-                    imgUrl: "",
-                    phone: phone.trim(),
-                  }
-                );
+                const base = getBackendBase();
+                if (!base) throw new Error("Missing backend URL");
+                const res = await axios.post(`${base}/api/v2/user/auth/clerkLogin`, {
+                  clerkId: clerkUserInfo.clerkId,
+                  email: clerkUserInfo.email,
+                  name: finalName,
+                  avatarUrl: finalAvatarUrl,
+                  collegeName: college,
+                  college,
+                  college_name: college,
+                  imgUrl: "",
+                  phone: phone.trim(),
+                });
                 if (res.data.token) {
                   localStorage.setItem("token", res.data.token);
                   sessionStorage.setItem("activeSession", "true");
@@ -216,23 +231,20 @@ function SSOCallbackContent() {
                 } else {
                   throw new Error("No token received");
                 }
-              } catch (err: any) {
-                toast.error(
-                  err.response?.data?.msg || err.message || "Signup failed."
-                );
+              } catch (err: unknown) {
+                const ax = err as { response?: { data?: { msg?: string } }; message?: string };
+                toast.error(ax.response?.data?.msg || ax.message || "Signup failed.");
               } finally {
                 setSubmitting(false);
               }
             }}
             className="space-y-5"
           >
-            {/* Avatar picker */}
             <DiceBearAvatar
               name={finalName}
               onAvatarChange={(url: string) => setCustomAvatarUrl(url)}
             />
 
-            {/* Display name */}
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-1">
                 Display name
@@ -250,7 +262,6 @@ function SSOCallbackContent() {
               </p>
             </div>
 
-            {/* College — required */}
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-1">
                 College / University <span className="text-yellow-500">*</span>
@@ -266,7 +277,6 @@ function SSOCallbackContent() {
               />
             </div>
 
-            {/* Phone — optional */}
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-1">
                 Phone number{" "}
@@ -299,7 +309,6 @@ function SSOCallbackContent() {
     );
   }
 
-  // ── Google sign-in: college required before dashboard ────────────────────
   if (needsCollegeSignin && clerkUserInfo) {
     const finalName = displayName.trim() || clerkUserInfo.name || "User";
     const finalAvatarUrl =
@@ -313,7 +322,7 @@ function SSOCallbackContent() {
           <div className="mb-4">
             <h2 className="text-2xl font-bold text-white">Which campus are you on?</h2>
             <p className="text-gray-400 text-sm mt-1">
-              Zynvo connects you to your college community. Pick your institution so we can
+              Zynvo is built for college communities. Choose your institution so we can
               personalize your feed and campus features.
             </p>
             <p className="text-gray-500 text-xs mt-2">{clerkUserInfo.email}</p>
@@ -330,20 +339,19 @@ function SSOCallbackContent() {
               }
               setSubmitting(true);
               try {
-                const res = await axios.post(
-                  `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
-                  {
-                    clerkId: clerkUserInfo.clerkId,
-                    email: clerkUserInfo.email,
-                    name: finalName,
-                    avatarUrl: finalAvatarUrl,
-                    collegeName: college,
-                    college,
-                    college_name: college,
-                    imgUrl: "",
-                    phone: phone.trim(),
-                  }
-                );
+                const base = getBackendBase();
+                if (!base) throw new Error("Missing backend URL");
+                const res = await axios.post(`${base}/api/v2/user/auth/clerkLogin`, {
+                  clerkId: clerkUserInfo.clerkId,
+                  email: clerkUserInfo.email,
+                  name: finalName,
+                  avatarUrl: finalAvatarUrl,
+                  collegeName: college,
+                  college,
+                  college_name: college,
+                  imgUrl: "",
+                  phone: phone.trim(),
+                });
                 if (res.data.token) {
                   localStorage.setItem("token", res.data.token);
                   sessionStorage.setItem("activeSession", "true");
@@ -352,9 +360,10 @@ function SSOCallbackContent() {
                 } else {
                   throw new Error("No token received");
                 }
-              } catch (err: any) {
+              } catch (err: unknown) {
+                const ax = err as { response?: { data?: { msg?: string } }; message?: string };
                 toast.error(
-                  err.response?.data?.msg || err.message || "Could not save your campus."
+                  ax.response?.data?.msg || ax.message || "Could not save your campus."
                 );
               } finally {
                 setSubmitting(false);
@@ -409,18 +418,23 @@ function SSOCallbackContent() {
     );
   }
 
-  // ── Loading / OAuth processing spinner ────────────────────────────────────
-  // Only render AuthenticateWithRedirectCallback when user is NOT yet signed in
-  // (i.e. OAuth tokens still need processing). Once signed in, just show spinner
-  // while the useEffect above handles backend sync.
   const showOAuthHandler = authLoaded && !isSignedIn;
+
+  const statusMessage = !isSignedIn
+    ? "Signing you in with Google…"
+    : backendSyncing
+      ? "Syncing your profile with Zynvo…"
+      : "Verifying your account…";
 
   return (
     <>
       {showOAuthHandler && <AuthenticateWithRedirectCallback />}
-      <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-center text-white">
+      <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-center text-white px-4">
         <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-xl font-medium animate-pulse">Verifying your account…</p>
+        <p className="text-xl font-medium animate-pulse text-center">{statusMessage}</p>
+        <p className="text-gray-500 text-sm mt-3 text-center max-w-sm">
+          If this takes more than a minute, check your connection and try again.
+        </p>
       </div>
     </>
   );
