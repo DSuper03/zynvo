@@ -19,6 +19,7 @@ export default function SSOCallback() {
   const [needsCollege, setNeedsCollege] = useState(false);
   const [collegeName, setCollegeName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [authType, setAuthType] = useState<"signin" | "signup" | null>(null);
   const [clerkUserInfo, setClerkUserInfo] = useState<{
     email: string;
     clerkId: string;
@@ -84,13 +85,15 @@ export default function SSOCallback() {
       localStorage.removeItem("sso_source");
 
       if (ssoSource === "signin") {
+        // For sign-in, check if user already has college info
         try {
           const res = await axios.post(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
-            { clerkId, email, name, avatarUrl, collegeName: "not joined" }
+            { clerkId, email, name, avatarUrl, collegeName: "pending" }
           );
 
           if (res.data.token) {
+            // User already has college or college is not required
             localStorage.setItem('token', res.data.token);
             sessionStorage.setItem('activeSession', 'true');
             toast.success("Login successful!");
@@ -102,7 +105,13 @@ export default function SSOCallback() {
           console.error("SSO Callback: clerkLogin error", err.response?.status, err.response?.data);
           const status = err.response?.status;
           const msg = err.response?.data?.msg || "Login failed";
-          if (status === 404) {
+          
+          // If college is required, show the form
+          if (msg.toLowerCase().includes("college") || msg.toLowerCase().includes("university")) {
+            setClerkUserInfo({ email, clerkId, name, avatarUrl });
+            setAuthType("signin");
+            setNeedsCollege(true);
+          } else if (status === 404) {
             toast.error("No account found with this email. Please sign up first.");
             setTimeout(() => router.push('/auth/signup'), 2000);
           } else {
@@ -111,7 +120,9 @@ export default function SSOCallback() {
           }
         }
       } else {
+        // For sign-up, always show college form
         setClerkUserInfo({ email, clerkId, name, avatarUrl });
+        setAuthType("signup");
         setNeedsCollege(true);
       }
     };
@@ -144,13 +155,15 @@ export default function SSOCallback() {
       if (res.data.token) {
         localStorage.setItem('token', res.data.token);
         sessionStorage.setItem('activeSession', 'true');
-        toast.success("Account created successfully!");
+        const message = authType === "signin" ? "Login successful!" : "Account created successfully!";
+        toast.success(message);
         router.push('/dashboard');
       } else {
         throw new Error("No token received");
       }
     } catch (err: any) {
-      const msg = err.response?.data?.msg || err.message || "Signup failed. Please try again.";
+      const msg = err.response?.data?.msg || err.message || "Failed to process. Please try again.";
+      console.error("SSO Callback: College submission error", err);
       toast.error(msg);
     } finally {
       setSubmitting(false);
@@ -161,8 +174,14 @@ export default function SSOCallback() {
     return (
       <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center p-4">
         <div className="w-full max-w-md p-8 bg-gray-900 rounded-xl border border-gray-800">
-          <h2 className="text-2xl font-bold text-white mb-2">Almost there!</h2>
-          <p className="text-gray-400 mb-6">Select your college to complete signup.</p>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            {authType === "signin" ? "Complete Login" : "Almost there!"}
+          </h2>
+          <p className="text-gray-400 mb-6">
+            {authType === "signin" 
+              ? "Select your college to complete your login." 
+              : "Select your college to complete signup."}
+          </p>
 
           <form onSubmit={handleCollegeSubmit}>
             <div className="mb-6">
@@ -187,7 +206,9 @@ export default function SSOCallback() {
                   : 'bg-yellow-500 text-black hover:bg-yellow-400'
               }`}
             >
-              {submitting ? "Creating account..." : "Complete Signup"}
+              {submitting 
+                ? (authType === "signin" ? "Logging in..." : "Creating account...")
+                : (authType === "signin" ? "Complete Login" : "Complete Signup")}
             </button>
           </form>
         </div>
