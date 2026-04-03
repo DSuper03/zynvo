@@ -20,6 +20,34 @@ function getBackendBase(): string | null {
   return base.replace(/\/$/, "");
 }
 
+/**
+ * Single shape for completing OAuth profile — mirrors email signup clerkLogin fields
+ * plus aliases many backends expect (profileAvatar, username, imgUrl).
+ */
+function buildClerkLoginCompleteBody(params: {
+  clerkId: string;
+  email: string;
+  displayName: string;
+  avatarUrl: string;
+  college: string;
+  phone: string;
+}) {
+  const { clerkId, email, displayName, avatarUrl, college, phone } = params;
+  return {
+    clerkId,
+    email,
+    name: displayName,
+    username: displayName,
+    avatarUrl,
+    profileAvatar: avatarUrl,
+    collegeName: college,
+    college,
+    college_name: college,
+    imgUrl: avatarUrl,
+    phone: phone || "",
+  };
+}
+
 export default function SSOCallbackPage() {
   return (
     <Suspense
@@ -44,14 +72,15 @@ function SSOCallbackContent() {
   const intentQuery = searchParams.get("intent");
 
   const oauthStartedRef = useRef(false);
+  /** Signup intent: show form before any backend call. */
   const [needsCollege, setNeedsCollege] = useState(false);
+  /** Sign-in intent but profile incomplete (no campus / placeholder). */
   const [needsCollegeSignin, setNeedsCollegeSignin] = useState(false);
   const [collegeName, setCollegeName] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [phone, setPhone] = useState("");
   const [customAvatarUrl, setCustomAvatarUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  /** Backend JWT sync in progress (sign-in path). */
   const [backendSyncing, setBackendSyncing] = useState(false);
   const [clerkUserInfo, setClerkUserInfo] = useState<{
     email: string;
@@ -60,7 +89,6 @@ function SSOCallbackContent() {
     avatarUrl: string;
   } | null>(null);
 
-  /** Only while backend sync runs after Clerk sign-in — do not time out during Google redirect. */
   useEffect(() => {
     if (!backendSyncing) return;
     const t = setTimeout(() => {
@@ -111,15 +139,17 @@ function SSOCallbackContent() {
 
     void (async () => {
       try {
-        const res = await axios.post(`${base}/api/v2/user/auth/clerkLogin`, {
-          clerkId,
-          email,
-          name,
-          avatarUrl,
-          collegeName: "not joined",
-          college: "not joined",
-          college_name: "not joined",
-        });
+        const res = await axios.post(
+          `${base}/api/v2/user/auth/clerkLogin`,
+          buildClerkLoginCompleteBody({
+            clerkId,
+            email,
+            displayName: name,
+            avatarUrl,
+            college: "not joined",
+            phone: "",
+          })
+        );
 
         if (cancelled) return;
 
@@ -140,7 +170,7 @@ function SSOCallbackContent() {
           });
           profile = userRes.data?.user ?? null;
         } catch (e) {
-          console.warn("[sso-callback] getUser failed, will prompt for campus", e);
+          console.warn("[sso-callback] getUser failed, will show full profile form", e);
         }
 
         if (cancelled) return;
@@ -176,27 +206,32 @@ function SSOCallbackContent() {
     return () => {
       cancelled = true;
     };
-  }, [
-    authLoaded,
-    userLoaded,
-    isSignedIn,
-    user,
-    router,
-    intentQuery,
-  ]);
+  }, [authLoaded, userLoaded, isSignedIn, user, router, intentQuery]);
 
-  if (needsCollege && clerkUserInfo) {
+  const showProfileCompletion =
+    (needsCollege || needsCollegeSignin) && clerkUserInfo;
+
+  if (showProfileCompletion && clerkUserInfo) {
+    const fromSigninIncomplete = needsCollegeSignin && !needsCollege;
     const finalName = displayName.trim() || clerkUserInfo.name || "User";
     const finalAvatarUrl =
       customAvatarUrl ||
+      clerkUserInfo.avatarUrl ||
       `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(finalName)}&size=128`;
 
     return (
       <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center p-4">
         <div className="w-full max-w-md p-8 bg-gray-900 rounded-xl border border-gray-800">
           <div className="mb-4">
-            <h2 className="text-2xl font-bold text-white">Almost there!</h2>
-            <p className="text-gray-400 text-sm">{clerkUserInfo.email}</p>
+            <h2 className="text-2xl font-bold text-white">
+              {fromSigninIncomplete ? "Welcome! Set up your profile" : "Almost there!"}
+            </h2>
+            <p className="text-gray-400 text-sm mt-1">
+              {fromSigninIncomplete
+                ? "Choose a display name, avatar, and college so your campus feed and profile are complete."
+                : "Tell us a bit about you to finish creating your account."}
+            </p>
+            <p className="text-gray-500 text-xs mt-2">{clerkUserInfo.email}</p>
           </div>
 
           <form
@@ -208,46 +243,61 @@ function SSOCallbackContent() {
                 toast.error("Please select your college/university from the list");
                 return;
               }
+              if (!displayName.trim()) {
+                toast.error("Please enter a display name");
+                return;
+              }
               setSubmitting(true);
               try {
                 const base = getBackendBase();
                 if (!base) throw new Error("Missing backend URL");
-                const res = await axios.post(`${base}/api/v2/user/auth/clerkLogin`, {
-                  clerkId: clerkUserInfo.clerkId,
-                  email: clerkUserInfo.email,
-                  name: finalName,
-                  avatarUrl: finalAvatarUrl,
-                  collegeName: college,
-                  college,
-                  college_name: college,
-                  imgUrl: "",
-                  phone: phone.trim(),
-                });
+                const res = await axios.post(
+                  `${base}/api/v2/user/auth/clerkLogin`,
+                  buildClerkLoginCompleteBody({
+                    clerkId: clerkUserInfo.clerkId,
+                    email: clerkUserInfo.email,
+                    displayName: displayName.trim(),
+                    avatarUrl: finalAvatarUrl,
+                    college,
+                    phone: phone.trim(),
+                  })
+                );
                 if (res.data.token) {
                   localStorage.setItem("token", res.data.token);
                   sessionStorage.setItem("activeSession", "true");
-                  toast.success("Account created successfully!");
+                  toast.success(
+                    fromSigninIncomplete
+                      ? "Profile saved — welcome to Zynvo!"
+                      : "Account created successfully!"
+                  );
                   router.push("/dashboard");
                 } else {
                   throw new Error("No token received");
                 }
               } catch (err: unknown) {
                 const ax = err as { response?: { data?: { msg?: string } }; message?: string };
-                toast.error(ax.response?.data?.msg || ax.message || "Signup failed.");
+                toast.error(
+                  ax.response?.data?.msg ||
+                    ax.message ||
+                    (fromSigninIncomplete ? "Could not save your profile." : "Signup failed.")
+                );
               } finally {
                 setSubmitting(false);
               }
             }}
             className="space-y-5"
           >
-            <DiceBearAvatar
-              name={finalName}
-              onAvatarChange={(url: string) => setCustomAvatarUrl(url)}
-            />
+            <div>
+              <p className="text-gray-400 text-sm mb-2">Avatar</p>
+              <DiceBearAvatar
+                name={displayName.trim() || clerkUserInfo.name || "User"}
+                onAvatarChange={(url: string) => setCustomAvatarUrl(url)}
+              />
+            </div>
 
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-1">
-                Display name
+                Display name <span className="text-yellow-500">*</span>
               </label>
               <input
                 type="text"
@@ -255,10 +305,10 @@ function SSOCallbackContent() {
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="How should we call you?"
                 className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-500"
-                autoComplete="off"
+                autoComplete="nickname"
               />
               <p className="text-gray-500 text-xs mt-1">
-                Pre-filled from Google — edit if you like.
+                This is your public name on Zynvo (you can edit it later in settings).
               </p>
             </div>
 
@@ -288,129 +338,24 @@ function SSOCallbackContent() {
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+91 98765 43210"
                 className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-500"
-                autoComplete="off"
+                autoComplete="tel"
               />
             </div>
 
             <button
               type="submit"
-              disabled={submitting || !collegeName.trim()}
+              disabled={submitting || !collegeName.trim() || !displayName.trim()}
               className={`w-full py-3 rounded-lg font-semibold transition duration-300 ${
-                submitting || !collegeName.trim()
+                submitting || !collegeName.trim() || !displayName.trim()
                   ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                   : "bg-yellow-500 text-black hover:bg-yellow-400"
               }`}
             >
-              {submitting ? "Creating your account…" : "Join Zynvo →"}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  if (needsCollegeSignin && clerkUserInfo) {
-    const finalName = displayName.trim() || clerkUserInfo.name || "User";
-    const finalAvatarUrl =
-      customAvatarUrl ||
-      clerkUserInfo.avatarUrl ||
-      `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(finalName)}&size=128`;
-
-    return (
-      <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center p-4">
-        <div className="w-full max-w-md p-8 bg-gray-900 rounded-xl border border-gray-800">
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold text-white">Which campus are you on?</h2>
-            <p className="text-gray-400 text-sm mt-1">
-              Zynvo is built for college communities. Choose your institution so we can
-              personalize your feed and campus features.
-            </p>
-            <p className="text-gray-500 text-xs mt-2">{clerkUserInfo.email}</p>
-          </div>
-
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const college = collegeName.trim();
-              const validCollege = collegesWithClubs.some((c) => c.college === college);
-              if (!college || !validCollege) {
-                toast.error("Please select your college/university from the list");
-                return;
-              }
-              setSubmitting(true);
-              try {
-                const base = getBackendBase();
-                if (!base) throw new Error("Missing backend URL");
-                const res = await axios.post(`${base}/api/v2/user/auth/clerkLogin`, {
-                  clerkId: clerkUserInfo.clerkId,
-                  email: clerkUserInfo.email,
-                  name: finalName,
-                  avatarUrl: finalAvatarUrl,
-                  collegeName: college,
-                  college,
-                  college_name: college,
-                  imgUrl: "",
-                  phone: phone.trim(),
-                });
-                if (res.data.token) {
-                  localStorage.setItem("token", res.data.token);
-                  sessionStorage.setItem("activeSession", "true");
-                  toast.success("Campus saved — welcome back!");
-                  router.push("/dashboard");
-                } else {
-                  throw new Error("No token received");
-                }
-              } catch (err: unknown) {
-                const ax = err as { response?: { data?: { msg?: string } }; message?: string };
-                toast.error(
-                  ax.response?.data?.msg || ax.message || "Could not save your campus."
-                );
-              } finally {
-                setSubmitting(false);
-              }
-            }}
-            className="space-y-5"
-          >
-            <div>
-              <label className="block text-gray-300 text-sm font-medium mb-1">
-                College / University <span className="text-yellow-500">*</span>
-              </label>
-              <CollegeSearchSelect
-                colleges={[...collegesWithClubs].sort((a, b) =>
-                  a.college.localeCompare(b.college)
-                )}
-                value={collegeName}
-                onChange={(v) => setCollegeName(v)}
-                placeholder="Search and select your college"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-300 text-sm font-medium mb-1">
-                Phone number{" "}
-                <span className="text-gray-500 font-normal">(optional)</span>
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+91 98765 43210"
-                className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-500"
-                autoComplete="off"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={submitting || !collegeName.trim()}
-              className={`w-full py-3 rounded-lg font-semibold transition duration-300 ${
-                submitting || !collegeName.trim()
-                  ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                  : "bg-yellow-500 text-black hover:bg-yellow-400"
-              }`}
-            >
-              {submitting ? "Saving…" : "Continue to Zynvo →"}
+              {submitting
+                ? "Saving…"
+                : fromSigninIncomplete
+                  ? "Save profile & continue →"
+                  : "Join Zynvo →"}
             </button>
           </form>
         </div>
