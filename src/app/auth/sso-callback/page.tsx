@@ -352,9 +352,9 @@ function SSOCallbackContent() {
                   : "bg-yellow-500 text-black hover:bg-yellow-400"
               }`}
             >
-              {submitting 
-                ? (authType === "signin" ? "Logging in..." : "Creating account...")
-                : (authType === "signin" ? "Complete Login" : "Complete Signup")}
+              {submitting
+                ? ((authType ?? "signin") === "signin" ? "Logging in..." : "Creating account...")
+                : ((authType ?? "signin") === "signin" ? "Complete Login" : "Complete Signup")}
             </button>
           </form>
         </div>
