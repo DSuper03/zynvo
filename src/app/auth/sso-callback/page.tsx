@@ -82,6 +82,7 @@ function SSOCallbackContent() {
   const [customAvatarUrl, setCustomAvatarUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [backendSyncing, setBackendSyncing] = useState(false);
+  const [authType, setAuthType] = useState<"signin" | "signup" | null>(null);
   const [clerkUserInfo, setClerkUserInfo] = useState<{
     email: string;
     clerkId: string;
@@ -352,10 +353,8 @@ function SSOCallbackContent() {
               }`}
             >
               {submitting
-                ? "Saving…"
-                : fromSigninIncomplete
-                  ? "Save profile & continue →"
-                  : "Join Zynvo →"}
+                ? ((authType ?? "signin") === "signin" ? "Logging in..." : "Creating account...")
+                : ((authType ?? "signin") === "signin" ? "Complete Login" : "Complete Signup")}
             </button>
           </form>
         </div>
