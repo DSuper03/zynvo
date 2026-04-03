@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useSignIn } from '@clerk/nextjs';
+import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
 
 
 
@@ -25,6 +26,7 @@ export default function SignIn() {
   const { isLoaded: authIsLoaded, signIn } = useSignIn();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -48,11 +50,12 @@ export default function SignIn() {
     }
     try {
       console.log('Starting Google OAuth redirect...');
-      localStorage.setItem('sso_source', 'signin');
+      const origin = window.location.origin;
+      setSsoIntentBeforeOAuth('signin');
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
-        redirectUrl: '/auth/sso-callback',
-        redirectUrlComplete: '/auth/sso-callback',
+        redirectUrl: `${origin}/auth/sso-callback?intent=signin`,
+        redirectUrlComplete: `${origin}/auth/sso-callback?intent=signin`,
       });
     } catch (err: any) {
       console.error('SSO redirect error:', err);
@@ -203,6 +206,9 @@ export default function SignIn() {
                 </Link>
               </p>
             </div>
+
+            {/* Clerk Smart CAPTCHA mount point — required for bot protection */}
+            <div id="clerk-captcha" />
 
             <div className="mb-6">
               <div className="flex items-center justify-center">

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { useSignUp, useAuth , useSignIn} from "@clerk/nextjs";
 import { jwtDecode } from "jwt-decode";
 import { de } from 'date-fns/locale';
+import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
  
 
 export default function SignUp() {
@@ -32,6 +33,7 @@ export default function SignUp() {
   const { getToken } = useAuth();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
@@ -157,8 +159,18 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       return;
     };
 
-    if (!agreeToTerms || !formData.collegeName) return;
+    if (!agreeToTerms) return;
 
+    // Validate college is selected from the actual list — blocks browser-autofilled garbage values
+    const validCollege = collegesWithClubs.some(
+      (c) => c.college === formData.collegeName
+    );
+    if (!formData.collegeName.trim() || !validCollege) {
+      setCollegeError('Please select your college/university from the list');
+      toast.error('Please select your college/university from the list');
+      return;
+    }
+    setCollegeError('');
     setIsCreatingAccount(true);
 
     try {
@@ -256,20 +268,40 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       // 2. Set the session active in Clerk
       await setActive({ session: completeSignUp.createdSessionId });
 
-      toast.success("Email verified successfully!");
+      toast.success("Email verified! Setting up your account…");
 
-      // 3. Get Token & Sync with Backend
-      const token = (await getToken()) as string; // Gets the new session token
+      // 3. Wait for session to propagate, then get token with retries
+      let token: string | null = null;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        await new Promise((r) => setTimeout(r, 600));
+        token = await getToken();
+        if (token) break;
+      }
+
+      if (!token) {
+        toast.error("Session setup timed out. Please sign in manually.");
+        router.push("/auth/signin");
+        return;
+      }
+
       const decodedToken: any = jwtDecode(token);
+      const clerkId: string = decodedToken.sub;
 
-      console.log("Decoded Clerk Token:", decodedToken);
+      // Fallback avatar using name seed if DiceBear component didn't fire
+      const avatarUrl =
+        formData.avatarUrl ||
+        `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(formData.name || "user")}&size=128`;
 
+      // 4. Sync with backend (send college under common key variants — some APIs only map `college` / `college_name`)
+      const college = formData.collegeName.trim();
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
         {
-          clerkId: decodedToken.sub,
-          collegeName: formData.collegeName,
-          avatarUrl: formData.avatarUrl,
+          clerkId,
+          collegeName: college,
+          college,
+          college_name: college,
+          avatarUrl,
           password: formData.password,
           name: formData.name,
           email: formData.email,
@@ -278,14 +310,17 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         }
       );
 
-      // 4. Save YOUR Custom JWT & Redirect
+      if (!res.data.token) throw new Error("No token returned from backend");
+
+      // 5. Save custom JWT & redirect
       localStorage.setItem('token', res.data.token);
       sessionStorage.setItem('activeSession', 'true');
-      toast.success("Account created & Verified!");
+      toast.success("Account created successfully!");
       router.push("/dashboard");
     } catch (err: any) {
       console.error("Post-verification sync failed:", JSON.stringify(err, null, 2));
-      toast.error("Email verified, but we couldn't complete signup. Please try again.");
+      const msg = err?.response?.data?.msg || err?.message || "Signup failed. Please try again.";
+      toast.error(msg);
     } finally {
       setIsVerifyingCode(false);
     }
@@ -298,11 +333,12 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       return;
     }
     try {
-      localStorage.setItem('sso_source', 'signup');
+      const origin = window.location.origin;
+      setSsoIntentBeforeOAuth('signup');
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
-        redirectUrl: "/auth/sso-callback",
-        redirectUrlComplete: "/auth/sso-callback",
+        redirectUrl: `${origin}/auth/sso-callback?intent=signup`,
+        redirectUrlComplete: `${origin}/auth/sso-callback?intent=signup`,
       });
     } catch (err) {
       console.error('SSO redirect error', err);
@@ -454,6 +490,8 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             </div>
             <div className="mb-6">
               <div className="flex items-center justify-center space-x-3">
+                {/* Clerk Smart CAPTCHA mount point */}
+                <div id="clerk-captcha" />
                 <button
                   type="button"
                   onClick={() => handleGoogleVerification()}

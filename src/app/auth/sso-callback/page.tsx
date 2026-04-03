@@ -1,24 +1,87 @@
 'use client';
 
-import { useEffect, useRef, useState } from "react";
-import { useAuth, useUser, useClerk } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { AuthenticateWithRedirectCallback, useAuth, useUser } from "@clerk/nextjs";
+import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
 import CollegeSearchSelect from "@/components/colleges/collegeSelect";
 import { collegesWithClubs } from "@/components/colleges/college";
+import DiceBearAvatar from "@/components/DicebearAvatars";
+import { resolveSsoIntentStable } from "@/lib/ssoIntent";
+import {
+  extractCollegeFromUserRecord,
+  shouldPromptForCollege,
+} from "@/lib/collegeProfile";
 
-export default function SSOCallback() {
-  const { isLoaded: authLoaded } = useAuth();
-  const clerk = useClerk();
+function getBackendBase(): string | null {
+  const base = process.env.NEXT_PUBLIC_BACKEND_URL;
+  if (!base || base === "undefined") return null;
+  return base.replace(/\/$/, "");
+}
+
+/**
+ * Single shape for completing OAuth profile — mirrors email signup clerkLogin fields
+ * plus aliases many backends expect (profileAvatar, username, imgUrl).
+ */
+function buildClerkLoginCompleteBody(params: {
+  clerkId: string;
+  email: string;
+  displayName: string;
+  avatarUrl: string;
+  college: string;
+  phone: string;
+}) {
+  const { clerkId, email, displayName, avatarUrl, college, phone } = params;
+  return {
+    clerkId,
+    email,
+    name: displayName,
+    username: displayName,
+    avatarUrl,
+    profileAvatar: avatarUrl,
+    collegeName: college,
+    college,
+    college_name: college,
+    imgUrl: avatarUrl,
+    phone: phone || "",
+  };
+}
+
+export default function SSOCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-center text-white">
+          <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4" />
+          <p className="text-xl font-medium animate-pulse">Loading…</p>
+        </div>
+      }
+    >
+      <SSOCallbackContent />
+    </Suspense>
+  );
+}
+
+function SSOCallbackContent() {
+  const { isLoaded: authLoaded, isSignedIn } = useAuth();
+  const { user, isLoaded: userLoaded } = useUser();
   const router = useRouter();
-  const { user, isLoaded: userLoaded, isSignedIn } = useUser();
-  const hasProcessed = useRef(false);
-  const callbackHandled = useRef(false);
+  const searchParams = useSearchParams();
 
+  const intentQuery = searchParams.get("intent");
+
+  const oauthStartedRef = useRef(false);
+  /** Signup intent: show form before any backend call. */
   const [needsCollege, setNeedsCollege] = useState(false);
+  /** Sign-in intent but profile incomplete (no campus / placeholder). */
+  const [needsCollegeSignin, setNeedsCollegeSignin] = useState(false);
   const [collegeName, setCollegeName] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [customAvatarUrl, setCustomAvatarUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [backendSyncing, setBackendSyncing] = useState(false);
   const [authType, setAuthType] = useState<"signin" | "signup" | null>(null);
   const [clerkUserInfo, setClerkUserInfo] = useState<{
     email: string;
@@ -27,62 +90,53 @@ export default function SSOCallback() {
     avatarUrl: string;
   } | null>(null);
 
-  // Step 1: Process OAuth tokens from the URL to finalize Clerk session
   useEffect(() => {
-    if (!clerk.loaded || callbackHandled.current) return;
-    callbackHandled.current = true;
+    if (!backendSyncing) return;
+    const t = setTimeout(() => {
+      toast.error("Could not sync your profile. Please try signing in again.");
+      router.push("/auth/signin");
+    }, 120000);
+    return () => clearTimeout(t);
+  }, [backendSyncing, router]);
 
-    // If already signed in (e.g. page reload after callback), skip — Step 2 will handle it
-    if (clerk.session) {
-      console.warn("SSO Callback: Session already exists, skipping handleRedirectCallback");
+  useEffect(() => {
+    if (!authLoaded || !userLoaded || !isSignedIn || !user) return;
+    if (oauthStartedRef.current) return;
+    oauthStartedRef.current = true;
+
+    let cancelled = false;
+
+    const email = user.emailAddresses[0]?.emailAddress;
+    const clerkId = user.id;
+    const name = user.fullName || user.firstName || "User";
+    const googleImage = user.imageUrl?.trim();
+    const avatarUrl =
+      googleImage ||
+      `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(name)}&size=128`;
+
+    if (!email || !clerkId) {
+      toast.error("Missing required user information");
+      router.push("/auth/signup");
       return;
     }
 
-    console.warn("SSO Callback: Processing OAuth callback...");
-    clerk.handleRedirectCallback({}).catch((err: any) => {
-      console.error("SSO Callback: handleRedirectCallback error", err);
-      toast.error("Authentication failed. Redirecting...");
-      setTimeout(() => router.push('/auth/signin'), 2000);
-    });
-  }, [clerk, router]);
+    const intent = resolveSsoIntentStable(intentQuery);
 
-  // Timeout fallback: if stuck on spinner for too long, redirect
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!hasProcessed.current && !needsCollege) {
-        console.error("SSO Callback: Timed out waiting for auth state");
-        toast.error("Authentication timed out. Please try again.");
-        router.push('/auth/signin');
-      }
-    }, 15000);
-    return () => clearTimeout(timeout);
-  }, [router, needsCollege]);
+    if (intent === "signup") {
+      setDisplayName(name);
+      setClerkUserInfo({ email, clerkId, name, avatarUrl });
+      setNeedsCollege(true);
+      return;
+    }
 
-  // Step 2: Once signed in, sync with backend
-  useEffect(() => {
-    const syncWithBackend = async () => {
-      if (hasProcessed.current) return;
-      if (!authLoaded || !userLoaded || !isSignedIn) return;
+    const base = getBackendBase();
+    if (!base) {
+      toast.error("App configuration error: backend URL is missing.");
+      router.push("/auth/signin");
+      return;
+    }
 
-      hasProcessed.current = true;
-      console.warn("SSO Callback: User signed in", { userId: user?.id });
-
-      const email = user?.emailAddresses[0]?.emailAddress;
-      const clerkId = user?.id;
-      const name = user?.fullName || user?.firstName || "User";
-      const avatarUrl = user?.hasImage
-        ? user.imageUrl
-        : `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(name)}&size=128`;
-
-      if (!email || !clerkId) {
-        toast.error("Missing required user information");
-        router.push('/auth/signup');
-        return;
-      }
-
-      const ssoSource = localStorage.getItem("sso_source") || "signup";
-      console.warn("SSO Callback: sso_source =", ssoSource, "| email =", email);
-      localStorage.removeItem("sso_source");
+    setBackendSyncing(true);
 
       if (ssoSource === "signin") {
         // For sign-in, check if user already has college info
@@ -91,119 +145,218 @@ export default function SSOCallback() {
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
             { clerkId, email, name, avatarUrl, collegeName: "pending" }
           );
+    void (async () => {
+      try {
+        const res = await axios.post(
+          `${base}/api/v2/user/auth/clerkLogin`,
+          buildClerkLoginCompleteBody({
+            clerkId,
+            email,
+            displayName: name,
+            avatarUrl,
+            college: "not joined",
+            phone: "",
+          })
+        );
 
-          if (res.data.token) {
-            // User already has college or college is not required
-            localStorage.setItem('token', res.data.token);
-            sessionStorage.setItem('activeSession', 'true');
-            toast.success("Login successful!");
-            router.push('/dashboard');
-          } else {
-            throw new Error("No token received");
-          }
-        } catch (err: any) {
-          console.error("SSO Callback: clerkLogin error", err.response?.status, err.response?.data);
-          const status = err.response?.status;
-          const msg = err.response?.data?.msg || "Login failed";
-          
-          // If college is required, show the form
-          if (msg.toLowerCase().includes("college") || msg.toLowerCase().includes("university")) {
-            setClerkUserInfo({ email, clerkId, name, avatarUrl });
-            setAuthType("signin");
-            setNeedsCollege(true);
-          } else if (status === 404) {
-            toast.error("No account found with this email. Please sign up first.");
-            setTimeout(() => router.push('/auth/signup'), 2000);
-          } else {
-            toast.error(msg);
-            setTimeout(() => router.push('/auth/signin'), 2000);
-          }
+        if (cancelled) return;
+
+        if (!res.data?.token) {
+          toast.error("Login failed: no session from server.");
+          setTimeout(() => router.push("/auth/signin"), 2000);
+          return;
         }
-      } else {
-        // For sign-up, always show college form
-        setClerkUserInfo({ email, clerkId, name, avatarUrl });
-        setAuthType("signup");
-        setNeedsCollege(true);
+
+        const token = res.data.token as string;
+        localStorage.setItem("token", token);
+        sessionStorage.setItem("activeSession", "true");
+
+        let profile: unknown = null;
+        try {
+          const userRes = await axios.get(`${base}/api/v1/user/getUser`, {
+            headers: { authorization: `Bearer ${token}` },
+          });
+          profile = userRes.data?.user ?? null;
+        } catch (e) {
+          console.warn("[sso-callback] getUser failed, will show full profile form", e);
+        }
+
+        if (cancelled) return;
+
+        const collegeStr = extractCollegeFromUserRecord(profile);
+        const mustCollectCampus = shouldPromptForCollege(collegeStr);
+
+        if (mustCollectCampus) {
+          setClerkUserInfo({ email, clerkId, name, avatarUrl });
+          setDisplayName(name);
+          setNeedsCollegeSignin(true);
+          return;
+        }
+
+        toast.success("Login successful!");
+        router.push("/dashboard");
+      } catch (err: unknown) {
+        if (cancelled) return;
+        const ax = err as { response?: { status?: number; data?: { msg?: string } } };
+        const status = ax.response?.status;
+        if (status === 404) {
+          toast.error("No account found. Please sign up first.");
+          setTimeout(() => router.push("/auth/signup"), 2000);
+        } else {
+          toast.error(ax.response?.data?.msg || "Login failed");
+          setTimeout(() => router.push("/auth/signin"), 2000);
+        }
+      } finally {
+        if (!cancelled) setBackendSyncing(false);
       }
+    })();
+
+    return () => {
+      cancelled = true;
     };
+  }, [authLoaded, userLoaded, isSignedIn, user, router, intentQuery]);
 
-    syncWithBackend();
-  }, [authLoaded, userLoaded, isSignedIn, user, router]);
+  const showProfileCompletion =
+    (needsCollege || needsCollegeSignin) && clerkUserInfo;
 
-  const handleCollegeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!collegeName.trim() || !clerkUserInfo) {
-      toast.error("Please select your college/university");
-      return;
-    }
+  if (showProfileCompletion && clerkUserInfo) {
+    const fromSigninIncomplete = needsCollegeSignin && !needsCollege;
+    const finalName = displayName.trim() || clerkUserInfo.name || "User";
+    const finalAvatarUrl =
+      customAvatarUrl ||
+      clerkUserInfo.avatarUrl ||
+      `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(finalName)}&size=128`;
 
-    setSubmitting(true);
-    try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
-        {
-          clerkId: clerkUserInfo.clerkId,
-          email: clerkUserInfo.email,
-          name: clerkUserInfo.name,
-          avatarUrl: clerkUserInfo.avatarUrl,
-          collegeName,
-          imgUrl: "",
-          phone: "",
-        }
-      );
-
-      if (res.data.token) {
-        localStorage.setItem('token', res.data.token);
-        sessionStorage.setItem('activeSession', 'true');
-        const message = authType === "signin" ? "Login successful!" : "Account created successfully!";
-        toast.success(message);
-        router.push('/dashboard');
-      } else {
-        throw new Error("No token received");
-      }
-    } catch (err: any) {
-      const msg = err.response?.data?.msg || err.message || "Failed to process. Please try again.";
-      console.error("SSO Callback: College submission error", err);
-      toast.error(msg);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (needsCollege) {
     return (
       <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center p-4">
         <div className="w-full max-w-md p-8 bg-gray-900 rounded-xl border border-gray-800">
-          <h2 className="text-2xl font-bold text-white mb-2">
-            {authType === "signin" ? "Complete Login" : "Almost there!"}
-          </h2>
-          <p className="text-gray-400 mb-6">
-            {authType === "signin" 
-              ? "Select your college to complete your login." 
-              : "Select your college to complete signup."}
-          </p>
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold text-white">
+              {fromSigninIncomplete ? "Welcome! Set up your profile" : "Almost there!"}
+            </h2>
+            <p className="text-gray-400 text-sm mt-1">
+              {fromSigninIncomplete
+                ? "Choose a display name, avatar, and college so your campus feed and profile are complete."
+                : "Tell us a bit about you to finish creating your account."}
+            </p>
+            <p className="text-gray-500 text-xs mt-2">{clerkUserInfo.email}</p>
+          </div>
 
-          <form onSubmit={handleCollegeSubmit}>
-            <div className="mb-6">
-              <label className="block text-gray-300 text-sm font-medium mb-2">
-                College/University
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const college = collegeName.trim();
+              const validCollege = collegesWithClubs.some((c) => c.college === college);
+              if (!college || !validCollege) {
+                toast.error("Please select your college/university from the list");
+                return;
+              }
+              if (!displayName.trim()) {
+                toast.error("Please enter a display name");
+                return;
+              }
+              setSubmitting(true);
+              try {
+                const base = getBackendBase();
+                if (!base) throw new Error("Missing backend URL");
+                const res = await axios.post(
+                  `${base}/api/v2/user/auth/clerkLogin`,
+                  buildClerkLoginCompleteBody({
+                    clerkId: clerkUserInfo.clerkId,
+                    email: clerkUserInfo.email,
+                    displayName: displayName.trim(),
+                    avatarUrl: finalAvatarUrl,
+                    college,
+                    phone: phone.trim(),
+                  })
+                );
+                if (res.data.token) {
+                  localStorage.setItem("token", res.data.token);
+                  sessionStorage.setItem("activeSession", "true");
+                  toast.success(
+                    fromSigninIncomplete
+                      ? "Profile saved — welcome to Zynvo!"
+                      : "Account created successfully!"
+                  );
+                  router.push("/dashboard");
+                } else {
+                  throw new Error("No token received");
+                }
+              } catch (err: unknown) {
+                const ax = err as { response?: { data?: { msg?: string } }; message?: string };
+                toast.error(
+                  ax.response?.data?.msg ||
+                    ax.message ||
+                    (fromSigninIncomplete ? "Could not save your profile." : "Signup failed.")
+                );
+              } finally {
+                setSubmitting(false);
+              }
+            }}
+            className="space-y-5"
+          >
+            <div>
+              <p className="text-gray-400 text-sm mb-2">Avatar</p>
+              <DiceBearAvatar
+                name={displayName.trim() || clerkUserInfo.name || "User"}
+                onAvatarChange={(url: string) => setCustomAvatarUrl(url)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-1">
+                Display name <span className="text-yellow-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="How should we call you?"
+                className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-500"
+                autoComplete="nickname"
+              />
+              <p className="text-gray-500 text-xs mt-1">
+                This is your public name on Zynvo (you can edit it later in settings).
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-1">
+                College / University <span className="text-yellow-500">*</span>
               </label>
               <CollegeSearchSelect
-                colleges={[...collegesWithClubs].sort((a, b) => a.college.localeCompare(b.college))}
+                colleges={[...collegesWithClubs].sort((a, b) =>
+                  a.college.localeCompare(b.college)
+                )}
                 value={collegeName}
-                onChange={(value) => setCollegeName(value)}
-                placeholder="Search and select your college/university"
+                onChange={(v) => setCollegeName(v)}
+                placeholder="Search and select your college"
                 required
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-1">
+                Phone number{" "}
+                <span className="text-gray-500 font-normal">(optional)</span>
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+91 98765 43210"
+                className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-500"
+                autoComplete="tel"
               />
             </div>
 
             <button
               type="submit"
-              disabled={submitting || !collegeName.trim()}
-              className={`w-full py-3 rounded-lg font-medium transition duration-300 ${
-                submitting || !collegeName.trim()
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  : 'bg-yellow-500 text-black hover:bg-yellow-400'
+              disabled={submitting || !collegeName.trim() || !displayName.trim()}
+              className={`w-full py-3 rounded-lg font-semibold transition duration-300 ${
+                submitting || !collegeName.trim() || !displayName.trim()
+                  ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                  : "bg-yellow-500 text-black hover:bg-yellow-400"
               }`}
             >
               {submitting 
@@ -216,12 +369,24 @@ export default function SSOCallback() {
     );
   }
 
+  const showOAuthHandler = authLoaded && !isSignedIn;
+
+  const statusMessage = !isSignedIn
+    ? "Signing you in with Google…"
+    : backendSyncing
+      ? "Syncing your profile with Zynvo…"
+      : "Verifying your account…";
+
   return (
-    <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-center text-white">
-      <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p className="text-xl font-medium animate-pulse">
-        Verifying your account...
-      </p>
-    </div>
+    <>
+      {showOAuthHandler && <AuthenticateWithRedirectCallback />}
+      <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-center text-white px-4">
+        <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-xl font-medium animate-pulse text-center">{statusMessage}</p>
+        <p className="text-gray-500 text-sm mt-3 text-center max-w-sm">
+          If this takes more than a minute, check your connection and try again.
+        </p>
+      </div>
+    </>
   );
 }

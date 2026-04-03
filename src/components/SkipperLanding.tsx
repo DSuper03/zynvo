@@ -408,17 +408,14 @@ const Skiper39 = () => {
                     onClick={login}
                     className="bg-black p-0 rounded-full w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center transition-all hover:scale-105 shadow-lg hover:shadow-black/40"
                   >
-                    {user?.pfp ? (
-                      <img
-                        src={user.pfp}
-                        alt="profile"
-                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-sm font-bold uppercase text-yellow-300">
-                        {user?.name?.charAt(0) ?? 'U'}
-                      </span>
-                    )}
+                    <img
+                      src={
+                        user?.pfp ||
+                        `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(user?.name || 'user')}&size=64`
+                      }
+                      alt="profile"
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover"
+                    />
                   </Button>
                   <button
                     onClick={hardLogout}

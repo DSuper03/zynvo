@@ -42,12 +42,20 @@ const LandingHeader = () => {
         <motion.div
           initial={false}
           animate={{
-            borderColor: isScrolled ? 'rgba(234, 179, 8, 0.25)' : 'rgba(255, 255, 255, 0.08)'
-           
-        ,
+            borderColor: isScrolled
+              ? 'rgba(234, 179, 8, 0.3)'
+              : 'rgba(255, 255, 255, 0.08)',
+            backgroundColor: isScrolled
+              ? 'rgba(255, 251, 235, 0.45)'
+              : 'rgba(255, 255, 255, 0)',
+            boxShadow: isScrolled
+              ? '0 8px 32px rgba(0,0,0,0.10), 0 1.5px 0 rgba(255,255,255,0.18) inset'
+              : 'none',
+            backdropFilter: isScrolled ? 'blur(18px) saturate(1.6)' : 'none',
           }}
-          transition={{ duration: 0.22, ease: 'easeOut' }}
-          className="rounded-2xl border bg-transparent "
+          transition={{ duration: 0.28, ease: 'easeOut' }}
+          className="rounded-2xl border"
+          style={{ WebkitBackdropFilter: isScrolled ? 'blur(18px) saturate(1.6)' : 'none' }}
         >
           <div className="flex h-16 items-center justify-between px-3 sm:px-4">
             <Link href="/" className="group inline-flex items-center gap-2.5">
@@ -86,13 +94,14 @@ const LandingHeader = () => {
                     className="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-yellow-400/40 bg-yellow-500/10 transition-all duration-200 hover:scale-105 hover:border-yellow-300"
                     aria-label="Open profile"
                   >
-                    {user?.pfp ? (
-                      <img src={user.pfp} alt="Profile" className="h-full w-full object-cover" />
-                    ) : (
-                      <span className="text-sm font-bold uppercase text-yellow-300">
-                        {user?.name?.charAt(0) ?? 'U'}
-                      </span>
-                    )}
+                    <img
+                      src={
+                        user?.pfp ||
+                        `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(user?.name || 'user')}&size=64`
+                      }
+                      alt="Profile"
+                      className="h-full w-full object-cover"
+                    />
                   </button>
                   <button
                     onClick={hardLogout}
@@ -105,7 +114,7 @@ const LandingHeader = () => {
                 <>
                   <Link
                     href="/auth/signin"
-                    className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                    className="rounded-xl border border-black/20 bg-black/5 px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-black/10"
                   >
                     Sign In
                   </Link>
