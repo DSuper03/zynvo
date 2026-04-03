@@ -138,13 +138,6 @@ function SSOCallbackContent() {
 
     setBackendSyncing(true);
 
-      if (ssoSource === "signin") {
-        // For sign-in, check if user already has college info
-        try {
-          const res = await axios.post(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
-            { clerkId, email, name, avatarUrl, collegeName: "pending" }
-          );
     void (async () => {
       try {
         const res = await axios.post(
