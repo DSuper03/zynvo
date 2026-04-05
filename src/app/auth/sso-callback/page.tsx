@@ -122,12 +122,11 @@ function SSOCallbackContent() {
 
     const intent = resolveSsoIntentStable(intentQuery);
 
-    if (intent === "signup") {
-      setDisplayName(name);
-      setClerkUserInfo({ email, clerkId, name, avatarUrl });
-      setNeedsCollege(true);
-      return;
-    }
+    // The app used to assume that intent === "signup" meant we should
+    // unconditionally prompt for the college name. But existing users
+    // who accidentally clicked "Sign Up" were forced to re-enter their details.
+    // Let the backend decide by directly logging them in and checking the returned profile.
+    // See lines below which check `shouldPromptForCollege(collegeStr)`.
 
     const base = getBackendBase();
     if (!base) {
