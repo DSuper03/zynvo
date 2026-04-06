@@ -140,7 +140,7 @@ function SSOCallbackContent() {
     void (async () => {
       try {
         // Step 1: Check if user already exists in our backend DB
-        let userExists = false;
+        let userExists: boolean | null = null; // tri-state: null = unknown, true = exists, false = doesn't exist
         let userHasCollege = false;
         try {
           const checkRes = await axios.post(
@@ -150,14 +150,16 @@ function SSOCallbackContent() {
           userExists = checkRes.data?.exists === true;
           userHasCollege = checkRes.data?.hasCollege === true;
         } catch {
-          // If check fails, fall through to clerkLogin which will handle it
-          console.warn("[sso-callback] checkUserExists failed, falling through");
+          // If check fails, leave userExists as null (unknown)
+          // The clerkLogin call will handle both existing and new users correctly
+          console.warn("[sso-callback] checkUserExists failed, proceeding with clerkLogin");
         }
 
         if (cancelled) return;
 
         // Step 2: Branch based on whether user exists
-        if (userExists) {
+        // If check failed (userExists is null), proceed with clerkLogin which handles both cases
+        if (userExists === true) {
           // Existing user — call clerkLogin to sync Clerk data & get JWT
           const res = await axios.post(
             `${base}/api/v2/user/auth/clerkLogin`,
@@ -209,6 +211,59 @@ function SSOCallbackContent() {
           if (mustCollectCampus) {
             setClerkUserInfo({ email, clerkId, name, avatarUrl });
             setDisplayName(name);
+            // Existing users keep their avatar — don't force them to re-pick
+            setNeedsCollegeSignin(true);
+            return;
+          }
+
+          toast.success("Login successful!");
+          router.push("/dashboard");
+        } else if (userExists === null) {
+          // Check failed (endpoint down) — call clerkLogin anyway, let backend handle it
+          const res = await axios.post(
+            `${base}/api/v2/user/auth/clerkLogin`,
+            buildClerkLoginCompleteBody({
+              clerkId,
+              email,
+              displayName: name,
+              avatarUrl,
+              college: "not joined",
+              phone: "",
+            })
+          );
+
+          if (cancelled) return;
+
+          if (!res.data?.token) {
+            toast.error("Login failed: no session from server.");
+            setTimeout(() => router.push("/auth/signin"), 2000);
+            return;
+          }
+
+          const token = res.data.token as string;
+          localStorage.setItem("token", token);
+          sessionStorage.setItem("activeSession", "true");
+
+          // Fetch profile to determine if they need to complete it
+          let profile: unknown = null;
+          try {
+            const userRes = await axios.get(`${base}/api/v1/user/getUser`, {
+              headers: { authorization: `Bearer ${token}` },
+            });
+            profile = userRes.data?.user ?? null;
+          } catch (e) {
+            console.warn("[sso-callback] getUser failed after clerkLogin", e);
+          }
+
+          if (cancelled) return;
+
+          const collegeStr = extractCollegeFromUserRecord(profile);
+          const mustCollectCampus = shouldPromptForCollege(collegeStr);
+
+          if (mustCollectCampus) {
+            setClerkUserInfo({ email, clerkId, name, avatarUrl });
+            setDisplayName(name);
+            // Existing users keep their avatar — don't force them to re-pick
             setNeedsCollegeSignin(true);
             return;
           }
@@ -216,8 +271,7 @@ function SSOCallbackContent() {
           toast.success("Login successful!");
           router.push("/dashboard");
         } else {
-          // New user — show the profile completion form inline
-          // (don't redirect to /auth/signup — they're already authenticated with Google)
+          // userExists === false — new user, show profile form
           // Pre-populate Google name but let them edit it
           setClerkUserInfo({ email, clerkId, name, avatarUrl });
           setDisplayName(name); // Pre-fill with Google name but editable
@@ -259,9 +313,9 @@ function SSOCallbackContent() {
   if (showProfileCompletion && clerkUserInfo) {
     const fromSigninIncomplete = needsCollegeSignin && !needsCollege;
     const finalName = displayName.trim() || clerkUserInfo.name || "User";
+    // Don't fall back to Google photo — user must pick their own avatar
     const finalAvatarUrl =
       customAvatarUrl ||
-      clerkUserInfo.avatarUrl ||
       `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(finalName)}&size=128`;
 
     return (
