@@ -351,9 +351,7 @@ function SSOCallbackContent() {
                 placeholder="How should we call you?"
                 className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-500"
                 autoComplete="nickname"
-              />Don't take the google photo and google name directly for 1st time users in google sign in or sign up
-Show the exsisting form where they can choose their avater and also can change their name......
-Say me what u understood u have to d
+              />
               <p className="text-gray-500 text-xs mt-1">
                 This is your public name on Zynvo (you can edit it later in settings).
               </p>
