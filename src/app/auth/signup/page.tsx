@@ -174,7 +174,24 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setIsCreatingAccount(true);
 
     try {
-      // 1. Create the user
+      // 0. Pre-check: does this email already exist in our backend DB?
+      try {
+        const checkRes = await axios.post(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/checkUserExists`,
+          { email: formData.email.trim().toLowerCase() }
+        );
+        if (checkRes.data?.exists) {
+          toast.error('An account with this email already exists. Redirecting to sign in...');
+          setIsCreatingAccount(false);
+          setTimeout(() => router.push('/auth/signin'), 1500);
+          return;
+        }
+      } catch (checkErr) {
+        // If the check fails, continue with signup — don't block the user
+        console.warn('Pre-check failed, continuing with signup:', checkErr);
+      }
+
+      // 1. Create the user in Clerk
       await signUp.create({
         emailAddress: formData.email,
         password: formData.password,

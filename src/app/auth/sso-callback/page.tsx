@@ -139,61 +139,106 @@ function SSOCallbackContent() {
 
     void (async () => {
       try {
-        const res = await axios.post(
-          `${base}/api/v2/user/auth/clerkLogin`,
-          buildClerkLoginCompleteBody({
-            clerkId,
-            email,
-            displayName: name,
-            avatarUrl,
-            college: "not joined",
-            phone: "",
-          })
-        );
-
-        if (cancelled) return;
-
-        if (!res.data?.token) {
-          toast.error("Login failed: no session from server.");
-          setTimeout(() => router.push("/auth/signin"), 2000);
-          return;
-        }
-
-        const token = res.data.token as string;
-        localStorage.setItem("token", token);
-        sessionStorage.setItem("activeSession", "true");
-
-        let profile: unknown = null;
+        // Step 1: Check if user already exists in our backend DB
+        let userExists = false;
+        let userHasCollege = false;
         try {
-          const userRes = await axios.get(`${base}/api/v1/user/getUser`, {
-            headers: { authorization: `Bearer ${token}` },
-          });
-          profile = userRes.data?.user ?? null;
-        } catch (e) {
-          console.warn("[sso-callback] getUser failed, will show full profile form", e);
+          const checkRes = await axios.post(
+            `${base}/api/v2/user/auth/checkUserExists`,
+            { email }
+          );
+          userExists = checkRes.data?.exists === true;
+          userHasCollege = checkRes.data?.hasCollege === true;
+        } catch {
+          // If check fails, fall through to clerkLogin which will handle it
+          console.warn("[sso-callback] checkUserExists failed, falling through");
         }
 
         if (cancelled) return;
 
-        const collegeStr = extractCollegeFromUserRecord(profile);
-        const mustCollectCampus = shouldPromptForCollege(collegeStr);
+        // Step 2: Branch based on whether user exists
+        if (userExists) {
+          // Existing user — call clerkLogin to sync Clerk data & get JWT
+          const res = await axios.post(
+            `${base}/api/v2/user/auth/clerkLogin`,
+            buildClerkLoginCompleteBody({
+              clerkId,
+              email,
+              displayName: name,
+              avatarUrl,
+              college: "not joined", // won't overwrite real college — backend skips placeholders
+              phone: "",
+            })
+          );
 
-        if (mustCollectCampus) {
+          if (cancelled) return;
+
+          if (!res.data?.token) {
+            toast.error("Login failed: no session from server.");
+            setTimeout(() => router.push("/auth/signin"), 2000);
+            return;
+          }
+
+          const token = res.data.token as string;
+          localStorage.setItem("token", token);
+          sessionStorage.setItem("activeSession", "true");
+
+          // If we already know they have a real college, skip the profile fetch
+          if (userHasCollege) {
+            toast.success("Login successful!");
+            router.push("/dashboard");
+            return;
+          }
+
+          // Otherwise, fetch profile to double-check college status
+          let profile: unknown = null;
+          try {
+            const userRes = await axios.get(`${base}/api/v1/user/getUser`, {
+              headers: { authorization: `Bearer ${token}` },
+            });
+            profile = userRes.data?.user ?? null;
+          } catch (e) {
+            console.warn("[sso-callback] getUser failed, will show full profile form", e);
+          }
+
+          if (cancelled) return;
+
+          const collegeStr = extractCollegeFromUserRecord(profile);
+          const mustCollectCampus = shouldPromptForCollege(collegeStr);
+
+          if (mustCollectCampus) {
+            setClerkUserInfo({ email, clerkId, name, avatarUrl });
+            setDisplayName(name);
+            setNeedsCollegeSignin(true);
+            return;
+          }
+
+          toast.success("Login successful!");
+          router.push("/dashboard");
+        } else {
+          // New user — show the profile completion form inline
+          // (don't redirect to /auth/signup — they're already authenticated with Google)
+          // Pre-populate Google name but let them edit it
           setClerkUserInfo({ email, clerkId, name, avatarUrl });
-          setDisplayName(name);
-          setNeedsCollegeSignin(true);
-          return;
+          setDisplayName(name); // Pre-fill with Google name but editable
+          setCustomAvatarUrl(""); // Empty for new signup — user must choose their own avatar
+          setAuthType("signup");
+          setNeedsCollege(true);
+          setBackendSyncing(false);
         }
-
-        toast.success("Login successful!");
-        router.push("/dashboard");
       } catch (err: unknown) {
         if (cancelled) return;
         const ax = err as { response?: { status?: number; data?: { msg?: string } } };
         const status = ax.response?.status;
         if (status === 404) {
-          toast.error("No account found. Please sign up first.");
-          setTimeout(() => router.push("/auth/signup"), 2000);
+          // User not found in backend — show profile form inline for new Google signups
+          // Pre-populate Google name but let them edit it
+          setClerkUserInfo({ email, clerkId, name, avatarUrl });
+          setDisplayName(name); // Pre-fill with Google name but editable
+          setCustomAvatarUrl(""); // Empty for new signup — user must choose their own avatar
+          setAuthType("signup");
+          setNeedsCollege(true);
+          setBackendSyncing(false);
         } else {
           toast.error(ax.response?.data?.msg || "Login failed");
           setTimeout(() => router.push("/auth/signin"), 2000);
