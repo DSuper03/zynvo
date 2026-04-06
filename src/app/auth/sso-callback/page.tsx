@@ -218,8 +218,10 @@ function SSOCallbackContent() {
         } else {
           // New user — show the profile completion form inline
           // (don't redirect to /auth/signup — they're already authenticated with Google)
+          // Pre-populate Google name but let them edit it
           setClerkUserInfo({ email, clerkId, name, avatarUrl });
-          setDisplayName(name);
+          setDisplayName(name); // Pre-fill with Google name but editable
+          setCustomAvatarUrl(""); // Empty for new signup — user must choose their own avatar
           setAuthType("signup");
           setNeedsCollege(true);
           setBackendSyncing(false);
@@ -230,8 +232,10 @@ function SSOCallbackContent() {
         const status = ax.response?.status;
         if (status === 404) {
           // User not found in backend — show profile form inline for new Google signups
+          // Pre-populate Google name but let them edit it
           setClerkUserInfo({ email, clerkId, name, avatarUrl });
-          setDisplayName(name);
+          setDisplayName(name); // Pre-fill with Google name but editable
+          setCustomAvatarUrl(""); // Empty for new signup — user must choose their own avatar
           setAuthType("signup");
           setNeedsCollege(true);
           setBackendSyncing(false);
@@ -347,7 +351,9 @@ function SSOCallbackContent() {
                 placeholder="How should we call you?"
                 className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-500"
                 autoComplete="nickname"
-              />
+              />Don't take the google photo and google name directly for 1st time users in google sign in or sign up
+Show the exsisting form where they can choose their avater and also can change their name......
+Say me what u understood u have to d
               <p className="text-gray-500 text-xs mt-1">
                 This is your public name on Zynvo (you can edit it later in settings).
               </p>
