@@ -161,13 +161,14 @@ function SSOCallbackContent() {
         // If check failed (userExists is null), proceed with clerkLogin which handles both cases
         if (userExists === true) {
           // Existing user — call clerkLogin to sync Clerk data & get JWT
+          // Don't send avatarUrl (Google photo) — only send custom-chosen avatars during signup form
           const res = await axios.post(
             `${base}/api/v2/user/auth/clerkLogin`,
             buildClerkLoginCompleteBody({
               clerkId,
               email,
               displayName: name,
-              avatarUrl,
+              avatarUrl: "", // Don't send Google photo for existing users
               college: "not joined", // won't overwrite real college — backend skips placeholders
               phone: "",
             })
@@ -220,13 +221,14 @@ function SSOCallbackContent() {
           router.push("/dashboard");
         } else if (userExists === null) {
           // Check failed (endpoint down) — call clerkLogin anyway, let backend handle it
+          // Don't send avatarUrl (Google photo) — only send custom-chosen avatars during signup form
           const res = await axios.post(
             `${base}/api/v2/user/auth/clerkLogin`,
             buildClerkLoginCompleteBody({
               clerkId,
               email,
               displayName: name,
-              avatarUrl,
+              avatarUrl: "", // Don't send Google photo for existing users
               college: "not joined",
               phone: "",
             })
