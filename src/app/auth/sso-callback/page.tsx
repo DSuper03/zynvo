@@ -82,6 +82,7 @@ function SSOCallbackContent() {
   const [customAvatarUrl, setCustomAvatarUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [backendSyncing, setBackendSyncing] = useState(false);
+  const [authType, setAuthType] = useState<"signin" | "signup" | null>(null);
   const [clerkUserInfo, setClerkUserInfo] = useState<{
     email: string;
     clerkId: string;
@@ -121,12 +122,11 @@ function SSOCallbackContent() {
 
     const intent = resolveSsoIntentStable(intentQuery);
 
-    if (intent === "signup") {
-      setDisplayName(name);
-      setClerkUserInfo({ email, clerkId, name, avatarUrl });
-      setNeedsCollege(true);
-      return;
-    }
+    // The app used to assume that intent === "signup" meant we should
+    // unconditionally prompt for the college name. But existing users
+    // who accidentally clicked "Sign Up" were forced to re-enter their details.
+    // Let the backend decide by directly logging them in and checking the returned profile.
+    // See lines below which check `shouldPromptForCollege(collegeStr)`.
 
     const base = getBackendBase();
     if (!base) {
@@ -139,61 +139,160 @@ function SSOCallbackContent() {
 
     void (async () => {
       try {
-        const res = await axios.post(
-          `${base}/api/v2/user/auth/clerkLogin`,
-          buildClerkLoginCompleteBody({
-            clerkId,
-            email,
-            displayName: name,
-            avatarUrl,
-            college: "not joined",
-            phone: "",
-          })
-        );
-
-        if (cancelled) return;
-
-        if (!res.data?.token) {
-          toast.error("Login failed: no session from server.");
-          setTimeout(() => router.push("/auth/signin"), 2000);
-          return;
-        }
-
-        const token = res.data.token as string;
-        localStorage.setItem("token", token);
-        sessionStorage.setItem("activeSession", "true");
-
-        let profile: unknown = null;
+        // Step 1: Check if user already exists in our backend DB
+        let userExists: boolean | null = null; // tri-state: null = unknown, true = exists, false = doesn't exist
+        let userHasCollege = false;
         try {
-          const userRes = await axios.get(`${base}/api/v1/user/getUser`, {
-            headers: { authorization: `Bearer ${token}` },
-          });
-          profile = userRes.data?.user ?? null;
-        } catch (e) {
-          console.warn("[sso-callback] getUser failed, will show full profile form", e);
+          const checkRes = await axios.post(
+            `${base}/api/v2/user/auth/checkUserExists`,
+            { email }
+          );
+          userExists = checkRes.data?.exists === true;
+          userHasCollege = checkRes.data?.hasCollege === true;
+        } catch {
+          // If check fails, leave userExists as null (unknown)
+          // The clerkLogin call will handle both existing and new users correctly
+          console.warn("[sso-callback] checkUserExists failed, proceeding with clerkLogin");
         }
 
         if (cancelled) return;
 
-        const collegeStr = extractCollegeFromUserRecord(profile);
-        const mustCollectCampus = shouldPromptForCollege(collegeStr);
+        // Step 2: Branch based on whether user exists
+        // If check failed (userExists is null), proceed with clerkLogin which handles both cases
+        if (userExists === true) {
+          // Existing user — call clerkLogin to sync Clerk data & get JWT
+          const res = await axios.post(
+            `${base}/api/v2/user/auth/clerkLogin`,
+            buildClerkLoginCompleteBody({
+              clerkId,
+              email,
+              displayName: name,
+              avatarUrl,
+              college: "not joined", // won't overwrite real college — backend skips placeholders
+              phone: "",
+            })
+          );
 
-        if (mustCollectCampus) {
+          if (cancelled) return;
+
+          if (!res.data?.token) {
+            toast.error("Login failed: no session from server.");
+            setTimeout(() => router.push("/auth/signin"), 2000);
+            return;
+          }
+
+          const token = res.data.token as string;
+          localStorage.setItem("token", token);
+          sessionStorage.setItem("activeSession", "true");
+
+          // If we already know they have a real college, skip the profile fetch
+          if (userHasCollege) {
+            toast.success("Login successful!");
+            router.push("/dashboard");
+            return;
+          }
+
+          // Otherwise, fetch profile to double-check college status
+          let profile: unknown = null;
+          try {
+            const userRes = await axios.get(`${base}/api/v1/user/getUser`, {
+              headers: { authorization: `Bearer ${token}` },
+            });
+            profile = userRes.data?.user ?? null;
+          } catch (e) {
+            console.warn("[sso-callback] getUser failed, will show full profile form", e);
+          }
+
+          if (cancelled) return;
+
+          const collegeStr = extractCollegeFromUserRecord(profile);
+          const mustCollectCampus = shouldPromptForCollege(collegeStr);
+
+          if (mustCollectCampus) {
+            setClerkUserInfo({ email, clerkId, name, avatarUrl });
+            setDisplayName(name);
+            // Existing users keep their avatar — don't force them to re-pick
+            setNeedsCollegeSignin(true);
+            return;
+          }
+
+          toast.success("Login successful!");
+          router.push("/dashboard");
+        } else if (userExists === null) {
+          // Check failed (endpoint down) — call clerkLogin anyway, let backend handle it
+          const res = await axios.post(
+            `${base}/api/v2/user/auth/clerkLogin`,
+            buildClerkLoginCompleteBody({
+              clerkId,
+              email,
+              displayName: name,
+              avatarUrl,
+              college: "not joined",
+              phone: "",
+            })
+          );
+
+          if (cancelled) return;
+
+          if (!res.data?.token) {
+            toast.error("Login failed: no session from server.");
+            setTimeout(() => router.push("/auth/signin"), 2000);
+            return;
+          }
+
+          const token = res.data.token as string;
+          localStorage.setItem("token", token);
+          sessionStorage.setItem("activeSession", "true");
+
+          // Fetch profile to determine if they need to complete it
+          let profile: unknown = null;
+          try {
+            const userRes = await axios.get(`${base}/api/v1/user/getUser`, {
+              headers: { authorization: `Bearer ${token}` },
+            });
+            profile = userRes.data?.user ?? null;
+          } catch (e) {
+            console.warn("[sso-callback] getUser failed after clerkLogin", e);
+          }
+
+          if (cancelled) return;
+
+          const collegeStr = extractCollegeFromUserRecord(profile);
+          const mustCollectCampus = shouldPromptForCollege(collegeStr);
+
+          if (mustCollectCampus) {
+            setClerkUserInfo({ email, clerkId, name, avatarUrl });
+            setDisplayName(name);
+            // Existing users keep their avatar — don't force them to re-pick
+            setNeedsCollegeSignin(true);
+            return;
+          }
+
+          toast.success("Login successful!");
+          router.push("/dashboard");
+        } else {
+          // userExists === false — new user, show profile form
+          // Pre-populate Google name but let them edit it
           setClerkUserInfo({ email, clerkId, name, avatarUrl });
-          setDisplayName(name);
-          setNeedsCollegeSignin(true);
-          return;
+          setDisplayName(name); // Pre-fill with Google name but editable
+          setCustomAvatarUrl(""); // Empty for new signup — user must choose their own avatar
+          setAuthType("signup");
+          setNeedsCollege(true);
+          setBackendSyncing(false);
         }
-
-        toast.success("Login successful!");
-        router.push("/dashboard");
       } catch (err: unknown) {
         if (cancelled) return;
         const ax = err as { response?: { status?: number; data?: { msg?: string } } };
         const status = ax.response?.status;
         if (status === 404) {
-          toast.error("No account found. Please sign up first.");
-          setTimeout(() => router.push("/auth/signup"), 2000);
+          // User not found in backend — show profile form inline for new Google signups
+          // Pre-populate Google name but let them edit it
+          setClerkUserInfo({ email, clerkId, name, avatarUrl });
+          setDisplayName(name); // Pre-fill with Google name but editable
+          setCustomAvatarUrl(""); // Empty for new signup — user must choose their own avatar
+          setAuthType("signup");
+          setNeedsCollege(true);
+          setBackendSyncing(false);
         } else {
           toast.error(ax.response?.data?.msg || "Login failed");
           setTimeout(() => router.push("/auth/signin"), 2000);
@@ -214,9 +313,9 @@ function SSOCallbackContent() {
   if (showProfileCompletion && clerkUserInfo) {
     const fromSigninIncomplete = needsCollegeSignin && !needsCollege;
     const finalName = displayName.trim() || clerkUserInfo.name || "User";
+    // Don't fall back to Google photo — user must pick their own avatar
     const finalAvatarUrl =
       customAvatarUrl ||
-      clerkUserInfo.avatarUrl ||
       `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(finalName)}&size=128`;
 
     return (
@@ -352,10 +451,8 @@ function SSOCallbackContent() {
               }`}
             >
               {submitting
-                ? "Saving…"
-                : fromSigninIncomplete
-                  ? "Save profile & continue →"
-                  : "Join Zynvo →"}
+                ? ((authType ?? "signin") === "signin" ? "Logging in..." : "Creating account...")
+                : ((authType ?? "signin") === "signin" ? "Complete Login" : "Complete Signup")}
             </button>
           </form>
         </div>
