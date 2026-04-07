@@ -1494,6 +1494,10 @@ export const collegesWithClubs = [
     State: 'West bengal',
   },
   {
+    college: 'NSHM Knowledge Campus, Durgapur, West bengal',
+    State: 'West bengal',
+  },
+  {
     college:
       'Indian Institute of Engineering Science and Technology, West bengal',
     State: 'West bengal',
