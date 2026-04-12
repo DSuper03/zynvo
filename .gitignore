@@ -38,3 +38,6 @@ next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# SEO cache (generated at runtime)
+/.cache/

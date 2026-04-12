@@ -40,6 +40,7 @@ import {
   type Participant,
 } from '@/hooks/useParticipants';
 import AchievementCelebration from '@/components/AchievementCelebration';
+import EventSeoHead from '@/components/EventSeoHead';
 
 interface Speaker {
   id: number;
@@ -606,6 +607,20 @@ const Eventid = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-[#02040A] to-black text-white">
+      <EventSeoHead
+        eventName={data.EventName}
+        collegeName={data.university}
+        eventType={data.EventMode}
+        description={data.description}
+        startDate={data.startDate}
+        endDate={data.endDate}
+        eventMode={data.EventMode}
+        posterUrl={data.posterUrl}
+        eventUrl={data.eventWebsite}
+        prizes={data.prizes}
+        contactEmail={data.contactEmail}
+        pageUrl={typeof window !== 'undefined' ? window.location.href : undefined}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Back Button */}
         <Link
