@@ -28,7 +28,7 @@ function buildClerkLoginCompleteBody(params: {
   clerkId: string;
   email: string;
   displayName: string;
-  avatarUrl: string;
+  avatarUrl?: string;
   college: string;
   phone: string;
 }) {
@@ -38,13 +38,13 @@ function buildClerkLoginCompleteBody(params: {
     email,
     name: displayName,
     username: displayName,
-    avatarUrl,
-    profileAvatar: avatarUrl,
     collegeName: college,
     college,
     college_name: college,
-    imgUrl: avatarUrl,
     phone: phone || "",
+    ...(avatarUrl
+      ? { avatarUrl, profileAvatar: avatarUrl, imgUrl: avatarUrl }
+      : {}),
   };
 }
 
@@ -161,13 +161,13 @@ function SSOCallbackContent() {
         // If check failed (userExists is null), proceed with clerkLogin which handles both cases
         if (userExists === true) {
           // Existing user — call clerkLogin to sync Clerk data & get JWT
+          // Don't send avatarUrl (Google photo) — only send custom-chosen avatars during signup form
           const res = await axios.post(
             `${base}/api/v2/user/auth/clerkLogin`,
             buildClerkLoginCompleteBody({
               clerkId,
               email,
               displayName: name,
-              avatarUrl,
               college: "not joined", // won't overwrite real college — backend skips placeholders
               phone: "",
             })
@@ -220,13 +220,13 @@ function SSOCallbackContent() {
           router.push("/dashboard");
         } else if (userExists === null) {
           // Check failed (endpoint down) — call clerkLogin anyway, let backend handle it
+          // Don't send avatarUrl (Google photo) — only send custom-chosen avatars during signup form
           const res = await axios.post(
             `${base}/api/v2/user/auth/clerkLogin`,
             buildClerkLoginCompleteBody({
               clerkId,
               email,
               displayName: name,
-              avatarUrl,
               college: "not joined",
               phone: "",
             })

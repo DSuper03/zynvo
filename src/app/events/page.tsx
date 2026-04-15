@@ -233,8 +233,13 @@ export default function ZynvoEventsPage() {
     
     return events.filter(event => {
       if (!event.endDate) return false;
-      const eventDate = new Date(event.endDate).toISOString().split('T')[0];
-      return eventDate === targetDate;
+
+      // Handle both Date objects and string dates
+      const eventDate = new Date(event.endDate);
+      // Check if the date is valid
+      if (isNaN(eventDate.getTime())) return false;
+
+      return eventDate.toISOString().split('T')[0] === targetDate;
     });
   };
 
