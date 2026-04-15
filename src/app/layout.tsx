@@ -59,7 +59,7 @@ export const metadata: Metadata = {
       'The intelligent social platform revolutionizing how college students connect, discover events, join clubs, and build meaningful campus relationships through AI-powered networking.',
     images: [
       {
-        url: '/landing page.png',
+        url: '/titlecard.png',
         width: 1200,
         height: 630,
         alt: 'Zynvo - Agentic Social Media Platform for Students',
