@@ -28,7 +28,7 @@ function buildClerkLoginCompleteBody(params: {
   clerkId: string;
   email: string;
   displayName: string;
-  avatarUrl: string;
+  avatarUrl?: string;
   college: string;
   phone: string;
 }) {
@@ -38,13 +38,13 @@ function buildClerkLoginCompleteBody(params: {
     email,
     name: displayName,
     username: displayName,
-    avatarUrl,
-    profileAvatar: avatarUrl,
     collegeName: college,
     college,
     college_name: college,
-    imgUrl: avatarUrl,
     phone: phone || "",
+    ...(avatarUrl
+      ? { avatarUrl, profileAvatar: avatarUrl, imgUrl: avatarUrl }
+      : {}),
   };
 }
 
@@ -168,7 +168,6 @@ function SSOCallbackContent() {
               clerkId,
               email,
               displayName: name,
-              avatarUrl: "", // Don't send Google photo for existing users
               college: "not joined", // won't overwrite real college — backend skips placeholders
               phone: "",
             })
@@ -228,7 +227,6 @@ function SSOCallbackContent() {
               clerkId,
               email,
               displayName: name,
-              avatarUrl: "", // Don't send Google photo for existing users
               college: "not joined",
               phone: "",
             })
