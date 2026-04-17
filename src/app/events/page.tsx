@@ -12,8 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import NoTokenModal from '@/components/modals/remindModal';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { buildAuthHref } from '@/lib/authReturnTo';
 
 
 interface apiRespEvents {
@@ -102,6 +103,7 @@ export default function ZynvoEventsPage() {
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
   
   const router = useRouter();
+  const pathname = usePathname();
 
   // Fetch token on component mount
   useEffect(() => {
@@ -124,7 +126,8 @@ export default function ZynvoEventsPage() {
         toast('Login required', {
           action: {
             label: 'Sign in',
-            onClick: () => router.push('/auth/signin'),
+            onClick: () =>
+              router.push(buildAuthHref('/auth/signin', pathname)),
           },
         });
         setHasTokenForModal(true);
@@ -132,7 +135,7 @@ export default function ZynvoEventsPage() {
         return;
       }
     }
-  }, [router]);
+  }, [router, pathname]);
 
   // Fetch user data and attended events
   useEffect(() => {

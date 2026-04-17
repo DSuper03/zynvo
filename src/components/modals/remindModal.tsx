@@ -1,35 +1,40 @@
 import Link from 'next/link';
 import { ShieldAlert } from 'lucide-react';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useEffect } from 'react';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import { buildAuthHref } from '@/lib/authReturnTo';
 
 type NoTokenModalProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   /** If true, user has token but no active session - redirect to signin. If false/undefined, no token - redirect to signup */
   hasToken?: boolean;
+  /** `event_register` uses copy for registering for events instead of AI features */
+  variant?: 'default' | 'event_register';
 };
 
 export default function NoTokenModal({
   isOpen,
   onOpenChange,
   hasToken = false,
+  variant = 'default',
 }: NoTokenModalProps) {
-  const router = useRouter();
+  const pathname = usePathname();
+  const authHref = buildAuthHref(
+    hasToken ? '/auth/signin' : '/auth/signup',
+    pathname
+  );
+  const primaryLabel = hasToken ? 'Sign in' : 'Sign up';
 
-  // Redirect based on whether user has token or not
-  // No token → signup (new user)
-  // Has token but no session → signin (returning user)
-  const handleDismiss = () => {
+  const closeOnly = useCallback(() => {
     onOpenChange(false);
-    router.push(hasToken ? '/auth/signin' : '/auth/signup');
-  };
+  }, [onOpenChange]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        handleDismiss();
+        closeOnly();
       }
     };
 
@@ -42,19 +47,21 @@ export default function NoTokenModal({
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, onOpenChange, router]);
+  }, [isOpen, closeOnly]);
 
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      handleDismiss();
+      closeOnly();
     }
   };
 
   const handleClose = () => {
-    handleDismiss();
+    closeOnly();
   };
+
+  const isEvent = variant === 'event_register';
 
   return (
     <div
@@ -69,7 +76,7 @@ export default function NoTokenModal({
         <div className="flex items-center gap-2 px-6 py-4 border-b border-gray-200">
           <ShieldAlert className="h-5 w-5 text-yellow-400" />
           <h3 className="text-lg font-semibold text-yellow-400">
-            Sign in required
+            {isEvent ? 'Sign in to register' : 'Sign in required'}
           </h3>
         </div>
 
@@ -77,15 +84,31 @@ export default function NoTokenModal({
         <div className="px-6 py-4 flex gap-4 items-center">
           {/* Info Section */}
           <div className="flex-1">
-            <p className="text-white mb-4">
-              You need to be signed in to use AI features. Please sign in to
-              continue.
-            </p>
-            <ul className="list-disc pl-5 space-y-1 text-sm text-white">
-              <li>Access personalized answers</li>
-              <li>See your recent activity</li>
-              <li>Sync across devices</li>
-            </ul>
+            {isEvent ? (
+              <>
+                <p className="text-white mb-4">
+                  Create a free account or sign in to register for this event
+                  and get your pass on Zynvo.
+                </p>
+                <ul className="list-disc pl-5 space-y-1 text-sm text-white">
+                  <li>Secure your spot</li>
+                  <li>Get your digital pass after you register</li>
+                  <li>Manage tickets from your dashboard</li>
+                </ul>
+              </>
+            ) : (
+              <>
+                <p className="text-white mb-4">
+                  You need to be signed in to use AI features. Please sign in to
+                  continue.
+                </p>
+                <ul className="list-disc pl-5 space-y-1 text-sm text-white">
+                  <li>Access personalized answers</li>
+                  <li>See your recent activity</li>
+                  <li>Sync across devices</li>
+                </ul>
+              </>
+            )}
           </div>
           {/* Image Section — PERFORMANCE: next/image for optimization */}
           <Image
@@ -100,14 +123,18 @@ export default function NoTokenModal({
         {/* Footer */}
         <div className="flex justify-end gap-2 px-6 py-4 border-t border-gray-200">
           <button
+            type="button"
             onClick={handleClose}
             className="px-4 py-2 text-white hover:bg-red-400  rounded-md transition-colors duration-200"
           >
             Not now
           </button>
-          <Link href="/auth/signin" className="inline-flex">
-            <button className="px-4 py-2 bg-yellow-500 text-black hover:bg-yellow-400 rounded-md transition-colors duration-200 font-medium">
-              Sign in
+          <Link href={authHref} className="inline-flex">
+            <button
+              type="button"
+              className="px-4 py-2 bg-yellow-500 text-black hover:bg-yellow-400 rounded-md transition-colors duration-200 font-medium"
+            >
+              {primaryLabel}
             </button>
           </Link>
         </div>
