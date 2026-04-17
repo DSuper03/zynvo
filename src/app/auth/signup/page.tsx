@@ -25,6 +25,13 @@ import { useSignUp, useAuth , useSignIn} from "@clerk/nextjs";
 import { jwtDecode } from "jwt-decode";
 import { de } from 'date-fns/locale';
 import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
+import {
+  consumeReturnTo,
+  persistReturnTo,
+  clearStoredReturnTo,
+  peekReturnTo,
+  buildAuthHref,
+} from '@/lib/authReturnTo';
  
 
 export default function SignUp() {
@@ -49,6 +56,7 @@ export default function SignUp() {
   const [verifying, setVerifying] = useState(false);
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [collegeSearch, setCollegeSearch] = useState<string>('');
+  const [signinHref, setSigninHref] = useState('/auth/signin');
 
   // Inline validation error for college select
   const [collegeError, setCollegeError] = useState<string>('');
@@ -60,6 +68,15 @@ export default function SignUp() {
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/.test(
       pw
     );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const r = params.get('returnTo');
+    if (r) persistReturnTo(r);
+    else clearStoredReturnTo();
+    setSigninHref(`/auth/signin${window.location.search}`);
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -183,7 +200,10 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         if (checkRes.data?.exists) {
           toast.error('An account with this email already exists. Redirecting to sign in...');
           setIsCreatingAccount(false);
-          setTimeout(() => router.push('/auth/signin'), 1500);
+          setTimeout(
+            () => router.push(buildAuthHref('/auth/signin', peekReturnTo())),
+            1500
+          );
           return;
         }
       } catch (checkErr) {
@@ -297,7 +317,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
       if (!token) {
         toast.error("Session setup timed out. Please sign in manually.");
-        router.push("/auth/signin");
+        router.push(buildAuthHref('/auth/signin', peekReturnTo()));
         return;
       }
 
@@ -333,7 +353,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       localStorage.setItem('token', res.data.token);
       sessionStorage.setItem('activeSession', 'true');
       toast.success("Account created successfully!");
-      router.push("/dashboard");
+      router.push(consumeReturnTo() ?? '/dashboard');
     } catch (err: any) {
       console.error("Post-verification sync failed:", JSON.stringify(err, null, 2));
       const msg = err?.response?.data?.msg || err?.message || "Signup failed. Please try again.";
@@ -352,10 +372,14 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
       const origin = window.location.origin;
       setSsoIntentBeforeOAuth('signup');
+      const rt = peekReturnTo();
+      const callbackQs = new URLSearchParams({ intent: 'signup' });
+      if (rt) callbackQs.set('returnTo', rt);
+      const callbackPath = `/auth/sso-callback?${callbackQs.toString()}`;
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
-        redirectUrl: `${origin}/auth/sso-callback?intent=signup`,
-        redirectUrlComplete: `${origin}/auth/sso-callback?intent=signup`,
+        redirectUrl: `${origin}${callbackPath}`,
+        redirectUrlComplete: `${origin}${callbackPath}`,
       });
     } catch (err) {
       console.error('SSO redirect error', err);
@@ -498,7 +522,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
               <p className="text-gray-400">
                 Already have an account?{' '}
                 <Link
-                  href="/auth/signin"
+                  href={signinHref}
                   className="text-yellow-500 hover:text-yellow-400 transition"
                 >
                   Sign in

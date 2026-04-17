@@ -13,6 +13,11 @@ import {
   extractCollegeFromUserRecord,
   shouldPromptForCollege,
 } from "@/lib/collegeProfile";
+import {
+  buildAuthHref,
+  consumePostAuthRedirect,
+  peekReturnTo,
+} from "@/lib/authReturnTo";
 
 function getBackendBase(): string | null {
   const base = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -94,7 +99,7 @@ function SSOCallbackContent() {
     if (!backendSyncing) return;
     const t = setTimeout(() => {
       toast.error("Could not sync your profile. Please try signing in again.");
-      router.push("/auth/signin");
+      router.push(buildAuthHref("/auth/signin", peekReturnTo()));
     }, 120000);
     return () => clearTimeout(t);
   }, [backendSyncing, router]);
@@ -116,7 +121,7 @@ function SSOCallbackContent() {
 
     if (!email || !clerkId) {
       toast.error("Missing required user information");
-      router.push("/auth/signup");
+      router.push(buildAuthHref("/auth/signup", peekReturnTo()));
       return;
     }
 
@@ -131,7 +136,7 @@ function SSOCallbackContent() {
     const base = getBackendBase();
     if (!base) {
       toast.error("App configuration error: backend URL is missing.");
-      router.push("/auth/signin");
+      router.push(buildAuthHref("/auth/signin", peekReturnTo()));
       return;
     }
 
@@ -177,7 +182,10 @@ function SSOCallbackContent() {
 
           if (!res.data?.token) {
             toast.error("Login failed: no session from server.");
-            setTimeout(() => router.push("/auth/signin"), 2000);
+            setTimeout(
+              () => router.push(buildAuthHref("/auth/signin", peekReturnTo())),
+              2000
+            );
             return;
           }
 
@@ -188,7 +196,7 @@ function SSOCallbackContent() {
           // If we already know they have a real college, skip the profile fetch
           if (userHasCollege) {
             toast.success("Login successful!");
-            router.push("/dashboard");
+            router.push(consumePostAuthRedirect(searchParams));
             return;
           }
 
@@ -217,7 +225,7 @@ function SSOCallbackContent() {
           }
 
           toast.success("Login successful!");
-          router.push("/dashboard");
+          router.push(consumePostAuthRedirect(searchParams));
         } else if (userExists === null) {
           // Check failed (endpoint down) — call clerkLogin anyway, let backend handle it
           // Don't send avatarUrl (Google photo) — only send custom-chosen avatars during signup form
@@ -236,7 +244,10 @@ function SSOCallbackContent() {
 
           if (!res.data?.token) {
             toast.error("Login failed: no session from server.");
-            setTimeout(() => router.push("/auth/signin"), 2000);
+            setTimeout(
+              () => router.push(buildAuthHref("/auth/signin", peekReturnTo())),
+              2000
+            );
             return;
           }
 
@@ -269,7 +280,7 @@ function SSOCallbackContent() {
           }
 
           toast.success("Login successful!");
-          router.push("/dashboard");
+          router.push(consumePostAuthRedirect(searchParams));
         } else {
           // userExists === false — new user, show profile form
           // Pre-populate Google name but let them edit it
@@ -295,7 +306,10 @@ function SSOCallbackContent() {
           setBackendSyncing(false);
         } else {
           toast.error(ax.response?.data?.msg || "Login failed");
-          setTimeout(() => router.push("/auth/signin"), 2000);
+          setTimeout(
+            () => router.push(buildAuthHref("/auth/signin", peekReturnTo())),
+            2000
+          );
         }
       } finally {
         if (!cancelled) setBackendSyncing(false);
@@ -369,7 +383,7 @@ function SSOCallbackContent() {
                       ? "Profile saved — welcome to Zynvo!"
                       : "Account created successfully!"
                   );
-                  router.push("/dashboard");
+                  router.push(consumePostAuthRedirect(searchParams));
                 } else {
                   throw new Error("No token received");
                 }

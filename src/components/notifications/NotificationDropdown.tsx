@@ -59,9 +59,9 @@ function NotificationRow({ notification, isSelected, onSelect }: NotificationRow
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <h4 className="text-sm font-medium text-white truncate">
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <div className="flex items-start justify-between gap-2 min-w-0">
+          <h4 className="text-sm font-medium text-white truncate min-w-0 flex-1">
             {notification.title}
           </h4>
           <span
@@ -74,7 +74,7 @@ function NotificationRow({ notification, isSelected, onSelect }: NotificationRow
             {typeIcons[notification.type]}
           </span>
         </div>
-        <p className="text-xs text-gray-400 line-clamp-1 mt-0.5">
+        <p className="text-xs text-gray-400 line-clamp-2 sm:line-clamp-1 mt-0.5 break-words">
           {notification.subtitle}
         </p>
         <p className={`text-[11px] mt-1 ${isFuture ? 'text-blue-400' : 'text-gray-500'}`}>
@@ -89,27 +89,51 @@ export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 384,
+  });
   const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
+  const updateDropdownPosition = useCallback(() => {
+    if (!buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const margin = 16;
+    const maxPanelWidth = 384; // matches max-w-md / sm:w-96
+    const width = Math.min(maxPanelWidth, vw - margin * 2);
+
+    // Align panel's right edge with the bell (typical header); clamp so nothing clips off-screen
+    let left = rect.right - width;
+    left = Math.max(margin, Math.min(left, vw - width - margin));
+
+    const gap = 8;
+    let top = rect.bottom + gap;
+    const panel = dropdownRef.current;
+    const estHeight =
+      panel?.getBoundingClientRect().height ||
+      420;
+    if (top + estHeight > vh - margin) {
+      const above = rect.top - estHeight - gap;
+      if (above >= margin) {
+        top = above;
+      } else {
+        top = Math.max(margin, vh - estHeight - margin);
+      }
+    }
+
+    setDropdownPosition({ top, left, width });
+  }, []);
+
   // Mount check for portal
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Calculate dropdown position when opening
-  useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + 8,
-        right: window.innerWidth - rect.right,
-      });
-    }
-  }, [isOpen]);
 
   // Filter and sort notifications
   const filteredNotifications = React.useMemo(() => {
@@ -127,6 +151,25 @@ export default function NotificationDropdown() {
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
   }, [activeTab]);
+
+  // Calculate / refresh dropdown position when open (viewport-safe on all breakpoints)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    updateDropdownPosition();
+
+    const onViewportChange = () => updateDropdownPosition();
+    window.addEventListener('resize', onViewportChange);
+    window.addEventListener('scroll', onViewportChange, true);
+
+    const id = requestAnimationFrame(() => updateDropdownPosition());
+
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener('resize', onViewportChange);
+      window.removeEventListener('scroll', onViewportChange, true);
+    };
+  }, [isOpen, updateDropdownPosition, activeTab, filteredNotifications.length]);
 
   // Unread count
   const unreadCount = sampleNotifications.filter((n) => !n.read).length;
@@ -253,10 +296,12 @@ export default function NotificationDropdown() {
       {isOpen && mounted && createPortal(
         <div
           ref={dropdownRef}
-          className="fixed w-[calc(100vw-2rem)] sm:w-96 max-w-md bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden"
+          className="fixed bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden overflow-x-hidden box-border"
           style={{
             top: dropdownPosition.top,
-            right: Math.max(16, dropdownPosition.right),
+            left: dropdownPosition.left,
+            width: dropdownPosition.width,
+            maxWidth: 'min(24rem, calc(100vw - 2rem))',
             zIndex: 9999,
             animation: 'fadeSlideIn 0.2s ease-out',
           }}
