@@ -36,6 +36,7 @@ import './responsive.css';
 import NoTokenModal from '@/components/modals/remindModal';
 import { useRouter } from 'next/navigation';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
+import { EmptyState } from '@/components/feedback';
 
 const getTypeClasses = (rawType: string) => {
   const type = String(rawType || '').toLowerCase();
@@ -713,12 +714,15 @@ const ClubsPage = () => {
               </div>
             )
           ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-lg mb-2">No clubs found</div>
-              <div className="text-gray-500 text-sm">
-                Try adjusting your search or filter criteria
-              </div>
-            </div>
+            <EmptyState
+              icon={Users}
+              title="No clubs found"
+              description={
+                debouncedSearchQuery.trim()
+                  ? `Nothing matches “${debouncedSearchQuery.trim()}”. Try different keywords or clear the search.`
+                  : 'Try adjusting your search or filters, or check back later for new clubs.'
+              }
+            />
           )
         ) : (
           <div className="grid grid-cols-1 xs:grid-cols-2 responsive-grid gap-4">

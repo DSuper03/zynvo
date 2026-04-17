@@ -20,13 +20,13 @@ import CreatePostModal from './components/CreatePostModal';
 import { PostData } from '@/types/global-Interface';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { AuroraText } from '@/components/magicui/aurora-text';
 import { toast } from 'sonner';
 import { setPostCache } from '@/lib/postCache';
 import TextWithLinks from '@/components/TextWithLinks';
 import ProfileHeaderCompact from '@/components/ProfileHeaderCompact';
 import { NotificationDropdown } from '@/components/notifications';
 import { VoteButtonsCompact } from '@/components/ui/vote-buttons';
+import { EmptyState, ErrorState, FeedPostSkeleton } from '@/components/feedback';
 
 interface ApiResponse {
   msg: string;
@@ -44,7 +44,8 @@ export default function Feed() {
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
-  
+  const [feedRetryNonce, setFeedRetryNonce] = useState(0);
+
   // Image modal state
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string } | null>(null);
@@ -204,7 +205,7 @@ export default function Feed() {
     };
 
     postData();
-  }, [page]);
+  }, [page, feedRetryNonce]);
 
   // Infinite scroll handler with debouncing
   useEffect(() => {
@@ -318,22 +319,18 @@ export default function Feed() {
             {/* Posts Display */}
             <div className="space-y-4 sm:space-y-6">
               {isLoading ? (
-                // Loading state
-                <div className="flex justify-center items-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
-                  <span className="ml-3 text-yellow-400">Loading posts...</span>
-                </div>
+                <FeedPostSkeleton count={3} />
               ) : error ? (
-                // Error state
-                <div className="bg-red-900/20 border border-red-500/30 rounded-md p-4">
-                  <p className="text-red-400">{error}</p>
-                  <Button
-                    onClick={() => window.location.reload()}
-                    className="mt-2 text-sm text-red-300 hover:text-red-200 underline"
-                  >
-                    Try again
-                  </Button>
-                </div>
+                <ErrorState
+                  title="Could not load the feed"
+                  message={error}
+                  onRetry={() => {
+                    setError(null);
+                    setPage(1);
+                    setFeedRetryNonce((n) => n + 1);
+                  }}
+                  retryLabel="Try again"
+                />
               ) : posts && posts.length > 0 ? (
                 posts.map((post) => (
                   <div
@@ -489,26 +486,20 @@ export default function Feed() {
                   </div>
                 ))
               ) : (
-                // No posts state
-                <div className="text-center py-12">
-                  <div className="bg-gray-800 rounded-lg p-8 border border-yellow-500/20">
-                    <MessageCircle
-                      size={48}
-                      className="text-yellow-500 mx-auto mb-4"
-                    />
-                    <h3 className="text-xl font-semibold text-yellow-400 mb-2">
-                      No posts yet
-                    </h3>
-                    <AuroraText className="">
-                      Be the first to create a post!
-                    </AuroraText>
+                <div className="rounded-xl border border-yellow-500/15 bg-gray-900/40 p-2 sm:p-4">
+                  <EmptyState
+                    icon={MessageCircle}
+                    title="No posts yet"
+                    description="Be the first to share something with your campus — updates, events, or questions."
+                  >
                     <Button
+                      type="button"
                       onClick={() => setIsPostModalOpen(true)}
-                      className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2 rounded-md font-medium transition-colors mt-4"
+                      className="min-h-11 bg-yellow-500 hover:bg-yellow-400 text-black px-6 font-medium"
                     >
-                      Create Post
+                      Create post
                     </Button>
-                  </div>
+                  </EmptyState>
                 </div>
               )}
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Search, MapPin, Clock, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import { eventData } from '@/types/global-Interface';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import CreateEventButton from './components/createEventButton';
 import CreateEventModal from './components/EventCreationModel';
 import EventCard from './components/EventCard';
@@ -15,6 +15,7 @@ import NoTokenModal from '@/components/modals/remindModal';
 import { usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { buildAuthHref } from '@/lib/authReturnTo';
+import { EmptyState, ErrorState } from '@/components/feedback';
 
 
 interface apiRespEvents {
@@ -101,7 +102,8 @@ export default function ZynvoEventsPage() {
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
-  
+  const [fetchNonce, setFetchNonce] = useState(0);
+
   const router = useRouter();
   const pathname = usePathname();
 
@@ -203,7 +205,16 @@ export default function ZynvoEventsPage() {
         if (!isMounted) return;
 
         console.error('Error fetching events:', err);
-
+        const message =
+          isAxiosError(err) && err.response?.data
+            ? (typeof (err.response.data as { msg?: string }).msg === 'string'
+                ? (err.response.data as { msg: string }).msg
+                : null)
+            : null;
+        setError(
+          message ||
+            'Could not load events. Check your connection and try again.'
+        );
         setEvents([]);
       } finally {
         if (isMounted) {
@@ -220,7 +231,7 @@ export default function ZynvoEventsPage() {
     return () => {
       isMounted = false;
     };
-  }, [currentPage]);
+  }, [currentPage, fetchNonce]);
 
   // Helper function to check if user is attending an event
   const isUserAttendingEvent = (event: eventData): boolean => {
@@ -258,9 +269,7 @@ export default function ZynvoEventsPage() {
   const handleRetry = () => {
     setError(null);
     setEvents(null);
-    setIsLoading(true);
-
-    setCurrentPage((prev) => (prev === 1 ? 1 : prev));
+    setFetchNonce((n) => n + 1);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -480,33 +489,12 @@ export default function ZynvoEventsPage() {
           {isLoading ? (
             <EventsGridSkeleton />
           ) : error ? (
-            <div className="text-center py-12">
-              <div className="text-red-400 mb-4">
-                <svg
-                  className="w-16 h-16 mx-auto mb-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-white mb-2">
-                Error Loading Events
-              </h3>
-              <p className="text-gray-400 mb-4 max-w-md mx-auto">{error}</p>
-              <Button
-                onClick={handleRetry}
-                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-6 py-2 rounded-lg font-medium transition-colors"
-              >
-                Try Again
-              </Button>
-            </div>
+            <ErrorState
+              title="Could not load events"
+              message={error}
+              onRetry={handleRetry}
+              retryLabel="Try again"
+            />
           ) : filteredEvents.length > 0 ? (
             // Pass the filtered events to EventCard
             <EventCard 
@@ -517,27 +505,29 @@ export default function ZynvoEventsPage() {
               isUserAttendingEvent={isUserAttendingEvent}
             />
           ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <Calendar className="w-16 h-16 mx-auto mb-4" />
-              </div>
-              <h3 className="text-lg font-medium text-white mb-2">
-                No Events Found
-              </h3>
-              <p className="text-gray-400 max-w-md mx-auto">
-                {searchTerm
-                  ? `No events match your search "${searchTerm}". Try different keywords.`
-                  : 'No events available at the moment. Check back later!'}
-              </p>
-              {searchTerm && (
+            <EmptyState
+              icon={Calendar}
+              title={
+                searchTerm.trim()
+                  ? 'No events match your search'
+                  : 'No events to show yet'
+              }
+              description={
+                searchTerm.trim()
+                  ? `Nothing matches “${searchTerm.trim()}”. Try different keywords or clear the search.`
+                  : 'New campus events will appear here when organizers publish them.'
+              }
+            >
+              {searchTerm.trim() ? (
                 <Button
+                  type="button"
                   onClick={() => setSearchTerm('')}
-                  className="mt-4 bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors"
+                  className="min-h-11 bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-6 font-medium"
                 >
-                  Clear Search
+                  Clear search
                 </Button>
-              )}
-            </div>
+              ) : null}
+            </EmptyState>
           )}
         </div>
 
