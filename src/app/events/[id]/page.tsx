@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -45,6 +45,7 @@ import {
 import AchievementCelebration from '@/components/AchievementCelebration';
 import EventSeoHead from '@/components/EventSeoHead';
 import { buildAuthHref } from '@/lib/authReturnTo';
+import { ErrorState, EventDetailSkeleton } from '@/components/feedback';
 
 interface Speaker {
   id: number;
@@ -90,6 +91,8 @@ const Eventid = () => {
 
   const [forkedUpId, setForkedUpId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [fetchNonce, setFetchNonce] = useState(0);
   const [isRegistering, setIsRegistering] = useState(false);
   const [showWhatsappModal, setShowWhatsappModal] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -322,6 +325,7 @@ const Eventid = () => {
     async function fetchEventData() {
       try {
         setIsLoading(true);
+        setLoadError(null);
         const res = await axios.get<EventByIdResponse>(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event/${id}`,
           {
@@ -376,14 +380,18 @@ const Eventid = () => {
         }
       } catch (error) {
         console.error('Error fetching event data:', error);
-        toast.error('Error loading event data');
+        const msg =
+          isAxiosError(error) && error.response?.status === 404
+            ? 'This event could not be found. It may have been removed or the link is wrong.'
+            : 'We could not load this event. Check your connection and try again.';
+        setLoadError(msg);
       } finally {
         setIsLoading(false);
       }
     }
    
     fetchEventData();
-  }, [token, id]);
+  }, [token, id, fetchNonce]);
 
   const handleRegistration = async () => {
     if (!token) {
@@ -606,9 +614,27 @@ const Eventid = () => {
   ]);
 
   if (isLoading) {
+    return <EventDetailSkeleton />;
+  }
+
+  if (loadError) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-yellow-400 text-xl">Loading event details...</div>
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4 py-12">
+        <ErrorState
+          title="Unable to load event"
+          message={loadError}
+          onRetry={() => {
+            setLoadError(null);
+            setFetchNonce((n) => n + 1);
+          }}
+        />
+        <Link
+          href="/events"
+          className="mt-8 inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 text-sm font-medium"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to all events
+        </Link>
       </div>
     );
   }
