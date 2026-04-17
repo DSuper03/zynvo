@@ -3495,10 +3495,7 @@ State: 'Punjab',
     State: 'West Bengal',
   },
 
-  {
-    college: 'Indian Institute of Information Technology Una',
-    State: 'Himachal Pradesh',
-  },
+ 
   // Additional West Bengal Engineering Colleges
   {
     college: 'Indian Institute of Engineering Science and Technology (IIEST), Shibpur',
