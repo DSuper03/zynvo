@@ -664,16 +664,17 @@ const Eventid = () => {
           <span>Back to Events</span>
         </Link>
 
-        {/* Hero — single flat section (layout already provides max-width + bg) */}
+        {/* Hero — framed panel for clearer hierarchy on dark bg */}
         <section className="mb-8 pb-8 border-b border-gray-800/60">
+          <div className="rounded-2xl border border-gray-800/80 bg-gradient-to-b from-gray-950/80 to-black/40 p-4 sm:p-6 md:p-8 shadow-lg shadow-black/20">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
               {/* Left: Event Info */}
               <div className="lg:col-span-2 space-y-4">
                 <div>
-                  <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">
-                    Featured Event
+                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-2">
+                    Event
                   </p>
-                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-yellow-400 leading-tight">
+                  <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-yellow-400 leading-[1.15] tracking-tight">
                     {data.EventName || 'Event Title'}
                   </h1>
                 </div>
@@ -734,8 +735,8 @@ const Eventid = () => {
                   </div>
                 )}
 
-                {/* Action Buttons */}
-                <div className="flex flex-wrap gap-3 pt-2">
+                {/* Action Buttons — stack on narrow screens */}
+                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2">
                   {signedin ? (
                     isUserAttendingEvent() ? (
                       <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 text-green-400 rounded-lg font-medium">
@@ -747,7 +748,7 @@ const Eventid = () => {
                         <Button
                           onClick={handleRegistration}
                           disabled={isRegistering || isRegistrationDisabled}
-                          className={`rounded-lg px-5 py-2 font-medium ${
+                          className={`min-h-11 w-full sm:w-auto rounded-lg px-5 py-2.5 font-medium ${
                             isRegistering || isRegistrationDisabled
                               ? 'bg-gray-800 text-gray-400 cursor-not-allowed'
                               : 'bg-yellow-400 hover:bg-yellow-500 text-black'
@@ -792,7 +793,7 @@ const Eventid = () => {
                   ) : (
                     <Button
                       onClick={() => setIsAuthModalOpen(true)}
-                      className="rounded-lg px-5 py-2 font-medium bg-yellow-400 hover:bg-yellow-500 text-black"
+                      className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-yellow-400 hover:bg-yellow-500 text-black w-full sm:w-auto"
                     >
                       {hasTokenForModal
                         ? 'Sign in to Register'
@@ -804,7 +805,7 @@ const Eventid = () => {
                     href={googleCalendarHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 rounded-lg px-4 py-2 bg-gray-900 border border-gray-800 hover:border-gray-700 text-white transition-colors"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2.5 bg-gray-900 border border-gray-800 hover:border-gray-700 text-white transition-colors w-full sm:w-auto"
                   >
                     <CalendarIcon className="w-4 h-4" />
                     <span>Add to Calendar</span>
@@ -881,6 +882,7 @@ const Eventid = () => {
                 </div>
               </div>
             </div>
+          </div>
         </section>
 
         {/* Tabs Navigation */}

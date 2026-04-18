@@ -3,17 +3,7 @@ import axios from 'axios';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import {
-  MessageCircle,
-  Share,
-  MoreHorizontal,
-  PenSquare,
-  Calendar,
-  User,
-  Building,
-  Users,
-  X,
-} from 'lucide-react';
+import { MessageCircle, PenSquare, X } from 'lucide-react';
 
 import CreatePostButton from './components/CreatePostButton';
 import CreatePostModal from './components/CreatePostModal';
@@ -22,11 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { setPostCache } from '@/lib/postCache';
-import TextWithLinks from '@/components/TextWithLinks';
 import ProfileHeaderCompact from '@/components/ProfileHeaderCompact';
 import { NotificationDropdown } from '@/components/notifications';
-import { VoteButtonsCompact } from '@/components/ui/vote-buttons';
 import { EmptyState, ErrorState, FeedPostSkeleton } from '@/components/feedback';
+import { FeedPostCard } from '@/components/discover/FeedPostCard';
 
 interface ApiResponse {
   msg: string;
@@ -333,157 +322,30 @@ export default function Feed() {
                 />
               ) : posts && posts.length > 0 ? (
                 posts.map((post) => (
-                  <div
+                  <FeedPostCard
                     key={post.id}
-                    className="bg-gray-800 p-6 rounded-lg border border-yellow-500/20 hover:border-yellow-500/40 transition-colors cursor-pointer"
-                    onClick={() => {
-                      // populate client-side cache so post page can render without fetching
+                    post={post}
+                    timeLabel={getTimeAgo(post.createdAt)}
+                    isDescriptionExpanded={expandedPosts.has(post.id)}
+                    onToggleDescription={(e) => {
+                      e.stopPropagation();
+                      setExpandedPosts((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(post.id)) next.delete(post.id);
+                        else next.add(post.id);
+                        return next;
+                      });
+                    }}
+                    onOpenPost={() => {
                       setPostCache(post.id, post);
                       router.push(`/post/${post.id}`);
                     }}
-                  >
-                    {/* Author Info Header */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="relative w-10 h-10">
-                        {post.author.profileAvatar ? (
-                          <Image
-                            src={post.author.profileAvatar}
-                            alt={post.author.name || 'User'}
-                            width={40}
-                            height={40}
-                            className="rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-400 rounded-full flex items-center justify-center">
-                            <User className="w-5 h-5 text-black" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-white">
-                            {post.author.name || 'Anonymous User'}
-                          </span>
-                          {!post.published && (
-                            <span className="px-2 py-0.5 bg-gray-600 text-xs rounded-full text-gray-300">
-                              Draft
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-400">
-                          <Calendar className="w-3 h-3" />
-                          <span>{getTimeAgo(post.createdAt)}</span>
-                          {post.createdAt !== post.updatedAt && (
-                            <span className="text-gray-500">• Edited</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Post Content */}
-                    <div className="mb-4">
-                      <h3 className="text-xl font-semibold text-yellow-400 mb-2">
-                        {post.title}
-                      </h3>
-                      {(() => {
-                        const maxChars = 220;
-                        const isExpanded = expandedPosts.has(post.id);
-                        const needsTruncate = (post.description || '').length > maxChars;
-                        const visible = !needsTruncate || isExpanded
-                          ? post.description
-                          : `${post.description.slice(0, maxChars)}...`;
-                        return (
-                          <div className="text-gray-300 leading-relaxed mb-4">
-                            <TextWithLinks text={visible} />
-                            {needsTruncate && (
-                                <button
-                                  type="button"
-                                  className="ml-2 text-yellow-400 hover:text-yellow-300 text-sm underline-offset-2 hover:underline"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setExpandedPosts((prev) => {
-                                      const next = new Set(prev);
-                                      if (isExpanded) next.delete(post.id);
-                                      else next.add(post.id);
-                                      return next;
-                                    });
-                                  }}
-                                >
-                                  {isExpanded ? 'Show less' : 'Read more'}
-                                </button>
-                            )}
-                          </div>
-                        );
-                      })()}
-
-                      {/* Post Image */}
-                      {post.image && (
-                        <div className="relative w-full max-w-2xl mx-auto mb-4">
-                          <div 
-                            className="aspect-video bg-gray-700 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={(e) => { e.stopPropagation(); post.image && handleImageClick(post.image, post.title); }}
-                          >
-                            <Image
-                              src={post.image}
-                              alt={post.title}
-                              layout="fill"
-                              className="object-cover"
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Post Metadata */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {post.collegeName && (
-                        <span className="flex items-center gap-1 text-sm bg-blue-500/10 text-blue-300 px-2 py-1 rounded">
-                          <Building className="w-3 h-3" />
-                          {post.collegeName}
-                        </span>
-                      )}
-                      {post.clubName && (
-                        <span className="flex items-center gap-1 text-sm bg-purple-500/10 text-purple-300 px-2 py-1 rounded">
-                          <Users className="w-3 h-3" />
-                          {post.clubName}
-                        </span>
-                      )}
-
-                    </div>
-
-                    {/* Post Actions */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-700">
-                      <div className="flex items-center space-x-4">
-                        {/* Vote Buttons */}
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <VoteButtonsCompact
-                            postId={post.id}
-                            initialUpvotes={(post as PostData).upvotes.length || 0}
-                            initialDownvotes={(post as PostData).downvotes.length || 0}
-                            initialUserVote={(post as PostData & { userVote?: 'upvote' | 'downvote' | null }).userVote || null}
-                          />
-                        </div>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-gray-400 hover:text-yellow-400 hover:bg-black transition-colors"
-                          onClick={(e) => { e.stopPropagation(); handleSharePost(post.id, post.title); }}
-                        >
-                          <Share className="w-4 h-4 mr-1" />
-                          <span className="text-sm">Share</span>
-                        </Button>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-400 hover:text-gray-300"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
+                    onImageClick={handleImageClick}
+                    onShare={(e) => {
+                      e.stopPropagation();
+                      handleSharePost(post.id, post.title);
+                    }}
+                  />
                 ))
               ) : (
                 <div className="rounded-xl border border-yellow-500/15 bg-gray-900/40 p-2 sm:p-4">
