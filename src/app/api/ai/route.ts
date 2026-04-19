@@ -11,10 +11,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing prompt' }, { status: 400 });
     }
 
-    // SECURITY: Only use server-side environment variable, never NEXT_PUBLIC_ prefix for API keys
-    const apiKey = (process.env.GOOGLE_AI_API_KEY || '').trim();
+    // Prefer server-only GOOGLE_AI_API_KEY; fall back to NEXT_PUBLIC_GOOGLE_AI_API_KEY (same value, still read only on the server here).
+    const apiKey = (
+      process.env.GOOGLE_AI_API_KEY ||
+      process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY ||
+      ''
+    ).trim();
     if (!apiKey) {
-      return NextResponse.json({ error: 'Missing GOOGLE_AI_API_KEY' }, { status: 500 });
+      return NextResponse.json(
+        {
+          error:
+            'Missing Google AI API key. Set GOOGLE_AI_API_KEY or NEXT_PUBLIC_GOOGLE_AI_API_KEY.',
+        },
+        { status: 500 }
+      );
     }
 
     const ai = new GoogleGenAI({ apiKey } as any);
