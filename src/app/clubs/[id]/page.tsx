@@ -81,6 +81,7 @@ interface ClubApiResponse {
       profileAvatar: string;
       course: string;
       year: string;
+      role?: 'founder' | 'admin' | 'member';
     }[];
   };
 }
@@ -446,6 +447,62 @@ useEffect(() => {
       default:
         return 'from-gray-500/20 to-slate-500/20 text-gray-300 border-gray-400/30';
     }
+  };
+
+  // Helper function to get member role
+  const getMemberRole = (member: any): 'founder' | 'admin' | 'member' => {
+    if (member.role) return member.role;
+    if (member.email && club.founderEmail && member.email.toLowerCase() === club.founderEmail.toLowerCase()) {
+      return 'founder';
+    }
+    return 'member';
+  };
+
+  // Helper function to get the founder member
+  const getFounder = (): any => {
+    return club.members?.find(
+      (member: any) => member.email && club.founderEmail && member.email.toLowerCase() === club.founderEmail.toLowerCase()
+    );
+  };
+
+  // Helper function to sort members with founder first
+  const getSortedMembers = () => {
+    if (!Array.isArray(club.members)) return [];
+    
+    return [...club.members].sort((a: any, b: any) => {
+      const roleA = getMemberRole(a);
+      const roleB = getMemberRole(b);
+      const roleOrder = { founder: 0, admin: 1, member: 2 };
+      return roleOrder[roleA] - roleOrder[roleB];
+    });
+  };
+
+  // Helper function to get role badge config
+  const getRoleBadgeConfig = (role: 'founder' | 'admin' | 'member') => {
+    const config: Record<string, { emoji: string; label: string; color: string; bgColor: string; borderColor: string }> = {
+      founder: {
+        emoji: '👑',
+        label: 'Club Founder',
+        color: 'text-yellow-400',
+        bgColor: 'bg-yellow-400/10',
+        borderColor: 'border-yellow-400/30',
+      },
+      admin: {
+        emoji: '⚡',
+        label: 'Club Admin',
+        color: 'text-purple-400',
+        bgColor: 'bg-purple-400/10',
+        borderColor: 'border-purple-400/30',
+      },
+      member: {
+        emoji: '🤝',
+        label: 'Club Member',
+        color: 'text-blue-400',
+        bgColor: 'bg-blue-400/10',
+        borderColor: 'border-blue-400/30',
+      },
+    };
+    return config[role] || config.member;
   };
 
   return (
@@ -912,49 +969,108 @@ useEffect(() => {
 
               {Array.isArray(club.members) && club.members.length > 0 ? (
                 <div className="space-y-4">
-                  {/* Member List */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    {club.members.slice(0, 20).map((member: any, index: number) => (
-                      <div
-                        key={member.id || index}
-                        className="group bg-gray-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all duration-300"
-                      >
-                        <div className="flex items-center gap-3 sm:gap-4">
-                          {/* Avatar - Mobile Optimized */}
-                          <div className="relative">
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl overflow-hidden transition-colors">
-                              <Image
-                                src={member.profileAvatar || '/default-avatar.jpg'}
-                                alt={member.name || 'Member'}
-                                width={48}
-                                height={48}
-                                className="w-full h-full object-cover"
-                              />
+                  {/* Founder Info Card */}
+                  {(() => {
+                    const founder = getFounder();
+                    if (founder) {
+                      const founderRole = getRoleBadgeConfig('founder');
+                      return (
+                        <div className="bg-gradient-to-r from-yellow-500/10 to-yellow-400/5 border-2 border-yellow-400/40 rounded-xl sm:rounded-2xl p-4 sm:p-5">
+                          <div className="flex items-start gap-4">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl overflow-hidden border-2 border-yellow-400/50">
+                                <Image
+                                  src={founder.profileAvatar || '/default-avatar.jpg'}
+                                  alt={founder.name || 'Founder'}
+                                  width={64}
+                                  height={64}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-black text-lg font-bold">👑</div>
                             </div>
-                            <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full"></div>
-                          </div>
-
-                          {/* Member Info - Mobile Optimized */}
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-white font-semibold truncate text-sm sm:text-base">
-                              {member.name || member.fullName || member.username || 'Member'}
-                            </h4>
-                            <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-400">
-                              {member.course && (
-                                <span className="truncate">{member.course}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="text-base sm:text-lg font-bold text-yellow-300">
+                                  {founder.name || founder.fullName || founder.username || 'Founder'}
+                                </h3>
+                                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${founderRole.bgColor} ${founderRole.color} border ${founderRole.borderColor}`}>
+                                  {founderRole.label}
+                                </span>
+                              </div>
+                              {founder.course && (
+                                <p className="text-sm text-gray-300">
+                                  {founder.course} {founder.year && `• ${founder.year} Year`}
+                                </p>
                               )}
-                              {member.course && member.year && <span>•</span>}
-                              {member.year && (
-                                <span>{member.year} Year</span>
+                              {founder.email && (
+                                <p className="text-xs text-gray-400 truncate mt-1">{founder.email}</p>
                               )}
                             </div>
-                            {member.email && (
-                              <p className="text-xs text-gray-500 truncate">{member.email}</p>
-                            )}
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    }
+                    return null;
+                  })()}
+
+                  {/* Other Members List */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide pl-1">
+                      Other Members ({getSortedMembers().filter(m => getMemberRole(m) !== 'founder').length})
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      {getSortedMembers().filter(m => getMemberRole(m) !== 'founder').slice(0, 20).map((member: any, index: number) => {
+                        const memberRole = getMemberRole(member);
+                        const roleConfig = getRoleBadgeConfig(memberRole);
+                        return (
+                          <div
+                            key={member.id || index}
+                            className="group bg-gray-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all duration-300 border border-gray-800 hover:border-gray-700"
+                          >
+                            <div className="flex items-center gap-3 sm:gap-4">
+                              {/* Avatar - Mobile Optimized */}
+                              <div className="relative flex-shrink-0">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl overflow-hidden transition-colors">
+                                  <Image
+                                    src={member.profileAvatar || '/default-avatar.jpg'}
+                                    alt={member.name || 'Member'}
+                                    width={48}
+                                    height={48}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full"></div>
+                              </div>
+
+                              {/* Member Info - Mobile Optimized */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="text-white font-semibold truncate text-sm sm:text-base">
+                                    {member.name || member.fullName || member.username || 'Member'}
+                                  </h4>
+                                </div>
+                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${roleConfig.bgColor} ${roleConfig.color} border ${roleConfig.borderColor} mb-1`}>
+                                  {roleConfig.emoji} {roleConfig.label}
+                                </span>
+                                <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-400">
+                                  {member.course && (
+                                    <span className="truncate">{member.course}</span>
+                                  )}
+                                  {member.course && member.year && <span>•</span>}
+                                  {member.year && (
+                                    <span>{member.year} Year</span>
+                                  )}
+                                </div>
+                                {member.email && (
+                                  <p className="text-xs text-gray-500 truncate">{member.email}</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Load More */}
