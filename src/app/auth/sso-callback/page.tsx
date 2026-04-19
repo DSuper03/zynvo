@@ -29,6 +29,10 @@ function getBackendBase(): string | null {
  * Single shape for completing OAuth profile — mirrors email signup clerkLogin fields
  * plus aliases many backends expect (profileAvatar, username, imgUrl).
  */
+const PLACEHOLDER_COLLEGES = new Set(
+  ["not joined", "not_joined", "n/a", "na", "none", "null", "undefined", "-", "—"].map(s => s.toLowerCase())
+);
+
 function buildClerkLoginCompleteBody(params: {
   clerkId: string;
   email: string;
@@ -38,14 +42,14 @@ function buildClerkLoginCompleteBody(params: {
   phone: string;
 }) {
   const { clerkId, email, displayName, avatarUrl, college, phone } = params;
+  // Don't send college fields when value is a placeholder — avoids overwriting real college on backend
+  const isRealCollege = college.trim() !== "" && !PLACEHOLDER_COLLEGES.has(college.trim().toLowerCase());
   return {
     clerkId,
     email,
     name: displayName,
     username: displayName,
-    collegeName: college,
-    college,
-    college_name: college,
+    ...(isRealCollege ? { collegeName: college, college, college_name: college } : {}),
     phone: phone || "",
     ...(avatarUrl
       ? { avatarUrl, profileAvatar: avatarUrl, imgUrl: avatarUrl }
@@ -114,10 +118,7 @@ function SSOCallbackContent() {
     const email = user.emailAddresses[0]?.emailAddress;
     const clerkId = user.id;
     const name = user.fullName || user.firstName || "User";
-    const googleImage = user.imageUrl?.trim();
-    const avatarUrl =
-      googleImage ||
-      `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(name)}&size=128`;
+    const avatarUrl = `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(name)}&size=128`;
 
     if (!email || !clerkId) {
       toast.error("Missing required user information");
@@ -167,13 +168,14 @@ function SSOCallbackContent() {
         if (userExists === true) {
           // Existing user — call clerkLogin to sync Clerk data & get JWT
           // Don't send avatarUrl (Google photo) — only send custom-chosen avatars during signup form
+          // Pass "not joined" — buildClerkLoginCompleteBody filters placeholders so backend won't overwrite real college
           const res = await axios.post(
             `${base}/api/v2/user/auth/clerkLogin`,
             buildClerkLoginCompleteBody({
               clerkId,
               email,
               displayName: name,
-              college: "not joined", // won't overwrite real college — backend skips placeholders
+              college: "not joined",
               phone: "",
             })
           );
@@ -229,6 +231,7 @@ function SSOCallbackContent() {
         } else if (userExists === null) {
           // Check failed (endpoint down) — call clerkLogin anyway, let backend handle it
           // Don't send avatarUrl (Google photo) — only send custom-chosen avatars during signup form
+          // Pass "not joined" — buildClerkLoginCompleteBody filters placeholders so backend won't overwrite real college
           const res = await axios.post(
             `${base}/api/v2/user/auth/clerkLogin`,
             buildClerkLoginCompleteBody({

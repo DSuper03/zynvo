@@ -178,6 +178,8 @@ export default function PublicUserProfile() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [ticketData, setTicketData] = useState<any>({});
   const [clubId, setClubId] = useState<string | null>(null);
+  const [isFounder, setIsFounder] = useState(false);
+  const [isMember, setIsMember] = useState(false);
   const badgeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -265,7 +267,7 @@ export default function PublicUserProfile() {
 
           setPosts(response.data.user.CreatePost);
 
-          // Fetch club ID if club name exists
+          // Fetch club ID if club name exists and determine founder status
           if (clubName) {
             try {
               const clubsResponse = await axios.get<any>(
@@ -286,10 +288,24 @@ export default function PublicUserProfile() {
               
               if (matchingClub?.id) {
                 setClubId(matchingClub.id);
+                
+                // Check if user is the founder by comparing emails
+                if (matchingClub.founderEmail && email) {
+                  const isUserFounder = email.toLowerCase() === matchingClub.founderEmail.toLowerCase();
+                  setIsFounder(isUserFounder);
+                  setIsMember(!isUserFounder); // If not founder, mark as member
+                } else {
+                  // If we can't determine, mark as member
+                  setIsMember(true);
+                }
+              } else {
+                // Club found but no ID, still mark as member
+                setIsMember(true);
               }
             } catch (clubError) {
               console.error('Error fetching club ID:', clubError);
-              // Continue without club ID - link won't work but page will still render
+              // User is in a club but we can't verify, mark as member
+              setIsMember(true);
             }
           }
         } else {
@@ -460,7 +476,6 @@ export default function PublicUserProfile() {
     return null;
   }
 
-  const isFounder = Boolean(userData.clubName && userData.clubName.trim());
   const eventCount = userData.events?.length || 0;
 
   return (
@@ -685,6 +700,7 @@ export default function PublicUserProfile() {
           </div>
           <UserBadgesDisplay
             isFounder={isFounder}
+            isMember={isMember}
             eventCount={eventCount}
             clubName={userData.clubName || ''}
             userName={userData.name || 'User'}

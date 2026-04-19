@@ -62,10 +62,27 @@ const getTypeClasses = (rawType: string) => {
 };
 
 const getFounderOrFirstMember = (club: any): { label: string; value: string } | null => {
+  // First, check if we can find the founder in the members array
+  if (club?.founderEmail && Array.isArray(club?.members) && club.members.length > 0) {
+    const founder = club.members.find(
+      (member: any) => member.email && member.email.toLowerCase() === club.founderEmail.toLowerCase()
+    );
+    if (founder) {
+      const founderName = founder.name || founder.fullName || founder.username || founder.email;
+      return { label: 'Founder', value: String(founderName) };
+    }
+  }
+  
+  // If no founder found in members, check for founder email
+  if (club?.founderEmail) {
+    return { label: 'Founder', value: String(club.founderEmail) };
+  }
+  
+  // Fall back to first member
   const firstMember = club?.members?.[0];
   const memberName = firstMember?.name || firstMember?.fullName || firstMember?.username || firstMember?.email;
   if (memberName) return { label: 'Member', value: String(memberName) };
-  if (club?.founderEmail) return { label: 'Founder', value: String(club.founderEmail) };
+  
   return null;
 };
 
