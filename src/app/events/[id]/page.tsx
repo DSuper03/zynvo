@@ -2,8 +2,8 @@
 
 import { Button } from '@/components/ui/button';
 import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
-import axios from 'axios';
-import { useParams, useRouter } from 'next/navigation';
+import axios, { isAxiosError } from 'axios';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import Image from 'next/image';
@@ -27,6 +27,9 @@ import {
 import { toast } from 'sonner';
 import EventAnnouncements from '../components/eventAnnouncement';
 import NoTokenModal from '@/components/modals/remindModal';
+import CollegeRegistrationBlockedModal, {
+  type CollegeBlockReason,
+} from '@/components/modals/CollegeRegistrationBlockedModal';
 import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import AddSpeakerModal from './speakers/AddSpeakerModal';
@@ -41,6 +44,8 @@ import {
 } from '@/hooks/useParticipants';
 import AchievementCelebration from '@/components/AchievementCelebration';
 import EventSeoHead from '@/components/EventSeoHead';
+import { buildAuthHref } from '@/lib/authReturnTo';
+import { ErrorState, EventDetailSkeleton } from '@/components/feedback';
 
 interface Speaker {
   id: number;
@@ -82,9 +87,12 @@ const Eventid = () => {
     paymentAmount: 0,
   });
   const router = useRouter();
+  const pathname = usePathname();
 
   const [forkedUpId, setForkedUpId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [fetchNonce, setFetchNonce] = useState(0);
   const [isRegistering, setIsRegistering] = useState(false);
   const [showWhatsappModal, setShowWhatsappModal] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -101,6 +109,10 @@ const Eventid = () => {
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
   const [isAddSpeakerModalOpen, setIsAddSpeakerModalOpen] = useState(false);
   const [isFounder, setIsFounder] = useState(false);
+  const [collegeBlockModal, setCollegeBlockModal] = useState<{
+    open: boolean;
+    reason: CollegeBlockReason;
+  }>({ open: false, reason: 'mismatch' });
 
   // CSV sync state: lastSince (newest joinedAt), etag, last updated time, sync in progress, badge count
   const [csvLastSince, setCsvLastSince] = useState<string | null>(null);
@@ -185,7 +197,8 @@ const Eventid = () => {
               toast('Login required', {
                 action: {
                   label: 'Sign in',
-                  onClick: () => router.push('/auth/signin'),
+                  onClick: () =>
+                    router.push(buildAuthHref('/auth/signin', pathname)),
                 },
               });
               return;
@@ -193,13 +206,11 @@ const Eventid = () => {
               setSignedin(true);
             }
       } else {
-        // No token - user needs to sign up
-        toast('Sign up required');
-        setHasTokenForModal(false);    
+        setHasTokenForModal(false);
         return;
       } 
     }
-  }, [router]);
+  }, [router, pathname]);
 
   // Fetch speakers for this event (used in the Speakers tab)
   const {
@@ -290,9 +301,11 @@ const Eventid = () => {
           const userData = (userResponse.data as any).user;
           setCurrentUser(userData);
           
-          // Extract attended event IDs from user data
+          // Extract attended event IDs (normalize to string — API may return number)
           if (userData.eventAttended && Array.isArray(userData.eventAttended)) {
-            const attendedIds = userData.eventAttended.map((attendance: any) => attendance.event.id);
+            const attendedIds = userData.eventAttended.map((attendance: any) =>
+              String(attendance?.event?.id ?? '')
+            ).filter(Boolean);
             setUserAttendedEventIds(attendedIds);
           }
         }
@@ -312,6 +325,7 @@ const Eventid = () => {
     async function fetchEventData() {
       try {
         setIsLoading(true);
+        setLoadError(null);
         const res = await axios.get<EventByIdResponse>(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event/${id}`,
           {
@@ -366,14 +380,18 @@ const Eventid = () => {
         }
       } catch (error) {
         console.error('Error fetching event data:', error);
-        toast.error('Error loading event data');
+        const msg =
+          isAxiosError(error) && error.response?.status === 404
+            ? 'This event could not be found. It may have been removed or the link is wrong.'
+            : 'We could not load this event. Check your connection and try again.';
+        setLoadError(msg);
       } finally {
         setIsLoading(false);
       }
     }
    
     fetchEventData();
-  }, [token, id]);
+  }, [token, id, fetchNonce]);
 
   const handleRegistration = async () => {
     if (!token) {
@@ -384,15 +402,11 @@ const Eventid = () => {
     setRegistrationNotice(null);
     if (isCollegeRestrictionBlocking) {
       if (isCollegeNameMissing) {
-        toast('Complete your profile to register.', {
-          action: {
-            label: 'Update profile',
-            onClick: () => router.push('/dashboard'),
-          },
-        });
-      } else {
-        const message = 'Only students from organizer college can register.';
-        toast.error(message);
+        setCollegeBlockModal({ open: true, reason: 'missing' });
+      } else if (isCollegeMismatch) {
+        setCollegeBlockModal({ open: true, reason: 'mismatch' });
+      } else if (isCollegeUnknown) {
+        setCollegeBlockModal({ open: true, reason: 'unknown' });
       }
       return;
     }
@@ -459,6 +473,11 @@ const Eventid = () => {
       if (resp && resp.status === 200) {
         console.log('Registration successful');
         setForkedUpId(resp.data.ForkedUpId);
+        // Immediately mark this event as attended so WhatsApp / UI update without full reload
+        const sid = String(id);
+        setUserAttendedEventIds((prev) =>
+          prev.some((x) => String(x) === sid) ? prev : [...prev, sid]
+        );
         // Show celebration modal
         setShowCelebration(true);
         // Show WhatsApp modal after celebration closes if link is available
@@ -472,9 +491,8 @@ const Eventid = () => {
       console.error('Registration error:', error);
       const axiosError = error as any;
       if (axiosError?.response?.status === 403) {
-        const message = 'Only students from organizer college can register.';
-        setRegistrationNotice(message);
-        toast.error(message);
+        setRegistrationNotice(null);
+        setCollegeBlockModal({ open: true, reason: 'mismatch' });
       } else {
         toast.error(
           axiosError?.response?.data?.message ||
@@ -491,10 +509,11 @@ const Eventid = () => {
     await completeRegistration(proofUrl);
   };
 
-  // Helper function to check if user is attending this event
+  // Helper: user is registered — compare ids as strings (params vs API types differ)
   const isUserAttendingEvent = (): boolean => {
-    if (!currentUser) return false;
-    return userAttendedEventIds.includes(id);
+    if (!id) return false;
+    const sid = String(id);
+    return userAttendedEventIds.some((eid) => String(eid) === sid);
   };
   const formatDateRange = (start?: string, end?: string) => {
     if (!start && !end) return 'TBD';
@@ -552,13 +571,10 @@ const Eventid = () => {
     isCollegeNameMissing || isCollegeMismatch || isCollegeUnknown;
 
   // Check if registration is disabled (event ended or applications closed)
+  /** Ended / closed only — college rules are handled on click (modal), so wrong-college users can tap Register. */
   const isRegistrationDisabled = useMemo(() => {
-    return (
-      isEventEnded ||
-      data.applicationStatus !== 'open' ||
-      isCollegeRestrictionBlocking
-    );
-  }, [isEventEnded, data.applicationStatus, isCollegeRestrictionBlocking]);
+    return isEventEnded || data.applicationStatus !== 'open';
+  }, [isEventEnded, data.applicationStatus]);
 
   const googleCalendarHref = useMemo(() => {
     // Build a Google Calendar event URL (best-effort if dates exist)
@@ -598,15 +614,33 @@ const Eventid = () => {
   ]);
 
   if (isLoading) {
+    return <EventDetailSkeleton />;
+  }
+
+  if (loadError) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-yellow-400 text-xl">Loading event details...</div>
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4 py-12">
+        <ErrorState
+          title="Unable to load event"
+          message={loadError}
+          onRetry={() => {
+            setLoadError(null);
+            setFetchNonce((n) => n + 1);
+          }}
+        />
+        <Link
+          href="/events"
+          className="mt-8 inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 text-sm font-medium"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to all events
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-[#02040A] to-black text-white">
+    <div className="w-full text-white">
       <EventSeoHead
         eventName={data.EventName}
         collegeName={data.university}
@@ -621,7 +655,6 @@ const Eventid = () => {
         contactEmail={data.contactEmail}
         pageUrl={typeof window !== 'undefined' ? window.location.href : undefined}
       />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Back Button */}
         <Link
           href="/events"
@@ -631,40 +664,36 @@ const Eventid = () => {
           <span>Back to Events</span>
         </Link>
 
-        {/* Hero Section - Compact Design */}
-        <div className="relative rounded-2xl bg-gradient-to-br from-[#0b0b0f] via-[#050508] to-[#050507] border border-yellow-500/20 shadow-[0_0_40px_rgba(234,179,8,0.08)] overflow-hidden mb-6">
-          {/* Subtle glow effects */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 rounded-full blur-3xl -z-0" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-400/5 rounded-full blur-3xl -z-0" />
-
-          <div className="relative z-10 p-6 md:p-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Hero — framed panel for clearer hierarchy on dark bg */}
+        <section className="mb-8 pb-8 border-b border-gray-800/60">
+          <div className="rounded-2xl border border-gray-800/80 bg-gradient-to-b from-gray-950/80 to-black/40 p-4 sm:p-6 md:p-8 shadow-lg shadow-black/20">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
               {/* Left: Event Info */}
               <div className="lg:col-span-2 space-y-4">
                 <div>
-                  <p className="text-gray-400 text-xs uppercase tracking-[0.18em] mb-2">
-                    Featured Event
+                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-2">
+                    Event
                   </p>
-                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-yellow-400 leading-tight drop-shadow-[0_0_25px_rgba(250,204,21,0.35)]">
+                  <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-yellow-400 leading-[1.15] tracking-tight">
                     {data.EventName || 'Event Title'}
                   </h1>
                 </div>
 
                 {/* Event Meta Chips */}
                 <div className="flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm mt-2">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-black/50 border border-gray-800/80 px-3 py-1">
-                    <CalendarIcon className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
-                    <span className="text-gray-200">
+                  <div className="inline-flex items-center gap-2 rounded-md bg-gray-800/60 px-3 py-1.5 text-gray-200">
+                    <CalendarIcon className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 shrink-0" />
+                    <span>
                       {formatDateRange(data.startDate, data.endDate)}
                     </span>
                   </div>
                   {data.university && (
-                    <div className="inline-flex items-center gap-2 rounded-full bg-black/50 border border-gray-800/80 px-3 py-1">
-                      <MapPin className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
-                      <span className="text-gray-200">{data.university}</span>
+                    <div className="inline-flex items-center gap-2 rounded-md bg-gray-800/60 px-3 py-1.5 text-gray-200 max-w-full min-w-0">
+                      <MapPin className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 shrink-0" />
+                      <span className="truncate">{data.university}</span>
                     </div>
                   )}
-                  <div className="inline-flex items-center gap-2 rounded-full bg-black/50 border border-gray-800/80 px-3 py-1">
+                  <div className="inline-flex items-center gap-2 rounded-md bg-gray-800/60 px-3 py-1.5 text-gray-200">
                     {isOnline ? (
                       <Globe className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
                     ) : (
@@ -706,8 +735,8 @@ const Eventid = () => {
                   </div>
                 )}
 
-                {/* Action Buttons */}
-                <div className="flex flex-wrap gap-3 pt-2">
+                {/* Action Buttons — stack on narrow screens */}
+                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2">
                   {signedin ? (
                     isUserAttendingEvent() ? (
                       <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 text-green-400 rounded-lg font-medium">
@@ -719,7 +748,7 @@ const Eventid = () => {
                         <Button
                           onClick={handleRegistration}
                           disabled={isRegistering || isRegistrationDisabled}
-                          className={`rounded-lg px-5 py-2 font-medium ${
+                          className={`min-h-11 w-full sm:w-auto rounded-lg px-5 py-2.5 font-medium ${
                             isRegistering || isRegistrationDisabled
                               ? 'bg-gray-800 text-gray-400 cursor-not-allowed'
                               : 'bg-yellow-400 hover:bg-yellow-500 text-black'
@@ -730,11 +759,21 @@ const Eventid = () => {
                         {isEventEnded && (
                           <p className="text-xs text-red-400">This event has already ended</p>
                         )}
+                        {isCollegeRestricted && data.university && (
+                          <p className="text-xs text-gray-400 max-w-xl">
+                            Organizer college:{' '}
+                            <span className="text-gray-200">{data.university}</span>
+                            <span className="text-yellow-500/90">
+                              {' '}
+                              · Limited to students of this college
+                            </span>
+                          </p>
+                        )}
                         {isCollegeNameMissing && (
                           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-yellow-300">
                             <span>
-                              Complete your profile to register (add your college
-                              name).
+                              Tap Register to add your college in the prompt, or
+                              update your profile first.
                             </span>
                             <Button
                               onClick={() => router.push('/dashboard')}
@@ -743,11 +782,6 @@ const Eventid = () => {
                               Complete profile
                             </Button>
                           </div>
-                        )}
-                        {!isCollegeNameMissing && isCollegeRestrictionBlocking && (
-                          <p className="text-xs text-red-400">
-                            Only students from organizer college can register.
-                          </p>
                         )}
                         {!isCollegeRestrictionBlocking && registrationNotice && (
                           <p className="text-xs text-red-400">
@@ -758,10 +792,12 @@ const Eventid = () => {
                     )
                   ) : (
                     <Button
-                      onClick={() => router.push('/auth/signup')}
-                      className="rounded-lg px-5 py-2 font-medium bg-yellow-400 hover:bg-yellow-500 text-black"
+                      onClick={() => setIsAuthModalOpen(true)}
+                      className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-yellow-400 hover:bg-yellow-500 text-black w-full sm:w-auto"
                     >
-                      Sign Up to Register
+                      {hasTokenForModal
+                        ? 'Sign in to Register'
+                        : 'Sign up to Register'}
                     </Button>
                   )}
 
@@ -769,7 +805,7 @@ const Eventid = () => {
                     href={googleCalendarHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 rounded-lg px-4 py-2 bg-gray-900 border border-gray-800 hover:border-gray-700 text-white transition-colors"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2.5 bg-gray-900 border border-gray-800 hover:border-gray-700 text-white transition-colors w-full sm:w-auto"
                   >
                     <CalendarIcon className="w-4 h-4" />
                     <span>Add to Calendar</span>
@@ -796,11 +832,39 @@ const Eventid = () => {
                     </p>
                   </div>
                 )}
+
+                {/* WhatsApp — hero left column, aligned with poster row */}
+                {data.whatsappLink && isUserAttendingEvent() && (
+                  <div className="mt-4 p-4 bg-green-500/10 border border-green-500/25 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <span className="text-green-400 text-lg shrink-0" aria-hidden>
+                        💬
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-green-400 text-sm mb-1">
+                          Join the WhatsApp group
+                        </h3>
+                        <p className="text-gray-400 text-xs mb-3">
+                          Stay updated and connect with other participants.
+                        </p>
+                        <a
+                          href={data.whatsappLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                          <span>Open WhatsApp</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Right: Compact Poster Image */}
+              {/* Right: Poster */}
               <div className="lg:col-span-1">
-                <div className="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-gray-900 border border-gray-800">
+                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-gray-800/50">
                   {data.posterUrl ? (
                     <Image
                       src={data.posterUrl}
@@ -819,7 +883,7 @@ const Eventid = () => {
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Tabs Navigation */}
         <div className="mb-6">
@@ -854,7 +918,7 @@ const Eventid = () => {
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {activeTab === 'overview' && (
-              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6">
+              <div className="py-1">
                 <h2 className="text-xl font-bold text-yellow-400 mb-4">
                   About This Event
                 </h2>
@@ -862,28 +926,6 @@ const Eventid = () => {
                   {data.description ||
                     'Event description will be available soon...'}
                 </p>
-
-                {/* WhatsApp Group Link - Only show if user is registered */}
-                {data.whatsappLink && userAttendedEventIds.includes(id) && (
-                  <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                    <div className="flex items-start gap-3">
-                      <div className="text-green-400 text-lg">💬</div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-green-400 mb-2">Join Our WhatsApp Group</h3>
-                        <p className="text-gray-300 text-sm mb-3">Connect with other participants and stay updated with event announcements.</p>
-                        <a
-                          href={data.whatsappLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
-                        >
-                          <span>Join WhatsApp Group</span>
-                          <ChevronRight className="w-4 h-4" />
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 {/* Event Website Link */}
                 {data.eventWebsite && (
@@ -1373,8 +1415,8 @@ const Eventid = () => {
               </div>
             )}
 
-            {/* CTA Card */}
-            <div className="rounded-xl bg-gradient-to-br from-yellow-400/10 to-transparent border border-yellow-400/20 p-6">
+            {/* CTA */}
+            <div className="pt-6 border-t border-gray-800/80">
               <h3 className="text-xl font-bold text-yellow-400 mb-2">
                 Make Your Campus Life Unforgettable
               </h3>
@@ -1382,7 +1424,9 @@ const Eventid = () => {
                 Join Zynvo and connect with your campus community.
               </p>
               <Button
-                onClick={() => router.push('/auth/signup')}
+                onClick={() =>
+                  router.push(buildAuthHref('/auth/signup', pathname))
+                }
                 className="bg-yellow-400 hover:bg-yellow-500 text-black font-medium rounded-lg px-5 py-2"
               >
                 Join Zynvo
@@ -1445,9 +1489,24 @@ const Eventid = () => {
             )}
           </div>
         </div>
-      </div>
       
-      <NoTokenModal isOpen={isAuthModalOpen} onOpenChange={setIsAuthModalOpen} hasToken={hasTokenForModal} />
+      <CollegeRegistrationBlockedModal
+        isOpen={collegeBlockModal.open}
+        onOpenChange={(open) =>
+          setCollegeBlockModal((prev) => ({ ...prev, open }))
+        }
+        reason={collegeBlockModal.reason}
+        organizerCollegeName={data.university}
+        userCollegeName={currentUser?.collegeName}
+        onGoToProfile={() => router.push('/dashboard')}
+      />
+
+      <NoTokenModal
+        isOpen={isAuthModalOpen}
+        onOpenChange={setIsAuthModalOpen}
+        hasToken={hasTokenForModal}
+        variant="event_register"
+      />
       
       {/* Add Speaker Modal */}
       <AddSpeakerModal

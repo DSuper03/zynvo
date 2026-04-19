@@ -19,6 +19,12 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useSignIn } from '@clerk/nextjs';
 import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
+import {
+  consumeReturnTo,
+  persistReturnTo,
+  clearStoredReturnTo,
+  peekReturnTo,
+} from '@/lib/authReturnTo';
 
 
 
@@ -33,6 +39,16 @@ export default function SignIn() {
   });
   const [rememberMe, setRem] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [signupHref, setSignupHref] = useState('/auth/signup');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const r = params.get('returnTo');
+    if (r) persistReturnTo(r);
+    else clearStoredReturnTo();
+    setSignupHref(`/auth/signup${window.location.search}`);
+  }, []);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -52,10 +68,14 @@ export default function SignIn() {
       console.log('Starting Google OAuth redirect...');
       const origin = window.location.origin;
       setSsoIntentBeforeOAuth('signin');
+      const rt = peekReturnTo();
+      const callbackQs = new URLSearchParams({ intent: 'signin' });
+      if (rt) callbackQs.set('returnTo', rt);
+      const callbackPath = `/auth/sso-callback?${callbackQs.toString()}`;
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
-        redirectUrl: `${origin}/auth/sso-callback?intent=signin`,
-        redirectUrlComplete: `${origin}/auth/sso-callback?intent=signin`,
+        redirectUrl: `${origin}${callbackPath}`,
+        redirectUrlComplete: `${origin}${callbackPath}`,
       });
     } catch (err: any) {
       console.error('SSO redirect error:', err);
@@ -88,7 +108,7 @@ export default function SignIn() {
         localStorage.setItem('token', res.data.token);
         sessionStorage.setItem('activeSession', 'true');
         toast.success('Login successful!');
-        router.push('/dashboard');
+        router.push(consumeReturnTo() ?? '/dashboard');
         return;
       }
 
@@ -199,7 +219,7 @@ export default function SignIn() {
               <p className="text-gray-400">
                 New to Zynvo?{' '}
                 <Link
-                  href="/auth/signup"
+                  href={signupHref}
                   className="text-yellow-500 hover:text-yellow-400 transition"
                 >
                   Create an account
@@ -334,7 +354,7 @@ export default function SignIn() {
 
               {/* Sign Up Button Below Sign In */}
               <div className="mt-4">
-                <Link href="/auth/signup" className="block">
+                <Link href={signupHref} className="block">
                   <Button
                     type="button"
                     variant="outline"
