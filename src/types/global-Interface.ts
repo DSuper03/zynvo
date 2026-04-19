@@ -428,6 +428,7 @@ export interface eventData {
   endDate: Date | null;
   posterUrl?: string;
   university: string;
+  startDate?: string | Date;
   isPaidEvent?: boolean;
   paymentQRCode?: string;
   paymentAmount?: number;

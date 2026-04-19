@@ -258,17 +258,12 @@ export default function ZynvoEventsPage() {
       }
 
       // Check startDate if available (from the event object or as a property)
-      const startDate = (event as any).startDate;
-      if (startDate) {
-        try {
-          const eventStartDate = new Date(startDate);
-          if (!isNaN(eventStartDate.getTime())) {
-            if (eventStartDate.toISOString().split('T')[0] === targetDate) {
-              return true;
-            }
+      if (event.startDate) {
+        const eventStartDate = new Date(event.startDate);
+        if (!isNaN(eventStartDate.getTime())) {
+          if (eventStartDate.toISOString().split('T')[0] === targetDate) {
+            return true;
           }
-        } catch (e) {
-          // If date parsing fails, skip
         }
       }
 
