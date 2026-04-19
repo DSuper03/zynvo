@@ -427,7 +427,8 @@ export interface eventData {
   prizes: string;
   endDate: Date | null;
   posterUrl?: string;
-  univerisity : string;
+  university: string;
+  startDate?: string | Date;
   isPaidEvent?: boolean;
   paymentQRCode?: string;
   paymentAmount?: number;

@@ -225,8 +225,8 @@ export default function EventCard({
                     <div className="flex items-center text-gray-300 text-sm">
                       <House className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
                       <span className="truncate">
-                        {event.univerisity
-                          ? event.univerisity
+                        {event.university
+                          ? event.university
                           : `${event.clubName} Club`}
                       </span>
                     </div>
