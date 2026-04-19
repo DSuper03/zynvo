@@ -110,9 +110,15 @@ function parseAiResponse(raw: string): GeneratedSeo | null {
 export async function generateEventSeoWithAI(
   input: EventSeoInput
 ): Promise<GeneratedSeo> {
-  const apiKey = (process.env.GOOGLE_AI_API_KEY || "").trim();
+  const apiKey = (
+    process.env.GOOGLE_AI_API_KEY ||
+    process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY ||
+    ""
+  ).trim();
   if (!apiKey) {
-    console.warn("[SEO] GOOGLE_AI_API_KEY missing — using deterministic fallback");
+    console.warn(
+      "[SEO] Google AI API key missing (GOOGLE_AI_API_KEY or NEXT_PUBLIC_GOOGLE_AI_API_KEY) — using deterministic fallback"
+    );
     return generateFallbackSeo(input);
   }
 
