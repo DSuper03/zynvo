@@ -94,8 +94,10 @@ export default function CollegeSearchSelect({
   };
 
   const handleInputClick = () => {
-    setIsOpen(true);
-    setSearchTerm('');
+    if (!isOpen) {
+      setIsOpen(true);
+      setSearchTerm('');
+    }
     if (inputRef.current) {
       inputRef.current.focus();
     }
