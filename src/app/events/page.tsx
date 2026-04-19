@@ -246,14 +246,33 @@ export default function ZynvoEventsPage() {
     const targetDate = date.toISOString().split('T')[0]; // Get YYYY-MM-DD format
     
     return events.filter(event => {
-      if (!event.endDate) return false;
+      // Check endDate
+      if (event.endDate) {
+        const eventDate = new Date(event.endDate);
+        // Check if the date is valid
+        if (!isNaN(eventDate.getTime())) {
+          if (eventDate.toISOString().split('T')[0] === targetDate) {
+            return true;
+          }
+        }
+      }
 
-      // Handle both Date objects and string dates
-      const eventDate = new Date(event.endDate);
-      // Check if the date is valid
-      if (isNaN(eventDate.getTime())) return false;
+      // Check startDate if available (from the event object or as a property)
+      const startDate = (event as any).startDate;
+      if (startDate) {
+        try {
+          const eventStartDate = new Date(startDate);
+          if (!isNaN(eventStartDate.getTime())) {
+            if (eventStartDate.toISOString().split('T')[0] === targetDate) {
+              return true;
+            }
+          }
+        } catch (e) {
+          // If date parsing fails, skip
+        }
+      }
 
-      return eventDate.toISOString().split('T')[0] === targetDate;
+      return false;
     });
   };
 
@@ -420,10 +439,10 @@ export default function ZynvoEventsPage() {
                                       })}
                                     </Badge>
                                   )}
-                                  {event.univerisity && (
+                                  {event.university && (
                                     <Badge variant="secondary" className="bg-blue-500/20 text-blue-200 border-blue-500/30">
                                       <MapPin className="w-3 h-3 mr-1" />
-                                      {event.univerisity}
+                                      {event.university}
                                     </Badge>
                                   )}
                                   {event.clubName && (
