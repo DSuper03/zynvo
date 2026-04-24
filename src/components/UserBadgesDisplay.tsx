@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Badge as BadgeIcon, User, Users, Star } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { Crown, Handshake, Star, Zap, Trophy, Flame } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface UserBadgesProps {
   isFounder?: boolean;
@@ -12,6 +12,30 @@ interface UserBadgesProps {
   userName?: string;
 }
 
+type Tier = 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM' | 'LEGENDARY';
+
+interface BadgeDef {
+  id: string;
+  name: string;
+  description: string;
+  Icon: React.ElementType;
+  tier: Tier;
+}
+
+const TIER_STYLES: Record<Tier, { label: string; ring: string; glow: string; text: string; bar: string; dot: string }> = {
+  BRONZE:    { label: 'Bronze',    ring: 'border-amber-600/40',    glow: 'shadow-amber-600/10',   text: 'text-amber-400',   bar: 'from-amber-500 to-amber-700',   dot: 'bg-amber-500'   },
+  SILVER:    { label: 'Silver',    ring: 'border-slate-400/40',    glow: 'shadow-slate-400/10',   text: 'text-slate-300',   bar: 'from-slate-300 to-slate-500',   dot: 'bg-slate-400'   },
+  GOLD:      { label: 'Gold',      ring: 'border-yellow-400/40',   glow: 'shadow-yellow-400/15',  text: 'text-yellow-400',  bar: 'from-yellow-300 to-yellow-500', dot: 'bg-yellow-400'  },
+  PLATINUM:  { label: 'Platinum',  ring: 'border-purple-400/40',   glow: 'shadow-purple-400/15',  text: 'text-purple-400',  bar: 'from-purple-400 to-pink-500',   dot: 'bg-purple-400'  },
+  LEGENDARY: { label: 'Legendary', ring: 'border-cyan-400/40',     glow: 'shadow-cyan-400/15',    text: 'text-cyan-400',    bar: 'from-cyan-400 to-blue-500',     dot: 'bg-cyan-400'    },
+};
+
+const MILESTONES = [
+  { label: 'Event Master',        target: 5,  barColor: 'from-yellow-400 to-yellow-600',   textColor: 'text-yellow-400'  },
+  { label: 'Legendary Status',    target: 10, barColor: 'from-purple-400 to-pink-500',     textColor: 'text-purple-400'  },
+  { label: 'Community Champion',  target: 20, barColor: 'from-cyan-400 to-blue-500',       textColor: 'text-cyan-400'    },
+];
+
 export const UserBadgesDisplay: React.FC<UserBadgesProps> = ({
   isFounder = false,
   isMember = false,
@@ -19,48 +43,34 @@ export const UserBadgesDisplay: React.FC<UserBadgesProps> = ({
   clubName = '',
   userName = 'User',
 }) => {
-  const [expandedBadge, setExpandedBadge] = useState<string | null>(null);
+  const badges: BadgeDef[] = [];
 
-  const badges = [];
-
-  // Founder Badge
   if (isFounder) {
     badges.push({
       id: 'founder',
       name: 'Club Founder',
-      icon: '👑',
-      color: 'from-yellow-400 to-yellow-600',
-      bgColor: 'bg-yellow-50',
-      textColor: 'text-yellow-900',
       description: `Founded ${clubName || 'a club'} on Zynvo`,
+      Icon: Crown,
       tier: 'GOLD',
     });
   }
 
-  // Member Badge
   if (isMember && !isFounder) {
     badges.push({
       id: 'member',
       name: 'Club Member',
-      icon: '🤝',
-      color: 'from-blue-400 to-blue-600',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-900',
       description: `Active member of ${clubName || 'a club'}`,
+      Icon: Handshake,
       tier: 'SILVER',
     });
   }
 
-  // Event Creation Badges
   if (eventCount >= 1) {
     badges.push({
       id: 'event_creator',
       name: 'Event Creator',
-      icon: '⭐',
-      color: 'from-red-400 to-red-600',
-      bgColor: 'bg-red-50',
-      textColor: 'text-red-900',
-      description: 'Created your first event',
+      description: 'Attended their first event',
+      Icon: Star,
       tier: 'BRONZE',
     });
   }
@@ -69,11 +79,8 @@ export const UserBadgesDisplay: React.FC<UserBadgesProps> = ({
     badges.push({
       id: 'event_master',
       name: 'Event Master',
-      icon: '🏆',
-      color: 'from-yellow-400 to-orange-500',
-      bgColor: 'bg-yellow-50',
-      textColor: 'text-yellow-900',
-      description: 'Created 5 amazing events',
+      description: 'Attended 5 events',
+      Icon: Trophy,
       tier: 'GOLD',
     });
   }
@@ -82,11 +89,8 @@ export const UserBadgesDisplay: React.FC<UserBadgesProps> = ({
     badges.push({
       id: 'event_legendary',
       name: 'Event Legendary',
-      icon: '⚡',
-      color: 'from-purple-400 to-pink-600',
-      bgColor: 'bg-purple-50',
-      textColor: 'text-purple-900',
-      description: 'Created 10 spectacular events',
+      description: 'Attended 10 events',
+      Icon: Zap,
       tier: 'PLATINUM',
     });
   }
@@ -95,170 +99,108 @@ export const UserBadgesDisplay: React.FC<UserBadgesProps> = ({
     badges.push({
       id: 'community_champion',
       name: 'Community Champion',
-      icon: '🌟',
-      color: 'from-cyan-400 to-blue-600',
-      bgColor: 'bg-cyan-50',
-      textColor: 'text-cyan-900',
-      description: 'Created 20 iconic events - A true leader!',
+      description: 'Attended 20+ events — a true campus leader',
+      Icon: Flame,
       tier: 'LEGENDARY',
     });
   }
 
+  const topTier = badges[badges.length - 1]?.tier ?? null;
+
+  const handleShare = (badge: BadgeDef) => {
+    const text = `🎖️ I just earned the "${badge.name}" badge on Zynvo!\n${badge.description}\n\nJoin me — #Zynvo #ClubLife`;
+    navigator.clipboard.writeText(text);
+    toast('Copied to clipboard!', { duration: 2000 });
+  };
+
   if (badges.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-400">
-        <p>No badges earned yet. Start creating events to earn badges!</p>
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <div className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center mb-3">
+          <Trophy className="w-5 h-5 text-gray-600" />
+        </div>
+        <p className="text-sm font-medium text-gray-400">No badges yet</p>
+        <p className="text-xs text-gray-600 mt-1">Attend events or join a club to earn your first badge.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {/* Badge Summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-3 text-center border border-gray-700">
-          <p className="text-2xl font-bold text-yellow-400">{badges.length}</p>
-          <p className="text-xs text-gray-400">Total Badges</p>
+    <div className="space-y-6">
+      {/* Top row: badge count + tier pill */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl font-bold text-white">{badges.length}</span>
+          <span className="text-sm text-gray-400">{badges.length === 1 ? 'badge' : 'badges'} earned</span>
         </div>
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-3 text-center border border-gray-700">
-          <p className="text-2xl font-bold text-blue-400">{eventCount}</p>
-          <p className="text-xs text-gray-400">Events Created</p>
-        </div>
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-3 text-center border border-gray-700">
-          <p className="text-2xl font-bold text-purple-400">{Math.max(1, badges.length * 10)}</p>
-          <p className="text-xs text-gray-400">XP Earned</p>
-        </div>
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-3 text-center border border-gray-700">
-          <p className="text-2xl font-bold text-green-400">
-            {badges[badges.length - 1]?.tier || 'BRONZE'}
-          </p>
-          <p className="text-xs text-gray-400">Current Tier</p>
-        </div>
+        {topTier && (
+          <span className={`text-xs font-bold px-3 py-1 rounded-full border ${TIER_STYLES[topTier].ring} ${TIER_STYLES[topTier].text} bg-white/[0.03]`}>
+            {TIER_STYLES[topTier].label} tier
+          </span>
+        )}
       </div>
 
-      {/* Badges Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {badges.map((badge) => (
-          <div
-            key={badge.id}
-            onClick={() => setExpandedBadge(expandedBadge === badge.id ? null : badge.id)}
-            className={`relative rounded-xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:scale-105 border-2 ${
-              expandedBadge === badge.id
-                ? `border-yellow-400 shadow-lg shadow-yellow-400/50 scale-105`
-                : 'border-gray-700 hover:border-yellow-400/50'
-            }`}
-          >
-            {/* Background Gradient */}
+      {/* Badge list */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {badges.map((badge) => {
+          const s = TIER_STYLES[badge.tier];
+          const Icon = badge.Icon;
+          return (
             <div
-              className={`absolute inset-0 bg-gradient-to-br ${badge.color} opacity-10`}
-            />
-
-            {/* Content */}
-            <div className={`relative p-6 ${badge.bgColor}`}>
-              {/* Badge Icon */}
-              <div className="text-5xl mb-4 text-center drop-shadow-lg">
-                {badge.icon}
+              key={badge.id}
+              className={`group flex items-center gap-4 px-4 py-3.5 rounded-xl border bg-white/[0.025] hover:bg-white/[0.04] transition-all duration-200 ${s.ring} shadow-lg ${s.glow}`}
+            >
+              {/* Icon circle */}
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-white/[0.04] border ${s.ring}`}>
+                <Icon className={`w-4.5 h-4.5 ${s.text}`} />
               </div>
 
-              {/* Badge Name */}
-              <h3 className={`font-bold text-lg mb-1 text-center ${badge.textColor}`}>
-                {badge.name}
-              </h3>
+              {/* Text */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-white leading-tight">{badge.name}</span>
+                  <span className={`hidden sm:inline text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${s.ring} ${s.text} bg-white/[0.03]`}>
+                    {TIER_STYLES[badge.tier].label}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mt-0.5 truncate">{badge.description}</p>
+              </div>
 
-              {/* Tier Badge */}
-              <div className="flex justify-center mb-3">
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r ${badge.color}`}
-                >
-                  {badge.tier}
+              {/* Share */}
+              <button
+                onClick={() => handleShare(badge)}
+                className="opacity-0 group-hover:opacity-100 flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-all"
+              >
+                Share
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Progress */}
+      <div className="space-y-3 pt-2 border-t border-gray-800/70">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Progress</p>
+        {MILESTONES.map((m) => {
+          const pct = Math.min((eventCount / m.target) * 100, 100);
+          const done = eventCount >= m.target;
+          return (
+            <div key={m.label}>
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="text-xs text-gray-400">{m.label}</span>
+                <span className={`text-xs font-semibold ${done ? 'text-green-400' : m.textColor}`}>
+                  {done ? 'Unlocked ✓' : `${m.target - eventCount} to go`}
                 </span>
               </div>
-
-              {/* Description */}
-              <p className={`text-sm text-center ${badge.textColor}`}>
-                {badge.description}
-              </p>
-
-              {/* Expanded Info */}
-              {expandedBadge === badge.id && (
-                <div className="mt-4 pt-4 border-t border-current/20 space-y-2 text-sm">
-                  <p className={`${badge.textColor}`}>
-                    ✓ Unlocked on {new Date().toLocaleDateString()}
-                  </p>
-                  <div className="flex gap-2 justify-center pt-2">
-                    <Button
-                      size="sm"
-                      className={`bg-gradient-to-r ${badge.color} text-white hover:opacity-90`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const text = `🎖️ I just earned the "${badge.name}" badge on Zynvo! 
-${badge.description}
-
-Join me and be part of an amazing campus community! 
-#Zynvo #Achievement #ClubLife`;
-                        navigator.clipboard.writeText(text);
-                        alert('Badge achievement copied to clipboard!');
-                      }}
-                    >
-                      Share
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full bg-gradient-to-r ${m.barColor} transition-all duration-500`}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Progression Bar */}
-      <div className="mt-8 bg-gray-900 rounded-lg p-4 border border-gray-800">
-        <p className="text-sm text-gray-400 mb-3">Your Achievement Progress</p>
-        <div className="space-y-2">
-          <div>
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-gray-300">Next Milestone</span>
-              <span className="text-yellow-400 font-bold">
-                {eventCount < 5 ? `${5 - eventCount} events away` : 'Master Unlocked! ✓'}
-              </span>
-            </div>
-            <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-yellow-400 to-yellow-600 h-full transition-all duration-300"
-                style={{ width: `${Math.min((eventCount / 5) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-
-          <div>
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-gray-300">Legendary Status</span>
-              <span className="text-purple-400 font-bold">
-                {eventCount < 10 ? `${10 - eventCount} events away` : 'Legendary! 🌟'}
-              </span>
-            </div>
-            <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-purple-400 to-pink-600 h-full transition-all duration-300"
-                style={{ width: `${Math.min((eventCount / 10) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-
-          <div>
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-gray-300">Community Champion</span>
-              <span className="text-cyan-400 font-bold">
-                {eventCount < 20 ? `${20 - eventCount} events away` : 'Champion! 👑'}
-              </span>
-            </div>
-            <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-cyan-400 to-blue-600 h-full transition-all duration-300"
-                style={{ width: `${Math.min((eventCount / 20) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
     </div>
   );
