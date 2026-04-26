@@ -36,11 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     // { icon: <Newspaper size={22} />, label: 'News', href: '/news' },
     // @keku bhai agent banne ke ba dconnect karke uncomment kar dena🫡 good night
     { icon: <FaBahai />, label: 'AI', href: '/ai' },
-    {
-      icon: <NotebookText size={22} />,
-      label: 'Resources',
-      href: '/resources',
-    },
+   
     {
       icon: <MapPinCheck />, label: 'Campus Map', href: '/cmap'
     },

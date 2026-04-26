@@ -119,7 +119,6 @@ export default function FooterWithSocial() {
                     title={`Instagram embed ${i + 1}`}
                     style={{ width: "100%", minHeight: 640, border: 0, borderRadius: 12 }}
                     scrolling="no"
-                    allowTransparency={true}
                     allowFullScreen
                     loading="lazy"
                   />
