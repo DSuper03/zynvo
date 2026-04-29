@@ -11,6 +11,7 @@ import {
   Settings,
   Building,
   Lock,
+  LogOut,
 } from 'lucide-react';
 import { NotificationDropdown } from '@/components/notifications';
 import axios from 'axios';
@@ -973,6 +974,14 @@ export default function ZynvoDashboard() {
     });
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('activeSession');
+    sessionStorage.removeItem('founder');
+    toast('Logged out');
+    navigate.push('/');
+  };
+
   if (!isClient || isLoading) {
     return (
       <div className="min-h-screen bg-black text-gray-100 flex items-center justify-center">
@@ -993,6 +1002,15 @@ export default function ZynvoDashboard() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3 sm:gap-4">
           <div className="flex flex-wrap justify-end gap-2 sm:gap-3 w-full sm:w-auto self-end sm:self-auto">
             <NotificationDropdown />
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="h-10 rounded-full border-red-500/40 bg-red-500/10 px-3 text-red-300 hover:bg-red-500/20 hover:text-red-200 sm:px-4"
+              aria-label="Logout"
+            >
+              <LogOut className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Logout</span>
+            </Button>
           </div>
         </div>
 
