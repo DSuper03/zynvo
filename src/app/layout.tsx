@@ -123,7 +123,7 @@ export default function RootLayout({
         },
       }}
     >
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
        <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
