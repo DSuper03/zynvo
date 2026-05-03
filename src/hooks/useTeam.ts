@@ -13,7 +13,7 @@ const API = process.env.NEXT_PUBLIC_BACKEND_URL;
  */
 export function useTeam(eventId: string, token: string | null, enabled = true) {
   const queryClient = useQueryClient();
-  const queryKey = ['my-team', eventId];
+  const queryKey = ['my-team', eventId, token];
 
   const headers = token ? { authorization: `Bearer ${token}` } : undefined;
 
