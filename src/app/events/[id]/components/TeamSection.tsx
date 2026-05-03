@@ -65,11 +65,15 @@ export default function TeamSection({
     setShowLeaveConfirm(false);
   }, [leaveTeam, myTeam]);
 
-  const handleCopyCode = useCallback(() => {
+  const handleCopyCode = useCallback(async () => {
     if (!myTeam?.teamCode) return;
-    navigator.clipboard.writeText(myTeam.teamCode);
-    setCodeCopied(true);
-    setTimeout(() => setCodeCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(myTeam.teamCode);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    } catch {
+      setCodeCopied(false);
+    }
   }, [myTeam?.teamCode]);
 
   // ── Loading state ──────────────────────────────────────────────────────────
