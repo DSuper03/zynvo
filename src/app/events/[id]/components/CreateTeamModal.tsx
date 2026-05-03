@@ -60,11 +60,15 @@ export default function CreateTeamModal({
     }
   };
 
-  const handleCopy = useCallback(() => {
+  const handleCopy = useCallback(async () => {
     if (!createdCode) return;
-    navigator.clipboard.writeText(createdCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(createdCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Do not show "Copied!" if the clipboard write fails
+    }
   }, [createdCode]);
 
   if (!isOpen) return null;
