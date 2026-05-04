@@ -9,12 +9,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'fileName is required' }, { status: 400 });
     }
 
-    const privateKey = process.env.NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY;
+    const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
     const expire = Date.now() + 600000; // 10 minutes from now
 
     if (!privateKey) {
       return NextResponse.json({ error: 'ImageKit private key not configured' }, { status: 500 });
     }
+
+    // SECURITY: Private keys should NEVER use NEXT_PUBLIC_ prefix as they get exposed to the browser
 
     // Create signature for ImageKit upload - correct format
     const expire_seconds = Math.floor(expire / 1000);

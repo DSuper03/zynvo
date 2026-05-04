@@ -35,6 +35,11 @@ export interface EventFormData {
   prizes: string;
   contactEmail: string;
   contactPhone: string;
+  form?: string; // Registration/Application form URL (Google Forms, Typeform, etc.)
+  whatsappLink?: string; // Optional WhatsApp group link for clubhead to share
+  isPaidEvent?: boolean; // Flag to indicate if event requires payment
+  paymentQRCode?: string; // QR code image URL for payment
+  paymentAmount?: number; // Payment amount required for event
   // image: string;
 }
 
@@ -48,6 +53,32 @@ export interface EventType {
   image?: string;
   time?: string;
   title?: string;
+  Venue?: string;
+  university?: string;
+  tagline?: string;
+  EventMode?: string;
+  EventType?: string;
+  EventUrl?: string;
+  TeamSize?: number;
+  clubId?: string;
+  prizes?: string;
+  startDate?: string;
+  endDate?: string;
+  applicationStartDate?: string;
+  applicationEndDate?: string;
+  collegeStudentsOnly?: boolean;
+  contactEmail?: string;
+  contactPhone?: string | null;
+  participationFee?: boolean;
+  posterUrl?: string;
+  link1?: string | null;
+  link2?: string | null;
+  link3?: string | null;
+  whatsappLink?: string;
+  isPaid?: boolean;
+  Fees?: string;
+  qrCodeUrl?: string;
+  paymentAmount?: string | number;
 }
 
 // axios post data interface ( register event button )
@@ -167,6 +198,7 @@ export interface JoinClubModalProps {
   clubName: string;
   clubImage: string;
   clubId: string;
+  requirements?: string;
 }
 export enum clubType {
   Technology,
@@ -229,10 +261,33 @@ export interface EventResponse {
     clubName: string;
     description: string;
     eventHeaderImage: string | null;
+    posterUrl?: string | null;
     prizes: string;
     clubId: string;
-    createdAt: Date;
-    endDate: Date | null;
+    createdAt: Date | string;
+    endDate: Date | string | null;
+    startDate?: string;
+    tagline?: string;
+    EventMode?: string;
+    EventType?: string;
+    EventUrl?: string;
+    Venue?: string;
+    TeamSize?: number;
+    applicationStartDate?: string;
+    applicationEndDate?: string;
+    university?: string;
+    collegeStudentsOnly?: boolean;
+    contactEmail?: string;
+    contactPhone?: string | null;
+    participationFee?: boolean;
+    link1?: string | null;
+    link2?: string | null;
+    link3?: string | null;
+    whatsappLink?: string;
+    isPaid?: boolean;
+    Fees?: string;
+    qrCodeUrl?: string;
+    paymentAmount?: string | number;
   }[];
 }
 
@@ -372,7 +427,11 @@ export interface eventData {
   prizes: string;
   endDate: Date | null;
   posterUrl?: string;
-  univerisity : string;
+  university: string;
+  startDate?: string | Date;
+  isPaidEvent?: boolean;
+  paymentQRCode?: string;
+  paymentAmount?: number;
 }
 
 export interface respnseUseState {
@@ -381,30 +440,52 @@ export interface respnseUseState {
   EventMode: string;
   startDate: any;
   endDate: any;
+  prizes?: string;
   contactEmail: string;
   contactPhone: string;
   university: string;
+  collegeStudentsOnly: boolean;
   applicationStatus: string;
   posterUrl?: string;
   eventHeader?: string;
+  whatsappLink?: string;
+  eventWebsite?: string;
+  form?: string;
+  isPaidEvent?: boolean;
+  paymentQRCode?: string;
+  paymentAmount?: number;
 }
 export interface PostData {
-  id: string;
-  title: string;
-  description: string;
-  image: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  published: boolean;
-  collegeId: string | null;
-  authorId: string;
-  collegeName: string;
-  clubName: string;
-  author: {
-    profileAvatar: string | null;
-    name: string | null;
-  };
+ 
+    title: string;
+    description: string;
+    collegeName: string;
+    clubName: string;
+    image: string | null;
+    id: string;
+    createdAt: Date;
+    collegeId: string | null;
+    updatedAt: Date;
+    published: boolean;
+    author: {
+        name: string | null;
+        profileAvatar: string | null;
+    };
+    upvotes: {
+        id: string;
+        createdAt: Date;
+        postId: string;
+        userId: string;
+    }[];
+    downvotes: {
+        id: string;
+        createdAt: Date;
+        postId: string;
+        userId: string;
+    }[];
+    authorId: string;
 }
+
 export interface EventByIdResponse {
   msg: string;
   response: {
@@ -430,6 +511,16 @@ export interface EventByIdResponse {
     participationFee: boolean;
     contactEmail: string;
     contactPhone: string;
+    whatsappLink?: string; // Optional WhatsApp group link
+    whatsappGroupLink?: string; // Alternative field name
+    eventWebsite?: string; // Optional event website
+    form?: string; // Optional registration form
+    registrationForm?: string; // Alternative field name for registration form
+    isPaidEvent?: boolean; // Flag to indicate if event requires payment
+    isPaid?: boolean; // Alternative field name from backend (maps to isPaidEvent)
+    paymentQRCode?: string; // QR code image URL for payment
+    qrCodeUrl?: string; // Alternative field name from backend (maps to paymentQRCode)
+    paymentAmount?: number; // Payment amount required for event
   };
 }
 

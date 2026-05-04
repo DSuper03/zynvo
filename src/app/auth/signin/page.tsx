@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
@@ -12,28 +12,43 @@ import {
   FiEyeOff,
   FiLoader,
 } from 'react-icons/fi';
-import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
-import dotenv from 'dotenv';
+import { FaGoogle } from 'react-icons/fa';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { signinRes } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useSignIn } from '@clerk/nextjs';
+import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
+import {
+  consumeReturnTo,
+  persistReturnTo,
+  clearStoredReturnTo,
+  peekReturnTo,
+} from '@/lib/authReturnTo';
 
-dotenv.config();
-// const BASE_URL = process.env.BASE_URL
+
 
 export default function SignIn() {
+  const { isLoaded: authIsLoaded, signIn } = useSignIn();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+
   const [formData, setFormData] = useState({
-    name: 'zynvo',
-    collegeName: 'zynvo college',
     email: '',
     password: '',
   });
   const [rememberMe, setRem] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [signupHref, setSignupHref] = useState('/auth/signup');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const r = params.get('returnTo');
+    if (r) persistReturnTo(r);
+    else clearStoredReturnTo();
+    setSignupHref(`/auth/signup${window.location.search}`);
+  }, []);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -41,6 +56,32 @@ export default function SignIn() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (!authIsLoaded || !signIn) {
+      toast('Authentication loading, please wait...');
+      console.log('Clerk not loaded yet:', { authIsLoaded, signIn: !!signIn });
+      return;
+    }
+    try {
+      console.log('Starting Google OAuth redirect...');
+      const origin = window.location.origin;
+      setSsoIntentBeforeOAuth('signin');
+      const rt = peekReturnTo();
+      const callbackQs = new URLSearchParams({ intent: 'signin' });
+      if (rt) callbackQs.set('returnTo', rt);
+      const callbackPath = `/auth/sso-callback?${callbackQs.toString()}`;
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: `${origin}${callbackPath}`,
+        redirectUrlComplete: `${origin}${callbackPath}`,
+      });
+    } catch (err: any) {
+      console.error('SSO redirect error:', err);
+      console.error('SSO error details:', JSON.stringify(err?.errors, null, 2));
+      toast.error(err?.errors?.[0]?.message || 'Failed to initiate Google sign-in');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -52,24 +93,44 @@ export default function SignIn() {
       return;
     }
     setLoading(true);
-    setTimeout(async () => {
-      const msg = await axios.post<signinRes>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/syncWithClerk`,
         formData
       );
-      setLoading(false);
-      if (!msg) {
-        toast('Some Internal Server Error Occured');
-      } else if (msg && msg.data.msg !== 'login success') {
-        toast(msg.data.msg);
+
+      if (!res || !res.data) {
+        toast.error('Some Internal Server Error Occurred');
+        return;
       }
-      if (msg.data.msg == 'login success') {
-        localStorage.setItem('token', msg.data.token);
+
+      if (res.data.msg === 'login success') {
+        localStorage.setItem('token', res.data.token);
         sessionStorage.setItem('activeSession', 'true');
-        toast('login success');
-        router.push('/dashboard');
+        toast.success('Login successful!');
+        router.push(consumeReturnTo() ?? '/dashboard');
+        return;
       }
-    }, 5000);
+
+      toast.error(res.data.msg || 'Login failed. Please try again.');
+    } catch (error: any) {
+      if (error.response) {
+        const errorMsg = error.response.data?.msg || 'Login failed';
+        if (error.response.status === 404) {
+          toast.error('No account found with this email. Please sign up first.');
+        } else if (errorMsg.includes('Invalid email or password')) {
+          toast.error('Invalid email or password. Please check your credentials and try again.');
+        } else {
+          toast.error(errorMsg);
+        }
+      } else if (error.request) {
+        toast.error('Network error. Please check your connection and try again.');
+      } else {
+        toast.error('An unexpected error occurred. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -158,12 +219,34 @@ export default function SignIn() {
               <p className="text-gray-400">
                 New to Zynvo?{' '}
                 <Link
-                  href="/auth/signup"
+                  href={signupHref}
                   className="text-yellow-500 hover:text-yellow-400 transition"
                 >
                   Create an account
                 </Link>
               </p>
+            </div>
+
+            {/* Clerk Smart CAPTCHA mount point — required for bot protection */}
+            <div id="clerk-captcha" />
+
+            <div className="mb-6">
+              <div className="flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => handleGoogleSignIn()}
+                  disabled={!authIsLoaded}
+                  className={`flex items-center justify-center w-full max-w-xs py-2 px-4 rounded-lg shadow transition ${
+                    !authIsLoaded
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : 'bg-white text-black hover:opacity-90'
+                  }`}
+                  aria-label="Sign in with Google"
+                >
+                  <FaGoogle className="mr-3" />
+                  {authIsLoaded ? 'Sign in with Google' : 'Loading...'}
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center justify-center mb-6">
@@ -207,7 +290,7 @@ export default function SignIn() {
                   <Link
                     href="/auth/forgot-password"
                     className="text-sm text-yellow-500 hover:text-yellow-400 transition"
-                  ></Link>
+                  >Forgot Password</Link>
                 </div>
                 <div className="relative">
                   <FiLock className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
@@ -268,6 +351,19 @@ export default function SignIn() {
                   </>
                 )}
               </motion.button>
+
+              {/* Sign Up Button Below Sign In */}
+              <div className="mt-4">
+                <Link href={signupHref} className="block">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full bg-transparent text-yellow-500 border border-yellow-500 hover:bg-yellow-500 hover:text-black p-4"
+                  >
+                    Sign up
+                  </Button>
+                </Link>
+              </div>
             </form>
 
             <p className="text-gray-400 text-xs text-center mt-8">

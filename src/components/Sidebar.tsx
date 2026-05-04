@@ -1,4 +1,4 @@
-'use client';
+//'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
@@ -11,14 +11,12 @@ import {
   NotebookText,
   Trophy,
   Newspaper,
+  MapPinCheck,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import dotenv from 'dotenv';
 import { FaBahai, FaUsers } from 'react-icons/fa';
 import { useWarmup } from './WarmupProvider';
-
-dotenv.config();
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -43,6 +41,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
       label: 'Resources',
       href: '/resources',
     },
+    {
+      icon: <MapPinCheck />, label: 'Campus Map', href: '/cmap'
+    },
     { icon: <Trophy size={22} />, label: 'Leaderboard', href: '/leaderboard' },
     { icon: <User size={22} />, label: 'Profile', href: '/dashboard' },
   ];
@@ -55,6 +56,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
 
   return (
     <div
+      style={{ backgroundColor: '#000000', opacity: 1 }}
       className={`
       h-full min-h-screen flex flex-col bg-black border-r border-gray-800
       transition-all duration-300 ease-in-out
@@ -62,7 +64,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     `}
     >
       {/* User Profile Header - Mobile Responsive */}
-      <div className="p-3 sm:p-4 border-b border-gray-800">
+      <div
+        className={`p-3 sm:p-4 transition-colors ${
+          isOpen ? 'border-b border-gray-800 bg-black' : 'border-b border-transparent bg-transparent'
+        }`}
+      >
         <div className="flex flex-col items-center w-full">
           {/* Profile Section - Now in vertical layout */}
           <div
@@ -113,7 +119,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
       </div>
 
       {/* Menu Items */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-black">
         {menuItems.map((item) => (
           <Link
             key={item.label}
@@ -134,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
       </div>
 
       {/* Account Items - Always visible */}
-      <div className="p-3 border-t border-gray-800">
+      <div className="p-3 border-t border-gray-800 bg-black">
         {accountItems.map((item) => (
           <Link
             key={item.label}
@@ -147,6 +153,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
             `}
             onClick={() => {
               sessionStorage.removeItem('activeSession');
+              sessionStorage.removeItem('founder');
             }}
           >
             <div className="flex-shrink-0">{item.icon}</div>

@@ -30,7 +30,7 @@ export default function SEOHead({
   description = "Experience the future of campus networking with Zynvo's intelligent agentic social media platform. AI-powered autonomous connections for college students, clubs, and events.",
   keywords = [],
   canonicalUrl,
-  ogImage = '/landing page.png',
+  ogImage = '/titlecard.png',
   schemaData,
 }: SEOHeadProps) {
   const defaultKeywords = [

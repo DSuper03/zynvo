@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
@@ -10,9 +10,9 @@ import {
   FiLock,
   FiEye,
   FiEyeOff,
+  FiPhone,
 } from 'react-icons/fi';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
-import dotenv from 'dotenv';
 import DiceBearAvatar from '@/components/DicebearAvatars';
 import { collegesWithClubs } from '@/components/colleges/college';
 import axios from 'axios';
@@ -21,12 +21,26 @@ import { signupRes } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import CollegeSearchSelect from '@/components/colleges/collegeSelect';
 import { Button } from '@/components/ui/button';
-
-dotenv.config();
+import { useSignUp, useAuth , useSignIn} from "@clerk/nextjs";
+import { jwtDecode } from "jwt-decode";
+import { de } from 'date-fns/locale';
+import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
+import {
+  consumeReturnTo,
+  persistReturnTo,
+  clearStoredReturnTo,
+  peekReturnTo,
+  buildAuthHref,
+} from '@/lib/authReturnTo';
+ 
 
 export default function SignUp() {
+  const { isLoaded, signUp, setActive } = useSignUp();
+  const { isLoaded: authIsLoaded, signIn } = useSignIn();
+  const { getToken } = useAuth();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
@@ -34,9 +48,18 @@ export default function SignUp() {
     password: '',
     collegeName: '',
     avatarUrl: '',
+    phone: '',
   });
   const [agreeToTerms, setAgree] = useState(false);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+  const [code, setCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+  const [collegeSearch, setCollegeSearch] = useState<string>('');
+  const [signinHref, setSigninHref] = useState('/auth/signin');
+
+  // Inline validation error for college select
+  const [collegeError, setCollegeError] = useState<string>('');
 
   // NEW: password error + validator
   const [passwordError, setPasswordError] = useState<string>('');
@@ -45,6 +68,15 @@ export default function SignUp() {
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/.test(
       pw
     );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const r = params.get('returnTo');
+    if (r) persistReturnTo(r);
+    else clearStoredReturnTo();
+    setSigninHref(`/auth/signin${window.location.search}`);
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -57,14 +89,22 @@ export default function SignUp() {
       // Handle interest checkboxes
       // interests deleted
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      // Normalise some fields before saving to state
+      let nextValue = value;
+
+      // For email, trim accidental spaces and lowercase
+      if (name === 'email') {
+        nextValue = value.trim().toLowerCase();
+      }
+
+      setFormData((prev) => ({ ...prev, [name]: nextValue }));
 
       // NEW: validate password as user types
       if (name === 'password') {
         setPasswordError(
           isValidPassword(value)
             ? ''
-            : 'Password must be 8+ chars and include uppercase, lowercase, and a number.'
+            : 'Password must be 8+ chars and include uppercase, lowercase, and a number and a special character.'
         );
       }
     }
@@ -83,7 +123,7 @@ export default function SignUp() {
     // NEW: block next step if password invalid
     if (!isValidPassword(formData.password)) {
       setPasswordError(
-        'Password must be 8+ chars and include uppercase, lowercase, and a number.'
+        'Password must be 8+ chars and include uppercase, lowercase, and a number and a special character.'
       );
       toast('Please fix your password to continue');
       return;
@@ -92,10 +132,19 @@ export default function SignUp() {
     setCurrentStep(2);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+
+
+//deprecated - use clerk method
+  const handle_Submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsCreatingAccount(true);
-    
+    // Validate college selection before submitting
+    if (!formData.collegeName || !formData.collegeName.trim()) {
+      setCollegeError('Please select your college/university');
+      toast('Please select your college/university');
+      setIsCreatingAccount(false);
+      return;
+    }
     try {
       const msg = await axios.post<signupRes>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
@@ -118,6 +167,259 @@ export default function SignUp() {
       setIsCreatingAccount(false);
     }
   };
+
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!isLoaded) {
+
+      toast("Security check new  loading, please wait...");
+      return;
+    };
+
+    if (!agreeToTerms) return;
+
+    // Validate college is selected from the actual list — blocks browser-autofilled garbage values
+    const validCollege = collegesWithClubs.some(
+      (c) => c.college === formData.collegeName
+    );
+    if (!formData.collegeName.trim() || !validCollege) {
+      setCollegeError('Please select your college/university from the list');
+      toast.error('Please select your college/university from the list');
+      return;
+    }
+    setCollegeError('');
+    setIsCreatingAccount(true);
+
+    try {
+      // 0. Pre-check: does this email already exist in our backend DB?
+      try {
+        const checkRes = await axios.post(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/checkUserExists`,
+          { email: formData.email.trim().toLowerCase() }
+        );
+        if (checkRes.data?.exists) {
+          toast.error('An account with this email already exists. Redirecting to sign in...');
+          setIsCreatingAccount(false);
+          setTimeout(
+            () => router.push(buildAuthHref('/auth/signin', peekReturnTo())),
+            1500
+          );
+          return;
+        }
+      } catch (checkErr) {
+        // If the check fails, continue with signup — don't block the user
+        console.warn('Pre-check failed, continuing with signup:', checkErr);
+      }
+
+      // 1. Create the user in Clerk
+      await signUp.create({
+        emailAddress: formData.email,
+        password: formData.password,
+        firstName: formData.name.split(" ")[0],
+        lastName: formData.name.split(" ")[1] || "",
+      });
+
+      // 2. Prepare Verification
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+
+      // 3. Switch UI
+      setVerifying(true); 
+      toast.success("Verification code sent to your email!");
+      
+    } catch (err: any) {
+      console.error(JSON.stringify(err, null, 2));
+
+      // --- SPECIFIC ERROR HANDLING ---
+      
+      // Check for "Pwned Password" error
+      const pwnedError = err.errors?.find((e: any) => e.code === "form_password_pwned");
+      
+      // Check for "Captcha" error (if div is missing)
+      const captchaError = err.errors?.find((e: any) => e.code === "captcha_invalid");
+
+      if (pwnedError) {
+        toast.error("Security Alert: This password was found in a data breach. Please choose a different one.");
+        // Optional: Clear the password field
+        // setFormData(prev => ({ ...prev, password: '' })); 
+      } else if (captchaError) {
+        toast.error("Please verify you are not a robot.");
+      } else {
+        // Fallback for other errors (e.g., Email already taken)
+        const errorMessage = err.errors?.[0]?.message || "Error creating account";
+        toast.error(errorMessage);
+      }
+    } finally {
+      setIsCreatingAccount(false);
+    }
+  };
+
+  const handleVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!isLoaded || !signUp) {
+      toast("Verification is still loading, please wait...");
+      return;
+    }
+
+    // Prevent double submits while a request is in flight
+    if (isVerifyingCode) return;
+
+    const cleanedCode = code.replace(/\s+/g, '');
+    if (!cleanedCode) {
+      toast.error("Please enter the verification code from your email.");
+      return;
+    }
+
+    setIsVerifyingCode(true);
+
+    let completeSignUp: any;
+
+    try {
+      // 1. Verify the code using the EXISTING signUp object
+      completeSignUp = await signUp.attemptEmailAddressVerification({
+        code: cleanedCode,
+      });
+
+      if (completeSignUp.status !== "complete") {
+        toast.error("Verification not complete. Please check the code and try again.");
+        return;
+      }
+    } catch (err: any) {
+      console.error(JSON.stringify(err, null, 2));
+
+      const clerkError = err?.errors?.[0];
+      const clerkCode = clerkError?.code;
+
+      if (clerkCode === "verification_code_invalid" || clerkCode === "verification_code_expired") {
+        toast.error("Invalid or expired verification code. Please request a new one and try again.");
+      } else {
+        const message = clerkError?.message || "Verification failed. Please try again.";
+        toast.error(message);
+      }
+
+      setIsVerifyingCode(false);
+      return;
+    }
+
+    try {
+      // 2. Set the session active in Clerk
+      await setActive({ session: completeSignUp.createdSessionId });
+
+      toast.success("Email verified! Setting up your account…");
+
+      // 3. Wait for session to propagate, then get token with retries
+      let token: string | null = null;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        await new Promise((r) => setTimeout(r, 600));
+        token = await getToken();
+        if (token) break;
+      }
+
+      if (!token) {
+        toast.error("Session setup timed out. Please sign in manually.");
+        router.push(buildAuthHref('/auth/signin', peekReturnTo()));
+        return;
+      }
+
+      const decodedToken: any = jwtDecode(token);
+      const clerkId: string = decodedToken.sub;
+
+      // Fallback avatar using name seed if DiceBear component didn't fire
+      const avatarUrl =
+        formData.avatarUrl ||
+        `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(formData.name || "user")}&size=128`;
+
+      // 4. Sync with backend (send college under common key variants — some APIs only map `college` / `college_name`)
+      const college = formData.collegeName.trim();
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
+        {
+          clerkId,
+          collegeName: college,
+          college,
+          college_name: college,
+          avatarUrl,
+          password: formData.password,
+          name: formData.name,
+          email: formData.email,
+          imgUrl: "",
+          phone: formData.phone || "",
+        }
+      );
+
+      if (!res.data.token) throw new Error("No token returned from backend");
+
+      // 5. Save custom JWT & redirect
+      localStorage.setItem('token', res.data.token);
+      sessionStorage.setItem('activeSession', 'true');
+      toast.success("Account created successfully!");
+      router.push(consumeReturnTo() ?? '/dashboard');
+    } catch (err: any) {
+      console.error("Post-verification sync failed:", JSON.stringify(err, null, 2));
+      const msg = err?.response?.data?.msg || err?.message || "Signup failed. Please try again.";
+      toast.error(msg);
+    } finally {
+      setIsVerifyingCode(false);
+    }
+  };
+
+
+  const handleGoogleVerification = async () => {
+    if (!authIsLoaded || !signIn) {
+      toast('Security check loading, please wait...');
+      return;
+    }
+    try {
+      const origin = window.location.origin;
+      setSsoIntentBeforeOAuth('signup');
+      const rt = peekReturnTo();
+      const callbackQs = new URLSearchParams({ intent: 'signup' });
+      if (rt) callbackQs.set('returnTo', rt);
+      const callbackPath = `/auth/sso-callback?${callbackQs.toString()}`;
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: `${origin}${callbackPath}`,
+        redirectUrlComplete: `${origin}${callbackPath}`,
+      });
+    } catch (err) {
+      console.error('SSO redirect error', err);
+      toast.error('Failed to initiate Google sign-in');
+    }
+  };
+  
+
+
+
+  if (verifying) {
+    return (
+      <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center">
+         <div className="w-full max-w-md p-8 bg-gray-900 rounded-xl border border-gray-800">
+            <h2 className="text-2xl font-bold text-white mb-4">Verify Email</h2>
+            <p className="text-gray-400 mb-6">Enter the code sent to {formData.email}</p>
+            
+            <form onSubmit={handleVerification}>
+               <input
+                 type="text"
+                 value={code}
+                 onChange={(e) =>
+                   // Strip any accidental spaces; keep original casing
+                   setCode(e.target.value.replace(/\s+/g, ''))
+                 }
+                 className="w-full bg-gray-800 text-white p-3 rounded-lg mb-4 text-center text-xl tracking-widest focus:ring-2 focus:ring-yellow-500 outline-none"
+                 placeholder="######"
+               />
+               <button 
+                 type="submit"
+                 className="w-full bg-yellow-500 text-black font-bold py-3 rounded-lg hover:bg-yellow-400 disabled:opacity-60 disabled:cursor-not-allowed"
+                 disabled={isVerifyingCode}
+               >
+                 {isVerifyingCode ? "Verifying..." : "Verify & Complete"}
+               </button>
+            </form>
+         </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -220,22 +522,37 @@ export default function SignUp() {
               <p className="text-gray-400">
                 Already have an account?{' '}
                 <Link
-                  href="/auth/signin"
+                  href={signinHref}
                   className="text-yellow-500 hover:text-yellow-400 transition"
                 >
                   Sign in
                 </Link>
               </p>
             </div>
+            <div className="mb-6">
+              <div className="flex items-center justify-center space-x-3">
+                {/* Clerk Smart CAPTCHA mount point */}
+                <div id="clerk-captcha" />
+                <button
+                  type="button"
+                  onClick={() => handleGoogleVerification()}
+                  className="flex items-center justify-center w-full max-w-xs bg-white text-black py-2 px-4 rounded-lg shadow hover:opacity-90 transition"
+                  aria-label="Sign up with Google"
+                >
+                  <FaGoogle className="mr-3" />
+                  Sign up with Google
+                </button>
+              </div>
+            </div>
 
             {/* Step 1: Account Information */}
             {currentStep === 1 && (
               <>
-                <div className="flex items-center justify-center mb-6">
+                {/* <div className="flex items-center justify-center mb-6">
                   <div className="h-px bg-gray-700 flex-1"></div>
                   <p className="mx-4 text-gray-400 text-sm">OR</p>
                   <div className="h-px bg-gray-700 flex-1"></div>
-                </div>
+                </div> */}
 
                 {/* Sign-Up Form Step 1 */}
                 <form onSubmit={handleNextStep} className="space-y-6">
@@ -291,6 +608,27 @@ export default function SignUp() {
 
                   <div className="space-y-2">
                     <label
+                      htmlFor="phone"
+                      className="block text-gray-300 text-sm font-medium"
+                    >
+                      Phone Number <span className="text-gray-500 text-xs">(Optional)</span>
+                    </label>
+                    <div className="relative">
+                      <FiPhone className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+                        placeholder="+1 (555) 123-4567"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
                       htmlFor="password"
                       className="block text-gray-300 text-sm font-medium"
                     >
@@ -330,7 +668,7 @@ export default function SignUp() {
                       className="text-gray-400 text-xs"
                     >
                       Password must be at least 8 characters long and include
-                      uppercase, lowercase, and a number.
+                      uppercase, lowercase, a number and a special character.
                     </p>
                     {passwordError && (
                       <p className="text-red-400 text-xs">
@@ -363,14 +701,19 @@ export default function SignUp() {
                     College/University Name
                   </label>
                   <CollegeSearchSelect
-                    colleges={collegesWithClubs.sort((a, b) => a.college.localeCompare(b.college))}
-                    value={formData.collegeName}
-                    onChange={(value) =>
-                      setFormData((prev) => ({ ...prev, collegeName: value }))
-                    }
-                    placeholder="Search and select your college/university"
-                    required
+                        colleges={[...collegesWithClubs].sort((a, b) => a.college.localeCompare(b.college))}
+                        value={formData.collegeName}
+                        onChange={(value) => {
+                          setFormData((prev) => ({ ...prev, collegeName: value }));
+                          // clear any previous college validation error
+                          if (value && value.trim()) setCollegeError('');
+                        }}
+                        placeholder="Search and select your college/university"
+                        required
                   />
+                      {collegeError && (
+                        <p className="text-red-400 text-xs mt-1">{collegeError}</p>
+                      )}
                 </div>
 
                 <div className="flex items-start space-x-3">
@@ -379,9 +722,7 @@ export default function SignUp() {
                     id="agreeToTerms"
                     name="agreeToTerms"
                     checked={agreeToTerms}
-                    onChange={() => {
-                      setAgree(true);
-                    }}
+                    onChange={() => setAgree((prev) => !prev)}
                     className="h-4 w-4 rounded border-gray-700 bg-gray-800 text-yellow-500 focus:ring-yellow-500 mt-0.5"
                     required
                   />
@@ -405,7 +746,7 @@ export default function SignUp() {
                     </Link>
                   </label>
                 </div>
-
+                      <div id="clerk-captcha" className="my-4"></div>
                 <div className="flex space-x-4">
                   <motion.button
                     type="button"
@@ -420,12 +761,12 @@ export default function SignUp() {
                   <motion.button
                     type="submit"
                     className={`flex-1 flex items-center justify-center py-3 px-4 rounded-lg font-medium transition duration-300 transform hover:-translate-y-1 ${
-                      isCreatingAccount || !agreeToTerms
+                      isCreatingAccount || !agreeToTerms || !formData.collegeName
                         ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                         : 'bg-yellow-500 text-black hover:bg-yellow-400'
                     }`}
                     whileTap={{ scale: isCreatingAccount ? 1 : 0.98 }}
-                    disabled={!agreeToTerms || isCreatingAccount}
+                    disabled={!agreeToTerms || isCreatingAccount || !formData.collegeName}
                   >
                     {isCreatingAccount ? (
                       <>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
+import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@/components/ui/sonner';
@@ -9,6 +10,8 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
 import { QueryProvider } from '@/providers/QueryProvider';
 import FloatingPWAInstall from '@/components/FloatingPWAInstall';
+import { ClerkKeyDebug } from '@/components/ClerkKeyDebug';
+import { ClerkProvider } from '@clerk/nextjs'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -22,6 +25,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://zynvo.social'),
   manifest: "/manifest.json",
   title:
     'Zynvo - Agentic Social Media Platform for Campus Communities | Student Network',
@@ -55,7 +59,7 @@ export const metadata: Metadata = {
       'The intelligent social platform revolutionizing how college students connect, discover events, join clubs, and build meaningful campus relationships through AI-powered networking.',
     images: [
       {
-        url: '/landing page.png',
+        url: '/titlecard.png',
         width: 1200,
         height: 630,
         alt: 'Zynvo - Agentic Social Media Platform for Students',
@@ -73,11 +77,7 @@ export const metadata: Metadata = {
   },
   category: 'Social Media',
   classification: 'Agentic Social Media Platform',
-  verification: {
-    google: 'your-google-verification-code',
-    yandex: 'your-yandex-verification-code',
-    yahoo: 'your-yahoo-verification-code',
-  },
+
   icons: {
     icon: [
       {
@@ -112,11 +112,35 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
   return (
+    <ClerkProvider
+      signInFallbackRedirectUrl="/auth/sso-callback"
+      signUpFallbackRedirectUrl="/auth/sso-callback"
+      appearance={{
+        elements: {
+          rootBox: "mx-auto",
+        },
+      }}
+    >
     <html lang="en">
+       <head />
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
       >
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-0E7B1VF3JX"
+          strategy="afterInteractive"
+        />
+        <Script id="ga" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-0E7B1VF3JX');
+          `}
+        </Script>
+        <ClerkKeyDebug />
         <ErrorBoundary>
           <QueryProvider>
             <WarmupProvider>
@@ -131,5 +155,6 @@ export default function RootLayout({
         </ErrorBoundary>
       </body>
     </html>
+    </ClerkProvider>
   );
 }

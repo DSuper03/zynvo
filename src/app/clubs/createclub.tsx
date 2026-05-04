@@ -6,7 +6,7 @@ import { X, Upload, Camera, Plus, Trash2, ChevronDown, Building } from 'lucide-r
 import { CreateClubModalProps } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
+import { toBase64, uploadImageToImageKit, compressImageToUnder2MB } from '@/lib/imgkit';
 import axios from 'axios';
 import { fetchClubsByCollege } from '@/app/api/hooks/useClubs';
 import { useRouter } from 'next/navigation';
@@ -38,6 +38,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   const [selectedExistingClub, setSelectedExistingClub] = useState<string>('');
   const [isLoadingClubs, setIsLoadingClubs] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [typeSearch, setTypeSearch] = useState('');
 
 
   useEffect(() => {
@@ -70,9 +71,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     const fetchUserCollegeAndClubs = async () => {
       if (!token) return;
       
-      // Debug environment variables
-      console.log('Backend URL:', process.env.NEXT_PUBLIC_BACKEND_URL);
-      console.log('Token available:', !!token);
+      // SECURITY: Removed console.log statements that expose sensitive data
       
       try {
         // Get user's college information
@@ -86,23 +85,12 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
         );
         
         const userData = (userResponse.data as any).user;
-        console.log('Full user response:', userResponse.data); // Debug log
-        console.log('User data:', userData); // Debug log
-        
-        // Try different possible college field names
-        const userCollege = userData?.collegeName || userData?.college || userData?.collegeId;
-        console.log('User college (collegeName):', userData?.collegeName);
-        console.log('User college (college):', userData?.college);
-        console.log('User college (collegeId):', userData?.collegeId);
-        console.log('Final user college:', userCollege);
         
         if (userCollege) {
           setUserCollege(userCollege);
           
           // Fetch existing clubs for this college
           setIsLoadingClubs(true);
-          console.log('Fetching clubs for college:', userCollege); // Debug log
-          
           // Test the API call directly first
           try {
             const testUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClubs/${encodeURIComponent(userCollege)}`;
@@ -147,7 +135,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
             setExistingClubs(clubs);
           }
         } else {
-          console.log('No college found for user');
+          
           // Add sample clubs even if no college is found
           const sampleClubs = [
             'Computer Science Club',
@@ -185,12 +173,22 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImg(file);
+      const maxBytes = 2 * 1024 * 1024;
+      let processed = file;
+      if (file.size > maxBytes) {
+        processed = await compressImageToUnder2MB(file);
+        if (processed.size > maxBytes) {
+          toast('Could not compress image under 2 MB. Try a smaller image.');
+          return;
+        }
+      }
+      setImg(processed);
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewImage(reader.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(processed);
+      e.currentTarget.value = '';
     }
   };
 
@@ -222,7 +220,16 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
       let image: string;
       
       if (img) {
-        image = await uploadImageToImageKit(await toBase64(img), img.name);
+        const maxBytes = 2 * 1024 * 1024;
+        let toUpload = img;
+        if (img.size > maxBytes) {
+          toUpload = await compressImageToUnder2MB(img);
+          if (toUpload.size > maxBytes) {
+            toast('Could not compress image under 2 MB. Try a smaller image.');
+            return;
+          }
+        }
+        image = await uploadImageToImageKit(await toBase64(toUpload), toUpload.name, '/clubs');
       } else {
         toast('please upload a logo for your club');
         return;
@@ -245,10 +252,10 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
       });
 
       const msg = upload?.data;
-      if (upload.status == 200) {
+      if (upload.status >= 200 && upload.status < 300) {
         toast(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
         onClose();
-      } else if(upload.status !== 200) {
+      } else {
         toast(msg.msg);
       }
     } catch (error: any) {
@@ -529,6 +536,17 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
             >
               Category/Type*
             </label>
+            {/* Search box for club type */}
+            <input
+              type="text"
+              placeholder="Search for a type..."
+              value={typeSearch}
+              onChange={e => {
+                const value = e.target.value;
+                setTypeSearch(value);
+              }}
+              className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none mb-2"
+            />
             <select
               id="type"
               name="type"
@@ -537,15 +555,40 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
               onChange={handleChange}
               className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
             >
-              <option value="" disabled>
+              <option value="" disabled hidden>
                 Select a type
               </option>
-              <option value="tech">Technology</option>
-              <option value="cultural">Cultural</option>
-              <option value="business">Business </option>
-              <option value="social">Social</option>
-              <option value="literary">Literature</option>
-              <option value="design">Design</option>
+              {/* Filter types based on search */}
+              {[
+                { label: "Open Mic", value: "open_mic"},
+                { label: "Technology", value: "tech" },
+                { label: "Quiz", value: "Quiz" },
+                { label: "Sports", value: "Sports" },
+                { label: "Debate", value: "Debate" },
+                { label: "Drama", value: "Drama" },
+                { label: "Music", value: "Music" },
+                { label: "Theatre", value: "Theatre" },
+                { label: "Art", value: "Art" },
+                { label: "Crafts", value: "Crafts" },
+                { label: "Food", value: "Food" },
+                { label: "Fashion", value: "Fashion" },
+                { label: "Photography", value: "Photography" },
+                { label: "Other", value: "Other" },
+                { label: "Cultural", value: "cultural" },
+                { label: "Business", value: "business" },
+                { label: "Social", value: "social" },
+                { label: "Literature", value: "literary" },
+                { label: "Design", value: "design" }
+              ]
+                .filter(opt =>
+                  !typeSearch ||
+                  opt.label.toLowerCase().includes(typeSearch.toLowerCase())
+                )
+                .map(opt => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
             </select>
           </div>
 

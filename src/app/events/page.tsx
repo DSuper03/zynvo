@@ -4,11 +4,18 @@ import { useEffect, useState } from 'react';
 import { Search, MapPin, Clock, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import { eventData } from '@/types/global-Interface';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import CreateEventButton from './components/createEventButton';
 import CreateEventModal from './components/EventCreationModel';
 import EventCard from './components/EventCard';
 import { Button } from '@/components/ui/button';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Badge } from '@/components/ui/badge';
+import NoTokenModal from '@/components/modals/remindModal';
+import { usePathname, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { buildAuthHref } from '@/lib/authReturnTo';
+import { EmptyState, ErrorState } from '@/components/feedback';
 
 
 interface apiRespEvents {
@@ -91,16 +98,46 @@ export default function ZynvoEventsPage() {
   const [userAttendedEventIds, setUserAttendedEventIds] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [token, setToken] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [hasTokenForModal, setHasTokenForModal] = useState(false);
+  const [fetchNonce, setFetchNonce] = useState(0);
+
+  const router = useRouter();
+  const pathname = usePathname();
 
   // Fetch token on component mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
+      const session = sessionStorage.getItem('activeSession');
+      
       if (storedToken) {
         setToken(storedToken);
+        setHasTokenForModal(true);
+      } else {
+        // No token - user needs to sign up
+        setHasTokenForModal(false);
+        setIsAuthModalOpen(true);
+        return;
+      }
+      
+      if (session !== 'true') {
+        // Has token but no session - user needs to sign in
+        toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () =>
+              router.push(buildAuthHref('/auth/signin', pathname)),
+          },
+        });
+        setHasTokenForModal(true);
+        setIsAuthModalOpen(true);
+        return;
       }
     }
-  }, []);
+  }, [router, pathname]);
 
   // Fetch user data and attended events
   useEffect(() => {
@@ -168,7 +205,16 @@ export default function ZynvoEventsPage() {
         if (!isMounted) return;
 
         console.error('Error fetching events:', err);
-
+        const message =
+          isAxiosError(err) && err.response?.data
+            ? (typeof (err.response.data as { msg?: string }).msg === 'string'
+                ? (err.response.data as { msg: string }).msg
+                : null)
+            : null;
+        setError(
+          message ||
+            'Could not load events. Check your connection and try again.'
+        );
         setEvents([]);
       } finally {
         if (isMounted) {
@@ -185,12 +231,44 @@ export default function ZynvoEventsPage() {
     return () => {
       isMounted = false;
     };
-  }, [currentPage]);
+  }, [currentPage, fetchNonce]);
 
   // Helper function to check if user is attending an event
   const isUserAttendingEvent = (event: eventData): boolean => {
     if (!currentUser) return false;
     return userAttendedEventIds.includes(event.id);
+  };
+
+  // Helper function to get events for a specific date
+  const getEventsForDate = (date: Date): eventData[] => {
+    if (!events) return [];
+    
+    const targetDate = date.toISOString().split('T')[0]; // Get YYYY-MM-DD format
+    
+    return events.filter(event => {
+      // Check endDate
+      if (event.endDate) {
+        const eventDate = new Date(event.endDate);
+        // Check if the date is valid
+        if (!isNaN(eventDate.getTime())) {
+          if (eventDate.toISOString().split('T')[0] === targetDate) {
+            return true;
+          }
+        }
+      }
+
+      // Check startDate if available (from the event object or as a property)
+      if (event.startDate) {
+        const eventStartDate = new Date(event.startDate);
+        if (!isNaN(eventStartDate.getTime())) {
+          if (eventStartDate.toISOString().split('T')[0] === targetDate) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    });
   };
 
   // Replace the filteredEvents computation with name-only search
@@ -205,9 +283,7 @@ export default function ZynvoEventsPage() {
   const handleRetry = () => {
     setError(null);
     setEvents(null);
-    setIsLoading(true);
-
-    setCurrentPage((prev) => (prev === 1 ? 1 : prev));
+    setFetchNonce((n) => n + 1);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -250,12 +326,24 @@ export default function ZynvoEventsPage() {
           )}
         </div>
 
-        {/* Create Event Button */}
+        {/* Create Event Button and Check Event Dates Button */}
         <div className="flex justify-between items-center mb-8">
           {isLoading ? (
-            <div className="h-10 w-32 bg-gray-800 rounded animate-pulse" />
+            <div className="flex gap-4">
+              <div className="h-10 w-32 bg-gray-800 rounded animate-pulse" />
+              <div className="h-10 w-40 bg-gray-800 rounded animate-pulse" />
+            </div>
           ) : (
-            <CreateEventButton onClick={() => setIsModalOpen(true)} />
+            <div className="flex gap-4">
+              <CreateEventButton onClick={() => setIsModalOpen(true)} />
+              <Button
+                onClick={() => setIsCalendarModalOpen(true)}
+                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <Calendar className="w-4 h-4" />
+                Check Event Dates
+              </Button>
+            </div>
           )}
         </div>
 
@@ -264,6 +352,126 @@ export default function ZynvoEventsPage() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
         />
+
+        {/* Calendar Modal */}
+        {isCalendarModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Event Calendar
+                </h2>
+                <Button
+                  onClick={() => setIsCalendarModalOpen(false)}
+                  className="text-gray-400 hover:text-white hover:bg-gray-700 p-2 rounded-lg"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <div className="mb-6">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  className="rounded-md border-0 bg-transparent"
+                  classNames={{
+                    day: "text-white hover:bg-gray-700",
+                    day_selected: "bg-yellow-500 text-black hover:bg-yellow-400",
+                    day_today: "bg-gray-700 text-white",
+                    day_outside: "text-gray-500",
+                    day_disabled: "text-gray-600",
+                    day_range_middle: "bg-gray-600 text-white",
+                    day_range_start: "bg-yellow-500 text-black",
+                    day_range_end: "bg-yellow-500 text-black",
+                    caption: "text-white",
+                    caption_label: "text-white",
+                    nav_button: "text-white hover:bg-gray-700",
+                    nav_button_previous: "text-white hover:bg-gray-700",
+                    nav_button_next: "text-white hover:bg-gray-700",
+                    table: "text-white",
+                    head_row: "text-white",
+                    head_cell: "text-gray-300",
+                    row: "text-white",
+                    cell: "text-white",
+                    button: "text-white hover:bg-gray-700",
+                  }}
+                />
+              </div>
+
+              {/* Events for Selected Date */}
+              {selectedDate && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium text-white mb-3">
+                    Events on {selectedDate.toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </h3>
+                  
+                  {(() => {
+                    const eventsForDate = getEventsForDate(selectedDate);
+                    return eventsForDate.length > 0 ? (
+                      <div className="space-y-3">
+                        {eventsForDate.map((event) => (
+                          <div key={event.id} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h4 className="text-white font-medium mb-2">{event.EventName}</h4>
+                                <p className="text-gray-300 text-sm mb-3 line-clamp-2">
+                                  {event.description}
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  {event.endDate && (
+                                    <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-200 border-yellow-500/30">
+                                      <Clock className="w-3 h-3 mr-1" />
+                                      {new Date(event.endDate).toLocaleTimeString('en-US', { 
+                                        hour: '2-digit', 
+                                        minute: '2-digit' 
+                                      })}
+                                    </Badge>
+                                  )}
+                                  {event.university && (
+                                    <Badge variant="secondary" className="bg-blue-500/20 text-blue-200 border-blue-500/30">
+                                      <MapPin className="w-3 h-3 mr-1" />
+                                      {event.university}
+                                    </Badge>
+                                  )}
+                                  {event.clubName && (
+                                    <Badge variant="outline" className="border-gray-500 text-gray-300">
+                                      {event.clubName}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Calendar className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+                        <p className="text-gray-400">No events scheduled for this date</p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2">
+                <Button
+                  onClick={() => setIsCalendarModalOpen(false)}
+                  className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Search and Filter Bar */}
         {isLoading ? (
@@ -295,33 +503,12 @@ export default function ZynvoEventsPage() {
           {isLoading ? (
             <EventsGridSkeleton />
           ) : error ? (
-            <div className="text-center py-12">
-              <div className="text-red-400 mb-4">
-                <svg
-                  className="w-16 h-16 mx-auto mb-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-white mb-2">
-                Error Loading Events
-              </h3>
-              <p className="text-gray-400 mb-4 max-w-md mx-auto">{error}</p>
-              <Button
-                onClick={handleRetry}
-                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-6 py-2 rounded-lg font-medium transition-colors"
-              >
-                Try Again
-              </Button>
-            </div>
+            <ErrorState
+              title="Could not load events"
+              message={error}
+              onRetry={handleRetry}
+              retryLabel="Try again"
+            />
           ) : filteredEvents.length > 0 ? (
             // Pass the filtered events to EventCard
             <EventCard 
@@ -332,27 +519,29 @@ export default function ZynvoEventsPage() {
               isUserAttendingEvent={isUserAttendingEvent}
             />
           ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <Calendar className="w-16 h-16 mx-auto mb-4" />
-              </div>
-              <h3 className="text-lg font-medium text-white mb-2">
-                No Events Found
-              </h3>
-              <p className="text-gray-400 max-w-md mx-auto">
-                {searchTerm
-                  ? `No events match your search "${searchTerm}". Try different keywords.`
-                  : 'No events available at the moment. Check back later!'}
-              </p>
-              {searchTerm && (
+            <EmptyState
+              icon={Calendar}
+              title={
+                searchTerm.trim()
+                  ? 'No events match your search'
+                  : 'No events to show yet'
+              }
+              description={
+                searchTerm.trim()
+                  ? `Nothing matches “${searchTerm.trim()}”. Try different keywords or clear the search.`
+                  : 'New campus events will appear here when organizers publish them.'
+              }
+            >
+              {searchTerm.trim() ? (
                 <Button
+                  type="button"
                   onClick={() => setSearchTerm('')}
-                  className="mt-4 bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors"
+                  className="min-h-11 bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-6 font-medium"
                 >
-                  Clear Search
+                  Clear search
                 </Button>
-              )}
-            </div>
+              ) : null}
+            </EmptyState>
           )}
         </div>
 
@@ -414,6 +603,8 @@ export default function ZynvoEventsPage() {
           </div>
         )}
       </main>
+      
+      <NoTokenModal isOpen={isAuthModalOpen} onOpenChange={setIsAuthModalOpen} hasToken={hasTokenForModal} />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { collegesWithClubs } from '@/components/colleges/college'; // Import colleges data
 
 export default function CreatePostModal() {
@@ -81,20 +82,36 @@ export default function CreatePostModal() {
 
   const handleImageUpload = (e: any) => {
     if (images.length >= 4) {
-      alert('Maximum 4 images allowed');
+      toast('Maximum 4 images allowed');
       return;
     }
 
-    const files = Array.from(e.target.files);
-    if (files.length > 0) {
-      setImages([...images, ...files]);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-      // Create preview URLs
-      const newPreviewUrls = files.map((file: any) =>
-        URL.createObjectURL(file)
+    const MAX_BYTES = 2 * 1024 * 1024;
+
+    (async () => {
+      const { compressImageToUnder2MB } = await import('@/lib/imgkit');
+      const processed = await Promise.all(
+        files.map(async (f: any) => {
+          if (f.size > MAX_BYTES) {
+            const c = await compressImageToUnder2MB(f);
+            return c.size <= MAX_BYTES ? c : null;
+          }
+          return f;
+        })
       );
+      const valid = processed.filter(Boolean) as File[];
+      if (valid.length === 0) {
+        toast('Could not compress images under 2 MB. Try smaller images.');
+        return;
+      }
+      setImages([...images, ...valid]);
+      const newPreviewUrls = valid.map((file: any) => URL.createObjectURL(file));
       setPreviewUrls([...previewUrls, ...newPreviewUrls]);
-    }
+      e.target.value = '';
+    })();
   };
 
   const removeImage = (index: any) => {
@@ -115,15 +132,8 @@ export default function CreatePostModal() {
     if (e) e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
+    // Simulate API call — DEBUG: console removed for production performance
     setTimeout(() => {
-      console.log({
-        postText,
-        selectedClub,
-        selectedCollege,
-        images,
-      });
-
       // Reset form
       setPostText('');
       setSelectedClub('');
@@ -133,7 +143,7 @@ export default function CreatePostModal() {
       setIsLoading(false);
 
       // Success message
-      alert('Post created successfully!');
+      toast.success('Post created successfully!');
     }, 1500);
   };
 

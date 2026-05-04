@@ -5,12 +5,17 @@ import {
   BarChart2,
   User,
   X,
-  BellDotIcon,
   Menu,
   School,
+  UserCheck,
+  Settings,
+  Building,
+  Lock,
 } from 'lucide-react';
+import { NotificationDropdown } from '@/components/notifications';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -26,13 +31,15 @@ import CollegeSearchSelect from '@/components/colleges/collegeSelect';
 import { FaSchool } from 'react-icons/fa';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import EventBadgeCard from '@/components/ticket';
-import * as htmlToImage from 'html-to-image';
 import TextWithLinks from '@/components/TextWithLinks';
+
 
 interface Event {
   EventName: string;
   startDate: string;
   id: string;
+  passId?: string | null;
+  
 }
 
 export interface UserData {
@@ -51,6 +58,7 @@ export interface UserData {
   twitter: string | null;
   instagram: string | null;
   linkedin: string | null;
+  clubId: string | null;
 }
 export interface ApiResponse {
   user: {
@@ -69,7 +77,10 @@ export interface ApiResponse {
     twitter: string | null;
     instagram: string | null;
     linkedin: string | null;
+    clubId: string | null;
     eventAttended: {
+      passId?: string | null;
+      uniquePassId?: string | null;
       event: {
         id: string;
         EventName: string;
@@ -81,6 +92,11 @@ export interface ApiResponse {
       description: string;
     }[];
   };
+}
+
+interface isAdminResponse {
+  msg : string;
+  founder : string;
 }
 
 // Add these new components and styles to your dashboard
@@ -564,6 +580,9 @@ export default function ZynvoDashboard() {
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [ticketData, setTicketData] = useState<any>({});
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
+  const [isQrGenerating, setIsQrGenerating] = useState(false);
+  const [qrPreviewOpen, setQrPreviewOpen] = useState(false);
   const badgeRef = useRef<HTMLDivElement>(null);
 
   // NEW: compact UI controls
@@ -571,6 +590,7 @@ export default function ZynvoDashboard() {
   const [viewAllPosts, setViewAllPosts] = useState(false);
   const [viewAllEvents, setViewAllEvents] = useState(false);
   const [showAllProfileTags, setShowAllProfileTags] = useState(false);
+  const [founder , setFounder] = useState<string>('false')
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -644,6 +664,7 @@ export default function ZynvoDashboard() {
               twitter,
               instagram,
               linkedin,
+              clubId
             } = response.data.user;
 
             const events =
@@ -651,6 +672,7 @@ export default function ZynvoDashboard() {
                 EventName: eve.event.EventName,
                 startDate: eve.event.startDate,
                 id: eve.event.id,
+                passId: eve.uniquePassId ?? eve.passId ?? null,
               })) || [];
 
             setUserData({
@@ -669,6 +691,7 @@ export default function ZynvoDashboard() {
               twitter,
               instagram,
               linkedin,
+              clubId
             });
             setId(response.data.user.id);
             setPosts(response.data.user.CreatePost);
@@ -688,12 +711,12 @@ export default function ZynvoDashboard() {
             // Set selected predefined tags
             setSelectedPredefinedTags(tags || []);
           } else {
-            alert('Error fetching in details');
+            toast.error('Error fetching user details');
             navigate.push('/auth/signin');
           }
         } catch (error) {
           console.error('API Error:', error);
-          alert('Error fetching in details');
+          toast.error('Error fetching user details');
           navigate.push('/auth/signin');
         }
       } catch (error) {
@@ -705,6 +728,43 @@ export default function ZynvoDashboard() {
 
     fetchUserData();
   }, [isClient, navigate, update,token]);
+
+
+
+
+  useEffect(()=> {
+   if(!isClient) return;
+
+   if(!token || !sessionStorage.getItem('activeSession') || sessionStorage.getItem('activeSession') != "true") {
+    toast("please login")
+    return;
+   }
+
+   if(sessionStorage.getItem('founder')) {
+    setFounder(sessionStorage.getItem('founder') as string);
+    return;
+   } 
+
+   const fetch = async() => {
+     const isfounder = await axios.get<isAdminResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isClubAdmin`
+      , {
+        headers : {
+          authorization : `Bearer ${token}`
+        }
+      }
+     )
+     if(isfounder.data.founder) {
+      sessionStorage.setItem('founder', isfounder.data.founder )
+      setFounder(isfounder.data.founder);
+     } else {
+      console.log(isfounder.data.msg);
+     }
+     return;
+   }
+
+   // add this in loader as well ki agar ye set nhi hai toh keep the loader on.
+   fetch()
+  },[isClient])
 
   const handleProfileFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -762,32 +822,109 @@ export default function ZynvoDashboard() {
     setUpdate(true);
   };
 
-  const openTicketModal = async (eventId: string) => {
+  const buildPassUrl = (passId: string) => {
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/verify-pass/${encodeURIComponent(passId)}`;
+    }
+    return `/verify-pass/${encodeURIComponent(passId)}`;
+  };
+
+  const generateQrCode = async (value: string | null | undefined) => {
+    if (!value) {
+      setQrCodeDataUrl(null);
+      setIsQrGenerating(false);
+      return;
+    }
+    setIsQrGenerating(true);
+    try {
+      const QRCode = await import('qrcode');
+      const toDataURL =
+        (QRCode as any).toDataURL || (QRCode as any).default?.toDataURL;
+      if (!toDataURL) {
+        throw new Error('QR toDataURL not available');
+      }
+      const dataUrl = await toDataURL(value, {
+        margin: 1,
+        width: 160,
+      });
+      setQrCodeDataUrl(dataUrl);
+    } catch (e: any) {
+      console.error('QR generation failed', e);
+      toast(e?.message || 'Failed to generate QR code. Please try again.');
+      setQrCodeDataUrl(null);
+    } finally {
+      setIsQrGenerating(false);
+    }
+  };
+
+  const openTicketModal = async (eventId: string, passId?: string | null) => {
+    if (!passId) {
+      toast('Pass ID not available for this event yet.');
+      return;
+    }
     try {
       setSelectedEventId(eventId);
+      setTicketData({});
+      setShowTicketModal(true);
+      setQrPreviewOpen(false);
+      const qrValue = buildPassUrl(passId);
+      await generateQrCode(qrValue);
       const safeId = encodeURIComponent(eventId);
-      const url = `/api/proxy/events/event-details?id=${safeId}`;
+      const base = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
+      const url = base
+        ? `${base}/api/v1/events/event-details?id=${safeId}`
+        : `/api/v1/events/event-details?id=${safeId}`;
       const headers: Record<string, string> = {};
       if (typeof window !== 'undefined') {
         const tok = localStorage.getItem('token');
         if (tok) headers['authorization'] = `Bearer ${tok}`;
       }
-      const resp = await axios.get<{
-        data: {
-          eventName: string;
-          clubName: string;
-          collegeName: string;
-          startDate: Date;
-          profilePic: string;
-        };
-      }>(url, { headers });
-      if (resp && resp.data && resp.data.data) {
-        const d = resp.data.data;
+      let payload: any = null;
+      try {
+        const resp = await axios.get<{ data: any }>(url, { headers });
+        payload = resp?.data?.data ?? null;
+      } catch (err) {
+        // fall back to local event info
+      }
+
+      const fallback = userData?.events?.find((e) => e.id === eventId);
+      const eventName =
+        payload?.eventName ??
+        payload?.EventName ??
+        payload?.event?.eventName ??
+        payload?.event?.EventName ??
+        fallback?.EventName ??
+        'Event';
+      const clubName =
+        payload?.clubName ??
+        payload?.club?.name ??
+        payload?.event?.clubName ??
+        userData?.clubName ??
+        '';
+      const collegeName =
+        payload?.collegeName ??
+        payload?.university ??
+        payload?.event?.collegeName ??
+        userData?.collegeName ??
+        '';
+      const startDateRaw = payload?.startDate ?? payload?.event?.startDate ?? fallback?.startDate;
+      const profilePic =
+        payload?.profilePic ??
+        payload?.profileAvatar ??
+        payload?.event?.profilePic ??
+        userData?.profileAvatar ??
+        '';
+
+      if (eventName || startDateRaw || clubName || collegeName) {
         setTicketData({
-          ...d,
-          startDate: new Date(d.startDate).toLocaleString(),
+          eventName,
+          clubName,
+          collegeName,
+          startDate: startDateRaw ? new Date(startDateRaw).toLocaleString() : '',
+          profilePic,
         });
-        setShowTicketModal(true);
+      } else {
+        toast('Unable to load ticket');
       }
     } catch (e: any) {
       console.error('Ticket fetch failed', e);
@@ -797,6 +934,8 @@ export default function ZynvoDashboard() {
 
   const downloadTicket = async () => {
     if (badgeRef.current) {
+      // Lazy load html-to-image only when needed
+      const htmlToImage = await import('html-to-image');
       const dataUrl = await htmlToImage.toPng(badgeRef.current, {
         cacheBust: true,
         skipFonts: false,
@@ -853,9 +992,7 @@ export default function ZynvoDashboard() {
         {/* Dashboard Header - Mobile Responsive */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3 sm:gap-4">
           <div className="flex flex-wrap justify-end gap-2 sm:gap-3 w-full sm:w-auto self-end sm:self-auto">
-            <Button className="bg-yellow-500 h-8 w-8 sm:h-10 sm:w-10 rounded-full grid place-items-center flex-shrink-0">
-              <BellDotIcon className="text-black w-4 h-4 sm:w-5 sm:h-5" />
-            </Button>
+            <NotificationDropdown />
           </div>
         </div>
 
@@ -889,31 +1026,90 @@ export default function ZynvoDashboard() {
             </div>
 
             <div className="pt-8 sm:pt-10 md:pt-12 lg:pt-14 xl:pt-16">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 sm:mb-1 gap-2 sm:gap-0">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-sans bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent leading-tight">
-                  {userData.name}
-                </h1>
+              {/* Name Section */}
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-sans bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent leading-tight mb-3 sm:mb-4">
+                {userData.name}
+              </h1>
 
-                {userData.clubName ? (
-                  <HoverBorderGradient
-                    containerClassName="rounded-full"
-                    as="button"
-                    className="dark:bg-black bg-yellow-400 text-black dark:text-white flex items-center space-x-2 px-3 py-1 text-xs sm:text-sm self-start sm:self-auto"
-                  >
-                    <p className="truncate max-w-[120px] sm:max-w-none"> {userData.clubName} </p>
-                  </HoverBorderGradient>
-                ) : (
-                  <div className="bg-gray-800 border border-gray-600 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-gray-700 transition-colors"
-                       onClick={() => navigate.push('/clubs')}>
-                    <p className="text-gray-300 text-xs sm:text-sm">
-                      You haven't joined any club yet
-                    </p>
-                    <p className="text-yellow-400 text-xs font-medium mt-1 hover:text-yellow-300 transition-colors">
-                      Join fast!
-                    </p>
+              {/* Club Section - Mobile Responsive */}
+              {userData.clubName ? (
+                <div className="mb-4 sm:mb-5">
+                  {/* Club Name Badge with Reset Password Button */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <Link href={`/clubs/${userData.clubId}`}>
+                      <div className="inline-flex items-center gap-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/50 text-yellow-400 px-4 py-2 rounded-full transition-all duration-200 hover:scale-105 cursor-pointer">
+                        <Building className="w-4 h-4 flex-shrink-0" />
+                        <p className="text-sm sm:text-base font-medium truncate max-w-[200px] sm:max-w-none">
+                          {userData.clubName}
+                        </p>
+                      </div>
+                    </Link>
+                    <Button
+                      onClick={() => navigate.push('/reset-password')}
+                      variant="ghost"
+                      size="icon"
+                      className="h-12 w-12 rounded-full bg-gray-800/50 hover:bg-gray-800 border border-neutral-300 hover:border-yellow-400/50 text-gray-400 hover:text-yellow-400 transition-all duration-200"
+                      aria-label="Reset Password"
+                    >
+                      <Lock className="w-4 h-4" />
+                    </Button>
                   </div>
-                )}
-              </div>
+
+                  {/* Action Buttons - Stack on Mobile */}
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3">
+                    <Button
+                      onClick={async () => {
+                        try {
+                          const leave = await axios.put<any>(
+                            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/leaveClub`,
+                            {
+                              clubId: userData.clubId,
+                              clubname: userData.clubName,
+                            },
+                            {
+                              headers: {
+                                authorization: `Bearer ${token}`,
+                              },
+                            }
+                          );
+                          toast.success(leave.data.message || leave.data.msg || 'Successfully left the club');
+                          setTimeout(() => navigate.refresh(), 1000);
+                        } catch (error: any) {
+                          toast.error(error.response?.data?.message || error.response?.data?.msg || 'Error leaving club');
+                        }
+                      }}
+                      variant="outline"
+                      className="w-full sm:w-auto bg-red-500/10 hover:bg-red-500/20 border-red-500/50 text-red-400 hover:text-red-300 font-medium py-2 transition-all"
+                    >
+                      <UserCheck className="w-4 h-4 mr-2" />
+                      Leave Club
+                    </Button>
+
+                    {founder === 'true' && (
+                      <Button
+                        onClick={() => navigate.push(`/admin/${userData.clubId}`)}
+                        variant="outline"
+                        className="w-full sm:w-auto bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/50 text-blue-400 hover:text-blue-300 font-medium py-2 transition-all"
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        Admin Controls
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div 
+                  className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-center cursor-pointer hover:bg-gray-700 transition-colors mb-4"
+                  onClick={() => navigate.push('/clubs')}
+                >
+                  <p className="text-gray-300 text-sm sm:text-base">
+                    You haven't joined any club yet
+                  </p>
+                  <p className="text-yellow-400 text-xs sm:text-sm font-medium mt-1 hover:text-yellow-300 transition-colors">
+                    Join fast! →
+                  </p>
+                </div>
+              )}
               <p className="text-gray-100 mb-3 text-sm sm:text-base font-serif line-clamp-2 leading-relaxed">
                 {userData.bio}
               </p>
@@ -1295,17 +1491,29 @@ export default function ZynvoDashboard() {
                             <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
                               Attended
                             </Badge>
+                            <span className="text-[10px] sm:text-xs text-gray-400">
+                              Pass ID:{' '}
+                              <span className="font-mono text-gray-200">
+                                {event.passId || '—'}
+                              </span>
+                            </span>
                           </div>
                           <h4 className="text-gray-200 font-medium text-xs sm:text-sm truncate leading-relaxed">
                             {event.EventName}
                           </h4>
-                          <p className="text-xs text-gray-400 mt-1">
-                            {new Date(event.startDate).toLocaleDateString()}
-                          </p>
+                          {/* <p className="text-xs text-gray-400 mt-1">
+                            {new Date(event.startDate).toLocaleString('default', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p> */}
                         </div>
                         <div className="ml-2 flex-shrink-0 flex items-center gap-2">
                           <button
-                            onClick={() => openTicketModal(event.id)}
+                            onClick={() => openTicketModal(event.id, event.passId)}
                             className="text-[10px] sm:text-xs px-2 py-1 rounded-md bg-yellow-400 text-gray-900 hover:bg-yellow-300"
                           >
                             View Ticket
@@ -1347,7 +1555,11 @@ export default function ZynvoDashboard() {
             <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800">
               <div className="text-sm font-semibold text-gray-900 dark:text-white">Your Ticket</div>
               <button
-                onClick={() => setShowTicketModal(false)}
+                onClick={() => {
+                  setShowTicketModal(false);
+                  setQrPreviewOpen(false);
+                  setIsQrGenerating(false);
+                }}
                 className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
                 ✕
@@ -1361,8 +1573,11 @@ export default function ZynvoDashboard() {
                   collegeName={ticketData.collegeName || ''}
                   clubName={ticketData.clubName || ''}
                   profileImage={ticketData.profilePic || ''}
-                  qrCodeImage={selectedEventId ? `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://zynvo.social/verify-event/${selectedEventId}` : undefined}
-                  style={{ backgroundColor: '#1e293b', textColor: 'white', overlayOpacity: 0.6 }}
+                  qrCodeImage={qrCodeDataUrl || undefined}
+                  onQrClick={qrCodeDataUrl ? () => setQrPreviewOpen(true) : undefined}
+                  isQrLoading={isQrGenerating}
+                  
+                 
                 />
               </div>
               <div className="mt-3 flex justify-end">
@@ -1370,6 +1585,30 @@ export default function ZynvoDashboard() {
                   Download
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {qrPreviewOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4">
+          <div className="bg-white dark:bg-neutral-950 rounded-2xl w-full max-w-sm border border-neutral-800 shadow-xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800">
+              <div className="text-sm font-semibold text-gray-900 dark:text-white">QR Code</div>
+              <button
+                onClick={() => setQrPreviewOpen(false)}
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                aria-label="Close QR Code preview"
+              >
+                X
+              </button>
+            </div>
+            <div className="p-4 flex items-center justify-center">
+              {qrCodeDataUrl ? (
+                <img src={qrCodeDataUrl} alt="QR Code" className="h-64 w-64" />
+              ) : (
+                <div className="text-sm text-gray-500">QR code not available</div>
+              )}
             </div>
           </div>
         </div>

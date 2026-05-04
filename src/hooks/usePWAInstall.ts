@@ -78,14 +78,12 @@ export const usePWAInstall = () => {
       const { outcome } = await deferredPrompt.userChoice;
       
       if (outcome === 'accepted') {
-        console.log('User accepted the install prompt');
         setIsInstalled(true);
         setIsInstallable(false);
         setDeferredPrompt(null);
         toast.success('🎉 Zynvo app installed successfully! You can now access it from your home screen.');
         return true;
       } else {
-        console.log('User dismissed the install prompt');
         toast.info('You can install Zynvo anytime from your browser menu.');
         return false;
       }

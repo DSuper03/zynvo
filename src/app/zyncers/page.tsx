@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -189,6 +189,8 @@ export default function UserSearchPage() {
   const [token, setToken] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  // PERFORMANCE: Ref to clear debounce timeout on unmount and when query changes (prevents leak + duplicate calls)
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -275,14 +277,10 @@ export default function UserSearchPage() {
         setSearchResults(data.users || []);
       } else if (response.status === 404) {
         setSearchResults([]);
-        console.log('No users found with that name');
       } else {
-        console.log('Error searching users');
         setSearchResults([]);
       }
     } catch (error) {
-      console.error('Search error:', error);
-      console.log('Network error occurred');
       setSearchResults([]);
     } finally {
       setIsSearching(false);
@@ -293,13 +291,19 @@ export default function UserSearchPage() {
     const query = e.target.value;
     setSearchQuery(query);
 
-    // Debounced search
-    const timeoutId = setTimeout(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(() => {
       handleSearch(query);
+      searchTimeoutRef.current = null;
     }, 500);
-
-    return () => clearTimeout(timeoutId);
   };
+
+  // PERFORMANCE: Clear debounce timeout on unmount to avoid setState after unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, []);
 
   const handleUserClick = (userId: string) => {
     // Just for the expand functionality - no navigation yet

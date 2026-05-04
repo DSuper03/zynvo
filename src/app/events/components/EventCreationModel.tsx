@@ -28,13 +28,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { EventFormData } from '@/types/global-Interface';
-import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
+import { toBase64, uploadImageToImageKit, compressImageToUnder2MB } from '@/lib/imgkit';
 import { toast } from 'sonner';
 import axios from 'axios';
 import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
 import { stringify } from 'querystring';
 import { useRouter } from 'next/navigation';
+import AchievementUnlockModal from '@/components/AchievementUnlockModal';
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -46,6 +47,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 }) => {
   const [token, setToken] = useState('');
   const [img, setImg] = useState<File | null>(null);
+  const [qrCodeImg, setQrCodeImg] = useState<File | null>(null);
+  const [qrCodePreviewUrl, setQrCodePreviewUrl] = useState('');
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<EventFormData>({
     eventMode: '',
@@ -67,14 +70,32 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     prizes: '',
     contactEmail: '',
     contactPhone: '',
+    form: '',
+    whatsappLink: '',
+    isPaidEvent: false,
+    paymentQRCode: '',
+    paymentAmount: 0,
   });
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
- const [lockedUniversity, setLockedUniversity] = useState<string>('');
- const [clubName, setClubName] = useState<string>('');
+  const [lockedUniversity, setLockedUniversity] = useState<string>('');
+  const [clubName, setClubName] = useState<string>('');
+  const [eventCount, setEventCount] = useState(0);
+  const [showAchievementModal, setShowAchievementModal] = useState(false);
+  const [unlockedBadge, setUnlockedBadge] = useState<{ name: string; count: number; description: string } | null>(null);
+  const [closeAfterAchievement, setCloseAfterAchievement] = useState(false);
+
+  // Helper function to get today's date in YYYY-MM-DD format
+  const getTodayDateString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
   useEffect(() => {
     const tok = localStorage.getItem('token');
     if (tok) setToken(tok);
@@ -117,6 +138,19 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         setClubName(clubName);
          
         }
+        
+        // Fetch event count for this founder
+        try {
+          const eventRes = await axios.get<{ count: number }>(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/founder-event-count`,
+            {
+              headers: { authorization: `Bearer ${token}` },
+            }
+          );
+          setEventCount(eventRes.data?.count || 0);
+        } catch (e) {
+          console.log('Could not fetch event count');
+        }
       } catch (e) {
         // ignore; backend will still validate
       }
@@ -131,16 +165,46 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev: any) => ({ ...prev, [name]: value }));
-
-    // Clear error when field is edited
-    if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
+    setFormData((prev: any) => {
+      const updated = { ...prev, [name]: value };
+      
+      // Validate dates in real-time
+      const newErrors: Record<string, string> = { ...errors };
+      
+      // Validate event end date vs start date
+      if (name === 'eventStartDate' || name === 'eventEndDate') {
+        if (updated.eventStartDate && updated.eventEndDate) {
+          const startDate = new Date(updated.eventStartDate);
+          const endDate = new Date(updated.eventEndDate);
+          if (endDate < startDate) {
+            newErrors.eventEndDate = 'End date cannot be before start date';
+          } else {
+            delete newErrors.eventEndDate;
+          }
+        }
+      }
+      
+      // Validate application end date vs start date
+      if (name === 'applicationStartDate' || name === 'applicationEndDate') {
+        if (updated.applicationStartDate && updated.applicationEndDate) {
+          const appStartDate = new Date(updated.applicationStartDate);
+          const appEndDate = new Date(updated.applicationEndDate);
+          if (appEndDate < appStartDate) {
+            newErrors.applicationEndDate = 'Application end date cannot be before start date';
+          } else {
+            delete newErrors.applicationEndDate;
+          }
+        }
+      }
+      
+      // Clear error when field is edited (only if validation passes)
+      if (newErrors[name]) {
         delete newErrors[name];
-        return newErrors;
-      });
-    }
+      }
+      
+      setErrors(newErrors);
+      return updated;
+    });
   }, [errors]);
 
   // Memoized handler for checkbox changes
@@ -149,19 +213,53 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     setFormData((prev: any) => ({ ...prev, [name]: checked }));
   }, []);
 
-  // Handle file upload
+  // Handle file upload with compression under 2MB
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setImg(file);
-      // Create preview URL
+      const maxBytes = 2 * 1024 * 1024;
+      let processed = file;
+      if (file.size > maxBytes) {
+        processed = await compressImageToUnder2MB(file);
+        if (processed.size > maxBytes) {
+          toast('Could not compress image under 2 MB. Try a smaller image.');
+          return;
+        }
+      }
+      setImg(processed);
       const fileReader = new FileReader();
       fileReader.onload = () => {
         if (typeof fileReader.result === 'string') {
           setPreviewUrl(fileReader.result);
         }
       };
-      fileReader.readAsDataURL(file);
+      fileReader.readAsDataURL(processed);
+      e.currentTarget.value = '';
+    }
+  };
+
+  // Handle QR code file upload
+  const handleQRCodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const maxBytes = 2 * 1024 * 1024;
+      let processed = file;
+      if (file.size > maxBytes) {
+        processed = await compressImageToUnder2MB(file);
+        if (processed.size > maxBytes) {
+          toast('Could not compress QR code image under 2 MB. Try a smaller image.');
+          return;
+        }
+      }
+      setQrCodeImg(processed);
+      const fileReader = new FileReader();
+      fileReader.onload = () => {
+        if (typeof fileReader.result === 'string') {
+          setQrCodePreviewUrl(fileReader.result);
+        }
+      };
+      fileReader.readAsDataURL(processed);
+      e.currentTarget.value = '';
     }
   };
 
@@ -187,6 +285,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         if (!formData.maxTeamSize)
           newErrors.maxTeamSize = 'Maximum team size is required';
         if (!formData.venue?.trim()) newErrors.venue = 'Venue is required';
+        // Validate paid event fields
+        if (formData.isPaidEvent) {
+          if (!qrCodeImg) newErrors.paymentQRCode = 'QR code is required for paid events';
+          if (!formData.paymentAmount || formData.paymentAmount <= 0) 
+            newErrors.paymentAmount = 'Payment amount is required and must be greater than 0';
+        }
         break;
 
       case 3:
@@ -194,10 +298,55 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           newErrors.eventStartDate = 'Event start date is required';
         if (!formData.eventEndDate)
           newErrors.eventEndDate = 'Event end date is required';
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Validate start date is not in the past
+        if (formData.eventStartDate) {
+          const startDate = new Date(formData.eventStartDate);
+          if (startDate < today) {
+            newErrors.eventStartDate = 'Event start date cannot be in the past';
+          }
+        }
+        
+        // Validate application start date is not in the past
+        if (formData.applicationStartDate) {
+          const appStartDate = new Date(formData.applicationStartDate);
+          if (appStartDate < today) {
+            newErrors.applicationStartDate = 'Application start date cannot be in the past';
+          }
+        }
+        
+        // Validate end date is not before start date
+        if (formData.eventStartDate && formData.eventEndDate) {
+          const startDate = new Date(formData.eventStartDate);
+          const endDate = new Date(formData.eventEndDate);
+          if (endDate < startDate) {
+            newErrors.eventEndDate = 'End date cannot be before start date';
+          }
+        }
+        
+        // Validate application end date is not before application start date
+        if (formData.applicationStartDate && formData.applicationEndDate) {
+          const appStartDate = new Date(formData.applicationStartDate);
+          const appEndDate = new Date(formData.applicationEndDate);
+          if (appEndDate < appStartDate) {
+            newErrors.applicationEndDate = 'Application end date cannot be before start date';
+          }
+        }
+        
         if (!formData.contactEmail?.trim())
           newErrors.contactEmail = 'Contact email is required';
         if (!formData.contactPhone?.trim())
           newErrors.contactPhone = 'Contact phone is required';
+        break;
+
+      case 4:
+        // Step 4 validation - Image is required
+        if (!img) {
+          newErrors.image = 'Event image is required';
+        }
         break;
     }
 
@@ -208,6 +357,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const nextStep = () => {
     if (validateStep()) {
       setStep((prev) => Math.min(prev + 1, 4));
+    } else {
+      console.log('Validation failed for step:', step);
+      console.log('Current errors:', errors);
     }
   };
 
@@ -222,6 +374,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       toast('please login or signup');
       return;
     }
+    if (!clubName) {
+      toast('You haven\'t created any club yet. Please create a club first.');
+      return;
+    }
     if (!validateStep()) return;
 
     setIsSubmitting(true);
@@ -232,17 +388,65 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       setIsSubmitting(false);
       return;
     } else {
-      imageLink = await uploadImageToImageKit(await toBase64(img), img.name);
+      const maxBytes = 2 * 1024 * 1024;
+      let toUpload = img;
+      if (img.size > maxBytes) {
+        toUpload = await compressImageToUnder2MB(img);
+        if (toUpload.size > maxBytes) {
+          toast('Could not compress image under 2 MB. Try a smaller image.');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      imageLink = await uploadImageToImageKit(await toBase64(toUpload), toUpload.name, '/events');
       toast('Image uploaded');
     }
 
-    // Submit with the correct image link
+    // Handle QR code upload for paid events
+    let qrCodeLink = '';
+    if (formData.isPaidEvent && qrCodeImg) {
+      const maxBytes = 2 * 1024 * 1024;
+      let toUpload = qrCodeImg;
+      if (qrCodeImg.size > maxBytes) {
+        toUpload = await compressImageToUnder2MB(qrCodeImg);
+        if (toUpload.size > maxBytes) {
+          toast('Could not compress QR code image under 2 MB. Try a smaller image.');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      qrCodeLink = await uploadImageToImageKit(await toBase64(toUpload), toUpload.name, '/payment-qr');
+      toast('Payment QR code uploaded');
+    }
+
+    // Build payload - only include paid event fields if it's a paid event
+    const payload: any = {
+      ...formData,
+      image: imageLink,
+    };
+
+    // Map isPaidEvent to isPaid for backend
+    if (formData.isPaidEvent) {
+      payload.isPaid = true;
+      payload.paymentQRCode = qrCodeLink;
+      payload.paymentAmount = formData.paymentAmount;
+    } else {
+      payload.isPaid = false;
+      // For free events, ensure these are not sent or are null
+      delete payload.isPaidEvent;
+      delete payload.paymentQRCode;
+      delete payload.paymentAmount;
+    }
+    // Remove the frontend-only field
+    delete payload.isPaidEvent;
+
+    // Submit with the correct image link and QR code link
     const createEvent = await axios.post<{
       msg: string;
       id: string;
     }>(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event`,
-      { ...formData, image: imageLink },
+      payload,
       {
         headers: {
           authorization: `Bearer ${token}`,
@@ -251,9 +455,48 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     );
 
     if (createEvent.status === 201 || createEvent.status === 200  ) {
-      toast('Event registered , start marketing now!!!');
+      // Update event count
+      const previousCount = eventCount;
+      const newCount = previousCount + 1;
+      setEventCount(newCount);
+      
+      // Check for achievement unlocks (crossing thresholds)
+      let badgeUnlocked = null;
+      if (previousCount < 20 && newCount >= 20) {
+        badgeUnlocked = {
+          name: 'Community Champion',
+          count: 20,
+          description: 'You\'ve created 20 events! You\'re the ultimate community champion! 🌟',
+        };
+      } else if (previousCount < 10 && newCount >= 10) {
+        badgeUnlocked = {
+          name: 'Event Legendary',
+          count: 10,
+          description: 'Wow! 10 events created! You\'re a true event legend! ⚡',
+        };
+      } else if (previousCount < 5 && newCount >= 5) {
+        badgeUnlocked = {
+          name: 'Event Master',
+          count: 5,
+          description: 'You\'ve created 5 amazing events! You\'re on fire! 🔥',
+        };
+      }
+      
+      if (badgeUnlocked) {
+        setUnlockedBadge(badgeUnlocked);
+        setShowAchievementModal(true);
+        setCloseAfterAchievement(true);
+      }
+      
+      toast('Event created successfully! Start marketing now!!!');
       setIsSubmitting(false);
-      onClose();
+      
+      if (!badgeUnlocked) {
+        // Close after a short delay when no achievement modal is shown
+        setTimeout(() => {
+          onClose();
+        }, 500);
+      }
     } else {
       toast(createEvent.data.msg);
       setIsSubmitting(false);
@@ -262,6 +505,44 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   };
  
   if (!isOpen) return null;
+
+  // Check if user has created a club
+  if (!clubName) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-transparent">
+        <Card className="flex min-h-full items-center justify-center p-4 bg-transparent shadow-none">
+          <MagicCard className="group relative bg-gray-900 rounded-xl w-full max-w-md transition-all duration-300 hover:scale-[1.01] border border-transparent hover:border-transparent">
+            <div className="absolute inset-0 rounded-xl -z-10 bg-gray-900" />
+
+            <div className="p-8 text-center">
+              <div className="text-5xl mb-4">🏢</div>
+              <h2 className="text-2xl font-bold text-white mb-3">No Club Found</h2>
+              <p className="text-gray-300 mb-6">
+                You haven't created any club yet. Please create a club first before creating an event.
+              </p>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => {
+                    onClose();
+                    router.push('/clubs');
+                  }}
+                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-lg"
+                >
+                  Create Club Now
+                </Button>
+                <Button
+                  onClick={onClose}
+                  className="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-3 rounded-lg"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </MagicCard>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-transparent">
@@ -343,9 +624,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                             }
                           `}
                           onClick={() => {
+                            const modeValue = mode.toLowerCase();
                             setFormData((prev: any) => ({
                               ...prev,
-                              eventMode: mode.toLowerCase(),
+                              eventMode: modeValue,
+                              // If online, set venue to "Online"
+                              venue: modeValue === 'online' ? 'Online' : prev.venue,
                             }));
                             if (errors.eventMode) {
                               setErrors((prev) => {
@@ -488,6 +772,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                         <SelectItem value="cultural">Cultural</SelectItem>
                         <SelectItem value="sports">Sports</SelectItem>
                         <SelectItem value="technical">Technical</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.eventType && (
@@ -545,9 +830,17 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       type="text"
                       value={formData.venue}
                       onChange={handleChange}
-                      className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
-                      placeholder="Event venue"
+                      disabled={formData.eventMode === 'online'}
+                      className={`w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none ${
+                        formData.eventMode === 'online' ? 'opacity-70 cursor-not-allowed' : ''
+                      }`}
+                      placeholder={formData.eventMode === 'online' ? 'Online' : 'Event venue'}
                     />
+                    {formData.eventMode === 'online' && (
+                      <p className="mt-1 text-xs text-gray-400">
+                        Venue is automatically set to "Online" for online events
+                      </p>
+                    )}
                     {errors.venue && (
                       <p className="mt-1 text-sm text-red-500">
                         {errors.venue}
@@ -628,6 +921,163 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       />
                     </div>
                   </div>
+
+                  <div>
+                    <label
+                      htmlFor="form"
+                      className="block text-sm font-medium text-yellow-400 mb-1"
+                    >
+                      Registration/Application Form (optional)
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Globe className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        id="form"
+                        name="form"
+                        type="url"
+                        value={formData.form || ''}
+                        onChange={handleChange}
+                        className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
+                        placeholder="https://forms.google.com/... or https://typeform.com/..."
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-gray-400">
+                      Add a link to your registration form (Google Forms, Typeform, etc.)
+                    </p>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="whatsappLink"
+                      className="block text-sm font-medium text-yellow-400 mb-1"
+                    >
+                      WhatsApp Group Link (optional)
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Globe className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        id="whatsappLink"
+                        name="whatsappLink"
+                        type="url"
+                        value={formData.whatsappLink || ''}
+                        onChange={handleChange}
+                        className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
+                        placeholder="https://chat.whatsapp.com/..."
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-gray-400">
+                      Share WhatsApp group link with registered participants
+                    </p>
+                  </div>
+
+                  {/* Paid Event Section */}
+                  <div className="border-t border-gray-700 pt-4">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <Input
+                        id="isPaidEvent"
+                        name="isPaidEvent"
+                        type="checkbox"
+                        checked={formData.isPaidEvent || false}
+                        onChange={(e) => {
+                          const checked = e.currentTarget.checked;
+                          setFormData((prev: any) => ({
+                            ...prev,
+                            isPaidEvent: checked,
+                            paymentAmount: checked ? prev.paymentAmount : 0,
+                          }));
+                        }}
+                        className="h-4 w-4 rounded border-gray-700 text-yellow-600 focus:ring-yellow-600 bg-gray-800"
+                      />
+                      <Label
+                        htmlFor="isPaidEvent"
+                        className="text-sm font-medium text-yellow-400"
+                      >
+                        This is a Paid Event
+                      </Label>
+                    </div>
+
+                    {formData.isPaidEvent && (
+                      <div className="space-y-4 bg-gray-800 bg-opacity-50 p-4 rounded-lg border border-yellow-500 border-opacity-20">
+                        <div>
+                          <label
+                            htmlFor="paymentAmount"
+                            className="block text-sm font-medium text-yellow-400 mb-1"
+                          >
+                            Payment Amount (₹)*
+                          </label>
+                          <input
+                            id="paymentAmount"
+                            name="paymentAmount"
+                            type="number"
+                            min="1"
+                            step="1"
+                            value={formData.paymentAmount || ''}
+                            onChange={handleChange}
+                            className="w-full bg-gray-900 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
+                            placeholder="e.g., 500"
+                          />
+                          {errors.paymentAmount && (
+                            <p className="mt-1 text-sm text-red-500">
+                              {errors.paymentAmount}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-yellow-400 mb-2">
+                            Payment QR Code Image*
+                          </label>
+                          <div className="flex flex-col gap-4">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              id="qrCodeUpload"
+                              className="hidden"
+                              onChange={handleQRCodeChange}
+                            />
+                            <label htmlFor="qrCodeUpload" className="cursor-pointer">
+                              <div className="w-full bg-gray-900 border-2 border-dashed border-gray-700 rounded-lg p-6 hover:border-yellow-500 transition-colors flex flex-col items-center justify-center">
+                                <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                                <span className="text-sm text-gray-400">Click to upload QR code</span>
+                                <span className="text-xs text-gray-500 mt-1">Max 2MB</span>
+                              </div>
+                            </label>
+
+                            {qrCodePreviewUrl && (
+                              <div className="relative w-32 h-32">
+                                <Image
+                                  src={qrCodePreviewUrl}
+                                  alt="QR Code Preview"
+                                  fill
+                                  className="rounded-lg object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  className="absolute top-1 right-1 bg-black bg-opacity-70 rounded-full p-1 hover:bg-red-600 transition-colors"
+                                  onClick={() => {
+                                    setQrCodeImg(null);
+                                    setQrCodePreviewUrl('');
+                                  }}
+                                >
+                                  <X size={16} className="text-white" />
+                                </button>
+                              </div>
+                            )}
+
+                            {errors.paymentQRCode && (
+                              <p className="text-sm text-red-500">
+                                {errors.paymentQRCode}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -658,6 +1108,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                           type="date"
                           value={formData.eventStartDate}
                           onChange={handleChange}
+                          min={getTodayDateString()}
                           className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -685,6 +1136,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                           type="date"
                           value={formData.eventEndDate}
                           onChange={handleChange}
+                          min={formData.eventStartDate || undefined}
                           className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -714,9 +1166,15 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                           type="date"
                           value={formData.applicationStartDate}
                           onChange={handleChange}
+                          min={getTodayDateString()}
                           className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
                         />
                       </div>
+                      {errors.applicationStartDate && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.applicationStartDate}
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -736,9 +1194,15 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                           type="date"
                           value={formData.applicationEndDate}
                           onChange={handleChange}
+                          min={formData.applicationStartDate || undefined}
                           className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
                         />
                       </div>
+                      {errors.applicationEndDate && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.applicationEndDate}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -1020,6 +1484,26 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
         </MagicCard>
       </Card>
+      
+      {/* Achievement Unlock Modal */}
+      {unlockedBadge && (
+        <AchievementUnlockModal
+          isOpen={showAchievementModal}
+          onClose={() => {
+            setShowAchievementModal(false);
+            setUnlockedBadge(null);
+            if (closeAfterAchievement) {
+              setCloseAfterAchievement(false);
+              onClose();
+            }
+          }}
+          badgeName={unlockedBadge.name}
+          achievementCount={unlockedBadge.count}
+          description={unlockedBadge.description}
+          shareText={`🏆 I just unlocked the "${unlockedBadge.name}" badge on Zynvo! I've created ${unlockedBadge.count} amazing events. Join me and let's build an incredible campus community! 🎉 #Zynvo #EventCreator`}
+        />
+      )}
+      
       <NoTokenModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} />
     </div>
   );

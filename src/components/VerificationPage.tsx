@@ -5,6 +5,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 type VerificationStatus = 'pending' | 'success' | 'error' | 'expired';
 
@@ -70,12 +71,12 @@ function VerificationContent() {
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/ResendEmail?email=${email}`
       );
       if (resend.status == 200) {
-        alert('Verification email has been resent!');
+        toast.success('Verification email has been resent!');
       } else {
-        alert(resend.data.msg);
+        toast.error(resend.data.msg);
       }
     } catch (error) {
-      alert('Failed to resend verification email. Please try again.');
+      toast.error('Failed to resend verification email. Please try again.');
     }
   };
 
