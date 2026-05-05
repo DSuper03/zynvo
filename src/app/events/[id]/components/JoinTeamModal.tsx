@@ -197,9 +197,9 @@ export default function JoinTeamModal({
           <button
             onClick={handleJoin}
             disabled={!isComplete || isSubmitting}
-            className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200
+            className={`w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200
               disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed
-              bg-yellow-400 hover:bg-yellow-500 text-black active:scale-[0.98]"
+              bg-yellow-400 hover:bg-yellow-500 text-black active:scale-[0.98]`}
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
