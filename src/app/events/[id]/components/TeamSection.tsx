@@ -95,57 +95,72 @@ export default function TeamSection({
   // ── No team yet → Create / Join options ────────────────────────────────────
   if (!myTeam) {
     return (
-      <div className="mt-4 rounded-xl border border-gray-800 bg-gradient-to-b from-gray-900/80 to-black/40 p-5">
-        <div className="flex items-center gap-2 mb-1">
-          <Users className="w-4 h-4 text-yellow-400" />
-          <h3 className="text-sm font-semibold text-white">
-            Team Up!
-          </h3>
-          <span className="text-xs text-gray-500 ml-auto">
-            Max {teamSize} members
-          </span>
-        </div>
-        <p className="text-xs text-gray-400 mb-4">
-          This is a team event. Create a new team or join one with an invite
-          code.
-        </p>
+      <>
+        <div className="mt-4 rounded-xl border border-gray-800 bg-gradient-to-b from-gray-900/80 to-black/40 p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <Users className="w-4 h-4 text-yellow-400" />
+            <h3 className="text-sm font-semibold text-white">
+              Team Up!
+            </h3>
+            <span className="text-xs text-gray-500 ml-auto">
+              Max {teamSize} members
+            </span>
+          </div>
+          <p className="text-xs text-gray-400 mb-4">
+            This is a team event. Create a new team or join one with an invite
+            code.
+          </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Create Team Card */}
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="group relative rounded-xl border border-gray-800 bg-gray-900/60 p-4 text-left
-              hover:border-yellow-500/40 hover:bg-yellow-500/5 transition-all duration-200"
-          >
-            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-yellow-500/10 text-yellow-400 mb-3 group-hover:bg-yellow-500/20 transition-colors">
-              <Plus className="w-5 h-5" />
-            </div>
-            <h4 className="text-sm font-semibold text-white mb-1">
-              Create Team
-            </h4>
-            <p className="text-xs text-gray-500 leading-relaxed">
-              Start a new team and get an invite code to share
-            </p>
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Create Team Card */}
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="group relative rounded-xl border border-gray-800 bg-gray-900/60 p-4 text-left
+                hover:border-yellow-500/40 hover:bg-yellow-500/5 transition-all duration-200"
+            >
+              <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-yellow-500/10 text-yellow-400 mb-3 group-hover:bg-yellow-500/20 transition-colors">
+                <Plus className="w-5 h-5" />
+              </div>
+              <h4 className="text-sm font-semibold text-white mb-1">
+                Create Team
+              </h4>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                Start a new team and get an invite code to share
+              </p>
+            </button>
 
-          {/* Join Team Card */}
-          <button
-            onClick={() => setShowJoinModal(true)}
-            className="group relative rounded-xl border border-gray-800 bg-gray-900/60 p-4 text-left
-              hover:border-yellow-500/40 hover:bg-yellow-500/5 transition-all duration-200"
-          >
-            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 mb-3 group-hover:bg-emerald-500/20 transition-colors">
-              <UserPlus className="w-5 h-5" />
-            </div>
-            <h4 className="text-sm font-semibold text-white mb-1">
-              Join Team
-            </h4>
-            <p className="text-xs text-gray-500 leading-relaxed">
-              Have an invite code? Join your teammate's team
-            </p>
-          </button>
+            {/* Join Team Card */}
+            <button
+              onClick={() => setShowJoinModal(true)}
+              className="group relative rounded-xl border border-gray-800 bg-gray-900/60 p-4 text-left
+                hover:border-yellow-500/40 hover:bg-yellow-500/5 transition-all duration-200"
+            >
+              <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 mb-3 group-hover:bg-emerald-500/20 transition-colors">
+                <UserPlus className="w-5 h-5" />
+              </div>
+              <h4 className="text-sm font-semibold text-white mb-1">
+                Join Team
+              </h4>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                Have an invite code? Join your teammate's team
+              </p>
+            </button>
+          </div>
         </div>
-      </div>
+
+        <CreateTeamModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onSubmit={handleCreateTeam}
+          isSubmitting={isCreating}
+        />
+        <JoinTeamModal
+          isOpen={showJoinModal}
+          onClose={() => setShowJoinModal(false)}
+          onSubmit={handleJoinTeam}
+          isSubmitting={isJoining}
+        />
+      </>
     );
   }
 

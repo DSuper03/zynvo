@@ -35,10 +35,18 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
+const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://zynvo-be-31292664726.asia-south1.run.app').replace(/\/$/, '');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Next 16 uses Turbopack by default; empty config acknowledges plugins may add webpack
   turbopack: {},
+  env: {
+    NEXT_PUBLIC_BACKEND_URL:
+      process.env.NODE_ENV === 'development'
+        ? ''
+        : process.env.NEXT_PUBLIC_BACKEND_URL,
+  },
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
@@ -180,8 +188,8 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/proxy/:path*',
-        destination: 'https://zynvo-backend-1.onrender.com/:path*',
+        source: '/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },
