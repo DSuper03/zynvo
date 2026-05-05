@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export const runtime = 'edge';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL = process.env.OPENROUTER_GEMINI_MODEL || 'google/gemini-2.5-flash';
+const MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
 
 const STREAM_PROGRESS_UPDATES = [
   'Receiving live intelligence updates.',
@@ -218,6 +218,46 @@ function normalizeAgentBlock(content: string): StreamEvent[] {
   }
 }
 
+function parseUpstreamErrorBody(body: string) {
+  if (!body.trim()) return '';
+
+  try {
+    const parsed = JSON.parse(body) as unknown;
+    if (!isRecord(parsed)) return '';
+
+    const error = parsed.error;
+    if (typeof error === 'string') return error.trim();
+    if (isRecord(error)) {
+      return sanitizeText(error.message) || sanitizeText(error.code);
+    }
+
+    return sanitizeText(parsed.message);
+  } catch {
+    return body.trim().slice(0, 240);
+  }
+}
+
+function buildUpstreamErrorMessage(status: number, body: string) {
+  const upstreamMessage = parseUpstreamErrorBody(body);
+
+  if (status === 402) {
+    return [
+      'OpenRouter returned 402: credits or payment are required for this model/tool request.',
+      'Check the OpenRouter account behind OPENROUTER_API_KEY, or switch OPENROUTER_GEMINI_MODEL to an available funded model.',
+      upstreamMessage ? `Provider details: ${upstreamMessage}` : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  return [
+    `AI event intelligence request failed with status ${status}.`,
+    upstreamMessage ? `Provider details: ${upstreamMessage}` : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
 function buildSystemPrompt() {
   return `You are Zynvo Event Intelligence, a specialist agent that bridges raw web data and student-centric event discovery.
 
@@ -295,10 +335,10 @@ export async function POST(req: Request) {
           });
 
           if (!response.ok || !response.body) {
-            await response.text().catch(() => '');
+            const body = await response.text().catch(() => '');
             send({
               type: 'error',
-              error: `AI event intelligence request failed with status ${response.status}.`,
+              error: buildUpstreamErrorMessage(response.status, body),
             });
             send({ type: 'done' });
             controller.close();
