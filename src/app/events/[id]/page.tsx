@@ -46,6 +46,7 @@ import AchievementCelebration from '@/components/AchievementCelebration';
 import EventSeoHead from '@/components/EventSeoHead';
 import { buildAuthHref } from '@/lib/authReturnTo';
 import { ErrorState, EventDetailSkeleton } from '@/components/feedback';
+import TeamSection from './components/TeamSection';
 
 interface Speaker {
   id: number;
@@ -90,6 +91,7 @@ const Eventid = () => {
   const pathname = usePathname();
 
   const [forkedUpId, setForkedUpId] = useState<string | null>(null);
+  const [eventTeamSize, setEventTeamSize] = useState<number>(1);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [fetchNonce, setFetchNonce] = useState(0);
@@ -377,6 +379,8 @@ const Eventid = () => {
             paymentQRCode: qrCodeUrl,
             paymentAmount: paymentAmount,
           });
+          // Store TeamSize for team section
+          setEventTeamSize(res.data.response.TeamSize || 1);
         }
       } catch (error) {
         console.error('Error fetching event data:', error);
@@ -859,6 +863,15 @@ const Eventid = () => {
                       </div>
                     </div>
                   </div>
+                )}
+
+                {/* Team Section — only for team events after registration */}
+                {isUserAttendingEvent() && eventTeamSize > 1 && (
+                  <TeamSection
+                    eventId={id}
+                    token={token}
+                    teamSize={eventTeamSize}
+                  />
                 )}
               </div>
 
