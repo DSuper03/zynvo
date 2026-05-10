@@ -106,7 +106,7 @@ export default function TeamSection({
               Max {teamSize} members
             </span>
           </div>
-          <p className="text-xs text-gray-400 mb-4">
+          <p className="text-x text-white mb-4">
             This is a team event. Create a new team or join one with an invite
             code.
           </p>
@@ -124,7 +124,7 @@ export default function TeamSection({
               <h4 className="text-sm font-semibold text-white mb-1">
                 Create Team
               </h4>
-              <p className="text-xs text-gray-500 leading-relaxed">
+              <p className="text-xs text-white leading-relaxed">
                 Start a new team and get an invite code to share
               </p>
             </button>
@@ -141,7 +141,7 @@ export default function TeamSection({
               <h4 className="text-sm font-semibold text-white mb-1">
                 Join Team
               </h4>
-              <p className="text-xs text-gray-500 leading-relaxed">
+              <p className="text-xs text-white leading-relaxed">
                 Have an invite code? Join your teammate's team
               </p>
             </button>
