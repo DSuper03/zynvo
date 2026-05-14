@@ -97,6 +97,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import ZynvoClubAnnouncement from '@/components/ZynvoClubAnnouncement';
 import NoTokenModal from '@/components/modals/remindModal';
+import { buildAuthHref } from '@/lib/authReturnTo';
 
 // All dynamic content is driven by backend data; no hardcoded demo content
 
@@ -143,6 +144,12 @@ export default function ClubPage() {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [requiresSignin, setRequiresSignin] = useState(false);
+  const [copiedInviteLink, setCopiedInviteLink] = useState(false);
+  const clubInvitePath = `/clubs/${id}`;
+  const signupInviteHref = buildAuthHref('/auth/signup', clubInvitePath);
+  const signinInviteHref = buildAuthHref('/auth/signin', clubInvitePath);
 
 
   const getMemberCount = (c: { members?: unknown; memberCount?: number; membersCount?: number }): number => {
@@ -159,12 +166,14 @@ export default function ClubPage() {
       const session = sessionStorage.getItem('activeSession');
       
       if (tok) {
-        setToken(tok);
         setHasTokenForModal(true);
       } else {
         // No token - user needs to sign up
         setHasTokenForModal(false);
+        setRequiresSignin(false);
         setIsAuthModalOpen(true);
+        setLoading(false);
+        setAuthChecked(true);
         return;
       }
       
@@ -173,22 +182,28 @@ export default function ClubPage() {
         toast('Login required', {
           action: {
             label: 'Sign in',
-            onClick: () => router.push('/auth/signin'),
+            onClick: () => router.push(signinInviteHref),
           },
         });
         setHasTokenForModal(true);
+        setRequiresSignin(true);
         setIsAuthModalOpen(true);
+        setLoading(false);
+        setAuthChecked(true);
         return;
       }
+      setToken(tok);
+      setRequiresSignin(false);
+      setAuthChecked(true);
     }
-  }, [router]);
+  }, [router, signinInviteHref]);
   useEffect(() => {
     async function call() {
       if (!token) {
          toast('Login required', {
           action: {
             label: 'Sign in',
-            onClick: () => router.push('/auth/signin'),
+            onClick: () => router.push(signinInviteHref),
           },
         });
         return;
@@ -289,7 +304,7 @@ export default function ClubPage() {
     if (token && id) {
       call();
     }
-  }, [id, token]);
+  }, [id, token, router, signinInviteHref]);
 useEffect(() => {
   const fetchUserData = async () => {
     try {
@@ -329,6 +344,40 @@ useEffect(() => {
     );
   }
 
+  if (authChecked && (!token || requiresSignin)) {
+    const primaryHref = requiresSignin ? signinInviteHref : signupInviteHref;
+    const primaryLabel = requiresSignin ? 'Sign in to continue' : 'Sign up to join';
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center px-4">
+        <div className="max-w-lg w-full rounded-2xl border border-yellow-400/30 bg-gray-950/90 p-6 text-center shadow-[0_0_30px_rgba(255,215,0,0.08)]">
+          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-yellow-400 text-black">
+            <UserPlus className="h-7 w-7" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-2">Join this club on Zynvo</h1>
+          <p className="text-gray-300 mb-6">
+            Sign up or sign in with this invite link and we will bring you back to this club page.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link href={primaryHref} className="flex-1">
+              <Button className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-semibold">
+                {primaryLabel}
+              </Button>
+            </Link>
+            <Link href={signinInviteHref} className="flex-1">
+              <Button
+                variant="outline"
+                className="w-full border-yellow-500/50 text-yellow-300 hover:bg-yellow-500/10"
+              >
+                Sign in
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!club || !club.id) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -351,7 +400,7 @@ useEffect(() => {
       toast('Login required', {
         action: {
           label: 'Sign in',
-          onClick: () => router.push('/auth/signin'),
+          onClick: () => router.push(signinInviteHref),
         },
       });
       return;
@@ -420,6 +469,45 @@ useEffect(() => {
         console.error('Error copying to clipboard:', err);
         toast.error('Failed to copy link to clipboard');
       }
+    }
+  };
+
+  const handleCopyInviteLink = async () => {
+    const inviteUrl = new URL(signupInviteHref, window.location.origin).toString();
+
+    const fallbackCopy = () => {
+      const input = document.createElement('textarea');
+      input.value = inviteUrl;
+      input.setAttribute('readonly', '');
+      input.style.position = 'fixed';
+      input.style.left = '-9999px';
+      input.style.top = '0';
+      document.body.appendChild(input);
+      input.focus();
+      input.select();
+      const copied = document.execCommand('copy');
+      document.body.removeChild(input);
+      if (!copied) {
+        throw new Error('Fallback copy command failed');
+      }
+    };
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(inviteUrl);
+        } catch {
+          fallbackCopy();
+        }
+      } else {
+        fallbackCopy();
+      }
+      setCopiedInviteLink(true);
+      toast.success('Invite link copied!');
+      setTimeout(() => setCopiedInviteLink(false), 2000);
+    } catch (err) {
+      console.error('Error copying invite link:', err);
+      toast.error('Failed to copy invite link');
     }
   };
 
@@ -649,6 +737,40 @@ useEffect(() => {
                 </Button>
               </Link>
             )}
+
+            <div className="rounded-xl border border-yellow-500/40 bg-yellow-500/10 p-3">
+              <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-yellow-300">
+                <UserPlus className="h-3.5 w-3.5" />
+                Invite Link
+              </div>
+              <div className="flex overflow-hidden rounded-lg border border-yellow-500/30 bg-black/30">
+                <input
+                  readOnly
+                  value={typeof window !== 'undefined' ? new URL(signupInviteHref, window.location.origin).toString() : signupInviteHref}
+                  onFocus={(e) => e.currentTarget.select()}
+                  className="min-w-0 flex-1 bg-transparent px-3 py-2 text-xs text-gray-200 outline-none"
+                  aria-label="Club invite link"
+                />
+                <button
+                  type="button"
+                  onClick={handleCopyInviteLink}
+                  className="inline-flex cursor-pointer items-center justify-center gap-1.5 bg-yellow-500 px-3 py-2 text-xs font-semibold text-black transition-colors hover:bg-yellow-400"
+                  title="Copy invite link"
+                >
+                  {copiedInviteLink ? (
+                    <Check className="h-3.5 w-3.5" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                  {copiedInviteLink ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+              {copiedInviteLink ? (
+                <p className="mt-2 text-xs text-green-300">Invite link copied to clipboard.</p>
+              ) : (
+                <p className="mt-2 text-xs text-yellow-100/70">Share this with students to bring them back here after signup.</p>
+              )}
+            </div>
 
             <div className="flex gap-2">
               <Button 

@@ -26,7 +26,7 @@ import { jwtDecode } from "jwt-decode";
 import { de } from 'date-fns/locale';
 import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
 import {
-  consumeReturnTo,
+  consumeBrowserPostAuthRedirect,
   persistReturnTo,
   clearStoredReturnTo,
   peekReturnTo,
@@ -353,7 +353,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       localStorage.setItem('token', res.data.token);
       sessionStorage.setItem('activeSession', 'true');
       toast.success("Account created successfully!");
-      router.push(consumeReturnTo() ?? '/dashboard');
+      router.push(consumeBrowserPostAuthRedirect());
     } catch (err: any) {
       console.error("Post-verification sync failed:", JSON.stringify(err, null, 2));
       const msg = err?.response?.data?.msg || err?.message || "Signup failed. Please try again.";
