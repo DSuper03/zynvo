@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/legacy/image';
 import Link from 'next/link';
 import {
@@ -147,10 +147,20 @@ export default function ClubPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [requiresSignin, setRequiresSignin] = useState(false);
   const [copiedInviteLink, setCopiedInviteLink] = useState(false);
+  const [inviteFullUrl, setInviteFullUrl] = useState('');
+  const inviteLinkInputRef = useRef<HTMLInputElement>(null);
   const clubInvitePath = `/clubs/${id}`;
   const signupInviteHref = buildAuthHref('/auth/signup', clubInvitePath);
   const signinInviteHref = buildAuthHref('/auth/signin', clubInvitePath);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      setInviteFullUrl(new URL(signupInviteHref, window.location.origin).href);
+    } catch {
+      setInviteFullUrl('');
+    }
+  }, [signupInviteHref]);
 
   const getMemberCount = (c: { members?: unknown; memberCount?: number; membersCount?: number }): number => {
     if (typeof c?.members === 'number') return c.members as number;
@@ -472,43 +482,78 @@ useEffect(() => {
     }
   };
 
-  const handleCopyInviteLink = async () => {
-    const inviteUrl = new URL(signupInviteHref, window.location.origin).toString();
+  const handleCopyInviteLink = () => {
+    const inviteUrl = inviteFullUrl;
+    if (!inviteUrl) {
+      toast.error('Invite link is not ready yet — wait a moment and try again.');
+      return;
+    }
 
-    const fallbackCopy = () => {
-      const input = document.createElement('textarea');
-      input.value = inviteUrl;
-      input.setAttribute('readonly', '');
-      input.style.position = 'fixed';
-      input.style.left = '-9999px';
-      input.style.top = '0';
-      document.body.appendChild(input);
-      input.focus();
-      input.select();
-      const copied = document.execCommand('copy');
-      document.body.removeChild(input);
-      if (!copied) {
-        throw new Error('Fallback copy command failed');
+    const copyFromElement = (el: HTMLInputElement | HTMLTextAreaElement): boolean => {
+      const wasReadOnly = 'readOnly' in el ? el.readOnly : false;
+      try {
+        if ('readOnly' in el) el.readOnly = false;
+        el.focus();
+        el.select();
+        el.setSelectionRange(0, inviteUrl.length);
+        return document.execCommand('copy');
+      } catch {
+        return false;
+      } finally {
+        if ('readOnly' in el) el.readOnly = wasReadOnly;
       }
     };
 
-    try {
-      if (navigator.clipboard?.writeText) {
-        try {
-          await navigator.clipboard.writeText(inviteUrl);
-        } catch {
-          fallbackCopy();
-        }
-      } else {
-        fallbackCopy();
-      }
+    const copyViaOverlayTextarea = (): boolean => {
+      const ta = document.createElement('textarea');
+      ta.value = inviteUrl;
+      ta.style.position = 'fixed';
+      ta.style.top = '0';
+      ta.style.left = '0';
+      ta.style.width = '100%';
+      ta.style.height = '100%';
+      ta.style.opacity = '0';
+      ta.style.zIndex = '2147483647';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, inviteUrl.length);
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    };
+
+    // Prefer synchronous copy (same user gesture) — Clipboard API can fail or detach from gesture.
+    let ok =
+      (inviteLinkInputRef.current && copyFromElement(inviteLinkInputRef.current)) ||
+      copyViaOverlayTextarea();
+
+    if (ok) {
       setCopiedInviteLink(true);
       toast.success('Invite link copied!');
       setTimeout(() => setCopiedInviteLink(false), 2000);
-    } catch (err) {
-      console.error('Error copying invite link:', err);
-      toast.error('Failed to copy invite link');
+      return;
     }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText && window.isSecureContext) {
+      void navigator.clipboard.writeText(inviteUrl).then(
+        () => {
+          setCopiedInviteLink(true);
+          toast.success('Invite link copied!');
+          setTimeout(() => setCopiedInviteLink(false), 2000);
+        },
+        () => {
+          toast.error('Could not copy — tap the link field, select all, then copy.');
+          inviteLinkInputRef.current?.focus();
+          inviteLinkInputRef.current?.select();
+        }
+      );
+      return;
+    }
+
+    toast.error('Could not copy automatically — tap the link field, select all, then copy.');
+    inviteLinkInputRef.current?.focus();
+    inviteLinkInputRef.current?.select();
   };
 
   const getTypeColor = (type: string) => {
@@ -745,16 +790,22 @@ useEffect(() => {
               </div>
               <div className="flex overflow-hidden rounded-lg border border-yellow-500/30 bg-black/30">
                 <input
+                  ref={inviteLinkInputRef}
                   readOnly
-                  value={typeof window !== 'undefined' ? new URL(signupInviteHref, window.location.origin).toString() : signupInviteHref}
+                  value={inviteFullUrl}
+                  onClick={(e) => e.currentTarget.select()}
                   onFocus={(e) => e.currentTarget.select()}
                   className="min-w-0 flex-1 bg-transparent px-3 py-2 text-xs text-gray-200 outline-none"
                   aria-label="Club invite link"
                 />
                 <button
                   type="button"
-                  onClick={handleCopyInviteLink}
-                  className="inline-flex cursor-pointer items-center justify-center gap-1.5 bg-yellow-500 px-3 py-2 text-xs font-semibold text-black transition-colors hover:bg-yellow-400"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleCopyInviteLink();
+                  }}
+                  className="relative z-10 inline-flex cursor-pointer items-center justify-center gap-1.5 bg-yellow-500 px-3 py-2 text-xs font-semibold text-black transition-colors hover:bg-yellow-400"
                   title="Copy invite link"
                 >
                   {copiedInviteLink ? (
