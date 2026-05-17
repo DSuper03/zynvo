@@ -79,7 +79,7 @@ export default function TeamSection({
   // ── Loading state ──────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="mt-4 rounded-xl border border-gray-800 bg-gray-900/50 p-5">
+      <div className="mt-4 rounded-xl border border-gray-800 bg-gray-900/70 p-5">
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 rounded-full bg-gray-800 animate-pulse" />
           <div className="h-4 w-32 rounded bg-gray-800 animate-pulse" />
@@ -96,17 +96,17 @@ export default function TeamSection({
   if (!myTeam) {
     return (
       <>
-        <div className="mt-4 rounded-xl border border-gray-800 bg-gradient-to-b from-gray-900/80 to-black/40 p-5">
-          <div className="flex items-center gap-2 mb-1">
+        <div className="mt-4 rounded-xl border border-gray-800 bg-gray-900/70 p-5">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <Users className="w-4 h-4 text-yellow-400" />
             <h3 className="text-sm font-semibold text-white">
               Team Up!
             </h3>
-            <span className="text-xs text-gray-500 ml-auto">
+            <span className="text-xs text-gray-400 sm:ml-auto">
               Max {teamSize} members
             </span>
           </div>
-          <p className="text-x text-white mb-4">
+          <p className="text-sm text-gray-300 mb-4">
             This is a team event. Create a new team or join one with an invite
             code.
           </p>
@@ -124,7 +124,7 @@ export default function TeamSection({
               <h4 className="text-sm font-semibold text-white mb-1">
                 Create Team
               </h4>
-              <p className="text-xs text-white leading-relaxed">
+              <p className="text-xs text-gray-300 leading-relaxed">
                 Start a new team and get an invite code to share
               </p>
             </button>
@@ -135,13 +135,13 @@ export default function TeamSection({
               className="group relative rounded-xl border border-gray-800 bg-gray-900/60 p-4 text-left
                 hover:border-yellow-500/40 hover:bg-yellow-500/5 transition-all duration-200"
             >
-              <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 mb-3 group-hover:bg-emerald-500/20 transition-colors">
+              <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-yellow-500/10 text-yellow-400 mb-3 group-hover:bg-yellow-500/20 transition-colors">
                 <UserPlus className="w-5 h-5" />
               </div>
               <h4 className="text-sm font-semibold text-white mb-1">
                 Join Team
               </h4>
-              <p className="text-xs text-white leading-relaxed">
+              <p className="text-xs text-gray-300 leading-relaxed">
                 Have an invite code? Join your teammate's team
               </p>
             </button>
@@ -167,9 +167,9 @@ export default function TeamSection({
   // ── Team Dashboard ─────────────────────────────────────────────────────────
   return (
     <>
-      <div className="mt-4 rounded-xl border border-yellow-500/20 bg-gradient-to-b from-gray-900/80 to-black/40 p-5">
+      <div className="mt-4 rounded-xl border border-yellow-500/20 bg-gray-900/70 p-5">
         {/* Header Row */}
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <Users className="w-4 h-4 text-yellow-400" />
@@ -182,7 +182,7 @@ export default function TeamSection({
                 </span>
               )}
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               {myTeam.currentMembers}/{myTeam.maxMembers} members
             </p>
           </div>
@@ -190,7 +190,7 @@ export default function TeamSection({
           {/* Invite Code */}
           <button
             onClick={handleCopyCode}
-            className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition-all active:scale-95"
+            className="flex w-full items-center justify-between gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition-all active:scale-95 sm:w-auto sm:justify-start"
             title="Copy invite code"
           >
             <span className="font-mono text-sm font-bold text-yellow-400 tracking-wider">
@@ -221,7 +221,7 @@ export default function TeamSection({
           {myTeam.members.map((member: TeamMember) => (
             <div
               key={member.id}
-              className="flex items-center gap-3 p-2 rounded-lg bg-gray-900/60 border border-gray-800/60"
+              className="flex items-center gap-3 p-3 rounded-lg bg-gray-900/80 border border-gray-800/80"
             >
               {/* Avatar */}
               <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
@@ -248,7 +248,7 @@ export default function TeamSection({
                 <p className="text-sm font-medium text-white truncate">
                   {member.user.name || 'Anonymous'}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
+                <p className="text-xs text-gray-400 truncate">
                   {member.user.email}
                 </p>
               </div>
@@ -260,7 +260,7 @@ export default function TeamSection({
                   Leader
                 </span>
               ) : (
-                <span className="px-2 py-0.5 bg-gray-800 border border-gray-700 rounded-full text-[10px] font-medium text-gray-400">
+                <span className="px-2 py-0.5 bg-gray-800 border border-gray-700 rounded-full text-[10px] font-medium text-gray-300">
                   Member
                 </span>
               )}
@@ -269,8 +269,8 @@ export default function TeamSection({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-800">
-          <p className="text-xs text-gray-500">
+        <div className="flex flex-col gap-3 pt-3 border-t border-gray-800 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-gray-400">
             Share the code so teammates can join
           </p>
           {!showLeaveConfirm ? (
@@ -285,7 +285,7 @@ export default function TeamSection({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowLeaveConfirm(false)}
-                className="text-xs text-gray-500 hover:text-white transition-colors"
+                className="text-xs text-gray-400 hover:text-white transition-colors"
               >
                 Cancel
               </button>
