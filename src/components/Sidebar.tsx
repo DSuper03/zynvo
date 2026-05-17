@@ -10,6 +10,7 @@ import {
   LogOut,
   Trophy,
   MapPinCheck,
+  MapPinned,
 } from 'lucide-react';
 import { FaBahai, FaUsers } from 'react-icons/fa';
 import { useWarmup } from './WarmupProvider';
@@ -35,6 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     { icon: <Users size={22} />, label: 'Clubs', href: '/clubs' },
     { icon: <FaBahai size={20} />, label: 'AI', href: '/ai', accent: true },
     { icon: <MapPinCheck size={22} />, label: 'Campus Map', href: '/cmap' },
+    { icon: <MapPinned size={22} />, label: 'Club Map', href: '/club-map' },
     { icon: <Trophy size={22} />, label: 'Leaderboard', href: '/leaderboard' },
     { icon: <User size={22} />, label: 'Profile', href: '/dashboard' },
   ];
