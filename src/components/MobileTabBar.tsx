@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { Search, Calendar, Users, MapPin, User } from 'lucide-react';
+import { Search, Calendar, Users, MapPin, User, MapPinned } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const MobileTabBar = () => {
@@ -32,6 +32,12 @@ const MobileTabBar = () => {
       label: 'Map', 
       icon: MapPin, 
       href: '/cmap' 
+    },
+    {
+      id: 'club-map',
+      label: 'Club Map',
+      icon: MapPinned,
+      href: '/club-map',
     },
     { 
       id: 'zyncers', 
@@ -94,7 +100,7 @@ const MobileTabBar = () => {
               <motion.button
                 key={tab.id}
                 onClick={() => handleTabClick(tab.href)}
-                className="relative flex min-w-[47px] flex-col items-center justify-center rounded-full px-1.5 py-1 transition-all duration-200"
+                className="relative flex min-w-[42px] flex-col items-center justify-center rounded-full px-1.5 py-1 transition-all duration-200"
                 whileTap={{ scale: 0.85 }}
                 whileHover={{ scale: 1.1 }}
               >
@@ -132,4 +138,3 @@ const MobileTabBar = () => {
 };
 
 export default MobileTabBar;
-
