@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 
-const SITE = "https://zynvo.social";
+const SITE = "https://zynvosocial.com";
 
 /**
  * Programmatic robots.txt — replaces the static public/robots.txt.

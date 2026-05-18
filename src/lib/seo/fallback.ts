@@ -85,7 +85,7 @@ export function generateFallbackSeo(input: EventSeoInput): GeneratedSeo {
 
   const locationObj: Record<string, unknown> =
     eventMode?.toLowerCase() === "online"
-      ? { "@type": "VirtualLocation", url: eventUrl || "https://zynvo.social" }
+      ? { "@type": "VirtualLocation", url: eventUrl || "https://zynvosocial.com" }
       : {
           "@type": "Place",
           name: venue || collegeName,
@@ -118,7 +118,7 @@ export function generateFallbackSeo(input: EventSeoInput): GeneratedSeo {
     organizer: {
       "@type": "Organization",
       name: clubName || shortCollege,
-      url: "https://zynvo.social",
+      url: "https://zynvosocial.com",
     },
     ...(contactEmail
       ? { performer: { "@type": "Organization", name: shortCollege, email: contactEmail } }
@@ -127,7 +127,7 @@ export function generateFallbackSeo(input: EventSeoInput): GeneratedSeo {
       "@type": "Offer",
       price: "0",
       priceCurrency: "INR",
-      url: eventUrl || "https://zynvo.social",
+      url: eventUrl || "https://zynvosocial.com",
       availability: "https://schema.org/InStock",
     },
   };

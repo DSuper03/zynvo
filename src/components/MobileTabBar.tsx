@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { Search, Calendar, Users, MapPin, User, MapPinned } from 'lucide-react';
+import { Search, Calendar, Users, User, MapPinned } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const MobileTabBar = () => {
@@ -26,12 +26,6 @@ const MobileTabBar = () => {
       label: 'Clubs', 
       icon: Users, 
       href: '/clubs' 
-    },
-    { 
-      id: 'cmap', 
-      label: 'Map', 
-      icon: MapPin, 
-      href: '/cmap' 
     },
     {
       id: 'club-map',

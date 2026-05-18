@@ -825,7 +825,7 @@ const Eventid = () => {
                     <p className="text-emerald-800 text-sm">
                       Get your pass on{' '}
                       <a
-                        href={`https://zynvo.social/ticket/${forkedUpId}`}
+                        href={`https://zynvosocial.com/ticket/${forkedUpId}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-emerald-700 hover:text-emerald-900 underline font-medium"

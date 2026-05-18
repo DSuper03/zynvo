@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { getAllSeo } from "@/lib/seo/store";
 import { collegesWithClubs } from "@/components/colleges/college";
 
-const SITE = "https://zynvo.social";
+const SITE = "https://zynvosocial.com";
 
 /**
  * Dynamic sitemap generated at build time (and on-demand via ISR).

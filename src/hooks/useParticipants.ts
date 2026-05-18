@@ -2,7 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { toast } from 'sonner';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://zynvo.social';
+const BASE_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  'https://zynvo-be-31292664726.asia-south1.run.app';
 
 export interface ParticipantUser {
   id: string;
