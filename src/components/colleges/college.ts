@@ -12,6 +12,10 @@ export const collegesWithClubs = [
     State: 'West Bengal',
   },
   {
+    college: 'Aliah University, Kolkata, West Bengal',
+    State: 'West Bengal',
+  },
+  {
     college: 'St. Xavier\'s College, Kolkata, West Bengal',
     State: 'West Bengal',
   },
@@ -527,6 +531,10 @@ export const collegesWithClubs = [
     college: 'Sagi Ramakrishnam Raju Engineering College, Andhra pradesh',
     State: 'Andhra pradesh',
   },
+  {
+    college :'Indian Institute of Technology Kalyani (IIIT, Kalyani ), West Bengal',
+    State: 'West Bengal'
+,  },
   {
     college: 'Gayatri Vidya Parishad College of Engineering, Andhra pradesh',
     State: 'Andhra pradesh',

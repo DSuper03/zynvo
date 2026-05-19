@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { Search, Calendar, Users, MapPin } from 'lucide-react';
+import { Search, Calendar, Users, MapPin, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const MobileTabBar = () => {
@@ -35,7 +35,7 @@ const MobileTabBar = () => {
     },
     { 
       id: 'zyncers', 
-      label: 'Zyncers', 
+      label: 'People', 
       icon: () => (
         <svg 
           viewBox="0 0 24 24" 
@@ -53,6 +53,12 @@ const MobileTabBar = () => {
         </svg>
       ), 
       href: '/zyncers' 
+    },
+    {
+      id: 'profile',
+      label: 'Profile',
+      icon: User,
+      href: '/dashboard',
     },
   ];
 
@@ -74,8 +80,8 @@ const MobileTabBar = () => {
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        <div 
-          className="inline-flex items-center justify-center gap-1 px-2.5 py-2 rounded-full shadow-lg backdrop-blur-sm"
+        <div
+          className="inline-flex max-w-[calc(100vw-24px)] items-center justify-center gap-0.5 rounded-full px-1.5 py-2 shadow-lg backdrop-blur-sm"
           style={{
             backgroundColor: '#FFD700',
           }}
@@ -88,7 +94,7 @@ const MobileTabBar = () => {
               <motion.button
                 key={tab.id}
                 onClick={() => handleTabClick(tab.href)}
-                className="relative flex flex-col items-center justify-center px-2.5 py-1 rounded-full transition-all duration-200 min-w-[52px]"
+                className="relative flex min-w-[47px] flex-col items-center justify-center rounded-full px-1.5 py-1 transition-all duration-200"
                 whileTap={{ scale: 0.85 }}
                 whileHover={{ scale: 1.1 }}
               >
@@ -101,7 +107,7 @@ const MobileTabBar = () => {
                   className="flex flex-col items-center gap-0.5 relative z-10"
                 >
                   <Icon className="w-4 h-4" />
-                  <span className="text-[9px] font-bold tracking-tight whitespace-nowrap">
+                  <span className="whitespace-nowrap text-[8px] font-bold tracking-tight">
                     {tab.label}
                   </span>
                 </motion.div>
