@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://zynvo.com',
+    url: 'https://zynvosocial.com',
     siteName: 'Zynvo',
     title: 'Zynvo - Agentic Social Media Platform for Campus Communities',
     description:

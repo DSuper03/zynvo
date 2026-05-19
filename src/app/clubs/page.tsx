@@ -135,7 +135,7 @@ const ClubsPage = () => {
   const router = useRouter()
   const handleShareClub = async (club: { id: string; name: string; description?: string }) => {
     try {
-      const url = typeof window !== 'undefined' ? `${window.location.origin}/clubs/${club.id}` : `https://zynvo.com/clubs/${club.id}`;
+      const url = typeof window !== 'undefined' ? `${window.location.origin}/clubs/${club.id}` : `https://zynvosocial.com/clubs/${club.id}`;
       const text = `Check out ${club.name}. Club ID: ${club.id}`;
 
       if (navigator.share) {

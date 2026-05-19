@@ -25,6 +25,7 @@ import {
 } from '@/data/kolkataCollegeClubs';
 import { cn } from '@/lib/utils';
 
+/** Liberty is vector + buildings; avoid raster-DEM terrain (was very heavy on GPU + network). */
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 
 const categoryStyles: Record<KolkataCollegeClub['category'], string> = {
@@ -242,8 +243,17 @@ const ClubMapPage = () => {
         zoom: 9,
         minZoom: 3,
         maxZoom: 18,
-        pitch: 52,
+        // Lower default tilt = fewer pixels for building extrusions; user can still pitch with controls.
+        pitch: 38,
         bearing: -26,
+        fadeDuration: 0,
+        renderWorldCopies: false,
+        crossSourceCollisions: false,
+        canvasContextAttributes: {
+          powerPreference: 'high-performance',
+          // Can reduce input latency on some GPUs (no effect if unsupported).
+          desynchronized: true,
+        },
       });
 
       map.addControl(
@@ -253,22 +263,6 @@ const ClubMapPage = () => {
 
       map.on('load', () => {
         if (disposed) return;
-
-        try {
-          if (!map.getSource('zynvo-terrain')) {
-            map.addSource('zynvo-terrain', {
-              type: 'raster-dem',
-              url: 'https://demotiles.maplibre.org/terrain-tiles/tiles.json',
-              tileSize: 256,
-            });
-            map.setTerrain({
-              source: 'zynvo-terrain',
-              exaggeration: 1.12,
-            });
-          }
-        } catch {
-          /* terrain is optional */
-        }
 
         if (map.getLayer('building-3d')) {
           map.setPaintProperty('building-3d', 'fill-extrusion-opacity', 0.9);
@@ -350,7 +344,8 @@ const ClubMapPage = () => {
                 26,
                 ['*', ['get', 'intensity'], 3.2],
               ],
-              'circle-blur': 0.88,
+              // Slightly less blur = cheaper overdraw when many points overlap.
+              'circle-blur': 0.72,
               'circle-opacity': [
                 'min',
                 0.22,
@@ -398,7 +393,7 @@ const ClubMapPage = () => {
 
         map.fitBounds(bounds, {
           padding: { top: 56, bottom: 110, left: 36, right: 36 },
-          pitch: 48,
+          pitch: 40,
           bearing: -22,
           duration: 0,
           maxZoom: 11,
@@ -433,7 +428,7 @@ const ClubMapPage = () => {
     map.flyTo({
       center: [pos.lng, pos.lat],
       zoom: 14.8,
-      pitch: 58,
+      pitch: 48,
       bearing: map.getBearing(),
       duration: 750,
       essential: true,
@@ -451,7 +446,7 @@ const ClubMapPage = () => {
     map.flyTo({
       center: [KOLKATA_CENTER.longitude, KOLKATA_CENTER.latitude],
       zoom: 11,
-      pitch: 52,
+      pitch: 42,
       bearing: -26,
       duration: 750,
       essential: true,
@@ -553,9 +548,13 @@ const ClubMapPage = () => {
                 return (
                   <motion.button
                     key={club.id}
-                    initial={{ opacity: 0, y: 8 }}
+                    initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: Math.min(index * 0.03, 0.2) }}
+                    // Avoid long stagger when many clubs match search — keeps the sidebar snappy.
+                    transition={{
+                      duration: 0.2,
+                      delay: Math.min(index * 0.02, 0.06),
+                    }}
                     type="button"
                     onClick={() => handleClubSelect(club)}
                     className={cn(
@@ -653,8 +652,21 @@ const ClubMapPage = () => {
                     </p>
                   </div>
                   <p className="mt-1 text-xs leading-5 text-zinc-400">
-                    Tap a map pin to open Google Maps directions to that campus
-                    in a new tab. Tilt the map to see building outlines in 3D.
+                    <span className="block text-zinc-300">
+                      Touch: drag with{' '}
+                      <strong className="font-semibold text-zinc-200">
+                        one finger
+                      </strong>{' '}
+                      to pan the map; use{' '}
+                      <strong className="font-semibold text-zinc-200">
+                        two fingers
+                      </strong>{' '}
+                      (pinch or spread) to zoom in and out.
+                    </span>
+                    <span className="mt-1.5 block">
+                      Tap a pin to open Google Maps directions. Tilt or rotate
+                      the map to explore campuses in 3D.
+                    </span>
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-400">
