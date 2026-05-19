@@ -839,7 +839,7 @@ export default function PublicUserProfile() {
                   profileImage={ticketData.profilePic || ''}
                   qrCodeImage={
                     selectedEventId
-                      ? `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://zynvo.social/verify-event/${selectedEventId}`
+                      ? `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://zynvosocial.com/verify-event/${selectedEventId}`
                       : undefined
                   }
                 />

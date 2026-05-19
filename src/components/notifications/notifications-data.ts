@@ -12,11 +12,27 @@ export interface Notification {
 
 export const sampleNotifications: Notification[] = [
   {
-    id: 'ju-iic-hack-kolkata-may26',
-    title: '💻 JU Tech Club × IIC — Kolkata Hack Weekend',
-    subtitle: 'Jadavpur University — 24-hour build at the Salt Lake satellite hub. Open to Kolkata college teams.',
-    date: '2026-05-05T09:00:00.000Z',
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=juhackkolkata26&backgroundColor=fbbf24',
+    id: 'bethune-code-cafe-may26',
+    title: '☕ Bethune College — Code Cafe Meetup',
+    subtitle: 'College Street coding circle with beginner-friendly problem solving, GitHub setup, and peer mentoring.',
+    date: '2026-05-06T08:30:00.000Z',
+    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=bethunecodecafe26&backgroundColor=f59e0b',
+    type: 'upcoming',
+  },
+  {
+    id: 'rcc-newtown-ai-talk-may26',
+    title: '🧠 RCCIIT New Town — AI Builders Talk',
+    subtitle: 'Hands-on session on AI tools, prompt workflows, and student project demos near Sector V.',
+    date: '2026-05-06T13:00:00.000Z',
+    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=rcciitai26&backgroundColor=6366f1',
+    type: 'upcoming',
+  },
+  {
+    id: 'jadavpur-photowalk-may26',
+    title: '📸 JU Lens Club — South Kolkata Photowalk',
+    subtitle: 'Golden-hour campus walk covering street frames, portraits, and quick editing tips for reels.',
+    date: '2026-05-07T11:30:00.000Z',
+    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=julenswalk26&backgroundColor=14b8a6',
     type: 'upcoming',
   },
   {
@@ -28,11 +44,35 @@ export const sampleNotifications: Notification[] = [
     type: 'upcoming',
   },
   {
+    id: 'ashutosh-quiz-evening-may26',
+    title: '🏆 Asutosh College — Quiz Evening',
+    subtitle: 'Southern Avenue inter-college quiz with pop culture, sports, Kolkata history, and tech rounds.',
+    date: '2026-05-09T12:00:00.000Z',
+    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=asutoshquiz26&backgroundColor=10b981',
+    type: 'upcoming',
+  },
+  {
     id: 'xaviers-parkstreet-music-may26',
     title: '🎵 St. Xavier\'s Calcutta — Spring Fest Night',
     subtitle: 'Park Street campus open-air: bands, acoustic sets, and X-Rhythms club showcase.',
     date: '2026-05-10T17:00:00.000Z',
     image: 'https://api.dicebear.com/7.x/shapes/svg?seed=xaviersfest26&backgroundColor=a855f7',
+    type: 'upcoming',
+  },
+  {
+    id: 'amity-kolkata-startup-may26',
+    title: '💡 Amity Kolkata — Startup Sprint',
+    subtitle: 'New Town ideation sprint for student founders: validation, pitch practice, and mentor feedback.',
+    date: '2026-05-11T09:00:00.000Z',
+    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=amitystartup26&backgroundColor=ef4444',
+    type: 'upcoming',
+  },
+  {
+    id: 'nsec-garia-cyber-may26',
+    title: '🔐 NSEC Garia — Cybersecurity Bootcamp',
+    subtitle: 'Intro CTF challenges, web security basics, and blue-team demos hosted by the campus tech society.',
+    date: '2026-05-12T07:30:00.000Z',
+    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=nseccyber26&backgroundColor=0ea5e9',
     type: 'upcoming',
   },
   {

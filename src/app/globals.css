@@ -1,3 +1,5 @@
+@import "maplibre-gl/dist/maplibre-gl.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -128,6 +130,98 @@
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
+}
+
+.club-maplibre-container.maplibregl-map {
+  height: 100%;
+  width: 100%;
+  background: #050505;
+  font: inherit;
+  outline: none;
+}
+
+.maplibregl-ctrl-bottom-right {
+  margin-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .maplibregl-ctrl-bottom-right {
+    margin-bottom: 12px;
+  }
+}
+
+.maplibregl-ctrl-group {
+  overflow: hidden;
+  border: 1px solid rgba(63, 63, 70, 0.9) !important;
+  border-radius: 10px !important;
+  background: rgba(0, 0, 0, 0.82) !important;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.maplibregl-ctrl-group button {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.maplibregl-ctrl-group button:hover {
+  background-color: rgba(250, 204, 21, 0.14) !important;
+}
+
+.maplibregl-ctrl-attrib {
+  margin: 0 0 6px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #a1a1aa;
+  font-size: 10px;
+  padding: 3px 8px;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: #fde047;
+}
+
+.maplibregl-popup-content {
+  border: 1px solid rgba(63, 63, 70, 0.9);
+  border-radius: 10px;
+  background: rgba(9, 9, 11, 0.94);
+  color: #f4f4f5;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.36);
+  backdrop-filter: blur(12px);
+  padding: 10px 12px;
+  min-width: 180px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.maplibregl-popup-content span,
+.maplibregl-popup-content small {
+  color: #a1a1aa;
+}
+
+.maplibregl-popup-close-button {
+  color: #71717a;
+  font-size: 18px;
+  padding: 4px 8px;
+}
+
+.zynvo-map-marker {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+.zynvo-map-marker span {
+  display: block;
+  height: 18px;
+  width: 18px;
+  border: 3px solid #050505;
+  border-radius: 999px;
+  background: #facc15;
+  box-shadow:
+    0 0 0 2px rgba(250, 204, 21, 0.55),
+    0 0 26px rgba(250, 204, 21, 0.6);
 }
 
 @theme inline {

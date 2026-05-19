@@ -3,12 +3,12 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvo.social https://challenges.cloudflare.com https://www.googletagmanager.com;
+      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvo.social https://clerk.zynvosocial.com https://challenges.cloudflare.com https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://www.gstatic.com;
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com https://api.qrserver.com https://img.clerk.com https://*.clerk.accounts.dev https://clerk.zynvo.social https://www.googletagmanager.com https://www.google-analytics.com https://s3-us-west-2.amazonaws.com;
-      connect-src 'self' data: http://localhost:* https://backend.zynvo.social https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com https://zynvo-backend-1.onrender.com https://zynvo-backend.onrender.com https://zynvo-be-31292664726.asia-south1.run.app https://zynvosocial-be-274792984950.asia-south1.run.app https://api.dicebear.com https://api.qrserver.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvo.social https://www.google-analytics.com https://www.googletagmanager.com;
+      img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com https://api.qrserver.com https://img.clerk.com https://*.clerk.accounts.dev https://clerk.zynvo.social https://clerk.zynvosocial.com https://*.googleusercontent.com https://ssl.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com https://s3-us-west-2.amazonaws.com https://*.tile.openstreetmap.org https://tiles.openfreemap.org https://demotiles.maplibre.org;
+      connect-src 'self' data: http://localhost:* https://backend.zynvo.social https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com https://zynvo-backend-1.onrender.com https://zynvo-backend.onrender.com https://zynvo-be-31292664726.asia-south1.run.app https://zynvosocial-be-274792984950.asia-south1.run.app https://api.dicebear.com https://api.qrserver.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvo.social https://clerk.zynvosocial.com https://www.google-analytics.com https://www.googletagmanager.com https://tiles.openfreemap.org https://demotiles.maplibre.org https://accounts.google.com https://www.googleapis.com https://oauth2.googleapis.com https://www.gstatic.com;
       font-src 'self' data:;
-      frame-src 'self' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvo.social https://challenges.cloudflare.com https://www.instagram.com https://instagram.com;
+      frame-src 'self' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvo.social https://clerk.zynvosocial.com https://accounts.google.com https://challenges.cloudflare.com https://www.instagram.com https://instagram.com;
       worker-src 'self' blob:;
     `
       .replace(/\s{2,}/g, ' ')
@@ -35,10 +35,18 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
+const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://zynvo-be-31292664726.asia-south1.run.app').replace(/\/$/, '');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Next 16 uses Turbopack by default; empty config acknowledges plugins may add webpack
   turbopack: {},
+  env: {
+    NEXT_PUBLIC_BACKEND_URL:
+      process.env.NODE_ENV === 'development'
+        ? ''
+        : process.env.NEXT_PUBLIC_BACKEND_URL,
+  },
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
@@ -180,8 +188,8 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/proxy/:path*',
-        destination: 'https://zynvo-backend-1.onrender.com/:path*',
+        source: '/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },

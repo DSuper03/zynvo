@@ -57,6 +57,16 @@ export function consumeReturnTo(): string | null {
   }
 }
 
+export function consumeBrowserPostAuthRedirect(): string {
+  if (typeof window === 'undefined') return '/dashboard';
+  const fromUrl = normalizeReturnTo(new URLSearchParams(window.location.search).get('returnTo'));
+  if (fromUrl) {
+    clearStoredReturnTo();
+    return fromUrl;
+  }
+  return consumeReturnTo() ?? '/dashboard';
+}
+
 export function buildAuthHref(
   base: '/auth/signin' | '/auth/signup',
   pathname: string | null | undefined

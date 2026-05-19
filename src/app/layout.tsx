@@ -25,7 +25,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://zynvo.social'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://zynvosocial.com'),
   manifest: "/manifest.json",
   title:
     'Zynvo - Agentic Social Media Platform for Campus Communities | Student Network',
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://zynvo.com',
+    url: 'https://zynvosocial.com',
     siteName: 'Zynvo',
     title: 'Zynvo - Agentic Social Media Platform for Campus Communities',
     description:
@@ -123,7 +123,7 @@ export default function RootLayout({
         },
       }}
     >
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
        <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}

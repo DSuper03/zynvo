@@ -1,4 +1,5 @@
 //'use client';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
@@ -9,9 +10,9 @@ import {
   User,
   LogOut,
   Trophy,
-  MapPinCheck,
+  MapPinned,
 } from 'lucide-react';
-import { FaBahai, FaUsers } from 'react-icons/fa';
+import { FaUsers } from 'react-icons/fa';
 import { useWarmup } from './WarmupProvider';
 import { cn } from '@/lib/utils';
 
@@ -19,6 +20,13 @@ interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
 }
+
+type SidebarMenuItem = {
+  icon: ReactNode;
+  label: string;
+  href: string;
+  accent?: boolean;
+};
 
 const ZYNVO_LOGO_URL =
   'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226&v=3';
@@ -28,13 +36,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
   const { userData, loading } = useWarmup();
   const { name, profileAvatar: profile } = userData;
 
-  const menuItems = [
+  const menuItems: SidebarMenuItem[] = [
     { icon: <Search size={22} />, label: 'Discover', href: '/discover' },
     { icon: <FaUsers size={22} />, label: 'Zyncers', href: '/zyncers' },
     { icon: <Calendar size={22} />, label: 'Events', href: '/events' },
     { icon: <Users size={22} />, label: 'Clubs', href: '/clubs' },
-    { icon: <FaBahai size={20} />, label: 'AI', href: '/ai', accent: true },
-    { icon: <MapPinCheck size={22} />, label: 'Campus Map', href: '/cmap' },
+    // { icon: <FaBahai size={20} />, label: 'AI', href: '/ai', accent: true },
+    // { icon: <MapPinCheck size={22} />, label: 'Campus Map', href: '/cmap' },
+    { icon: <MapPinned size={22} />, label: 'Club Map', href: '/club-map' },
     { icon: <Trophy size={22} />, label: 'Leaderboard', href: '/leaderboard' },
     { icon: <User size={22} />, label: 'Profile', href: '/dashboard' },
   ];
