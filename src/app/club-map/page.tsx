@@ -180,6 +180,7 @@ const ClubMapPage = () => {
     kolkataCollegeClubs[0]?.id ?? ''
   );
   const [mapReady, setMapReady] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
   const categoryCount = useMemo(
     () => new Set(kolkataCollegeClubs.map((club) => club.category)).size,
     []
@@ -228,41 +229,54 @@ const ClubMapPage = () => {
 
     let disposed = false;
     markerRefs.current = {};
+    /** MapLibre does not reliably track `%` sizing through grid/flex transitions; resizing fixes a black canvas until refresh. */
+    let resizeObs: ResizeObserver | null = null;
 
     const setup = async () => {
-      const maplibregl = (await import('maplibre-gl')).default;
+      try {
+        const maplibregl = (await import('maplibre-gl')).default;
 
-      if (disposed || !mapNodeRef.current) {
-        return;
-      }
+        if (disposed || !mapNodeRef.current) {
+          return;
+        }
 
-      const map = new maplibregl.Map({
-        container: mapNodeRef.current,
-        style: OPENFREEMAP_STYLE,
-        center: [KOLKATA_CENTER.longitude, KOLKATA_CENTER.latitude],
-        zoom: 9,
-        minZoom: 3,
-        maxZoom: 18,
-        // Lower default tilt = fewer pixels for building extrusions; user can still pitch with controls.
-        pitch: 38,
-        bearing: -26,
-        fadeDuration: 0,
-        renderWorldCopies: false,
-        crossSourceCollisions: false,
-        canvasContextAttributes: {
-          powerPreference: 'high-performance',
-          // Can reduce input latency on some GPUs (no effect if unsupported).
-          desynchronized: true,
-        },
-      });
+        const map = new maplibregl.Map({
+          container: mapNodeRef.current,
+          style: OPENFREEMAP_STYLE,
+          center: [KOLKATA_CENTER.longitude, KOLKATA_CENTER.latitude],
+          zoom: 9,
+          minZoom: 3,
+          maxZoom: 18,
+          // Lower default tilt = fewer pixels for building extrusions; user can still pitch with controls.
+          pitch: 38,
+          bearing: -26,
+          fadeDuration: 0,
+          renderWorldCopies: false,
+          crossSourceCollisions: false,
+        });
 
-      map.addControl(
-        new maplibregl.NavigationControl({ visualizePitch: true }),
-        'bottom-right'
-      );
+        map.on('error', () => {
+          setMapError('Map tiles failed to load. Check internet or try refreshing.');
+        });
 
-      map.on('load', () => {
-        if (disposed) return;
+        const container = mapNodeRef.current;
+        if (typeof window !== 'undefined' && typeof window.ResizeObserver !== 'undefined') {
+          resizeObs = new ResizeObserver(() => {
+            if (!disposed) {
+              map.resize();
+            }
+          });
+          resizeObs.observe(container);
+        }
+
+        map.addControl(
+          new maplibregl.NavigationControl({ visualizePitch: true }),
+          'bottom-right'
+        );
+
+        map.on('load', () => {
+          if (disposed) return;
+          setMapError(null);
 
         if (map.getLayer('building-3d')) {
           map.setPaintProperty('building-3d', 'fill-extrusion-opacity', 0.9);
@@ -399,18 +413,38 @@ const ClubMapPage = () => {
           maxZoom: 11,
         });
 
-        mapRef.current = map;
-        setMapReady(true);
-      });
+        const triggerResize = () => {
+          if (!disposed) {
+            map.resize();
+          }
+        };
+        triggerResize();
+        queueMicrotask(triggerResize);
+        requestAnimationFrame(triggerResize);
+        setTimeout(triggerResize, 120);
+
+          mapRef.current = map;
+          setMapReady(true);
+        });
+      } catch {
+        if (!disposed) {
+          setMapError('Map could not initialize on this device/browser.');
+          setMapReady(false);
+        }
+      }
     };
 
     setup();
 
     return () => {
       disposed = true;
+      resizeObs?.disconnect();
+      resizeObs = null;
       markerRefs.current = {};
       mapRef.current?.remove();
       mapRef.current = null;
+      setMapReady(false);
+      setMapError(null);
     };
   }, []);
 
@@ -455,7 +489,7 @@ const ClubMapPage = () => {
 
   return (
     <div className="min-h-full overflow-hidden rounded-2xl border border-zinc-900 bg-[#050505] text-white shadow-2xl">
-      <div className="grid min-h-[calc(100vh-3rem)] lg:grid-cols-[390px_1fr]">
+      <div className="grid min-h-[calc(100vh-3rem)] lg:grid-cols-[390px_minmax(0,1fr)]">
         <aside className="flex min-h-[520px] flex-col border-b border-zinc-900 bg-zinc-950/80 lg:border-b-0 lg:border-r">
           <div className="space-y-5 border-b border-zinc-900 p-5">
             <div className="flex flex-wrap items-center gap-2">
@@ -600,6 +634,14 @@ const ClubMapPage = () => {
             className="club-maplibre-container h-full min-h-[620px] w-full"
             aria-label="College club map"
           />
+          {mapError ? (
+            <div className="absolute inset-0 z-[420] flex items-center justify-center bg-black/85 p-6 text-center">
+              <div className="max-w-md rounded-xl border border-zinc-700 bg-zinc-950/90 p-5">
+                <p className="text-base font-semibold text-white">Map unavailable</p>
+                <p className="mt-2 text-sm text-zinc-300">{mapError}</p>
+              </div>
+            </div>
+          ) : null}
 
           <div className="pointer-events-none absolute inset-x-0 top-0 z-[400] p-4">
             <div className="pointer-events-auto flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-800 bg-black/80 p-3 backdrop-blur-md">
