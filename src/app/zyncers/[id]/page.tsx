@@ -210,6 +210,8 @@ export default function PublicUserProfile() {
   const [clubId, setClubId] = useState<string | null>(null);
   const [isFounder, setIsFounder] = useState(false);
   const [isMember, setIsMember] = useState(false);
+  /** Logged-in user's id (from getUser); used so only the profile owner can open tickets. */
+  const [viewerUserId, setViewerUserId] = useState<string | null>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -231,6 +233,36 @@ export default function PublicUserProfile() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    if (!isClient || !token) {
+      setViewerUserId(null);
+      return;
+    }
+
+    let cancelled = false;
+    const base = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
+    if (!base) {
+      setViewerUserId(null);
+      return;
+    }
+
+    axios
+      .get<{ user?: { id?: string } }>(`${base}/api/v1/user/getUser`, {
+        headers: { authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const id = res.data?.user?.id;
+        if (!cancelled) setViewerUserId(id ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setViewerUserId(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isClient, token]);
 
   useEffect(() => {
     if (!isClient || !userId) return;
