@@ -59,8 +59,8 @@ export default function SEOHead({
     applicationCategory: 'SocialNetworkingApplication',
     applicationSubCategory: 'Agentic Social Media Platform',
     operatingSystem: 'Web, iOS, Android',
-    url: 'https://zynvo.social',
-    downloadUrl: 'https://zynvo.social',
+    url: 'https://zynvosocial.com',
+    downloadUrl: 'https://zynvosocial.com',
     creator: {
       '@type': 'Organization',
       name: 'Zynvo Team',
@@ -193,8 +193,8 @@ export default function SEOHead({
       />
       <meta name="designer" content="Zynvo UX Team" />
       <meta name="owner" content="Zynvo" />
-      <meta name="url" content="https://zynvo.social" />
-      <meta name="identifier-URL" content="https://zynvo.social" />
+      <meta name="url" content="https://zynvosocial.com" />
+      <meta name="identifier-URL" content="https://zynvosocial.com" />
       <meta name="coverage" content="Worldwide" />
       <meta name="distribution" content="Global" />
       <meta name="rating" content="General" />

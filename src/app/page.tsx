@@ -124,7 +124,7 @@ export default function Home() {
             name: 'Zynvo',
             description:
               'Agentic social media platform for campus communities that intelligently connects college students with clubs, events, and opportunities',
-            url: 'https://zynvo.social',
+            url: 'https://zynvosocial.com',
             applicationCategory: 'SocialNetworkingApplication',
             operatingSystem: 'Web, iOS, Android',
             offers: {
@@ -135,7 +135,7 @@ export default function Home() {
             creator: {
               '@type': 'Organization',
               name: 'Zynvo Team',
-              url: 'https://zynvo.social/founders',
+              url: 'https://zynvosocial.com/founders',
             },
             keywords:
               'agentic social media platform, intelligent campus networking, college student connections, AI-powered university platform',
@@ -153,7 +153,7 @@ export default function Home() {
               'Shared club resources',
               'PWA — installable on mobile',
             ],
-            screenshot: 'https://zynvo.social/landing%20page.png',
+            screenshot: 'https://zynvosocial.com/landing%20page.png',
             aggregateRating: {
               '@type': 'AggregateRating',
               ratingValue: '4.8',
@@ -173,7 +173,7 @@ export default function Home() {
             '@type': 'Organization',
             name: 'Zynvo',
             alternateName: 'Zynvo - Agentic Social Media Platform',
-            url: 'https://zynvo.social',
+            url: 'https://zynvosocial.com',
             logo: 'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226',
             description:
               'The leading agentic social media platform revolutionizing campus communities through intelligent networking and AI-powered connections',
@@ -216,7 +216,7 @@ export default function Home() {
             '@context': 'https://schema.org',
             '@type': 'WebSite',
             name: 'Zynvo',
-            url: 'https://zynvo.social',
+            url: 'https://zynvosocial.com',
             description:
               'Zynvo is a campus social network for college students in India — discover clubs, join events, and connect with your campus community.',
             potentialAction: {
@@ -224,7 +224,7 @@ export default function Home() {
               target: {
                 '@type': 'EntryPoint',
                 urlTemplate:
-                  'https://zynvo.social/discover?q={search_term_string}',
+                  'https://zynvosocial.com/discover?q={search_term_string}',
               },
               'query-input': 'required name=search_term_string',
             },
@@ -261,7 +261,7 @@ export default function Home() {
                 name: 'How do I join a club on Zynvo?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Sign up at zynvo.social/auth/signup, then browse clubs at zynvo.social/discover and tap Join on any club that interests you.',
+                  text: 'Sign up at zynvosocial.com/auth/signup, then browse clubs at zynvosocial.com/discover and tap Join on any club that interests you.',
                 },
               },
               {
@@ -301,7 +301,7 @@ export default function Home() {
                 name: 'Who founded Zynvo?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Zynvo was founded in 2026 by Anirban Ghosh (CEO), Mohak Chakraborty (COO), and Swarnendu Ghosh (CTO). Learn more at zynvo.social/founders.',
+                  text: 'Zynvo was founded in 2026 by Anirban Ghosh (CEO), Mohak Chakraborty (COO), and Swarnendu Ghosh (CTO). Learn more at zynvosocial.com/founders.',
                 },
               },
             ],

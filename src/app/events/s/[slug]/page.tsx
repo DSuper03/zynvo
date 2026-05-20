@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSeoBySlug } from "@/lib/seo/store";
 
-const SITE_URL = "https://zynvo.social";
+const SITE_URL = "https://zynvosocial.com";
 
 /** SEO-friendly public URL: /events/s/{slug} (avoids conflict with /events/[id]) */
 const SEO_PATH_PREFIX = "/events/s";

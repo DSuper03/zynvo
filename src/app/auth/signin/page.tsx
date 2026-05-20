@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { useSignIn } from '@clerk/nextjs';
 import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
 import {
-  consumeReturnTo,
+  consumeBrowserPostAuthRedirect,
   persistReturnTo,
   clearStoredReturnTo,
   peekReturnTo,
@@ -108,7 +108,7 @@ export default function SignIn() {
         localStorage.setItem('token', res.data.token);
         sessionStorage.setItem('activeSession', 'true');
         toast.success('Login successful!');
-        router.push(consumeReturnTo() ?? '/dashboard');
+        router.push(consumeBrowserPostAuthRedirect());
         return;
       }
 

@@ -4,7 +4,7 @@
 
 ## What is Zynvo?
 
-Zynvo (https://zynvo.social) is a campus social network designed for college students in India. It helps students discover and join clubs, find events happening on their campus, meet like-minded peers, and stay connected to campus life — replacing scattered WhatsApp groups and notice boards with a single, organised platform.
+Zynvo (https://zynvosocial.com) is a campus social network designed for college students in India. It helps students discover and join clubs, find events happening on their campus, meet like-minded peers, and stay connected to campus life — replacing scattered WhatsApp groups and notice boards with a single, organised platform.
 
 Think of it as "the social layer of your college" — a place where students actually find their tribe, join communities, and make college worth it.
 
@@ -34,20 +34,20 @@ Founded in 2026. Based in India.
 
 ## Key URLs
 
-- Homepage: https://zynvo.social
-- Discover Clubs: https://zynvo.social/discover
-- Events: https://zynvo.social/events
-- Sign Up: https://zynvo.social/auth/signup
-- Founders: https://zynvo.social/founders
-- FAQ: https://zynvo.social/faq
-- Contact: https://zynvo.social/contact
+- Homepage: https://zynvosocial.com
+- Discover Clubs: https://zynvosocial.com/discover
+- Events: https://zynvosocial.com/events
+- Sign Up: https://zynvosocial.com/auth/signup
+- Founders: https://zynvosocial.com/founders
+- FAQ: https://zynvosocial.com/faq
+- Contact: https://zynvosocial.com/contact
 
 ## Social Media
 
-- Instagram: https://www.instagram.com/zynvo.social
+- Instagram: https://www.instagram.com/zynvosocial.com
 - Twitter / X: https://x.com/Zynvonow
 - LinkedIn: https://www.linkedin.com/company/dsuper03
 
 ## Optional: Full Details
 
-- Full product brief: https://zynvo.social/llms-full.txt
+- Full product brief: https://zynvosocial.com/llms-full.txt

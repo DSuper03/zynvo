@@ -669,49 +669,49 @@ const Eventid = () => {
         </Link>
 
         {/* Hero — framed panel for clearer hierarchy on dark bg */}
-        <section className="mb-8 pb-8 border-b border-gray-800/60">
-          <div className="rounded-2xl border border-gray-800/80 bg-gradient-to-b from-gray-950/80 to-black/40 p-4 sm:p-6 md:p-8 shadow-lg shadow-black/20">
+        <section className="mb-8 pb-8 border-b border-gray-800">
+          <div className="rounded-2xl border border-yellow-500/25 bg-[#0B0B0B] p-4 shadow-lg shadow-black/20 sm:p-6 md:p-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
               {/* Left: Event Info */}
               <div className="lg:col-span-2 space-y-4">
                 <div>
-                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-2">
+                  <p className="text-yellow-400 text-xs uppercase tracking-wider mb-2">
                     Event
                   </p>
-                  <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-yellow-400 leading-[1.15] tracking-tight">
+                  <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-white leading-[1.15] tracking-tight">
                     {data.EventName || 'Event Title'}
                   </h1>
                 </div>
 
                 {/* Event Meta Chips */}
                 <div className="flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm mt-2">
-                  <div className="inline-flex items-center gap-2 rounded-md bg-gray-800/60 px-3 py-1.5 text-gray-200">
+                  <div className="inline-flex items-center gap-2 rounded-md border border-gray-800 bg-gray-900/80 px-3 py-1.5 text-gray-200">
                     <CalendarIcon className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 shrink-0" />
                     <span>
                       {formatDateRange(data.startDate, data.endDate)}
                     </span>
                   </div>
                   {data.university && (
-                    <div className="inline-flex items-center gap-2 rounded-md bg-gray-800/60 px-3 py-1.5 text-gray-200 max-w-full min-w-0">
+                    <div className="inline-flex items-center gap-2 rounded-md border border-gray-800 bg-gray-900/80 px-3 py-1.5 text-gray-200 max-w-full min-w-0">
                       <MapPin className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 shrink-0" />
                       <span className="truncate">{data.university}</span>
                     </div>
                   )}
-                  <div className="inline-flex items-center gap-2 rounded-md bg-gray-800/60 px-3 py-1.5 text-gray-200">
+                  <div className="inline-flex items-center gap-2 rounded-md border border-gray-800 bg-gray-900/80 px-3 py-1.5 text-gray-200">
                     {isOnline ? (
                       <Globe className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
                     ) : (
                       <Square className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
                     )}
-                    <span className="text-gray-200">
+                    <span>
                       {isOnline ? 'Online' : data.EventMode || 'Mode TBA'}
                     </span>
                   </div>
                   <div
                     className={`inline-flex items-center gap-2 rounded-full px-3 py-1 border text-xs md:text-sm ${
                       data.applicationStatus === 'open'
-                        ? 'border-emerald-400/60 bg-emerald-500/10 text-emerald-300'
-                        : 'border-red-400/60 bg-red-500/10 text-red-300'
+                        ? 'border-yellow-500/30 bg-yellow-500/10 text-yellow-300'
+                        : 'border-red-700 bg-red-50 text-red-700'
                     }`}
                   >
                     {data.applicationStatus === 'open' && (
@@ -725,15 +725,15 @@ const Eventid = () => {
 
                 {/* Payment Info for Paid Events */}
                 {data.isPaidEvent && (
-                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                  <div className="bg-yellow-500/10 border border-yellow-500/25 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-2">
                       <CreditCard className="w-4 h-4 text-yellow-400" />
-                      <span className="font-semibold text-yellow-400">Payment Required</span>
+                      <span className="font-semibold text-yellow-300">Payment Required</span>
                     </div>
                     <p className="text-sm text-gray-300">
                       This is a paid event. After clicking register, you'll need to scan the QR code and upload your payment screenshot.
                     </p>
-                    <p className="text-sm font-semibold text-yellow-400 mt-2">
+                    <p className="text-sm font-semibold text-yellow-300 mt-2">
                       Amount: ₹{data.paymentAmount}
                     </p>
                   </div>
@@ -743,7 +743,7 @@ const Eventid = () => {
                 <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2">
                   {signedin ? (
                     isUserAttendingEvent() ? (
-                      <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 text-green-400 rounded-lg font-medium">
+                      <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 rounded-lg font-medium">
                         <CheckSquare className="w-4 h-4" />
                         <span>You're attending</span>
                       </div>
@@ -754,41 +754,41 @@ const Eventid = () => {
                           disabled={isRegistering || isRegistrationDisabled}
                           className={`min-h-11 w-full sm:w-auto rounded-lg px-5 py-2.5 font-medium ${
                             isRegistering || isRegistrationDisabled
-                              ? 'bg-gray-800 text-gray-400 cursor-not-allowed'
-                              : 'bg-yellow-400 hover:bg-yellow-500 text-black'
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : 'bg-amber-900 hover:bg-amber-950 text-yellow-200'
                           }`}
                         >
                           {isRegistering ? 'Registering...' : isEventEnded ? 'Event Ended' : 'Register Now'}
                         </Button>
                         {isEventEnded && (
-                          <p className="text-xs text-red-400">This event has already ended</p>
+                          <p className="text-xs text-red-700">This event has already ended</p>
                         )}
                         {isCollegeRestricted && data.university && (
-                          <p className="text-xs text-gray-400 max-w-xl">
+                          <p className="text-sm text-gray-300 max-w-xl">
                             Organizer college:{' '}
-                            <span className="text-gray-200">{data.university}</span>
-                            <span className="text-yellow-500/90">
+                            <span className="text-yellow-300">{data.university}</span>
+                            <span className="text-gray-400">
                               {' '}
                               · Limited to students of this college
                             </span>
                           </p>
                         )}
                         {isCollegeNameMissing && (
-                          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-yellow-300">
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-300">
                             <span>
                               Tap Register to add your college in the prompt, or
                               update your profile first.
                             </span>
                             <Button
                               onClick={() => router.push('/dashboard')}
-                              className="bg-yellow-400/90 hover:bg-yellow-400 text-black px-3 py-1 text-xs"
+                              className="bg-amber-900 hover:bg-amber-950 text-yellow-200 px-3 py-1 text-xs"
                             >
                               Complete profile
                             </Button>
                           </div>
                         )}
                         {!isCollegeRestrictionBlocking && registrationNotice && (
-                          <p className="text-xs text-red-400">
+                          <p className="text-xs text-red-700">
                             {registrationNotice}
                           </p>
                         )}
@@ -797,7 +797,7 @@ const Eventid = () => {
                   ) : (
                     <Button
                       onClick={() => setIsAuthModalOpen(true)}
-                      className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-yellow-400 hover:bg-yellow-500 text-black w-full sm:w-auto"
+                      className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-amber-900 hover:bg-amber-950 text-yellow-200 w-full sm:w-auto"
                     >
                       {hasTokenForModal
                         ? 'Sign in to Register'
@@ -809,7 +809,7 @@ const Eventid = () => {
                     href={googleCalendarHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2.5 bg-gray-900 border border-gray-800 hover:border-gray-700 text-white transition-colors w-full sm:w-auto"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2.5 bg-gray-900 border border-gray-800 hover:border-yellow-400/50 text-white transition-colors w-full sm:w-auto"
                   >
                     <CalendarIcon className="w-4 h-4" />
                     <span>Add to Calendar</span>
@@ -818,17 +818,17 @@ const Eventid = () => {
 
                 {/* Success notice */}
                 {forkedUpId && (
-                  <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                    <p className="text-green-400 font-medium mb-1 text-sm">
+                  <div className="mt-4 p-4 bg-emerald-50 border border-emerald-700 rounded-lg">
+                    <p className="text-emerald-900 font-medium mb-1 text-sm">
                       Registration Successful! 🎉
                     </p>
-                    <p className="text-gray-300 text-sm">
+                    <p className="text-emerald-800 text-sm">
                       Get your pass on{' '}
                       <a
-                        href={`https://zynvo.social/ticket/${forkedUpId}`}
+                        href={`https://zynvosocial.com/ticket/${forkedUpId}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-yellow-400 hover:text-yellow-300 underline font-medium"
+                        className="text-emerald-700 hover:text-emerald-900 underline font-medium"
                       >
                         Zynced It
                       </a>
@@ -839,23 +839,27 @@ const Eventid = () => {
 
                 {/* WhatsApp — hero left column, aligned with poster row */}
                 {data.whatsappLink && isUserAttendingEvent() && (
-                  <div className="mt-4 p-4 bg-green-500/10 border border-green-500/25 rounded-lg">
+                  <div className="mt-4 p-4 bg-gray-900/80 border border-gray-800 rounded-lg">
                     <div className="flex items-start gap-3">
-                      <span className="text-green-400 text-lg shrink-0" aria-hidden>
-                        💬
-                      </span>
+                       <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 32 32"
+                        className="text-yellow-400 w-5 h-5 shrink-0 fill-current"
+                        >
+                        <path d="M16.001 3C9.372 3 4 8.372 4 15c0 2.385.699 4.607 1.898 6.48L4 29l7.722-1.867A11.93 11.93 0 0016.001 27C22.63 27 28 21.628 28 15S22.63 3 16.001 3zm0 21.6c-1.98 0-3.84-.58-5.4-1.58l-.38-.24-4.58 1.1 1.22-4.46-.26-.4A9.58 9.58 0 016.4 15c0-5.3 4.3-9.6 9.6-9.6s9.6 4.3 9.6 9.6-4.3 9.6-9.6 9.6zm5.28-7.2c-.29-.14-1.7-.84-1.96-.94-.26-.1-.45-.14-.64.14-.19.29-.73.94-.9 1.13-.16.19-.33.21-.62.07-.29-.14-1.22-.45-2.33-1.43-.86-.76-1.44-1.7-1.61-1.99-.17-.29-.02-.44.12-.58.12-.12.29-.33.43-.5.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.5-.07-.14-.64-1.54-.88-2.11-.23-.56-.47-.48-.64-.49h-.55c-.19 0-.5.07-.76.36-.26.29-1 1-.98 2.44.02 1.44 1.04 2.83 1.18 3.03.14.19 2.03 3.1 4.92 4.34.69.3 1.23.48 1.65.61.69.22 1.31.19 1.8.12.55-.08 1.7-.69 1.94-1.36.24-.67.24-1.25.17-1.36-.07-.1-.26-.17-.55-.31z"/>
+                        </svg>
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-green-400 text-sm mb-1">
+                        <h3 className="font-semibold text-white text-sm mb-1">
                           Join the WhatsApp group
                         </h3>
-                        <p className="text-gray-400 text-xs mb-3">
+                        <p className="text-gray-300 text-sm mb-3">
                           Stay updated and connect with other participants.
                         </p>
                         <a
                           href={data.whatsappLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg text-sm font-medium transition-colors"
                         >
                           <span>Open WhatsApp</span>
                           <ChevronRight className="w-4 h-4" />
@@ -877,7 +881,7 @@ const Eventid = () => {
 
               {/* Right: Poster */}
               <div className="lg:col-span-1">
-                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-gray-800/50">
+                <div className="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-gray-900 border border-gray-800">
                   {data.posterUrl ? (
                     <Image
                       src={data.posterUrl}
@@ -931,7 +935,7 @@ const Eventid = () => {
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {activeTab === 'overview' && (
-              <div className="py-1">
+              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-5 sm:p-6">
                 <h2 className="text-xl font-bold text-yellow-400 mb-4">
                   About This Event
                 </h2>
@@ -942,17 +946,17 @@ const Eventid = () => {
 
                 {/* Event Website Link */}
                 {data.eventWebsite && (
-                  <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                  <div className="mb-6 p-4 bg-gray-900/70 border border-gray-800 rounded-lg">
                     <div className="flex items-start gap-3">
-                      <div className="text-blue-400 text-lg">🌐</div>
+                      <Globe className="w-5 h-5 text-yellow-400 mt-0.5 shrink-0" />
                       <div className="flex-1">
-                        <h3 className="font-semibold text-blue-400 mb-2">Event Website</h3>
+                        <h3 className="font-semibold text-white mb-2">Event Website</h3>
                         <p className="text-gray-300 text-sm mb-3">Visit the official event website for more information.</p>
                         <a
                           href={data.eventWebsite}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg font-medium transition-colors"
                         >
                           <span>Visit Website</span>
                           <ChevronRight className="w-4 h-4" />
@@ -964,17 +968,17 @@ const Eventid = () => {
 
                 {/* Registration Form Link */}
                 {data.form && (
-                  <div className="mb-6 p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                  <div className="mb-6 p-4 bg-gray-900/70 border border-gray-800 rounded-lg">
                     <div className="flex items-start gap-3">
-                      <div className="text-purple-400 text-lg">📋</div>
+                      <CheckSquare className="w-5 h-5 text-yellow-400 mt-0.5 shrink-0" />
                       <div className="flex-1">
-                        <h3 className="font-semibold text-purple-400 mb-2">Registration Form</h3>
+                        <h3 className="font-semibold text-white mb-2">Registration Form</h3>
                         <p className="text-gray-300 text-sm mb-3">Fill out the registration form to participate in this event.</p>
                         <a
                           href={data.form}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg font-medium transition-colors"
                         >
                           <span>Open Form</span>
                           <ChevronRight className="w-4 h-4" />
@@ -1002,7 +1006,7 @@ const Eventid = () => {
                       {/* QR Code Display */}
                       {data.paymentQRCode ? (
                         <div className="space-y-2">
-                          <p className="text-sm text-gray-400">Payment QR Code</p>
+                          <p className="text-sm text-gray-300">Payment QR Code</p>
                           <div className="bg-white p-3 rounded-lg inline-block">
                             <Image
                               src={data.paymentQRCode}
@@ -1024,8 +1028,8 @@ const Eventid = () => {
                           </a>
                         </div>
                       ) : (
-                        <div className="bg-gray-800/50 p-4 rounded border border-dashed border-gray-700 text-center">
-                          <p className="text-gray-400 text-sm">QR Code not available</p>
+                        <div className="bg-gray-900/70 p-4 rounded border border-dashed border-gray-700 text-center">
+                          <p className="text-gray-300 text-sm">QR Code not available</p>
                         </div>
                       )}
                     </div>
@@ -1034,20 +1038,20 @@ const Eventid = () => {
 
                 {/* Details Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-800">
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">
+                  <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-4 space-y-1">
+                    <p className="text-xs text-gray-400 uppercase tracking-wide">
                       Location
                     </p>
                     <p className="text-white">{data.university || 'TBD'}</p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">
+                  <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-4 space-y-1">
+                    <p className="text-xs text-gray-400 uppercase tracking-wide">
                       Mode
                     </p>
                     <p className="text-white">{data.EventMode || 'TBD'}</p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">
+                  <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-4 space-y-1">
+                    <p className="text-xs text-gray-400 uppercase tracking-wide">
                       Start Date
                     </p>
                     <p className="text-white">
@@ -1056,8 +1060,8 @@ const Eventid = () => {
                         : 'TBD'}
                     </p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">
+                  <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-4 space-y-1">
+                    <p className="text-xs text-gray-400 uppercase tracking-wide">
                       End Date
                     </p>
                     <p className="text-white">
@@ -1070,14 +1074,14 @@ const Eventid = () => {
 
                 {/* Prizes & Highlights */}
                 {data.prizes && data.prizes.trim().length > 0 && (
-                  <div className="mt-6 rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-4">
+                  <div className="mt-6 rounded-lg border border-yellow-500/25 bg-yellow-500/10 p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Sparkles className="w-4 h-4 text-yellow-400" />
-                      <h3 className="text-sm font-semibold text-yellow-400 uppercase tracking-wide">
+                      <h3 className="text-sm font-semibold text-yellow-300 uppercase tracking-wide">
                         Prizes & Highlights
                       </h3>
                     </div>
-                    <div className="text-sm text-gray-100 whitespace-pre-line leading-relaxed">
+                    <div className="text-sm text-gray-200 whitespace-pre-line leading-relaxed">
                       {data.prizes}
                     </div>
                   </div>
@@ -1085,54 +1089,43 @@ const Eventid = () => {
 
                 {/* Why you should join */}
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="rounded-lg border border-gray-800 bg-black/40 p-4 space-y-2">
-                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-500/15 text-yellow-300">
+                  <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-4 space-y-2">
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-500/10 text-yellow-400">
                       <Trophy className="w-4 h-4" />
                     </div>
                     <h3 className="text-sm font-semibold text-white">
                       Compete & Win
                     </h3>
-                    <p className="text-xs text-gray-400 leading-relaxed">
+                    <p className="text-xs text-gray-300 leading-relaxed">
                       Show off your skills, build your portfolio and take a shot
                       at exclusive campus-level prizes.
                     </p>
                   </div>
-                  <div className="rounded-lg border border-gray-800 bg-black/40 p-4 space-y-2">
-                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500/15 text-emerald-300">
+                  <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-4 space-y-2">
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-500/10 text-yellow-400">
                       <Users className="w-4 h-4" />
                     </div>
                     <h3 className="text-sm font-semibold text-white">
                       Meet Smart People
                     </h3>
-                    <p className="text-xs text-gray-400 leading-relaxed">
+                    <p className="text-xs text-gray-300 leading-relaxed">
                       Connect with organisers, speakers and participants from
                       across your campus network.
                     </p>
                   </div>
-                  <div className="rounded-lg border border-gray-800 bg-black/40 p-4 space-y-2">
-                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-500/15 text-sky-300">
+                  <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-4 space-y-2">
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-500/10 text-yellow-400">
                       <AlarmClock className="w-4 h-4" />
                     </div>
                     <h3 className="text-sm font-semibold text-white">
                       Make Memories
                     </h3>
-                    <p className="text-xs text-gray-400 leading-relaxed">
+                    <p className="text-xs text-gray-300 leading-relaxed">
                       Turn a normal week into something memorable with matches,
-                      photos and late‑night prep with your friends.
+                      photos and late-night prep with your friends.
                     </p>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {activeTab === 'schedule' && (
-              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6">
-                <h2 className="text-xl font-bold text-yellow-400 mb-4">
-                  Schedule
-                </h2>
-                <p className="text-gray-400">
-                  Schedule details will be announced soon.
-                </p>
               </div>
             )}
 
