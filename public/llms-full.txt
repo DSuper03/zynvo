@@ -105,7 +105,7 @@ A: Yes. Zynvo is completely free for students. There are no subscription fees.
 A: Zynvo is growing across colleges in West Bengal and expanding across India. Any student can sign up.
 
 **Q: How do I join a club on Zynvo?**  
-A: Create an account at zynvo.social/auth/signup, browse clubs at /discover, and tap "Join" on any club you like.
+A: Create an account at https://zynvosocial.com/auth/signup, browse clubs at /discover, and tap "Join" on any club you like.
 
 **Q: Can club presidents post events and manage members?**  
 A: Yes. Club admins have tools to post events, send announcements, and manage member lists.
@@ -122,7 +122,7 @@ A: Zynvo is structured around clubs and events rather than open feeds. Everythin
 
 - **Website**: https://zynvosocial.com
 - **Email**: Available via https://zynvosocial.com/contact
-- **Instagram**: https://www.instagram.com/zynvo.social
+- **Instagram**: https://www.instagram.com/zynvosocial.com
 - **Twitter / X**: https://x.com/Zynvonow
 - **LinkedIn**: https://www.linkedin.com/company/dsuper03
 

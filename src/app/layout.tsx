@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://zynvosocial.com'),
   manifest: "/manifest.json",
   title:
-    'Zynvo - Agentic Social Media Platform for Campus Communities | Student Network',
+    'Zynvo -Social Media Platform for Campus Communities | Student Network',
   description:
     'Zynvo is the leading agentic social media platform connecting college students, clubs, and societies. Discover events, join communities, compete in challenges, and build meaningful campus connections through AI-powered networking.',
   keywords: [
