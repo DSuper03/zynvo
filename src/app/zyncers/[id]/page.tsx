@@ -210,6 +210,8 @@ export default function PublicUserProfile() {
   const [clubId, setClubId] = useState<string | null>(null);
   const [isFounder, setIsFounder] = useState(false);
   const [isMember, setIsMember] = useState(false);
+  /** Logged-in user's id (from getUser); used so only the profile owner can open tickets. */
+  const [viewerUserId, setViewerUserId] = useState<string | null>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -231,6 +233,36 @@ export default function PublicUserProfile() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    if (!isClient || !token) {
+      setViewerUserId(null);
+      return;
+    }
+
+    let cancelled = false;
+    const base = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
+    if (!base) {
+      setViewerUserId(null);
+      return;
+    }
+
+    axios
+      .get<{ user?: { id?: string } }>(`${base}/api/v1/user/getUser`, {
+        headers: { authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const id = res.data?.user?.id;
+        if (!cancelled) setViewerUserId(id ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setViewerUserId(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isClient, token]);
 
   useEffect(() => {
     if (!isClient || !userId) return;
@@ -311,6 +343,16 @@ export default function PublicUserProfile() {
     fetchUserData();
   }, [isClient, userId, token]);
 
+  const isOwnProfile = Boolean(viewerUserId && viewerUserId === userId);
+
+  useEffect(() => {
+    if (!isOwnProfile && showTicketModal) {
+      setShowTicketModal(false);
+      setSelectedEventId(null);
+      setTicketData({});
+    }
+  }, [isOwnProfile, showTicketModal]);
+
   const handleSkillClick = (skill: string) => {
     toast(`Exploring ${skill} communities…`, { duration: 2000 });
   };
@@ -345,6 +387,10 @@ export default function PublicUserProfile() {
   };
 
   const openTicketModal = async (eventId: string) => {
+    if (!isOwnProfile) {
+      toast('Tickets are only available on your own profile.');
+      return;
+    }
     try {
       setSelectedEventId(eventId);
       const safeId = encodeURIComponent(eventId);
@@ -753,13 +799,16 @@ export default function PublicUserProfile() {
                             <span className="hidden sm:block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
                               Attended
                             </span>
-                            <button
-                              onClick={() => openTicketModal(event.id)}
-                              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-semibold transition-colors"
-                            >
-                              <Ticket className="w-3 h-3" />
-                              Ticket
-                            </button>
+                            {isOwnProfile ? (
+                              <button
+                                type="button"
+                                onClick={() => openTicketModal(event.id)}
+                                className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-semibold transition-colors"
+                              >
+                                <Ticket className="w-3 h-3" />
+                                Ticket
+                              </button>
+                            ) : null}
                           </div>
                         </div>
                       </div>
@@ -781,8 +830,8 @@ export default function PublicUserProfile() {
         </div>
       </div>
 
-      {/* Ticket Modal */}
-      {showTicketModal && (
+      {/* Ticket Modal — only the profile owner can view / generate their ticket */}
+      {showTicketModal && isOwnProfile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="bg-gray-950 rounded-2xl w-full max-w-md border border-gray-800 shadow-2xl">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
