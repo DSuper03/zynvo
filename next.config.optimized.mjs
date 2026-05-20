@@ -223,6 +223,12 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.zynvosocial.com' }],
+        destination: 'https://zynvosocial.com/:path*',
+        permanent: true,
+      },
+      {
         source: '/campus-social-media',
         destination: '/',
         permanent: true,

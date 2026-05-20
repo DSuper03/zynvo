@@ -57,6 +57,7 @@ export default function SignUp() {
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [collegeSearch, setCollegeSearch] = useState<string>('');
   const [signinHref, setSigninHref] = useState('/auth/signin');
+  const [clerkLoadTimedOut, setClerkLoadTimedOut] = useState(false);
 
   // Inline validation error for college select
   const [collegeError, setCollegeError] = useState<string>('');
@@ -77,6 +78,17 @@ export default function SignUp() {
     else clearStoredReturnTo();
     setSigninHref(`/auth/signin${window.location.search}`);
   }, []);
+
+  useEffect(() => {
+    if (isLoaded && authIsLoaded) {
+      setClerkLoadTimedOut(false);
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      setClerkLoadTimedOut(true);
+    }, 8000);
+    return () => window.clearTimeout(timeout);
+  }, [isLoaded, authIsLoaded]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -745,6 +757,11 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   </label>
                 </div>
                       <div id="clerk-captcha" className="my-4"></div>
+                {clerkLoadTimedOut && !isLoaded && (
+                  <p className="text-amber-400 text-xs mt-2">
+                    Security verification is taking longer than expected. Try disabling ad-block/VPN, switch network, or open the site without <code>www</code>.
+                  </p>
+                )}
                 <div className="flex space-x-4">
                   <motion.button
                     type="button"
