@@ -171,8 +171,7 @@ export default function SignUp() {
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isLoaded) {
-
-      toast("Security check new  loading, please wait...");
+      toast.error("Security check is still loading. Please wait a moment and try again.");
       return;
     };
 
@@ -366,7 +365,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
   const handleGoogleVerification = async () => {
     if (!authIsLoaded || !signIn) {
-      toast('Security check loading, please wait...');
+      toast.error('Security check is still loading. Please wait a moment and try again.');
       return;
     }
     try {
@@ -531,11 +530,10 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             </div>
             <div className="mb-6">
               <div className="flex items-center justify-center space-x-3">
-                {/* Clerk Smart CAPTCHA mount point */}
-                <div id="clerk-captcha" />
                 <button
                   type="button"
                   onClick={() => handleGoogleVerification()}
+                  disabled={!authIsLoaded}
                   className="flex items-center justify-center w-full max-w-xs bg-white text-black py-2 px-4 rounded-lg shadow hover:opacity-90 transition"
                   aria-label="Sign up with Google"
                 >
@@ -761,12 +759,12 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   <motion.button
                     type="submit"
                     className={`flex-1 flex items-center justify-center py-3 px-4 rounded-lg font-medium transition duration-300 transform hover:-translate-y-1 ${
-                      isCreatingAccount || !agreeToTerms || !formData.collegeName
+                      isCreatingAccount || !agreeToTerms || !formData.collegeName || !isLoaded
                         ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                         : 'bg-yellow-500 text-black hover:bg-yellow-400'
                     }`}
                     whileTap={{ scale: isCreatingAccount ? 1 : 0.98 }}
-                    disabled={!agreeToTerms || isCreatingAccount || !formData.collegeName}
+                    disabled={!agreeToTerms || isCreatingAccount || !formData.collegeName || !isLoaded}
                   >
                     {isCreatingAccount ? (
                       <>

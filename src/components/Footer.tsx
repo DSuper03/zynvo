@@ -9,17 +9,17 @@ const instagramPosts = [
   {
     id: "ig1",
     permalink: "https://www.instagram.com/reel/DQjEXRrkWvA/",
-    caption: "A post shared by Zynvo (@zynvosocial.com)",
+    caption: "A post shared by Zynvo (@zynvo.social)",
   },
   {
     id: "ig2",
     permalink: "https://www.instagram.com/reel/DUNkZWukZUe/",
-    caption: "A post shared by Zynvo (@zynvosocial.com)",
+    caption: "A post shared by Zynvo (@zynvo.social)",
   },
   {
     id: "ig3",
     permalink: "https://www.instagram.com/reel/DUflpyJEbRn/",
-    caption: "A post shared by Zynvo (@zynvosocial.com)",
+    caption: "A post shared by Zynvo (@zynvo.social)",
   },
 ];
 
@@ -101,11 +101,11 @@ export default function FooterWithSocial() {
                   <Instagram size={20} color="white" />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 900, fontSize: 16, color: "#1a1a1a" }}>@zynvosocial.com</div>
+                  <div style={{ fontWeight: 900, fontSize: 16, color: "#1a1a1a" }}>@zynvo.social</div>
                   <div style={{ fontSize: 12, color: "#9ca3af", fontWeight: 600 }}>Instagram</div>
                 </div>
               </div>
-              <a href="https://www.instagram.com/zynvosocial.com/" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.instagram.com/zynvo.social/" target="_blank" rel="noopener noreferrer"
                 style={{ display:"flex", alignItems:"center", gap:6, fontSize:13, fontWeight:800, color:"#78350f", textDecoration:"none", background:"#fef3c7", padding:"7px 16px", borderRadius:30, border:"1.5px solid #fde68a" }}>
                 Follow <ExternalLink size={13} />
               </a>
@@ -219,7 +219,7 @@ export default function FooterWithSocial() {
                 <a href="https://x.com/Zynvonow" target="_blank" rel="noopener noreferrer" className="social-icon-btn" title="Twitter / X">
                   <Twitter size={17} />
                 </a>
-                <a href="https://www.instagram.com/zynvosocial.com/" target="_blank" rel="noopener noreferrer" className="social-icon-btn" title="Instagram">
+                <a href="https://www.instagram.com/zynvo.social/" target="_blank" rel="noopener noreferrer" className="social-icon-btn" title="Instagram">
                   <Instagram size={17} />
                 </a>
                 <a href="mailto:dsuper03.dev@gmail.com" className="social-icon-btn" title="Email">

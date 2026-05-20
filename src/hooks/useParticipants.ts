@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ||
-  'https://zynvo-be-31292664726.asia-south1.run.app';
+  'https://zynvosocial-be-274792984950.asia-south1.run.app';
 
 export interface ParticipantUser {
   id: string;

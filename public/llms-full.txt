@@ -122,7 +122,7 @@ A: Zynvo is structured around clubs and events rather than open feeds. Everythin
 
 - **Website**: https://zynvosocial.com
 - **Email**: Available via https://zynvosocial.com/contact
-- **Instagram**: https://www.instagram.com/zynvosocial.com
+- **Instagram**: https://www.instagram.com/zynvo.social
 - **Twitter / X**: https://x.com/Zynvonow
 - **LinkedIn**: https://www.linkedin.com/company/dsuper03
 

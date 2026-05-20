@@ -7,7 +7,7 @@ const securityHeaders = [
       script-src-elem 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://challenges.cloudflare.com https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://www.gstatic.com https://va.vercel-scripts.com;
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: blob: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com https://api.qrserver.com https://img.clerk.com https://*.clerk.accounts.dev https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://*.googleusercontent.com https://ssl.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com https://s3-us-west-2.amazonaws.com https://*.tile.openstreetmap.org https://tiles.openfreemap.org https://demotiles.maplibre.org;
-      connect-src 'self' data: http://localhost:* https://backend.zynvosocial.com https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com https://zynvo-backend-1.onrender.com https://zynvo-backend.onrender.com https://zynvo-be-31292664726.asia-south1.run.app https://zynvosocial-be-274792984950.asia-south1.run.app https://api.dicebear.com https://api.qrserver.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://www.google-analytics.com https://www.googletagmanager.com https://tiles.openfreemap.org https://demotiles.maplibre.org https://accounts.google.com https://www.googleapis.com https://oauth2.googleapis.com https://www.gstatic.com https://va.vercel-scripts.com https://vitals.vercel-insights.com;
+      connect-src 'self' data: http://localhost:* https://backend.zynvosocial.com https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com https://zynvo-backend-1.onrender.com https://zynvo-backend.onrender.com https://zynvosocial-be-274792984950.asia-south1.run.app https://api.dicebear.com https://api.qrserver.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://www.google-analytics.com https://www.googletagmanager.com https://tiles.openfreemap.org https://demotiles.maplibre.org https://accounts.google.com https://www.googleapis.com https://oauth2.googleapis.com https://www.gstatic.com https://va.vercel-scripts.com https://vitals.vercel-insights.com;
       font-src 'self' data:;
       frame-src 'self' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://accounts.google.com https://challenges.cloudflare.com https://www.instagram.com https://instagram.com;
       worker-src 'self' blob:;
@@ -36,17 +36,14 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://zynvo-be-31292664726.asia-south1.run.app').replace(/\/$/, '');
+const backendUrl = 'https://zynvosocial-be-274792984950.asia-south1.run.app';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Next 16 uses Turbopack by default; empty config acknowledges plugins may add webpack
   turbopack: {},
   env: {
-    NEXT_PUBLIC_BACKEND_URL:
-      process.env.NODE_ENV === 'development'
-        ? ''
-        : process.env.NEXT_PUBLIC_BACKEND_URL,
+    NEXT_PUBLIC_BACKEND_URL: 'https://zynvosocial-be-274792984950.asia-south1.run.app',
   },
   images: {
     dangerouslyAllowSVG: true,
