@@ -33,6 +33,7 @@ import CollegeRegistrationBlockedModal, {
 import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import AddSpeakerModal from './speakers/AddSpeakerModal';
+import AddJudgeModal from './speakers/AddJudgeModal';
 import PaymentProofModal from '@/components/PaymentProofModal';
 import { Plus, Download, Users, RefreshCw } from 'lucide-react';
 import {
@@ -62,11 +63,24 @@ interface SpeakerResponse {
   speakers: Speaker[];
 }
 
+interface Judge {
+  id: string;
+  name: string;
+  achievement: string;
+  description: string;
+  eventId: string;
+}
+
+interface JudgesResponse {
+  msg: string;
+  data: Judge[];
+}
+
 const Eventid = () => {
   const params = useParams();
   const id = params.id as string;
 
-  const [data, setData] = useState<respnseUseState>({
+  const [data, setData] = useState<respnseUseState & { attendeesCount?: number }>({
     EventName: '',
     description: '',
     EventMode: '',
@@ -86,6 +100,8 @@ const Eventid = () => {
     isPaidEvent: false,
     paymentQRCode: '',
     paymentAmount: 0,
+    maxParticipants: undefined,
+    attendeesCount: 0,
   });
   const router = useRouter();
   const pathname = usePathname();
@@ -110,6 +126,7 @@ const Eventid = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
   const [isAddSpeakerModalOpen, setIsAddSpeakerModalOpen] = useState(false);
+  const [isAddJudgeModalOpen, setIsAddJudgeModalOpen] = useState(false);
   const [isFounder, setIsFounder] = useState(false);
   const [collegeBlockModal, setCollegeBlockModal] = useState<{
     open: boolean;
@@ -237,6 +254,30 @@ const Eventid = () => {
   });
 
   const speakers = speakersData?.speakers || [];
+
+  // Fetch judges for this event
+  const {
+    data: judgesData,
+    isLoading: isJudgesLoading,
+  } = useQuery<JudgesResponse>({
+    queryKey: ['judges', id],
+    queryFn: async () => {
+      if (!id || !token) throw new Error('Missing id or token');
+      const res = await axios.get<JudgesResponse>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/${id}/judges`,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return res.data;
+    },
+    enabled: !!id && !!token,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const judges = judgesData?.data || [];
 
   // Fetch participants for this event
   const [participantsPage, setParticipantsPage] = useState(1);
@@ -378,6 +419,8 @@ const Eventid = () => {
             isPaidEvent: hasPaidEvent,
             paymentQRCode: qrCodeUrl,
             paymentAmount: paymentAmount,
+            maxParticipants: res.data.response.maxParticipants,
+            attendeesCount: (res.data.response as any)._count?.attendees ?? 0,
           });
           // Store TeamSize for team section
           setEventTeamSize(res.data.response.TeamSize || 1);
@@ -574,11 +617,15 @@ const Eventid = () => {
   const isCollegeRestrictionBlocking =
     isCollegeNameMissing || isCollegeMismatch || isCollegeUnknown;
 
-  // Check if registration is disabled (event ended or applications closed)
+  const isEventFull = useMemo(() => {
+    return !!data.maxParticipants && (data.attendeesCount ?? 0) >= data.maxParticipants;
+  }, [data.maxParticipants, data.attendeesCount]);
+
+  // Check if registration is disabled (event ended or applications closed or full)
   /** Ended / closed only — college rules are handled on click (modal), so wrong-college users can tap Register. */
   const isRegistrationDisabled = useMemo(() => {
-    return isEventEnded || data.applicationStatus !== 'open';
-  }, [isEventEnded, data.applicationStatus]);
+    return isEventEnded || data.applicationStatus !== 'open' || isEventFull;
+  }, [isEventEnded, data.applicationStatus, isEventFull]);
 
   const googleCalendarHref = useMemo(() => {
     // Build a Google Calendar event URL (best-effort if dates exist)
@@ -758,8 +805,14 @@ const Eventid = () => {
                               : 'bg-amber-900 hover:bg-amber-950 text-yellow-200'
                           }`}
                         >
-                          {isRegistering ? 'Registering...' : isEventEnded ? 'Event Ended' : 'Register Now'}
+                          {isRegistering ? 'Registering...' : isEventEnded ? 'Event Ended' : isEventFull ? 'Event Full' : 'Register Now'}
                         </Button>
+                        {data.maxParticipants && (
+                          <div className="flex items-center gap-2 text-sm text-gray-300 bg-gray-900/60 px-4 py-2 border border-gray-800 rounded-lg">
+                            <span className="font-semibold text-yellow-400">Capacity:</span>
+                            <span>{data.attendeesCount} / {data.maxParticipants} registered</span>
+                          </div>
+                        )}
                         {isEventEnded && (
                           <p className="text-xs text-red-700">This event has already ended</p>
                         )}
@@ -1130,72 +1183,136 @@ const Eventid = () => {
             )}
 
             {activeTab === 'speakers' && (
-              <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-yellow-400">
-                    Speakers & Judges
-                  </h2>
-                  {isFounder && (
-                    <Button
-                      onClick={() => setIsAddSpeakerModalOpen(true)}
-                      className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add Speaker
-                    </Button>
-                  )}
-                </div>
-
-                {isSpeakersLoading ? (
-                  <p className="text-gray-400">Loading speakers...</p>
-                ) : speakers.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-gray-400 mb-4">
-                      Speakers will be revealed closer to the event.
-                    </p>
+              <div className="space-y-6">
+                {/* Speakers Section */}
+                <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-yellow-400">
+                      Speakers
+                    </h2>
                     {isFounder && (
                       <Button
                         onClick={() => setIsAddSpeakerModalOpen(true)}
-                        className="px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2 mx-auto"
+                        className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2"
                       >
                         <Plus className="w-4 h-4" />
-                        Add First Speaker
+                        Add Speaker
                       </Button>
                     )}
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {speakers.map((speaker) => (
-                      <div
-                        key={speaker.id}
-                        className="bg-black border border-yellow-500/20 rounded-lg p-4 flex gap-3"
+
+                  {isSpeakersLoading ? (
+                    <p className="text-gray-400">Loading speakers...</p>
+                  ) : speakers.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-400 mb-4">
+                        Speakers will be revealed closer to the event.
+                      </p>
+                      {isFounder && (
+                        <Button
+                          onClick={() => setIsAddSpeakerModalOpen(true)}
+                          className="px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2 mx-auto"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Add First Speaker
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {speakers.map((speaker) => (
+                        <div
+                          key={speaker.id}
+                          className="bg-black border border-yellow-500/20 rounded-lg p-4 flex gap-3"
+                        >
+                          <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-800 flex-shrink-0">
+                            <Image
+                              src={
+                                speaker.profilePic ||
+                                'https://i.pravatar.cc/150?img=11'
+                              }
+                              alt={speaker.name}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-semibold text-white truncate">
+                              {speaker.name}
+                            </h3>
+                            <p className="text-xs text-yellow-400 truncate">
+                              {speaker.email}
+                            </p>
+                            <p className="mt-1 text-xs text-gray-300 line-clamp-2">
+                              {speaker.about}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Judges Section */}
+                <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-yellow-400">
+                      Judges
+                    </h2>
+                    {isFounder && (
+                      <Button
+                        onClick={() => setIsAddJudgeModalOpen(true)}
+                        className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2"
                       >
-                        <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-800 flex-shrink-0">
-                          <Image
-                            src={
-                              speaker.profilePic ||
-                              'https://i.pravatar.cc/150?img=11'
-                            }
-                            alt={speaker.name}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-semibold text-white truncate">
-                            {speaker.name}
-                          </h3>
-                          <p className="text-xs text-yellow-400 truncate">
-                            {speaker.email}
-                          </p>
-                          <p className="mt-1 text-xs text-gray-300 line-clamp-2">
-                            {speaker.about}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                        <Plus className="w-4 h-4" />
+                        Add Judge
+                      </Button>
+                    )}
                   </div>
-                )}
+
+                  {isJudgesLoading ? (
+                    <p className="text-gray-400">Loading judges...</p>
+                  ) : judges.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-400 mb-4">
+                        Judges will be revealed closer to the event.
+                      </p>
+                      {isFounder && (
+                        <Button
+                          onClick={() => setIsAddJudgeModalOpen(true)}
+                          className="px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2 mx-auto"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Add First Judge
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {judges.map((judge) => (
+                        <div
+                          key={judge.id}
+                          className="bg-black border border-yellow-500/20 rounded-lg p-4 flex gap-3"
+                        >
+                          <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-yellow-400/20 to-yellow-600/20 border border-yellow-500/30 flex items-center justify-center flex-shrink-0 text-yellow-400 font-bold text-lg shadow-inner shadow-yellow-500/10">
+                            {(judge.name || '').trim().split(/\s+/).map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'JD'}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-semibold text-white truncate">
+                              {judge.name}
+                            </h3>
+                            <p className="text-xs text-yellow-400 truncate">
+                              {judge.achievement}
+                            </p>
+                            <p className="mt-1 text-xs text-gray-300 line-clamp-2">
+                              {judge.description}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -1518,6 +1635,13 @@ const Eventid = () => {
       <AddSpeakerModal
         isOpen={isAddSpeakerModalOpen}
         onClose={() => setIsAddSpeakerModalOpen(false)}
+        eventId={id}
+      />
+
+      {/* Add Judge Modal */}
+      <AddJudgeModal
+        isOpen={isAddJudgeModalOpen}
+        onClose={() => setIsAddJudgeModalOpen(false)}
         eventId={id}
       />
 
