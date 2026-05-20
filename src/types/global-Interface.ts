@@ -40,6 +40,7 @@ export interface EventFormData {
   isPaidEvent?: boolean; // Flag to indicate if event requires payment
   paymentQRCode?: string; // QR code image URL for payment
   paymentAmount?: number; // Payment amount required for event
+  maxParticipants?: number | ''; // Max participation limit (optional)
   // image: string;
 }
 
@@ -79,6 +80,7 @@ export interface EventType {
   Fees?: string;
   qrCodeUrl?: string;
   paymentAmount?: string | number;
+  maxParticipants?: number;
 }
 
 // axios post data interface ( register event button )
@@ -288,6 +290,7 @@ export interface EventResponse {
     Fees?: string;
     qrCodeUrl?: string;
     paymentAmount?: string | number;
+    maxParticipants?: number;
   }[];
 }
 
@@ -432,6 +435,7 @@ export interface eventData {
   isPaidEvent?: boolean;
   paymentQRCode?: string;
   paymentAmount?: number;
+  maxParticipants?: number;
 }
 
 export interface respnseUseState {
@@ -454,6 +458,7 @@ export interface respnseUseState {
   isPaidEvent?: boolean;
   paymentQRCode?: string;
   paymentAmount?: number;
+  maxParticipants?: number;
 }
 export interface PostData {
  
@@ -521,6 +526,8 @@ export interface EventByIdResponse {
     paymentQRCode?: string; // QR code image URL for payment
     qrCodeUrl?: string; // Alternative field name from backend (maps to paymentQRCode)
     paymentAmount?: number; // Payment amount required for event
+    maxParticipants?: number;
+    attendeesCount?: number;
   };
 }
 
