@@ -55,7 +55,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       const offsetY =
         (baseOffset - spread * gsap.parseEase("power2.in")(Math.random())) * heightRatio;
         
-      const startY = stage.height - peep.height + offsetY;
+      const startY = Math.max(0, stage.height - peep.height + offsetY);
       let startX: number;
       let endX: number;
 
@@ -447,9 +447,7 @@ const Skiper39 = () => {
       </div>
 
       {/* Peep Canvas Section - Minimal gap, no extra overlay */}
-      <div
-        className="mt-70 mb-70 relative z-0 w-full flex-1 min-h-[40vh] md:h-[45vh] overflow-hidden"
-      >
+      <div className="relative z-0 w-full flex-1 min-h-[44vh] md:h-[48vh] overflow-hidden">
         <CrowdCanvas
           src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/175711/open-peeps-sheet.png"
           rows={15}

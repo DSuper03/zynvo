@@ -1,6 +1,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import type { ComponentType } from 'react';
+import type { DiscoverPostPreview } from '@/app/discover/discoverImages';
 
 // Loading component for better UX
 const LoadingSpinner = () => (
@@ -32,10 +34,17 @@ export const Hero = dynamic(() => import('./Hero'), {
   ssr: true
 });
 
-export const Features = dynamic(() => import('./features'), {
+type FeaturesProps = {
+  discoverPosts?: DiscoverPostPreview[];
+};
+
+export const Features = dynamic<FeaturesProps>(
+  () => import('./features') as Promise<{ default: ComponentType<FeaturesProps> }>,
+  {
   loading: () => <LoadingSpinner />,
   ssr: false
-});
+  }
+);
 
 export const Events = dynamic(() => import('./Events'), {
   loading: () => <LoadingSpinner />,
@@ -47,9 +56,13 @@ export const HowItWorks = dynamic(() => import('./working'), {
   ssr: false
 });
 
-export const Footer = dynamic(() => import('./Footer'), {
+type FooterProps = {
+  discoverPosts?: DiscoverPostPreview[];
+};
+
+export const Footer = dynamic<FooterProps>(() => import('./Footer') as Promise<{ default: ComponentType<FooterProps> }>, {
   loading: () => <LoadingSpinner />,
-  ssr: true
+  ssr: true,
 });
 
 // Testimonials component

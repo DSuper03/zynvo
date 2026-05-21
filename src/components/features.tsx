@@ -22,6 +22,10 @@ import {
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
+import {
+  isUsableDiscoverImage,
+  type DiscoverPostPreview,
+} from '@/app/discover/discoverImages';
 
 // Custom Skeletons for Bento Grid Items
 
@@ -279,7 +283,50 @@ const ClubRoomSkeleton = () => {
   );
 };
 
-const Features = () => {
+type FeaturesProps = {
+  discoverPosts?: DiscoverPostPreview[];
+};
+
+const fallbackDiscoverPosts: DiscoverPostPreview[] = [
+  {
+    id: 'fallback-1',
+    title: 'Campus life on Zynvo',
+    description: 'Discover what students are sharing across clubs, events, and campus communities.',
+    image: '/posters/1.png',
+    authorName: 'Zynvo',
+    clubName: 'Discover',
+    collegeName: '',
+  },
+  {
+    id: 'fallback-2',
+    title: 'Events worth showing up for',
+    description: 'Find the next meetup, hackathon, workshop, or cultural moment from your campus.',
+    image: '/posters/2.png',
+    authorName: 'Zynvo',
+    clubName: 'Events',
+    collegeName: '',
+  },
+  {
+    id: 'fallback-3',
+    title: 'Posts from your people',
+    description: 'Stay close to the communities that make college feel alive.',
+    image: '/posters/3.png',
+    authorName: 'Zynvo',
+    clubName: 'Campus',
+    collegeName: '',
+  },
+  {
+    id: 'fallback-4',
+    title: 'Everything in one feed',
+    description: 'The freshest campus updates, all in one place.',
+    image: '/posters/4.png',
+    authorName: 'Zynvo',
+    clubName: 'Feed',
+    collegeName: '',
+  },
+];
+
+const Features = ({ discoverPosts = fallbackDiscoverPosts }: FeaturesProps) => {
   const heroRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 

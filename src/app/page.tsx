@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   FaUniversity,
@@ -11,6 +11,15 @@ import {
 
 import LandingHeader from '@/components/landingHeader';
 import { Skiper39 } from '@/components/SkipperLanding';
+import { cn } from '@/lib/utils';
+import { CanvasText } from '@/components/ui/canvas-text';
+import { ParallaxHeroImages } from '@/components/ui/parallax-hero-images';
+import {
+  fetchDiscoverPostPreviews,
+  type DiscoverPostPreview,
+} from '@/app/discover/discoverImages';
+import { CommunityFeed } from '@/components/CommunityFeed';
+import TopClubs from '@/components/TopClubs';
 import {
   Hero,
   Features,
@@ -18,8 +27,12 @@ import {
   Events,
   Footer,
 } from '@/components/DynamicComponents';
+
+
 export default function Home() {
   const heroRef = useRef(null);
+  const [discoverPosts, setDiscoverPosts] =
+    useState<DiscoverPostPreview[]>([]);
   // PERFORMANCE: Store timeout IDs so we can clear on unmount and avoid leaks + setState after unmount
   const floatingTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -61,6 +74,21 @@ export default function Home() {
       floatingTimeoutsRef.current.forEach((id) => clearTimeout(id));
       floatingTimeoutsRef.current = [];
     };
+  }, []);
+
+  useEffect(() => {
+    const loadDiscoverPosts = async () => {
+      try {
+        const posts = await fetchDiscoverPostPreviews(6);
+        if (posts.length) {
+          setDiscoverPosts(posts);
+        }
+      } catch {
+        console.warn('Using fallback Discover posts for landing.');
+      }
+    };
+
+    loadDiscoverPosts();
   }, []);
 
   return (
@@ -318,21 +346,65 @@ export default function Home() {
         <LandingHeader />
 
         <Skiper39 />
+        <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-yellow-300 text-black">
+          <ParallaxHeroImages posts={discoverPosts} />
+          <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-4 px-4 text-center">
+            <p className="rounded-full border-2 border-black bg-yellow-200 px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-wide text-black shadow-[4px_4px_0_rgba(0,0,0,0.95)]">
+              Discover feed
+            </p>
+            <h1 className="text-4xl font-bold tracking-tight text-black md:text-6xl">
+              Campus moments, everywhere.
+            </h1>
+            <p className="max-w-md text-base font-semibold text-black/80 md:text-lg">
+              Live club and community moments from ZenvoSocial Discover, animated in real time.
+            </p>
+          </div>
+        </section>
+        <TopClubs />
         <Hero />
         {/*     
         <ZynvoDashboard /> */}
-        <Features />
+        <Features discoverPosts={discoverPosts} />
 
-        
-        {/* Testimonials Section */}
-        {/* <Testimonials /> */}
+        {discoverPosts.length > 0 && (
+          <section className="bg-yellow-300/60 py-10">
+            <CommunityFeed posts={discoverPosts} />
+          </section>
+        )}
 
         {/* Event Highlights Section */}
         <Events />
         {/* CTA Section */}
+        <section className="flex min-h-80 items-center justify-center bg-yellow-300 p-8 text-black">
+          <h2
+            className={cn(
+              'group relative mx-auto mt-4 max-w-2xl text-left text-4xl font-bold leading-tight tracking-tight text-balance text-neutral-900 sm:text-5xl md:text-6xl xl:text-7xl',
+            )}
+          >
+            Explore campus at{' '}
+            <CanvasText
+              text="Lightning Speed"
+              backgroundClassName="bg-black"
+              colors={[
+                'rgba(250, 204, 21, 1)',
+                'rgba(250, 204, 21, 0.9)',
+                'rgba(250, 204, 21, 0.8)',
+                'rgba(250, 204, 21, 0.7)',
+                'rgba(250, 204, 21, 0.6)',
+                'rgba(250, 204, 21, 0.5)',
+                'rgba(250, 204, 21, 0.4)',
+                'rgba(250, 204, 21, 0.3)',
+                'rgba(250, 204, 21, 0.2)',
+                'rgba(250, 204, 21, 0.1)',
+              ]}
+              lineGap={4}
+              animationDuration={20}
+            />
+          </h2>
+        </section>
 
         {/* Footer */}
-        <Footer />
+        <Footer discoverPosts={discoverPosts} />
       </div>
     </div>
   );

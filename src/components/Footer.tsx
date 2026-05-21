@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   Twitter, Mail, MapPin, ArrowRight, Heart,
@@ -35,7 +37,6 @@ export default function FooterWithSocial() {
   return (
     <div style={{ fontFamily: "'Nunito', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700&display=swap');
         * { box-sizing: border-box; }
 
         /* ── Social section ── */
@@ -81,7 +82,6 @@ export default function FooterWithSocial() {
       ════════════════════════════════════════ */}
       <section className="social-section">
         <div style={{ maxWidth: 1060, margin: "0 auto" }}>
-
           {/* heading */}
           <div style={{ textAlign: "center", marginBottom: 40 }}>
             <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(26px,4vw,40px)", fontWeight: 700, color: "#1a1a1a" }}>
@@ -254,4 +254,3 @@ export default function FooterWithSocial() {
     </div>
   );
 }
-

@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import ImageKit from 'imagekit';
 
-// SECURITY: Private keys should NEVER use NEXT_PUBLIC_ prefix as they get exposed to the browser
-const imagekit = new ImageKit({
-  publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY as string,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY as string,
-  urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT as string,
-});
+function getImageKitClient() {
+  const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY;
+  const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
+  const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
+
+  if (!publicKey || !privateKey || !urlEndpoint) {
+    throw new Error('ImageKit environment variables are not configured');
+  }
+
+  // SECURITY: Private keys should NEVER use NEXT_PUBLIC_ prefix as they get exposed to the browser
+  return new ImageKit({
+    publicKey,
+    privateKey,
+    urlEndpoint,
+  });
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,7 +35,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     // Upload to ImageKit with specified folder
-    const uploadResponse = await imagekit.upload({
+    const uploadResponse = await getImageKitClient().upload({
       file: buffer,
       fileName: file.name,
       folder: folder, // Organize uploads in folders (posts, events, clubs)

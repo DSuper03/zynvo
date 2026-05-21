@@ -35,7 +35,7 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://zynvo-be-31292664726.asia-south1.run.app').replace(/\/$/, '');
+const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://zynvosocial-be-274792984950.asia-south1.run.app').replace(/\/$/, '');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
