@@ -235,16 +235,13 @@ export default function SignIn() {
                 <button
                   type="button"
                   onClick={() => handleGoogleSignIn()}
-                  disabled={!authIsLoaded}
                   className={`flex items-center justify-center w-full max-w-xs py-2 px-4 rounded-lg shadow transition ${
-                    !authIsLoaded
-                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                      : 'bg-white text-black hover:opacity-90'
+                    'bg-white text-black hover:opacity-90'
                   }`}
                   aria-label="Sign in with Google"
                 >
                   <FaGoogle className="mr-3" />
-                  {authIsLoaded ? 'Sign in with Google' : 'Loading...'}
+                  Sign in with Google
                 </button>
               </div>
             </div>
