@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import {
   isUsableDiscoverImage,
   type DiscoverPostPreview,
@@ -48,6 +48,8 @@ function FloatingImage({ src, eager }: { src: string; eager: boolean }) {
 
 export function ParallaxHeroImages({ posts }: ParallaxHeroImagesProps) {
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
+  const dragRef = useRef<{ activeIndex: number; startX: number; startY: number } | null>(null);
+  const [dragOffsets, setDragOffsets] = useState<Record<number, { x: number; y: number }>>({});
 
   const visiblePosts = useMemo(
     () => posts.filter((post) => isUsableDiscoverImage(post.image)).slice(0, positions.length),
@@ -58,15 +60,16 @@ export function ParallaxHeroImages({ posts }: ParallaxHeroImagesProps) {
 
   return (
     <div
-      className="pointer-events-none absolute inset-x-0 top-20 bottom-8 mx-auto w-full max-w-7xl overflow-hidden px-3 sm:top-24 sm:px-6"
-      onMouseMove={(event) => {
+      className="absolute inset-x-0 top-20 bottom-8 mx-auto w-full max-w-7xl overflow-hidden px-3 sm:top-24 sm:px-6"
+      onPointerMove={(event) => {
+        // update parallax pointer based on pointer position
         const rect = event.currentTarget.getBoundingClientRect();
         setPointer({
           x: (event.clientX - rect.left) / rect.width - 0.5,
           y: (event.clientY - rect.top) / rect.height - 0.5,
         });
       }}
-      onMouseLeave={() => setPointer({ x: 0, y: 0 })}
+      onPointerLeave={() => setPointer({ x: 0, y: 0 })}
       aria-hidden="true"
     >
       {visiblePosts.map((post, index) => {
@@ -75,9 +78,42 @@ export function ParallaxHeroImages({ posts }: ParallaxHeroImagesProps) {
         return (
           <div
             key={`${post.id}-${index}`}
-            className={`absolute overflow-hidden rounded-xl border-2 border-black bg-white shadow-[6px_6px_0_rgba(0,0,0,0.95)] transition-transform duration-200 ease-out sm:shadow-[8px_8px_0_rgba(0,0,0,0.95)] ${positions[index]}`}
+            // allow pointer interactions on each card so users can drag on touch
+            className={`pointer-events-auto absolute overflow-hidden rounded-xl border-2 border-black bg-white shadow-[6px_6px_0_rgba(0,0,0,0.95)] transition-transform duration-200 ease-out sm:shadow-[8px_8px_0_rgba(0,0,0,0.95)] ${positions[index]}`}
             style={{
-              transform: `translate3d(${pointer.x * depth}px, ${pointer.y * depth}px, 0) rotate(var(--tw-rotate))`,
+              transform: `translate3d(${pointer.x * depth + (dragOffsets[index]?.x || 0)}px, ${pointer.y * depth + (dragOffsets[index]?.y || 0)}px, 0) rotate(var(--tw-rotate))`,
+            }}
+            onPointerDown={(e) => {
+              // begin drag for this card
+              try {
+                (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+              } catch {}
+              dragRef.current = { activeIndex: index, startX: e.clientX, startY: e.clientY };
+            }}
+            onPointerMove={(e) => {
+              // handle dragging for this specific card
+              if (dragRef.current?.activeIndex === index) {
+                const deltaX = e.clientX - dragRef.current.startX;
+                const deltaY = e.clientY - dragRef.current.startY;
+                setDragOffsets((prev) => {
+                  const prevOff = prev[index] || { x: 0, y: 0 };
+                  const newOff = { x: prevOff.x + deltaX, y: prevOff.y + deltaY };
+                  return { ...prev, [index]: newOff };
+                });
+                // update start to avoid accumulating large deltas
+                dragRef.current!.startX = e.clientX;
+                dragRef.current!.startY = e.clientY;
+                e.preventDefault();
+              }
+            }}
+            onPointerUp={(e) => {
+              try {
+                (e.currentTarget as Element).releasePointerCapture?.(e.pointerId);
+              } catch {}
+              dragRef.current = null;
+            }}
+            onPointerCancel={() => {
+              dragRef.current = null;
             }}
           >
             <FloatingImage src={post.image || ""} eager={index < 2} />
@@ -95,3 +131,4 @@ export function ParallaxHeroImages({ posts }: ParallaxHeroImagesProps) {
     </div>
   );
 }
+

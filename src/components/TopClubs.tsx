@@ -60,7 +60,7 @@ export default function TopClubs() {
   return (
     <section style={{ marginBottom: 72 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 24, flexWrap: 'wrap', marginBottom: 24 }}>
-        <div style={{ maxWidth: 520 }}>
+        <div style={{ maxWidth: 520, marginLeft: 40 }}>
           <p style={{ margin: 0, fontSize: 13, letterSpacing: '0.28em', textTransform: 'uppercase', fontWeight: 900, color: '#b45309' }}>
             Top clubs
           </p>
