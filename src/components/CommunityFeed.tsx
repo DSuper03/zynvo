@@ -117,7 +117,7 @@ export function CommunityFeed({ posts }: CommunityFeedProps) {
               Community feed
             </p>
             <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
-              Real student posts from ZenvoSocial Discover
+              Real student posts from ZynvoSocial Discover
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600">
               Fresh uploads from clubs, events and student creators — live from the backend.

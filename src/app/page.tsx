@@ -356,7 +356,7 @@ export default function Home() {
               Campus moments, everywhere.
             </h1>
             <p className="max-w-md text-base font-semibold text-black/80 md:text-lg">
-              Live club and community moments from ZenvoSocial Discover, animated in real time.
+              Live club and community moments from ZynvoSocial Discover, animated in real time.
             </p>
           </div>
         </section>
