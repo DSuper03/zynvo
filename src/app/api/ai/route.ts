@@ -312,7 +312,7 @@ export async function POST(req: Request) {
             headers: {
               Authorization: `Bearer ${apiKey}`,
               'Content-Type': 'application/json',
-              'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'https://zynvo.app',
+              'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'https://zynvosocial.com',
               'X-Title': 'Zynvo Event Intelligence',
             },
             body: JSON.stringify({

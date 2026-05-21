@@ -5,7 +5,7 @@
   
   <!-- Homepage - Main agentic social media platform entry point -->
   <url>
-    <loc>https://zynvo.social/</loc>
+    <loc>https://zynvosocial.com/</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -14,7 +14,7 @@
 
   <!-- Authentication Pages -->
   <url>
-    <loc>https://zynvo.social/auth/signup</loc>
+    <loc>https://zynvosocial.com/auth/signup</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -22,7 +22,7 @@
   </url>
 
   <url>
-    <loc>https://zynvo.social/auth/signin</loc>
+    <loc>https://zynvosocial.com/auth/signin</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -31,7 +31,7 @@
 
   <!-- Core Platform Features -->
   <url>
-    <loc>https://zynvo.social/discover</loc>
+    <loc>https://zynvosocial.com/discover</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -39,7 +39,7 @@
   </url>
 
   <url>
-    <loc>https://zynvo.social/events</loc>
+    <loc>https://zynvosocial.com/events</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -47,7 +47,7 @@
   </url>
 
   <url>
-    <loc>https://zynvo.social/clubs</loc>
+    <loc>https://zynvosocial.com/clubs</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -55,7 +55,7 @@
   </url>
 
   <url>
-    <loc>https://zynvo.social/zyncers</loc>
+    <loc>https://zynvosocial.com/zyncers</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -63,7 +63,7 @@
   </url>
 
   <url>
-    <loc>https://zynvo.social/leaderboard</loc>
+    <loc>https://zynvosocial.com/leaderboard</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
@@ -72,7 +72,7 @@
 
   <!-- AI and Resources -->
   <url>
-    <loc>https://zynvo.social/ai</loc>
+    <loc>https://zynvosocial.com/ai</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -80,7 +80,7 @@
   </url>
 
   <url>
-    <loc>https://zynvo.social/resources</loc>
+    <loc>https://zynvosocial.com/resources</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -88,7 +88,7 @@
   </url>
 
   <url>
-    <loc>https://zynvo.social/news</loc>
+    <loc>https://zynvosocial.com/news</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
@@ -97,7 +97,7 @@
 
   <!-- About and Team -->
   <url>
-    <loc>https://zynvo.social/founders</loc>
+    <loc>https://zynvosocial.com/founders</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -105,7 +105,7 @@
   </url>
 
   <url>
-    <loc>https://zynvo.social/founders/story</loc>
+    <loc>https://zynvosocial.com/founders/story</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -113,7 +113,7 @@
   </url>
 
   <url>
-    <loc>https://zynvo.social/testimonials</loc>
+    <loc>https://zynvosocial.com/testimonials</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -122,7 +122,7 @@
 
   <!-- Support and Information -->
   <url>
-    <loc>https://zynvo.social/faq</loc>
+    <loc>https://zynvosocial.com/faq</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -130,7 +130,7 @@
   </url>
 
   <url>
-    <loc>https://zynvo.social/contact</loc>
+    <loc>https://zynvosocial.com/contact</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -138,7 +138,7 @@
   </url>
 
   <url>
-    <loc>https://zynvo.social/feedback</loc>
+    <loc>https://zynvosocial.com/feedback</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -147,7 +147,7 @@
 
   <!-- Legal Pages -->
   <url>
-    <loc>https://zynvo.social/privacy</loc>
+    <loc>https://zynvosocial.com/privacy</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
@@ -155,7 +155,7 @@
   </url>
 
   <url>
-    <loc>https://zynvo.social/terms</loc>
+    <loc>https://zynvosocial.com/terms</loc>
     <lastmod>2026-12-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>

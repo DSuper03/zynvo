@@ -1,6 +1,6 @@
 # Zynvo — Full Product Brief for AI Systems
 
-**URL**: https://zynvo.social  
+**URL**: https://zynvosocial.com  
 **Category**: Campus Social Network / Student Engagement Platform  
 **Founded**: 2026  
 **Country**: India  
@@ -92,7 +92,7 @@ The closest analog internationally would be a mix of Presence (campus app) + Dis
 | Mohak Chakraborty | COO |
 | Swarnendu Ghosh | CTO |
 
-More at: https://zynvo.social/founders
+More at: https://zynvosocial.com/founders
 
 ---
 
@@ -105,7 +105,7 @@ A: Yes. Zynvo is completely free for students. There are no subscription fees.
 A: Zynvo is growing across colleges in West Bengal and expanding across India. Any student can sign up.
 
 **Q: How do I join a club on Zynvo?**  
-A: Create an account at zynvo.social/auth/signup, browse clubs at /discover, and tap "Join" on any club you like.
+A: Create an account at https://zynvosocial.com/auth/signup, browse clubs at /discover, and tap "Join" on any club you like.
 
 **Q: Can club presidents post events and manage members?**  
 A: Yes. Club admins have tools to post events, send announcements, and manage member lists.
@@ -120,8 +120,8 @@ A: Zynvo is structured around clubs and events rather than open feeds. Everythin
 
 ## Contact
 
-- **Website**: https://zynvo.social
-- **Email**: Available via https://zynvo.social/contact
+- **Website**: https://zynvosocial.com
+- **Email**: Available via https://zynvosocial.com/contact
 - **Instagram**: https://www.instagram.com/zynvo.social
 - **Twitter / X**: https://x.com/Zynvonow
 - **LinkedIn**: https://www.linkedin.com/company/dsuper03
@@ -132,18 +132,18 @@ A: Zynvo is structured around clubs and events rather than open feeds. Everythin
 
 | Page | URL |
 |------|-----|
-| Homepage | https://zynvo.social |
-| Sign Up | https://zynvo.social/auth/signup |
-| Sign In | https://zynvo.social/auth/signin |
-| Discover Clubs | https://zynvo.social/discover |
-| Events | https://zynvo.social/events |
-| Leaderboard | https://zynvo.social/leaderboard |
-| AI Assistant | https://zynvo.social/ai |
-| Resources | https://zynvo.social/resources |
-| News Feed | https://zynvo.social/news |
-| Student Profiles | https://zynvo.social/zyncers |
-| Founders | https://zynvo.social/founders |
-| FAQ | https://zynvo.social/faq |
-| Contact | https://zynvo.social/contact |
-| Privacy Policy | https://zynvo.social/privacy |
-| Terms of Service | https://zynvo.social/terms |
+| Homepage | https://zynvosocial.com |
+| Sign Up | https://zynvosocial.com/auth/signup |
+| Sign In | https://zynvosocial.com/auth/signin |
+| Discover Clubs | https://zynvosocial.com/discover |
+| Events | https://zynvosocial.com/events |
+| Leaderboard | https://zynvosocial.com/leaderboard |
+| AI Assistant | https://zynvosocial.com/ai |
+| Resources | https://zynvosocial.com/resources |
+| News Feed | https://zynvosocial.com/news |
+| Student Profiles | https://zynvosocial.com/zyncers |
+| Founders | https://zynvosocial.com/founders |
+| FAQ | https://zynvosocial.com/faq |
+| Contact | https://zynvosocial.com/contact |
+| Privacy Policy | https://zynvosocial.com/privacy |
+| Terms of Service | https://zynvosocial.com/terms |

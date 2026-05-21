@@ -150,7 +150,7 @@ export function generateEventSeo(input: EventSeoInput): EventSeoOutput {
   const locationObj: Record<string, unknown> = eventMode?.toLowerCase() === "online"
     ? {
         "@type": "VirtualLocation",
-        url: eventUrl || "https://zynvo.in",
+        url: eventUrl || "https://zynvosocial.com",
       }
     : {
         "@type": "Place",
@@ -182,14 +182,14 @@ export function generateEventSeo(input: EventSeoInput): EventSeoOutput {
     organizer: {
       "@type": "Organization",
       name: shortCollege,
-      url: "https://zynvo.in",
+      url: "https://zynvosocial.com",
     },
     ...(contactEmail ? { performer: { "@type": "Organization", name: shortCollege, email: contactEmail } } : {}),
     offers: {
       "@type": "Offer",
       price: "0",
       priceCurrency: "INR",
-      url: eventUrl || "https://zynvo.in",
+      url: eventUrl || "https://zynvosocial.com",
       availability: "https://schema.org/InStock",
     },
   };

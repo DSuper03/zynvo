@@ -455,7 +455,7 @@ const Skiper39 = () => {
         />
       </div>
 
-      {/* Running Chain Text - zynvo.social */}
+      {/* Running Chain Text - zynvosocial.com */}
       <div className="relative z-0 w-full bg-yellow-300 flex-shrink-0 py-2 sm:py-3 md:py-4 overflow-hidden border-t border-yellow-400">
         <style>{`
           @keyframes scroll {
@@ -474,10 +474,10 @@ const Skiper39 = () => {
         `}</style>
         <div className="scroll-container">
           <div className="scroll-item font-mono text-sm sm:text-base md:text-lg font-bold text-black tracking-wider px-4">
-            ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦
+            ✦ zynvosocial.com ✦ zynvosocial.com ✦ zynvosocial.com ✦ zynvosocial.com ✦ zynvosocial.com ✦
           </div>
           <div className="scroll-item font-mono text-sm sm:text-base md:text-lg font-bold text-black tracking-wider px-4">
-            ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦ zynvo.social ✦
+            ✦ zynvosocial.com ✦ zynvosocial.com ✦ zynvosocial.com ✦ zynvosocial.com ✦ zynvosocial.com ✦
           </div>
         </div>
       </div>

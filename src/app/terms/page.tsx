@@ -7,7 +7,7 @@ const TermsPage: NextPage = () => {
         <h1 className="text-4xl font-bold mb-4">Terms of Service</h1>
         <p className="mb-4">
           Welcome to Zynvo! These terms and conditions outline the rules and
-          regulations for the use of Zynvo's Website, located at zynvo.com.
+          regulations for the use of Zynvo's Website, located at zynvosocial.com.
         </p>
         <p className="mb-4">
           By accessing this website we assume you accept these terms and

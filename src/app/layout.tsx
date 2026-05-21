@@ -13,6 +13,18 @@ import FloatingPWAInstall from '@/components/FloatingPWAInstall';
 import { ClerkKeyDebug } from '@/components/ClerkKeyDebug';
 import { ClerkProvider } from '@clerk/nextjs'
 
+const LEGACY_CLERK_FRONTEND_API_ENCODED = 'Y2xlcmsuenludm8uc29jaWFsJA';
+const ACTIVE_CLERK_FRONTEND_API_ENCODED = 'Y2xlcmsuenludm9zb2NpYWwuY29tJA';
+
+function normalizeClerkPublishableKey(key: string | undefined): string | undefined {
+  if (!key) return key;
+  if (!key.includes(LEGACY_CLERK_FRONTEND_API_ENCODED)) return key;
+  return key.replace(
+    LEGACY_CLERK_FRONTEND_API_ENCODED,
+    ACTIVE_CLERK_FRONTEND_API_ENCODED
+  );
+}
+
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
   variable: '--font-geist-sans',
@@ -25,10 +37,10 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://zynvo.social'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://zynvosocial.com'),
   manifest: "/manifest.json",
   title:
-    'Zynvo - Agentic Social Media Platform for Campus Communities | Student Network',
+    'Zynvo -Social Media Platform for Campus Communities | Student Network',
   description:
     'Zynvo is the leading agentic social media platform connecting college students, clubs, and societies. Discover events, join communities, compete in challenges, and build meaningful campus connections through AI-powered networking.',
   keywords: [
@@ -52,7 +64,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://zynvo.com',
+    url: 'https://zynvosocial.com',
     siteName: 'Zynvo',
     title: 'Zynvo - Agentic Social Media Platform for Campus Communities',
     description:
@@ -112,9 +124,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const publishableKey = normalizeClerkPublishableKey(
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+  );
   
   return (
     <ClerkProvider
+      publishableKey={publishableKey}
       signInFallbackRedirectUrl="/auth/sso-callback"
       signUpFallbackRedirectUrl="/auth/sso-callback"
       appearance={{

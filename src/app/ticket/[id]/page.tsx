@@ -230,7 +230,7 @@ export default function Page() {
                     collegeName={filteredVisible.collegeName || 'Campus'}
                     clubName={filteredVisible.clubName || 'Club'}
                     profileImage={filteredVisible.profilePic || 'https://i.pravatar.cc/300'}
-                    qrCodeImage={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://zynvo.social/verify-event/${id}`}
+                    qrCodeImage={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://zynvosocial.com/verify-event/${id}`}
                     status={filteredVisible.status}
                     attendeeName={userData?.name || undefined}
                     attendeeCollege={userData?.collegeName || undefined}
@@ -354,7 +354,7 @@ export default function Page() {
                 collegeName={filteredVisible.collegeName}
                 clubName={filteredVisible.clubName}
                 profileImage={filteredVisible.profilePic}
-                qrCodeImage={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://zynvo.social/verify-event/${id}`}
+                qrCodeImage={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://zynvosocial.com/verify-event/${id}`}
                 status={filteredVisible.status}
                 attendeeName={userData?.name || undefined}
                 attendeeCollege={userData?.collegeName || undefined}
