@@ -3471,6 +3471,10 @@ State: 'Punjab',
     State: 'Jharkhand',
   },
   {
+    college: 'Srinath University, Jamshedpur',
+    State: 'Jharkhand',
+  },
+  {
     college: 'Indian Institute of Information Technology Nagpur',
     State: 'Maharashtra',
   },
