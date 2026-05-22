@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   Twitter, Mail, MapPin, ArrowRight, Heart,
@@ -35,7 +37,6 @@ export default function FooterWithSocial() {
   return (
     <div style={{ fontFamily: "'Nunito', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700&display=swap');
         * { box-sizing: border-box; }
 
         /* ── Social section ── */
@@ -81,7 +82,6 @@ export default function FooterWithSocial() {
       ════════════════════════════════════════ */}
       <section className="social-section">
         <div style={{ maxWidth: 1060, margin: "0 auto" }}>
-
           {/* heading */}
           <div style={{ textAlign: "center", marginBottom: 40 }}>
             <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(26px,4vw,40px)", fontWeight: 700, color: "#1a1a1a" }}>
@@ -160,7 +160,7 @@ export default function FooterWithSocial() {
                 </div>
                 <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                   <MapPin size={15} color="#92400e" />
-                  <span style={{ fontSize:13.5, color:"#78350f", fontWeight:700 }}>New Delhi, India</span>
+                  <span style={{ fontSize:13.5, color:"#78350f", fontWeight:700 }}>Kolkata, India</span>
                 </div>
               </div>
 
@@ -234,7 +234,7 @@ export default function FooterWithSocial() {
         {/* ── Bottom bar ── */}
         <div style={{ marginTop:48, borderTop:"1.5px solid rgba(251,191,36,0.5)", background:"rgba(0,0,0,0.06)" }}>
           <div style={{ maxWidth:1060, margin:"0 auto", padding:"14px 24px", display:"flex", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", gap:12 }}>
-            <p style={{ fontSize:13, color:"#78350f", fontWeight:700 }}>© 2025 Zynvo. All rights reserved.</p>
+            <p style={{ fontSize:13, color:"#78350f", fontWeight:700 }}>© 2025 Zynvosocial. All rights reserved.</p>
             <div style={{ display:"flex", gap:20 }}>
               {["Privacy Policy","Terms of Service","Cookie Policy"].map(link => (
                 <a key={link} href="#" style={{ fontSize:13, color:"#78350f", fontWeight:700, textDecoration:"none", transition:"color 0.18s" }}
@@ -254,4 +254,3 @@ export default function FooterWithSocial() {
     </div>
   );
 }
-
