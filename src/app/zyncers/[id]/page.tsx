@@ -26,6 +26,7 @@ interface Event {
   EventName: string;
   startDate: string;
   id: string;
+  passId?: string | null;
 }
 
 export interface UserData {
@@ -65,6 +66,8 @@ export interface ApiResponse {
     instagram: string | null;
     linkedin: string | null;
     eventAttended: {
+      passId?: string | null;
+      uniquePassId?: string | null;
       event: {
         id: string;
         EventName: string;
@@ -289,6 +292,7 @@ export default function PublicUserProfile() {
               EventName: eve.event.EventName,
               startDate: eve.event.startDate,
               id: eve.event.id,
+              passId: eve.passId || eve.uniquePassId || null,
             })) || [];
 
           setUserData({
@@ -793,6 +797,20 @@ export default function PublicUserProfile() {
                                   day: 'numeric',
                                 })}
                               </p>
+                              {isOwnProfile && (
+                                <div className="flex flex-wrap gap-2 mt-1.5">
+                                  {event.id && (
+                                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-gray-800/80 text-gray-400 border border-gray-700/50">
+                                      Event ID: {event.id}
+                                    </span>
+                                  )}
+                                  {event.passId && (
+                                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-gray-800/80 text-gray-400 border border-gray-700/50">
+                                      Pass ID: {event.passId}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
@@ -806,7 +824,7 @@ export default function PublicUserProfile() {
                                 className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-semibold transition-colors"
                               >
                                 <Ticket className="w-3 h-3" />
-                                Ticket
+                                View Ticket
                               </button>
                             ) : null}
                           </div>

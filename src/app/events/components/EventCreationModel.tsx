@@ -75,6 +75,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     isPaidEvent: false,
     paymentQRCode: '',
     paymentAmount: 0,
+    maxParticipants: '',
   });
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -424,6 +425,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       ...formData,
       image: imageLink,
     };
+
+    if (payload.maxParticipants === '' || payload.maxParticipants === 0 || payload.maxParticipants === undefined || payload.maxParticipants === null) {
+      payload.maxParticipants = null;
+    } else {
+      payload.maxParticipants = parseInt(payload.maxParticipants.toString(), 10);
+    }
 
     // Map isPaidEvent to isPaid for backend
     if (formData.isPaidEvent) {
@@ -815,6 +822,28 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                         {errors.maxTeamSize}
                       </p>
                     )}
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="maxParticipants"
+                      className="block text-sm font-medium text-yellow-400 mb-1"
+                    >
+                      Maximum Number of Participants (Optional)
+                    </label>
+                    <input
+                      id="maxParticipants"
+                      name="maxParticipants"
+                      type="number"
+                      min="1"
+                      value={formData.maxParticipants}
+                      onChange={handleChange}
+                      className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
+                      placeholder="Uncapped limit"
+                    />
+                    <p className="mt-1 text-xs text-gray-400">
+                      Leave empty for unlimited participation.
+                    </p>
                   </div>
 
                   <div>
@@ -1391,6 +1420,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                             Team Size:
                           </span>
                           <span>{formData.maxTeamSize || 'Not specified'}</span>
+                        </div>
+
+                        <div className="flex items-center text-gray-300">
+                          <span className="font-medium text-yellow-400 mr-2">
+                            Max Participants:
+                          </span>
+                          <span>{formData.maxParticipants || 'Unlimited'}</span>
                         </div>
 
                         <div className="flex items-center text-gray-300">
