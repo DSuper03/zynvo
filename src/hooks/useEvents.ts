@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
+import { getSafeErrorMessage } from '@/lib/safe-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 
@@ -143,8 +144,7 @@ export const useCreateEvent = () => {
     },
     onError: (error: Error) => {
       logger.error('Error creating event:', error);
-      const axiosError = error as any;
-      toast.error(axiosError.response?.data?.message || 'Failed to create event');
+      toast.error(getSafeErrorMessage(error, 'Failed to create event'));
     },
   });
 };
@@ -193,9 +193,7 @@ export const useRegisterForEvent = () => {
         toast.error('Only students from organizer college can register.');
         return;
       }
-      toast.error(
-        axiosError.response?.data?.message || 'Failed to register for event'
-      );
+      toast.error(getSafeErrorMessage(error, 'Failed to register for event'));
     },
   });
 };

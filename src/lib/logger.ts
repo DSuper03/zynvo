@@ -1,3 +1,5 @@
+import { captureApiFailure } from '@/lib/telemetry';
+
 // Production-safe logging utility
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -16,8 +18,14 @@ export const logger = {
     if (isDevelopment) {
       console.error(...args);
     }
-    // In production, you might want to send errors to a logging service
-    // Example: sendToLoggingService(args);
+    const [firstArg] = args;
+    if (typeof window !== 'undefined') {
+      captureApiFailure({
+        error: firstArg instanceof Error ? firstArg : new Error(String(firstArg ?? 'Unknown logger error')),
+        context: 'logger.error',
+        metadata: { args: args.slice(0, 3).map((v) => (typeof v === 'string' ? v : undefined)).filter(Boolean) },
+      });
+    }
   },
   info: (...args: any[]) => {
     if (isDevelopment) {

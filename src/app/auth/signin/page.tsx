@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useSignIn } from '@clerk/nextjs';
+import { getSafeErrorMessage, toSafeUserMessage } from '@/lib/safe-error';
 import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
 import {
   consumeBrowserPostAuthRedirect,
@@ -80,7 +81,9 @@ export default function SignIn() {
     } catch (err: any) {
       console.error('SSO redirect error:', err);
       console.error('SSO error details:', JSON.stringify(err?.errors, null, 2));
-      toast.error(err?.errors?.[0]?.message || 'Failed to initiate Google sign-in');
+      toast.error(
+        toSafeUserMessage(err?.errors?.[0]?.message, 'Failed to initiate Google sign-in')
+      );
     }
   };
 
@@ -100,7 +103,7 @@ export default function SignIn() {
       );
 
       if (!res || !res.data) {
-        toast.error('Some Internal Server Error Occurred');
+        toast.error('Unable to sign in right now. Please try again.');
         return;
       }
 
@@ -112,7 +115,9 @@ export default function SignIn() {
         return;
       }
 
-      toast.error(res.data.msg || 'Login failed. Please try again.');
+      toast.error(
+        toSafeUserMessage(res.data.msg, 'Login failed. Please try again.')
+      );
     } catch (error: any) {
       if (error.response) {
         const errorMsg = error.response.data?.msg || 'Login failed';
@@ -121,12 +126,12 @@ export default function SignIn() {
         } else if (errorMsg.includes('Invalid email or password')) {
           toast.error('Invalid email or password. Please check your credentials and try again.');
         } else {
-          toast.error(errorMsg);
+          toast.error(getSafeErrorMessage(error, 'Login failed. Please try again.'));
         }
       } else if (error.request) {
         toast.error('Network error. Please check your connection and try again.');
       } else {
-        toast.error('An unexpected error occurred. Please try again.');
+        toast.error(getSafeErrorMessage(error, 'An unexpected error occurred. Please try again.'));
       }
     } finally {
       setLoading(false);
