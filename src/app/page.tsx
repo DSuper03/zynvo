@@ -14,6 +14,7 @@ import { Skiper39 } from '@/components/SkipperLanding';
 import { cn } from '@/lib/utils';
 import { CanvasText } from '@/components/ui/canvas-text';
 import { ParallaxHeroImages } from '@/components/ui/parallax-hero-images';
+import OpenRolesSection from '@/components/OpenRolesSection';
 import {
   fetchDiscoverPostPreviews,
   type DiscoverPostPreview,
@@ -374,6 +375,7 @@ export default function Home() {
 
         {/* Event Highlights Section */}
         <Events />
+        <OpenRolesSection />
         {/* CTA Section */}
         <section className="flex min-h-80 items-center justify-center bg-yellow-300 p-8 text-black">
           <h2
