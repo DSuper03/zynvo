@@ -12,7 +12,7 @@ import { QueryProvider } from '@/providers/QueryProvider';
 import FloatingPWAInstall from '@/components/FloatingPWAInstall';
 import { ClerkKeyDebug } from '@/components/ClerkKeyDebug';
 import ClientTelemetryBootstrap from '@/components/ClientTelemetryBootstrap';
-import { ClerkProvider } from '@clerk/nextjs'
+import { ClerkProvider } from '@clerk/nextjs';
 
 const LEGACY_CLERK_FRONTEND_API_ENCODED = 'Y2xlcmsuenludm8uc29jaWFsJA';
 const ACTIVE_CLERK_FRONTEND_API_ENCODED = 'Y2xlcmsuenludm9zb2NpYWwuY29tJA';
