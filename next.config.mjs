@@ -31,6 +31,7 @@ const securityHeaders = [
 
 import bundleAnalyzer from '@next/bundle-analyzer';
 import withPWA from 'next-pwa';
+import { withSentryConfig } from '@sentry/nextjs';
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -274,4 +275,15 @@ const pwaConfig = withPWA({
 })(nextConfig);
 
 // Apply bundle analyzer and export
-export default withBundleAnalyzer(pwaConfig);
+const bundledConfig = withBundleAnalyzer(pwaConfig);
+
+export default withSentryConfig(bundledConfig, {
+  // Set SENTRY_AUTH_TOKEN in CI to upload source maps.
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: !process.env.CI,
+  tunnelRoute: '/monitoring',
+  disableLogger: true,
+  widenClientFileUpload: true,
+});

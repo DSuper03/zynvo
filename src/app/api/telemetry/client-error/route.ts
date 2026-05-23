@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { createErrorId } from '@/lib/safe-error';
 
 type IncomingTelemetryBody = {
@@ -57,7 +58,18 @@ export async function POST(request: NextRequest) {
     };
 
     // For now we log structured events to server logs.
-    // This can be forwarded to Sentry/Datadog without changing clients.
+    Sentry.captureMessage(`Client telemetry: ${event.message}`, {
+      level: 'error',
+      tags: {
+        telemetryId: event.telemetryId,
+        kind: event.kind,
+        context: event.context || 'unknown',
+      },
+      extra: {
+        ...event,
+      },
+    });
+
     console.error('[client-telemetry]', event);
 
     return NextResponse.json({ ok: true, telemetryId });
