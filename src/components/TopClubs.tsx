@@ -12,39 +12,156 @@ type TopClub = {
   description?: string | null;
 };
 
-const DEFAULT_CLUB_IMAGE = 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=800&q=80';
+type TopClubApiItem = {
+  id?: string;
+  name?: string;
+  clubName?: string;
+  collegeName?: string | null;
+  description?: string | null;
+  profilePicUrl?: string | null;
+  profilePic?: string | null;
+  image?: string | null;
+  logo?: string | null;
+};
+
+type CachedTopClubsPayload = {
+  clubs: TopClub[];
+  cachedAt: number;
+};
+
+const DEFAULT_CLUB_IMAGE =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#111827"/>
+          <stop offset="100%" stop-color="#1f2937"/>
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="800" fill="url(#g)"/>
+      <circle cx="930" cy="180" r="210" fill="#facc15" fill-opacity="0.14"/>
+      <circle cx="250" cy="650" r="230" fill="#f59e0b" fill-opacity="0.12"/>
+      <text x="600" y="390" text-anchor="middle" font-size="56" font-family="Arial, sans-serif" fill="#facc15" font-weight="700">
+        Zynvo Club
+      </text>
+      <text x="600" y="450" text-anchor="middle" font-size="30" font-family="Arial, sans-serif" fill="#d1d5db">
+        Image unavailable
+      </text>
+    </svg>
+  `);
+const BACKEND_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://zynvosocial-be-274792984950.asia-south1.run.app').replace(/\/$/, '');
+const TOP_CLUBS_CACHE_KEY = 'zynvo.topclubs.cache.v1';
+
+const resolveClubImageUrl = (url?: string | null) => {
+  if (!url || typeof url !== 'string') return DEFAULT_CLUB_IMAGE;
+
+  const trimmedUrl = url.trim();
+  if (!trimmedUrl) return DEFAULT_CLUB_IMAGE;
+
+  // Absolute URLs, data/blob URLs can be used directly.
+  if (/^(https?:)?\/\//i.test(trimmedUrl) || /^(data|blob):/i.test(trimmedUrl)) {
+    return trimmedUrl.startsWith('//') ? `https:${trimmedUrl}` : trimmedUrl;
+  }
+
+  // Backend can return relative paths like /uploads/... or uploads/...
+  return `${BACKEND_BASE_URL}/${trimmedUrl.replace(/^\/+/, '')}`;
+};
+
+const buildClubFallbackLogo = (clubName: string) =>
+  `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(clubName)}&fontSize=42&backgroundColor=111827,facc15,1f2937&textColor=facc15,ffffff`;
 
 const fallbackClubs: TopClub[] = kolkataCollegeClubs.slice(0, 8).map((club) => ({
   id: club.id,
   name: club.clubName,
   collegeName: club.collegeName,
   description: club.description,
-  profilePicUrl: DEFAULT_CLUB_IMAGE,
+  profilePicUrl: buildClubFallbackLogo(club.clubName),
 }));
+
+const mapApiClubToTopClub = (club: TopClubApiItem, index: number): TopClub => {
+  const imageCandidate =
+    club.profilePicUrl ||
+    club.profilePic ||
+    club.image ||
+    club.logo ||
+    DEFAULT_CLUB_IMAGE;
+
+  return {
+    id: club.id || `club-${index}`,
+    name: club.name || club.clubName || 'Unnamed club',
+    collegeName: club.collegeName || null,
+    description: club.description || null,
+    profilePicUrl: resolveClubImageUrl(imageCandidate),
+  };
+};
+
+const readCachedTopClubs = (): TopClub[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(TOP_CLUBS_CACHE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as CachedTopClubsPayload;
+    if (!Array.isArray(parsed?.clubs)) return [];
+    return parsed.clubs
+      .slice(0, 8)
+      .map((club, index) => mapApiClubToTopClub(club as TopClubApiItem, index));
+  } catch {
+    return [];
+  }
+};
+
+const writeCachedTopClubs = (clubs: TopClub[]) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const payload: CachedTopClubsPayload = {
+      clubs: clubs.slice(0, 8),
+      cachedAt: Date.now(),
+    };
+    localStorage.setItem(TOP_CLUBS_CACHE_KEY, JSON.stringify(payload));
+  } catch {
+    // Ignore storage failures silently (quota / private mode).
+  }
+};
 
 export default function TopClubs() {
   const [clubs, setClubs] = useState<TopClub[]>(fallbackClubs);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [authRequiredForLogos, setAuthRequiredForLogos] = useState(false);
 
   useEffect(() => {
     const fetchClubs = async () => {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const cachedClubs = readCachedTopClubs();
+      if (cachedClubs.length > 0) {
+        setClubs(cachedClubs);
+        setIsLoaded(true);
+      }
+
       try {
-        const response = await axios.get<{ resp: TopClub[] }>('/api/v1/clubs/getAll?page=1', {
-          headers: token ? { authorization: `Bearer ${token}` } : undefined,
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const hasActiveSession = typeof window !== 'undefined' ? sessionStorage.getItem('activeSession') === 'true' : false;
+        const headers =
+          token && hasActiveSession ? { authorization: `Bearer ${token}` } : undefined;
+
+        const response = await axios.get<{ resp: TopClubApiItem[] }>('/api/public/top-clubs', {
+          headers,
         });
 
         const fetchedClubs = response.data?.resp || [];
-        setClubs(fetchedClubs.slice(0, 8).map((club) => ({
-          id: club.id,
-          name: club.name,
-          collegeName: club.collegeName,
-          description: club.description,
-          profilePicUrl: club.profilePicUrl || DEFAULT_CLUB_IMAGE,
-        })));
+        const mappedClubs = fetchedClubs
+          .slice(0, 8)
+          .map((club, index) => mapApiClubToTopClub(club, index));
+        setAuthRequiredForLogos(false);
+        setClubs(mappedClubs);
+        writeCachedTopClubs(mappedClubs);
       } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          setAuthRequiredForLogos(true);
+        }
         console.warn('Failed to load top clubs from backend, using fallback clubs.', error);
-        setClubs(fallbackClubs);
+        if (cachedClubs.length === 0) {
+          setClubs(fallbackClubs);
+        }
       } finally {
         setIsLoaded(true);
       }
@@ -70,6 +187,11 @@ export default function TopClubs() {
           <p style={{ margin: 0, fontSize: 15, color: '#4b5563', lineHeight: 1.7 }}>
             Discover the most active clubs on Zynvo, with live photos and college names fetched directly from the backend.
           </p>
+          {authRequiredForLogos && (
+            <p style={{ marginTop: 10, fontSize: 12, fontWeight: 700, color: '#92400e' }}>
+              Official logos are restricted by backend auth right now. Sign in to unlock them.
+            </p>
+          )}
         </div>
       </div>
 
@@ -84,10 +206,14 @@ export default function TopClubs() {
             >
               <div className="relative h-48 overflow-hidden">
                 <img
-                  src={club.profilePicUrl || DEFAULT_CLUB_IMAGE}
+                  src={resolveClubImageUrl(club.profilePicUrl)}
                   alt={club.name}
                   className="h-full w-full object-cover"
                   loading="lazy"
+                  onError={(event) => {
+                    event.currentTarget.onerror = null;
+                    event.currentTarget.src = DEFAULT_CLUB_IMAGE;
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
               </div>
