@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
+import { getSafeErrorMessage, toSafeUserMessage } from '@/lib/safe-error';
 
 const JoinClubModal: React.FC<JoinClubModalProps> = ({
   isOpen,
@@ -63,20 +64,24 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
         });
       return;
     }
-    const res = await axios.post<{ msg: string }>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/joinClub/${clubId}`,
-      {},
-      {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
+    try {
+      const res = await axios.post<{ msg: string }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/joinClub/${clubId}`,
+        {},
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (res.status == 200) {
+        toast.success(toSafeUserMessage(res.data.msg, 'Successfully joined club.'));
+        onClose();
+      } else {
+        toast.error(toSafeUserMessage(res.data.msg, 'Failed to join club. Please try again.'));
       }
-    );
-    if (res.status == 200) {
-      toast.success(res.data.msg);
-      onClose();
-    } else {
-      toast.error(res.data.msg);
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, 'Failed to join club. Please try again.'));
     }
     // console.log('Join request data:', formData);
   };

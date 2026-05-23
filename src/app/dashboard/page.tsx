@@ -33,6 +33,7 @@ import { FaSchool } from 'react-icons/fa';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import EventBadgeCard from '@/components/ticket';
 import TextWithLinks from '@/components/TextWithLinks';
+import { getSafeErrorMessage } from '@/lib/safe-error';
 
 
 interface Event {
@@ -851,7 +852,7 @@ export default function ZynvoDashboard() {
       setQrCodeDataUrl(dataUrl);
     } catch (e: any) {
       console.error('QR generation failed', e);
-      toast(e?.message || 'Failed to generate QR code. Please try again.');
+      toast(getSafeErrorMessage(e, 'Failed to generate QR code. Please try again.'));
       setQrCodeDataUrl(null);
     } finally {
       setIsQrGenerating(false);
@@ -929,7 +930,7 @@ export default function ZynvoDashboard() {
       }
     } catch (e: any) {
       console.error('Ticket fetch failed', e);
-      toast(e?.response?.data?.msg || e?.message || 'Unable to load ticket');
+      toast(getSafeErrorMessage(e, 'Unable to load ticket'));
     }
   };
 
@@ -1093,7 +1094,7 @@ export default function ZynvoDashboard() {
                           toast.success(leave.data.message || leave.data.msg || 'Successfully left the club');
                           setTimeout(() => navigate.refresh(), 1000);
                         } catch (error: any) {
-                          toast.error(error.response?.data?.message || error.response?.data?.msg || 'Error leaving club');
+                          toast.error(getSafeErrorMessage(error, 'Error leaving club'));
                         }
                       }}
                       variant="outline"

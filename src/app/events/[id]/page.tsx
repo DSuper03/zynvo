@@ -48,6 +48,7 @@ import EventSeoHead from '@/components/EventSeoHead';
 import { buildAuthHref } from '@/lib/authReturnTo';
 import { ErrorState, EventDetailSkeleton } from '@/components/feedback';
 import TeamSection from './components/TeamSection';
+import { getSafeErrorMessage } from '@/lib/safe-error';
 
 interface Speaker {
   id: number;
@@ -185,7 +186,7 @@ const Eventid = () => {
         setSyncBackoffMs((prev) => Math.min((prev || 5000) * 1.5, 60000));
         toast.error('Server busy. Retrying with backoff.');
       } else {
-        toast.error(err instanceof Error ? err.message : 'Sync failed');
+        toast.error(getSafeErrorMessage(err, 'Sync failed'));
       }
     } finally {
       setCsvSyncInProgress(false);
@@ -541,10 +542,7 @@ const Eventid = () => {
         setRegistrationNotice(null);
         setCollegeBlockModal({ open: true, reason: 'mismatch' });
       } else {
-        toast.error(
-          axiosError?.response?.data?.message ||
-            'Registration failed. Please try again.'
-        );
+        toast.error(getSafeErrorMessage(error, 'Registration failed. Please try again.'));
       }
     } finally {
       setIsRegistering(false);

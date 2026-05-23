@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { useSignUp, useAuth , useSignIn} from "@clerk/nextjs";
 import { jwtDecode } from "jwt-decode";
 import { de } from 'date-fns/locale';
+import { getSafeErrorMessage, toSafeUserMessage } from '@/lib/safe-error';
 import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
 import {
   consumeBrowserPostAuthRedirect,
@@ -256,8 +257,9 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         toast.error("Please verify you are not a robot.");
       } else {
         // Fallback for other errors (e.g., Email already taken)
-        const errorMessage = err.errors?.[0]?.message || "Error creating account";
-        toast.error(errorMessage);
+        toast.error(
+          toSafeUserMessage(err.errors?.[0]?.message, "Error creating account")
+        );
       }
     } finally {
       setIsCreatingAccount(false);
@@ -304,8 +306,9 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       if (clerkCode === "verification_code_invalid" || clerkCode === "verification_code_expired") {
         toast.error("Invalid or expired verification code. Please request a new one and try again.");
       } else {
-        const message = clerkError?.message || "Verification failed. Please try again.";
-        toast.error(message);
+        toast.error(
+          toSafeUserMessage(clerkError?.message, "Verification failed. Please try again.")
+        );
       }
 
       setIsVerifyingCode(false);
@@ -367,8 +370,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       router.push(consumeBrowserPostAuthRedirect());
     } catch (err: any) {
       console.error("Post-verification sync failed:", JSON.stringify(err, null, 2));
-      const msg = err?.response?.data?.msg || err?.message || "Signup failed. Please try again.";
-      toast.error(msg);
+      toast.error(getSafeErrorMessage(err, "Signup failed. Please try again."));
     } finally {
       setIsVerifyingCode(false);
     }

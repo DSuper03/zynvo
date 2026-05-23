@@ -21,6 +21,7 @@ import Image from 'next/image';
 import { FaUserGraduate } from 'react-icons/fa';
 import TextWithLinks from '@/components/TextWithLinks';
 import { UserBadgesDisplay } from '@/components/UserBadgesDisplay';
+import { getSafeErrorMessage } from '@/lib/safe-error';
 
 interface Event {
   EventName: string;
@@ -447,7 +448,7 @@ export default function PublicUserProfile() {
         toast('Unable to load ticket');
       }
     } catch (e: any) {
-      toast(e?.response?.data?.msg || e?.message || 'Unable to load ticket');
+      toast(getSafeErrorMessage(e, 'Unable to load ticket'));
     }
   };
 

@@ -98,6 +98,7 @@ import { Button } from '@/components/ui/button';
 import ZynvoClubAnnouncement from '@/components/ZynvoClubAnnouncement';
 import NoTokenModal from '@/components/modals/remindModal';
 import { buildAuthHref } from '@/lib/authReturnTo';
+import { getSafeErrorMessage } from '@/lib/safe-error';
 
 // All dynamic content is driven by backend data; no hardcoded demo content
 
@@ -436,7 +437,7 @@ useEffect(() => {
       }, 1000);
     } catch (error: any) {
       console.error('Error leaving club:', error);
-      toast.error(error.response?.data?.message || error.response?.data?.msg || 'Failed to leave club. Please try again.');
+      toast.error(getSafeErrorMessage(error, 'Failed to leave club. Please try again.'));
     }
   };
 

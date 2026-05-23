@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { toast } from 'sonner';
 import type { TeamApiResponse, CreateTeamPayload, JoinTeamPayload } from '@/types/teamTypes';
+import { getSafeErrorMessage } from '@/lib/safe-error';
 
 const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -51,11 +52,7 @@ export function useTeam(eventId: string, token: string | null, enabled = true) {
       queryClient.invalidateQueries({ queryKey });
     },
     onError: (err: any) => {
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.msg ||
-        'Failed to create team';
-      toast.error(msg);
+      toast.error(getSafeErrorMessage(err, 'Failed to create team'));
     },
   });
 
@@ -73,11 +70,7 @@ export function useTeam(eventId: string, token: string | null, enabled = true) {
       queryClient.invalidateQueries({ queryKey });
     },
     onError: (err: any) => {
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.msg ||
-        'Failed to join team';
-      toast.error(msg);
+      toast.error(getSafeErrorMessage(err, 'Failed to join team'));
     },
   });
 
@@ -94,11 +87,7 @@ export function useTeam(eventId: string, token: string | null, enabled = true) {
       toast.success('You have left the team');
     },
     onError: (err: any) => {
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.msg ||
-        'Failed to leave team';
-      toast.error(msg);
+      toast.error(getSafeErrorMessage(err, 'Failed to leave team'));
     },
   });
 

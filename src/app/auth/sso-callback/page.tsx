@@ -18,6 +18,7 @@ import {
   consumePostAuthRedirect,
   peekReturnTo,
 } from "@/lib/authReturnTo";
+import { getSafeErrorMessage } from "@/lib/safe-error";
 
 function getBackendBase(): string | null {
   const base = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -308,7 +309,7 @@ function SSOCallbackContent() {
           setNeedsCollege(true);
           setBackendSyncing(false);
         } else {
-          toast.error(ax.response?.data?.msg || "Login failed");
+          toast.error(getSafeErrorMessage(err, "Login failed"));
           setTimeout(
             () => router.push(buildAuthHref("/auth/signin", peekReturnTo())),
             2000
@@ -391,11 +392,11 @@ function SSOCallbackContent() {
                   throw new Error("No token received");
                 }
               } catch (err: unknown) {
-                const ax = err as { response?: { data?: { msg?: string } }; message?: string };
                 toast.error(
-                  ax.response?.data?.msg ||
-                    ax.message ||
-                    (fromSigninIncomplete ? "Could not save your profile." : "Signup failed.")
+                  getSafeErrorMessage(
+                    err,
+                    fromSigninIncomplete ? "Could not save your profile." : "Signup failed."
+                  )
                 );
               } finally {
                 setSubmitting(false);

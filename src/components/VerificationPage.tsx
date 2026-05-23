@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { getSafeErrorMessage, toSafeUserMessage } from '@/lib/safe-error';
 
 type VerificationStatus = 'pending' | 'success' | 'error' | 'expired';
 
@@ -73,10 +74,15 @@ function VerificationContent() {
       if (resend.status == 200) {
         toast.success('Verification email has been resent!');
       } else {
-        toast.error(resend.data.msg);
+        toast.error(
+          toSafeUserMessage(
+            resend.data.msg,
+            'Failed to resend verification email. Please try again.'
+          )
+        );
       }
-    } catch (error) {
-      toast.error('Failed to resend verification email. Please try again.');
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, 'Failed to resend verification email. Please try again.'));
     }
   };
 

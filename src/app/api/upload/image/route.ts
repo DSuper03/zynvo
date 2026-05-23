@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import ImageKit from 'imagekit';
+import { createErrorId } from '@/lib/safe-error';
 
 function getImageKitClient() {
   const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY;
@@ -19,6 +20,7 @@ function getImageKitClient() {
 }
 
 export async function POST(request: NextRequest) {
+  const errorId = createErrorId();
   try {
     const formData = await request.formData();
     const file = formData.get('image') as File;
@@ -47,10 +49,10 @@ export async function POST(request: NextRequest) {
       url: uploadResponse.url,
       fileId: uploadResponse.fileId,
     });
-  } catch (error: any) {
-    console.error('Upload failed:', error);
+  } catch (error) {
+    console.error(`[${errorId}] Upload failed:`, error);
     return NextResponse.json(
-      { error: `Upload failed: ${error.message}` },
+      { error: 'Upload failed. Please try again later.', errorId },
       { status: 500 }
     );
   }
