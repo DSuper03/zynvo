@@ -104,7 +104,6 @@ export async function readSafeErrorMessageFromResponse(
 }
 
 export function createErrorId(): string {
-  const random = Math.random().toString(36).slice(2, 8).toUpperCase();
-  const timestamp = Date.now().toString(36).slice(-4).toUpperCase();
-  return `ERR-${timestamp}${random}`;
+  const id = globalThis.crypto.randomUUID().replace(/-/g, '').slice(0, 10).toUpperCase();
+  return `ERR-${id}`;
 }
