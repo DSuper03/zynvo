@@ -41,6 +41,7 @@ export default function SignIn() {
   const [rememberMe, setRem] = useState(false);
   const [loading, setLoading] = useState(false);
   const [signupHref, setSignupHref] = useState('/auth/signup');
+  const [suggestGoogle, setSuggestGoogle] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -53,10 +54,23 @@ export default function SignIn() {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
+    if (name === 'email') setSuggestGoogle(false);
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+  };
+
+  const checkIfGoogleAccount = async (email: string) => {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/checkUserExists`,
+        { email }
+      );
+      if (res.data?.exists) setSuggestGoogle(true);
+    } catch {
+      // silently ignore — this is a best-effort hint
+    }
   };
 
   const handleGoogleSignIn = async () => {
@@ -125,8 +139,10 @@ export default function SignIn() {
           toast.error('No account found with this email. Please sign up first.');
         } else if (errorMsg.includes('Invalid email or password')) {
           toast.error('Invalid email or password. Please check your credentials and try again.');
+          checkIfGoogleAccount(formData.email);
         } else {
           toast.error(getSafeErrorMessage(error, 'Login failed. Please try again.'));
+          checkIfGoogleAccount(formData.email);
         }
       } else if (error.request) {
         toast.error('Network error. Please check your connection and try again.');
@@ -241,7 +257,9 @@ export default function SignIn() {
                   type="button"
                   onClick={() => handleGoogleSignIn()}
                   className={`flex items-center justify-center w-full max-w-xs py-2 px-4 rounded-lg shadow transition ${
-                    'bg-white text-black hover:opacity-90'
+                    suggestGoogle
+                      ? 'bg-white text-black ring-2 ring-yellow-400 ring-offset-2 ring-offset-[#0F0F0F] animate-pulse'
+                      : 'bg-white text-black hover:opacity-90'
                   }`}
                   aria-label="Sign in with Google"
                 >
@@ -250,6 +268,33 @@ export default function SignIn() {
                 </button>
               </div>
             </div>
+
+            {suggestGoogle && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-5 flex items-start gap-3 rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-4 py-3"
+              >
+                <FaGoogle className="mt-0.5 shrink-0 text-yellow-400" />
+                <div>
+                  <p className="text-sm font-medium text-yellow-300">
+                    Looks like you signed up with Google
+                  </p>
+                  <p className="mt-0.5 text-xs text-yellow-200/70">
+                    Your account was created via Google, so there&apos;s no
+                    password set. Use the&nbsp;
+                    <button
+                      type="button"
+                      onClick={handleGoogleSignIn}
+                      className="underline underline-offset-2 hover:text-yellow-300"
+                    >
+                      Sign in with Google
+                    </button>
+                    &nbsp;button above instead.
+                  </p>
+                </div>
+              </motion.div>
+            )}
 
             <div className="flex items-center justify-center mb-6">
               <div className="h-px bg-gray-700 flex-1"></div>
