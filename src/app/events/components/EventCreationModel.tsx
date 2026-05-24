@@ -5,12 +5,15 @@ import {
   X,
   Calendar,
   Globe,
-  MapPin,
   Upload,
   Mail,
   Phone,
   ChevronLeft,
   ChevronRight,
+  Check,
+  Users,
+  CreditCard,
+  Lock,
 } from 'lucide-react';
 import Image from 'next/image';
 import { MagicCard } from '@/components/magicui/magic-card';
@@ -33,7 +36,6 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
-import { stringify } from 'querystring';
 import { useRouter } from 'next/navigation';
 import AchievementUnlockModal from '@/components/AchievementUnlockModal';
 interface CreateEventModalProps {
@@ -382,6 +384,36 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     if (!validateStep()) return;
 
     setIsSubmitting(true);
+
+    // Server-side date conflict check
+    try {
+      const dateCheckRes = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/checkEventDates`,
+        {
+          eventStartDate: formData.eventStartDate,
+          eventEndDate: formData.eventEndDate,
+          applicationStartDate: formData.applicationStartDate,
+          applicationEndDate: formData.applicationEndDate,
+        }
+      );
+      const { isValid, errors: dateErrors, warnings, existingEvents } = dateCheckRes.data;
+
+      if (!isValid && dateErrors?.length) {
+        dateErrors.forEach((msg: string) => toast.error(msg));
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (warnings?.length) {
+        warnings.forEach((msg: string) => toast(msg, { duration: 5000 }));
+      }
+
+      if (existingEvents?.length) {
+        toast(`${existingEvents.length} event(s) already scheduled in this period. Double-check your dates.`, { duration: 6000 });
+      }
+    } catch {
+      // Non-blocking: if the check endpoint fails, proceed with creation
+    }
   const userUniAndClub = `${lockedUniversity}-${clubName}`;
     let imageLink = '';
     if (!img) {
@@ -582,26 +614,36 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
 
           {/* Progress Indicator */}
-          <div className="px-6 pt-6">
-            <div className="flex items-center justify-between mb-8">
-              {[1, 2, 3, 4].map((stepNumber) => (
-                <div key={stepNumber} className="flex flex-col items-center">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= stepNumber
-                      ? 'bg-yellow-500 text-black'
-                      : 'bg-gray-800 text-gray-400'
-                      }`}
-                  >
-                    {stepNumber}
-                  </div>
-                  <span className="text-xs mt-2 text-gray-400">
-                    {stepNumber === 1 && 'Basics'}
-                    {stepNumber === 2 && 'Details'}
-                    {stepNumber === 3 && 'Timing'}
-                    {stepNumber === 4 && 'Media'}
-                  </span>
-                </div>
-              ))}
+          <div className="px-6 pt-5 pb-2">
+            <div className="flex items-center">
+              {(['Basics', 'Details', 'Timing', 'Media'] as const).map((label, i) => {
+                const stepNum = i + 1;
+                const done = step > stepNum;
+                const active = step === stepNum;
+                return (
+                  <React.Fragment key={stepNum}>
+                    <div className="flex flex-col items-center shrink-0">
+                      <div
+                        className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
+                          done
+                            ? 'bg-yellow-500 text-black'
+                            : active
+                            ? 'bg-yellow-500 text-black ring-4 ring-yellow-500/20'
+                            : 'bg-gray-800 text-gray-500'
+                        }`}
+                      >
+                        {done ? <Check className="w-4 h-4" /> : stepNum}
+                      </div>
+                      <span className={`text-xs mt-1.5 font-medium ${active ? 'text-yellow-400' : done ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {label}
+                      </span>
+                    </div>
+                    {i < 3 && (
+                      <div className={`flex-1 h-0.5 mx-2 mb-5 rounded-full transition-all ${step > stepNum ? 'bg-yellow-500' : 'bg-gray-800'}`} />
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </div>
           </div>
 
@@ -877,55 +919,52 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                     )}
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      id="collegeStudentsOnly"
-                      name="collegeStudentsOnly"
-                      type="checkbox"
-                      checked={formData.collegeStudentsOnly}
-                      onChange={handleCheckboxChange}
-                      className="h-4 w-4 rounded border-gray-700 text-yellow-600 focus:ring-yellow-600 bg-gray-800"
-                    />
-                    <Label
-                      htmlFor="collegeStudentsOnly"
-                      className="text-sm text-gray-300"
-                    >
-                      For college students only
-                    </Label>
-                  </div>
+                  {/* Access & Participation toggles */}
+                  <div>
+                    <p className="text-sm font-medium text-yellow-400 mb-3">Access Restrictions</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* College students only */}
+                      <button
+                        type="button"
+                        onClick={() => setFormData((prev: any) => ({ ...prev, collegeStudentsOnly: !prev.collegeStudentsOnly }))}
+                        className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
+                          formData.collegeStudentsOnly
+                            ? 'border-yellow-500 bg-yellow-500/10'
+                            : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border ${formData.collegeStudentsOnly ? 'bg-yellow-500 border-yellow-500' : 'border-gray-600'}`}>
+                          {formData.collegeStudentsOnly && <Check className="w-3 h-3 text-black" />}
+                        </div>
+                        <div>
+                          <p className={`text-sm font-medium ${formData.collegeStudentsOnly ? 'text-yellow-400' : 'text-gray-300'}`}>
+                            College students only
+                          </p>
+                          <p className="text-xs text-gray-500">Restrict to your college</p>
+                        </div>
+                      </button>
 
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      id="noParticipationFee"
-                      name="noParticipationFee"
-                      type="checkbox"
-                      checked={formData.noParticipationFee}
-                      onChange={handleCheckboxChange}
-                      className="h-4 w-4 rounded border-gray-700 text-yellow-600 focus:ring-yellow-600 bg-gray-800"
-                    />
-                    <Label
-                      htmlFor="noParticipationFee"
-                      className="text-sm text-gray-300"
-                    >
-                      No participation fee
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <input
-                      id="coreTeamOnly"
-                      name="coreTeamOnly"
-                      type="checkbox"
-                      checked={formData.coreTeamOnly}
-                      onChange={handleCheckboxChange}
-                      className="h-4 w-4 rounded border-gray-700 text-yellow-600 focus:ring-yellow-600 bg-gray-800"
-                    />
-                    <label
-                      htmlFor="coreTeamOnly"
-                      className="text-sm text-gray-300"
-                    >
-                      Allowed to core team only
-                    </label>
+                      {/* Core team only */}
+                      <button
+                        type="button"
+                        onClick={() => setFormData((prev: any) => ({ ...prev, coreTeamOnly: !prev.coreTeamOnly }))}
+                        className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
+                          formData.coreTeamOnly
+                            ? 'border-yellow-500 bg-yellow-500/10'
+                            : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border ${formData.coreTeamOnly ? 'bg-yellow-500 border-yellow-500' : 'border-gray-600'}`}>
+                          {formData.coreTeamOnly && <Check className="w-3 h-3 text-black" />}
+                        </div>
+                        <div>
+                          <p className={`text-sm font-medium ${formData.coreTeamOnly ? 'text-yellow-400' : 'text-gray-300'}`}>
+                            Core team only
+                          </p>
+                          <p className="text-xs text-gray-500">Internal club members</p>
+                        </div>
+                      </button>
+                    </div>
                   </div>
 
                   <div>
@@ -1003,106 +1042,117 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                     </p>
                   </div>
 
-                  {/* Paid Event Section */}
-                  <div className="border-t border-gray-700 pt-4">
-                    <div className="flex items-center space-x-2 mb-4">
-                      <Input
-                        id="isPaidEvent"
-                        name="isPaidEvent"
-                        type="checkbox"
-                        checked={formData.isPaidEvent || false}
-                        onChange={(e) => {
-                          const checked = e.currentTarget.checked;
-                          setFormData((prev: any) => ({
-                            ...prev,
-                            isPaidEvent: checked,
-                            paymentAmount: checked ? prev.paymentAmount : 0,
-                          }));
-                        }}
-                        className="h-4 w-4 rounded border-gray-700 text-yellow-600 focus:ring-yellow-600 bg-gray-800"
-                      />
-                      <Label
-                        htmlFor="isPaidEvent"
-                        className="text-sm font-medium text-yellow-400"
+                  {/* Fee — single Free / Paid selector */}
+                  <div className="border-t border-gray-800 pt-4">
+                    <p className="text-sm font-medium text-yellow-400 mb-3">Participation Fee</p>
+                    <div className="flex rounded-lg bg-gray-800 p-1 gap-1 mb-4">
+                      <button
+                        type="button"
+                        onClick={() => setFormData((prev: any) => ({
+                          ...prev,
+                          isPaidEvent: false,
+                          noParticipationFee: true,
+                          paymentAmount: 0,
+                        }))}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
+                          !formData.isPaidEvent
+                            ? 'bg-yellow-500 text-black'
+                            : 'text-gray-400 hover:text-white'
+                        }`}
                       >
-                        This is a Paid Event
-                      </Label>
+                        <Check className="w-4 h-4" />
+                        Free
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormData((prev: any) => ({
+                          ...prev,
+                          isPaidEvent: true,
+                          noParticipationFee: false,
+                        }))}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
+                          formData.isPaidEvent
+                            ? 'bg-yellow-500 text-black'
+                            : 'text-gray-400 hover:text-white'
+                        }`}
+                      >
+                        <CreditCard className="w-4 h-4" />
+                        Paid
+                      </button>
                     </div>
 
                     {formData.isPaidEvent && (
-                      <div className="space-y-4 bg-gray-800 bg-opacity-50 p-4 rounded-lg border border-yellow-500 border-opacity-20">
+                      <div className="space-y-4 bg-gray-800/50 p-4 rounded-lg border border-yellow-500/20">
                         <div>
                           <label
                             htmlFor="paymentAmount"
                             className="block text-sm font-medium text-yellow-400 mb-1"
                           >
-                            Payment Amount (₹)*
+                            Registration Fee (₹)*
                           </label>
-                          <input
-                            id="paymentAmount"
-                            name="paymentAmount"
-                            type="number"
-                            min="1"
-                            step="1"
-                            value={formData.paymentAmount || ''}
-                            onChange={handleChange}
-                            className="w-full bg-gray-900 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
-                            placeholder="e.g., 500"
-                          />
+                          <div className="relative">
+                            <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 text-sm">₹</span>
+                            <input
+                              id="paymentAmount"
+                              name="paymentAmount"
+                              type="number"
+                              min="1"
+                              step="1"
+                              value={formData.paymentAmount || ''}
+                              onChange={handleChange}
+                              className="w-full bg-gray-900 border border-gray-700 focus:border-yellow-500 text-white pl-7 pr-4 py-2.5 rounded-lg focus:outline-none"
+                              placeholder="e.g. 500"
+                            />
+                          </div>
                           {errors.paymentAmount && (
-                            <p className="mt-1 text-sm text-red-500">
-                              {errors.paymentAmount}
-                            </p>
+                            <p className="mt-1 text-sm text-red-500">{errors.paymentAmount}</p>
                           )}
                         </div>
 
                         <div>
                           <label className="block text-sm font-medium text-yellow-400 mb-2">
-                            Payment QR Code Image*
+                            Payment QR Code*
                           </label>
-                          <div className="flex flex-col gap-4">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              id="qrCodeUpload"
-                              className="hidden"
-                              onChange={handleQRCodeChange}
-                            />
-                            <label htmlFor="qrCodeUpload" className="cursor-pointer">
-                              <div className="w-full bg-gray-900 border-2 border-dashed border-gray-700 rounded-lg p-6 hover:border-yellow-500 transition-colors flex flex-col items-center justify-center">
-                                <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                                <span className="text-sm text-gray-400">Click to upload QR code</span>
-                                <span className="text-xs text-gray-500 mt-1">Max 2MB</span>
-                              </div>
-                            </label>
-
-                            {qrCodePreviewUrl && (
-                              <div className="relative w-32 h-32">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            id="qrCodeUpload"
+                            className="hidden"
+                            onChange={handleQRCodeChange}
+                          />
+                          {qrCodePreviewUrl ? (
+                            <div className="flex items-center gap-4">
+                              <div className="relative w-28 h-28 shrink-0">
                                 <Image
                                   src={qrCodePreviewUrl}
                                   alt="QR Code Preview"
                                   fill
-                                  className="rounded-lg object-cover"
+                                  className="rounded-lg object-cover border border-gray-700"
                                 />
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <p className="text-sm text-gray-300">QR code uploaded</p>
                                 <button
                                   type="button"
-                                  className="absolute top-1 right-1 bg-black bg-opacity-70 rounded-full p-1 hover:bg-red-600 transition-colors"
-                                  onClick={() => {
-                                    setQrCodeImg(null);
-                                    setQrCodePreviewUrl('');
-                                  }}
+                                  onClick={() => { setQrCodeImg(null); setQrCodePreviewUrl(''); }}
+                                  className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1"
                                 >
-                                  <X size={16} className="text-white" />
+                                  <X className="w-3 h-3" /> Remove
                                 </button>
                               </div>
-                            )}
-
-                            {errors.paymentQRCode && (
-                              <p className="text-sm text-red-500">
-                                {errors.paymentQRCode}
-                              </p>
-                            )}
-                          </div>
+                            </div>
+                          ) : (
+                            <label htmlFor="qrCodeUpload" className="cursor-pointer block">
+                              <div className="w-full bg-gray-900 border-2 border-dashed border-gray-700 rounded-lg p-5 hover:border-yellow-500 transition-colors flex flex-col items-center justify-center gap-1.5">
+                                <Upload className="w-7 h-7 text-gray-400" />
+                                <span className="text-sm text-gray-400">Click to upload QR code</span>
+                                <span className="text-xs text-gray-600">Max 2 MB · PNG, JPG</span>
+                              </div>
+                            </label>
+                          )}
+                          {errors.paymentQRCode && (
+                            <p className="mt-1 text-sm text-red-500">{errors.paymentQRCode}</p>
+                          )}
                         </div>
                       </div>
                     )}
@@ -1382,94 +1432,57 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                   </div>
 
                   {/* Event Summary Card */}
-                  <div className="bg-gray-800 rounded-lg overflow-hidden mt-6">
-                    <div className="p-4">
-                      <h4 className="text-xl font-bold text-white mb-2">
-                        {formData.eventName || 'Event Name'}
+                  <div className="bg-gray-800/60 border border-gray-700 rounded-xl overflow-hidden mt-2">
+                    <div className="px-5 py-4 border-b border-gray-700">
+                      <h4 className="text-lg font-bold text-white leading-tight">
+                        {formData.eventName || 'Untitled Event'}
                       </h4>
-                        <div className="grid grid-cols-2 gap-y-2 text-sm">
-                        <div className="flex items-center text-gray-300">
-                          <span className="font-medium text-yellow-400 mr-2">
-                            Event University
-                          </span>
-                          <span className="capitalize">
-                            {formData.university || 'Not specified'}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <p className="text-gray-400 text-sm mb-1">
-                        {formData.tagline || 'Event tagline'}
-                      </p>
-                      <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-                        {formData.description || 'Event description'}
-                      </p>
-
-                      <div className="grid grid-cols-2 gap-y-2 text-sm">
-                        <div className="flex items-center text-gray-300">
-                          <span className="font-medium text-yellow-400 mr-2">
-                            Mode:
-                          </span>
-                          <span className="capitalize">
-                            {formData.eventMode || 'Not specified'}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center text-gray-300">
-                          <span className="font-medium text-yellow-400 mr-2">
-                            Team Size:
-                          </span>
-                          <span>{formData.maxTeamSize || 'Not specified'}</span>
-                        </div>
-
-                        <div className="flex items-center text-gray-300">
-                          <span className="font-medium text-yellow-400 mr-2">
-                            Max Participants:
-                          </span>
-                          <span>{formData.maxParticipants || 'Unlimited'}</span>
-                        </div>
-
-                        <div className="flex items-center text-gray-300">
-                          <span className="font-medium text-yellow-400 mr-2">
-                            Dates:
-                          </span>
-                          <span>
-                            {formData.eventStartDate || '--'} to{' '}
-                            {formData.eventEndDate || '--'}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center text-gray-300">
-                          <span className="font-medium text-yellow-400 mr-2">
-                            Fee:
-                          </span>
-                          <span>
-                            {formData.noParticipationFee ? 'Free' : 'Paid'}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center text-gray-300">
-                          <span className="font-medium text-yellow-400 mr-2">
-                            Venue:
-                          </span>
-                          <span>{formData.venue || 'Not specified'}</span>
-                        </div>
-
-                        <div className="flex items-center text-gray-300">
-                          <span className="font-medium text-yellow-400 mr-2">
-                            Contact:
-                          </span>
-                          <span>{formData.contactEmail || 'Not provided'}</span>
-                        </div>
-                      </div>
+                      {formData.tagline && (
+                        <p className="text-sm text-yellow-400/80 mt-0.5">{formData.tagline}</p>
+                      )}
+                      {formData.description && (
+                        <p className="text-xs text-gray-400 mt-1.5 line-clamp-2">{formData.description}</p>
+                      )}
                     </div>
+
+                    <div className="grid grid-cols-2 gap-px bg-gray-700">
+                      {[
+                        { label: 'Mode', value: formData.eventMode ? formData.eventMode.charAt(0).toUpperCase() + formData.eventMode.slice(1) : '—' },
+                        { label: 'Type', value: formData.eventType ? formData.eventType.charAt(0).toUpperCase() + formData.eventType.slice(1) : '—' },
+                        { label: 'Team size', value: formData.maxTeamSize ? `Up to ${formData.maxTeamSize}` : '—' },
+                        { label: 'Max participants', value: formData.maxParticipants ? String(formData.maxParticipants) : 'Unlimited' },
+                        { label: 'Start date', value: formData.eventStartDate || '—' },
+                        { label: 'End date', value: formData.eventEndDate || '—' },
+                        { label: 'Venue', value: formData.venue || '—' },
+                        { label: 'Fee', value: formData.isPaidEvent ? `₹${formData.paymentAmount || '?'}` : 'Free' },
+                        { label: 'Contact email', value: formData.contactEmail || '—' },
+                        { label: 'Contact phone', value: formData.contactPhone || '—' },
+                      ].map(({ label, value }) => (
+                        <div key={label} className="bg-gray-800/80 px-4 py-3">
+                          <p className="text-xs text-gray-500 mb-0.5">{label}</p>
+                          <p className="text-sm text-white truncate">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {(formData.collegeStudentsOnly || formData.coreTeamOnly) && (
+                      <div className="px-5 py-3 border-t border-gray-700 flex gap-2 flex-wrap">
+                        {formData.collegeStudentsOnly && (
+                          <span className="text-xs bg-yellow-500/15 text-yellow-400 border border-yellow-500/20 px-2 py-0.5 rounded-full">
+                            College students only
+                          </span>
+                        )}
+                        {formData.coreTeamOnly && (
+                          <span className="text-xs bg-yellow-500/15 text-yellow-400 border border-yellow-500/20 px-2 py-0.5 rounded-full">
+                            Core team only
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 text-yellow-400 text-sm">
-                    <p>
-                      Please review all details carefully before submitting.
-                      Once submitted, your event will be visible to all users.
-                    </p>
+                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-4 py-3 text-yellow-400 text-sm">
+                    Review all details carefully. Once submitted your event goes live immediately.
                   </div>
                 </div>
               </div>

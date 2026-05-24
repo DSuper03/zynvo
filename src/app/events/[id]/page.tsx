@@ -35,7 +35,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import AddSpeakerModal from './speakers/AddSpeakerModal';
 import AddJudgeModal from './speakers/AddJudgeModal';
 import PaymentProofModal from '@/components/PaymentProofModal';
-import { Plus, Download, Users, RefreshCw } from 'lucide-react';
+import { Plus, Download, Users, RefreshCw, Pencil, Trash2 } from 'lucide-react';
+import { useUpdateJudge } from '@/hooks/useUpdateJudge';
+import { useDeleteJudge } from '@/hooks/useDeleteJudge';
 import {
   useParticipants,
   downloadParticipantsCSV,
@@ -128,6 +130,9 @@ const Eventid = () => {
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
   const [isAddSpeakerModalOpen, setIsAddSpeakerModalOpen] = useState(false);
   const [isAddJudgeModalOpen, setIsAddJudgeModalOpen] = useState(false);
+  const [editingJudge, setEditingJudge] = useState<{ id: string; name: string; description: string; achievement: string } | null>(null);
+  const updateJudgeMutation = useUpdateJudge();
+  const deleteJudgeMutation = useDeleteJudge();
   const [isFounder, setIsFounder] = useState(false);
   const [collegeBlockModal, setCollegeBlockModal] = useState<{
     open: boolean;
@@ -1290,10 +1295,10 @@ const Eventid = () => {
                       {judges.map((judge) => (
                         <div
                           key={judge.id}
-                          className="bg-black border border-yellow-500/20 rounded-lg p-4 flex gap-3"
+                          className="group bg-black border border-yellow-500/20 rounded-lg p-4 flex gap-3 relative"
                         >
                           <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-yellow-400/20 to-yellow-600/20 border border-yellow-500/30 flex items-center justify-center flex-shrink-0 text-yellow-400 font-bold text-lg shadow-inner shadow-yellow-500/10">
-                            {(judge.name || '').trim().split(/\s+/).map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'JD'}
+                            {(judge.name || '').trim().split(/\s+/).map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'JD'}
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="text-sm font-semibold text-white truncate">
@@ -1306,6 +1311,25 @@ const Eventid = () => {
                               {judge.description}
                             </p>
                           </div>
+                          {isFounder && (
+                            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={() => setEditingJudge({ id: judge.id, name: judge.name, description: judge.description, achievement: judge.achievement })}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-yellow-400 hover:bg-yellow-400/10 transition-colors"
+                                title="Edit judge"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => deleteJudgeMutation.mutate({ eventId: id as string, judgeId: judge.id })}
+                                disabled={deleteJudgeMutation.isPending}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-colors disabled:opacity-50"
+                                title="Remove judge"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -1359,7 +1383,7 @@ const Eventid = () => {
                 <h2 className="text-xl font-bold text-yellow-400 mb-4">
                   Announcements
                 </h2>
-                <EventAnnouncements />
+                <EventAnnouncements eventId={id as string} isFounder={isFounder} />
               </div>
             )}
 
@@ -1641,6 +1665,21 @@ const Eventid = () => {
         isOpen={isAddJudgeModalOpen}
         onClose={() => setIsAddJudgeModalOpen(false)}
         eventId={id}
+      />
+
+      {/* Edit Judge Modal */}
+      <AddJudgeModal
+        isOpen={!!editingJudge}
+        onClose={() => setEditingJudge(null)}
+        eventId={id}
+        initialData={editingJudge ?? undefined}
+        onSave={(data) => {
+          if (!editingJudge) return;
+          updateJudgeMutation.mutate(
+            { eventId: id as string, judgeId: editingJudge.id, ...data },
+            { onSuccess: () => setEditingJudge(null) }
+          );
+        }}
       />
 
       {/* Payment Proof Modal for Paid Events */}

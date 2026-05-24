@@ -141,7 +141,14 @@ export default function RootLayout({
       }}
     >
     <html lang="en" suppressHydrationWarning>
-       <head />
+      <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6745473381903668"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
       >
