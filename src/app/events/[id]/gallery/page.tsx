@@ -6,7 +6,7 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { X, Link as LinkIcon, Plus } from 'lucide-react';
+import { X, Link as LinkIcon, Plus, Pencil, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface GalleryItem {
@@ -98,7 +98,14 @@ const GalleryPage = () => {
   const [itemUrl, setItemUrl] = useState('');
   const [itemTitle, setItemTitle] = useState('');
 
+  // edit state
+  const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
+  const [editUrl, setEditUrl] = useState('');
+  const [editCaption, setEditCaption] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+
   const urlValidation: UrlValidation | null = itemUrl.trim() ? validateUrl(itemUrl) : null;
+  const editUrlValidation: UrlValidation | null = editUrl.trim() ? validateUrl(editUrl) : null;
 
   useEffect(() => {
     const tok = localStorage.getItem('token');
@@ -224,6 +231,53 @@ const GalleryPage = () => {
       } else {
         toast.error('Failed to delete gallery item. Please try again');
       }
+    }
+  };
+
+  const openEdit = (item: GalleryItem) => {
+    setEditingItem(item);
+    setEditUrl(item.imageUrl);
+    setEditCaption(item.caption);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingItem || !token) return;
+
+    if (!editCaption.trim()) {
+      toast.error('Caption is required');
+      return;
+    }
+
+    const validation = validateUrl(editUrl);
+    if (!validation.valid) {
+      toast.error(validation.error);
+      return;
+    }
+
+    setIsSavingEdit(true);
+    try {
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/${id}/gallery?galleryId=${editingItem.id}`,
+        { imageUrl: editUrl.trim(), caption: editCaption.trim() },
+        { headers: { authorization: `Bearer ${token}` } }
+      );
+
+      const updated: GalleryItem = res.data?.data ?? { ...editingItem, imageUrl: editUrl.trim(), caption: editCaption.trim() };
+      setGalleryItems((prev) => prev.map((g) => (g.id === editingItem.id ? updated : g)));
+      setEditingItem(null);
+      toast.success('Gallery item updated');
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        toast.error('Only the club head can edit gallery images');
+      } else if (error.response?.status === 404) {
+        toast.error('Gallery item not found');
+      } else if (error.request) {
+        toast.error('Network error. Please check your connection');
+      } else {
+        toast.error('Failed to update gallery item. Please try again');
+      }
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -397,12 +451,22 @@ const GalleryPage = () => {
                         {type === 'image' ? 'View' : 'Open'}
                       </a>
                       {isFounder && (
-                        <button
-                          onClick={() => handleDeleteItem(item.id)}
-                          className="px-3 py-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 text-sm font-medium rounded-lg transition-colors"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
+                        <>
+                          <button
+                            onClick={() => openEdit(item)}
+                            className="px-3 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 text-sm font-medium rounded-lg transition-colors"
+                            title="Edit"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteItem(item.id)}
+                            className="px-3 py-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 text-sm font-medium rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>
@@ -412,6 +476,97 @@ const GalleryPage = () => {
           </div>
         )}
       </div>
+
+      {/* Edit gallery item modal */}
+      {editingItem && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          onClick={() => !isSavingEdit && setEditingItem(null)}
+        >
+          <div
+            className="bg-[#0B0B0B] border border-gray-700 rounded-xl p-6 w-full max-w-md space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white">Edit Gallery Item</h3>
+              <button
+                onClick={() => setEditingItem(null)}
+                disabled={isSavingEdit}
+                className="text-gray-500 hover:text-white disabled:opacity-40"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-yellow-400 mb-2">Caption</label>
+              <Input
+                value={editCaption}
+                onChange={(e) => setEditCaption(e.target.value)}
+                placeholder="e.g. Day 1 Highlights"
+                className="bg-gray-800 border-gray-700 text-white"
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-yellow-400">
+                  Image URL or Google Drive Link
+                </label>
+                {editUrlValidation && (
+                  editUrlValidation.valid ? (
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                      editUrlValidation.type === 'drive'
+                        ? 'bg-blue-500/20 text-blue-300'
+                        : 'bg-green-500/20 text-green-300'
+                    }`}>
+                      {editUrlValidation.type === 'drive' ? '✓ Google Drive' : '✓ Image'}
+                    </span>
+                  ) : (
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-500/20 text-red-400">
+                      Invalid
+                    </span>
+                  )
+                )}
+              </div>
+              <Input
+                value={editUrl}
+                onChange={(e) => setEditUrl(e.target.value)}
+                placeholder="https://example.com/image.jpg or https://drive.google.com/..."
+                className={`bg-gray-800 border text-white transition-colors ${
+                  editUrlValidation
+                    ? editUrlValidation.valid
+                      ? 'border-green-600'
+                      : 'border-red-600'
+                    : 'border-gray-700'
+                }`}
+              />
+              {editUrlValidation && !editUrlValidation.valid && (
+                <p className="mt-1.5 text-xs text-red-400">{editUrlValidation.error}</p>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                onClick={() => setEditingItem(null)}
+                disabled={isSavingEdit}
+                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveEdit}
+                disabled={isSavingEdit || !editCaption.trim() || !editUrlValidation?.valid}
+                className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black font-bold rounded-lg disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSavingEdit ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
+                ) : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

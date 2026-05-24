@@ -1,5 +1,5 @@
-import EventAnnouncements from "../components/eventAnnouncement";
+import { redirect } from 'next/navigation';
 
 export default function EventAnnouncementsPage() {
-  return <EventAnnouncements />;
+  redirect('/events');
 }
