@@ -51,6 +51,13 @@ import { buildAuthHref } from '@/lib/authReturnTo';
 import { ErrorState, EventDetailSkeleton } from '@/components/feedback';
 import TeamSection from './components/TeamSection';
 import { getSafeErrorMessage } from '@/lib/safe-error';
+import { useSchedule } from '@/hooks/useSchedule';
+import {
+  getScheduleStats,
+  ScheduleDayPicker,
+  ScheduleEmptyState,
+  ScheduleSessionTimeline,
+} from './components/schedule';
 
 interface Speaker {
   id: number;
@@ -134,8 +141,9 @@ const Eventid = () => {
   const updateJudgeMutation = useUpdateJudge();
   const deleteJudgeMutation = useDeleteJudge();
   const [isFounder, setIsFounder] = useState(false);
-  const [schedule, setSchedule] = useState<any[]>([]);
   const [activeDay, setActiveDay] = useState(1);
+  const { data: schedule = [] } = useSchedule(id, token);
+  const { totalSessions } = getScheduleStats(schedule);
   const [collegeBlockModal, setCollegeBlockModal] = useState<{
     open: boolean;
     reason: CollegeBlockReason;
@@ -333,27 +341,11 @@ const Eventid = () => {
     checkFounderStatus();
   }, [id, token]);
 
-  // Fetch event schedule
   useEffect(() => {
-    if (!id) return;
-
-    const fetchSchedule = async () => {
-      try {
-        const headers = token ? { authorization: `Bearer ${token}` } : undefined;
-        const scheduleRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/schedule/${id}`,
-          { headers }
-        );
-        if (scheduleRes.data && scheduleRes.data.response) {
-          setSchedule(scheduleRes.data.response);
-        }
-      } catch (error) {
-        console.error('Error fetching schedule in page:', error);
-      }
-    };
-
-    fetchSchedule();
-  }, [id, token]);
+    if (schedule.length > 0 && !schedule.some((day) => day.day === activeDay)) {
+      setActiveDay(schedule[0].day);
+    }
+  }, [schedule, activeDay]);
 
   // Fetch user data and attended events
   useEffect(() => {
@@ -1366,6 +1358,12 @@ const Eventid = () => {
               <div className="rounded-xl bg-[#0B0B0B] border border-gray-800 p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-gray-800/80 pb-5">
                   <div>
+                    <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-yellow-400/20 bg-yellow-400/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-yellow-300">
+                      Timeline
+                      {totalSessions > 0 && (
+                        <span className="text-yellow-400/80">· {totalSessions} sessions</span>
+                      )}
+                    </div>
                     <h2 className="text-xl font-bold text-yellow-400">Event Schedule</h2>
                     <p className="text-xs text-gray-400 mt-1">
                       Stay updated with the timeline and venues for all sessions.
@@ -1382,111 +1380,39 @@ const Eventid = () => {
                   )}
                 </div>
 
-                {/* Day Tabs Selector */}
-                {schedule.length > 1 && (
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {schedule.map((dayObj) => {
-                      const isSelected = dayObj.day === activeDay;
-                      return (
-                        <button
-                          key={dayObj.id || dayObj.day}
-                          onClick={() => setActiveDay(dayObj.day)}
-                          className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all border ${
-                            isSelected
-                              ? 'bg-yellow-400 border-yellow-400 text-black shadow-md shadow-yellow-400/10 font-bold'
-                              : 'bg-black/40 border-gray-800 text-gray-400 hover:text-white hover:border-gray-700'
-                          }`}
-                        >
-                          {dayObj.name || `Day ${dayObj.day}`}
-                        </button>
-                      );
-                    })}
-                  </div>
+                {schedule.length > 0 && (
+                  <ScheduleDayPicker
+                    days={schedule}
+                    activeDay={activeDay}
+                    onDayChange={setActiveDay}
+                    className="mb-8"
+                  />
                 )}
 
-                {/* Sessions list */}
                 {(() => {
                   const currentDayData = schedule.find((d) => d.day === activeDay) || schedule[0];
                   const currentSessions = currentDayData?.sessions || [];
+                  const dayLabel =
+                    currentDayData?.name ||
+                    (currentDayData?.date
+                      ? `Day ${activeDay} · ${currentDayData.date}`
+                      : `Day ${activeDay}`);
 
                   if (currentSessions.length === 0) {
                     return (
-                      <div className="text-center py-10 bg-black/30 border border-gray-800/50 rounded-xl px-4">
-                        <div className="w-12 h-12 rounded-full bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center mx-auto mb-4">
-                          <AlarmClock className="w-5 h-5 text-yellow-400" />
-                        </div>
-                        <h3 className="text-sm font-semibold text-white mb-1">No sessions scheduled yet</h3>
-                        <p className="text-xs text-gray-400 max-w-xs mx-auto mb-4">
-                          The schedule for {currentDayData?.name || `Day ${activeDay}`} will be updated soon.
-                        </p>
-                        {isFounder && (
-                          <Link
-                            href={`/events/${id}/schedule`}
-                            className="px-4 py-2 bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-400 font-bold rounded-lg border border-yellow-400/30 transition-all text-xs inline-flex items-center gap-1.5"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                            <span>Add First Session</span>
-                          </Link>
-                        )}
-                      </div>
+                      <ScheduleEmptyState
+                        dayLabel={dayLabel}
+                        isFounder={isFounder}
+                        manageHref={`/events/${id}/schedule`}
+                      />
                     );
                   }
 
                   return (
-                    <div className="relative pl-6 border-l border-gray-800 space-y-6">
-                      {currentSessions.map((session: any, idx: number) => (
-                        <div key={session.id || idx} className="relative">
-                          {/* Timeline node */}
-                          <div className="absolute -left-[31px] top-1.5 w-2.5 h-2.5 rounded-full bg-yellow-400 border border-black shadow-[0_0_8px_rgba(250,204,21,0.5)]" />
-
-                          <div className="bg-[#0e0e0e] border border-gray-800/80 rounded-xl p-5 hover:border-yellow-400/20 transition-all group">
-                            <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 mb-3">
-                              <div>
-                                <h3 className="text-base font-bold text-white group-hover:text-yellow-400 transition-colors">
-                                  {session.title}
-                                </h3>
-                                <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-gray-400">
-                                  <div className="flex items-center gap-1">
-                                    <AlarmClock className="w-3.5 h-3.5 text-yellow-400" />
-                                    <span>{session.time}</span>
-                                  </div>
-                                  {session.location && (
-                                    <div className="flex items-center gap-1">
-                                      <MapPin className="w-3.5 h-3.5 text-yellow-400" />
-                                      <span>{session.location}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-
-                            {session.description && (
-                              <p className="text-xs text-gray-300 leading-relaxed mb-3">
-                                {session.description}
-                              </p>
-                            )}
-
-                            {session.speakers && session.speakers.length > 0 && (
-                              <div className="border-t border-gray-900 pt-3 mt-3">
-                                <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold block mb-2">
-                                  Speakers
-                                </span>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {session.speakers.map((speaker: string, sIdx: number) => (
-                                    <span
-                                      key={sIdx}
-                                      className="px-2.5 py-1 rounded bg-[#171717] border border-gray-800 text-[11px] text-gray-200 font-medium"
-                                    >
-                                      {speaker}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <ScheduleSessionTimeline
+                      sessions={currentSessions}
+                      showDescriptionInline
+                    />
                   );
                 })()}
               </div>
