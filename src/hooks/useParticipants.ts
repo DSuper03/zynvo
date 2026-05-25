@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { getSafeErrorMessage } from '@/lib/safe-error';
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ||
-  'https://zynvo-be-31292664726.asia-south1.run.app';
+  'https://zynvosocial-be-274792984950.asia-south1.run.app';
 
 export interface ParticipantUser {
   id: string;
@@ -254,7 +255,9 @@ export async function downloadParticipantsCSV(
     toast.success('CSV downloaded successfully!');
   } catch (error: any) {
     console.error('Error downloading CSV:', error);
-    toast.error(error.message || 'Failed to download CSV');
+    toast.error(
+      getSafeErrorMessage(error, 'Unable to download CSV right now. Please try again.')
+    );
     throw error;
   }
 }

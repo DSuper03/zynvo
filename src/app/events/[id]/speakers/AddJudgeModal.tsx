@@ -8,24 +8,41 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAddJudge } from '@/hooks/useAddJudge';
 import { X, Loader2 } from 'lucide-react';
 
+interface JudgeFormData {
+  name: string;
+  achievement: string;
+  description: string;
+}
+
 interface AddJudgeModalProps {
   isOpen: boolean;
   onClose: () => void;
   eventId: string;
+  /** When provided the modal acts as an editor; submit calls onSave instead of the add mutation. */
+  initialData?: JudgeFormData;
+  onSave?: (data: JudgeFormData) => void;
 }
 
 export default function AddJudgeModal({
   isOpen,
   onClose,
   eventId,
+  initialData,
+  onSave,
 }: AddJudgeModalProps) {
-  const [formData, setFormData] = useState({
-    name: '',
-    achievement: '',
-    description: '',
-  });
+  const isEditMode = !!initialData;
+
+  const [formData, setFormData] = useState<JudgeFormData>(
+    initialData ?? { name: '', achievement: '', description: '' }
+  );
+
+  // Sync form when initialData changes (e.g. clicking edit on a different judge)
+  React.useEffect(() => {
+    setFormData(initialData ?? { name: '', achievement: '', description: '' });
+  }, [initialData]);
 
   const addJudgeMutation = useAddJudge();
+  const isPending = addJudgeMutation.isPending;
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -41,8 +58,12 @@ export default function AddJudgeModal({
       return;
     }
 
+    if (isEditMode && onSave) {
+      onSave(formData);
+      return;
+    }
+
     try {
-      // Submit judge data
       await addJudgeMutation.mutateAsync({
         eventId,
         name: formData.name,
@@ -50,13 +71,7 @@ export default function AddJudgeModal({
         description: formData.description,
       });
 
-      // Reset form
-      setFormData({
-        name: '',
-        achievement: '',
-        description: '',
-      });
-
+      setFormData({ name: '', achievement: '', description: '' });
       onClose();
     } catch (error) {
       console.error('Error adding judge:', error);
@@ -64,7 +79,7 @@ export default function AddJudgeModal({
   };
 
   const handleClose = () => {
-    if (!addJudgeMutation.isPending) {
+    if (!isPending) {
       onClose();
     }
   };
@@ -84,10 +99,10 @@ export default function AddJudgeModal({
             className="bg-gray-900 border-2 border-yellow-500/30 rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
           >
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-white">Add New Judge</h3>
+              <h3 className="text-2xl font-bold text-white">{isEditMode ? 'Edit Judge' : 'Add New Judge'}</h3>
               <Button
                 onClick={handleClose}
-                disabled={addJudgeMutation.isPending}
+                disabled={isPending}
                 variant="ghost"
                 size="icon"
                 className="text-gray-400 hover:text-white transition-colors"
@@ -108,7 +123,7 @@ export default function AddJudgeModal({
                   className="w-full bg-gray-800 border-gray-700 text-white focus:border-yellow-400"
                   placeholder="Enter judge's name"
                   required
-                  disabled={addJudgeMutation.isPending}
+                  disabled={isPending}
                 />
               </div>
 
@@ -123,7 +138,7 @@ export default function AddJudgeModal({
                   className="w-full bg-gray-800 border-gray-700 text-white focus:border-yellow-400"
                   placeholder="e.g. SDE-2 at Google, Tech Founder"
                   required
-                  disabled={addJudgeMutation.isPending}
+                  disabled={isPending}
                 />
               </div>
 
@@ -138,7 +153,7 @@ export default function AddJudgeModal({
                   className="w-full bg-gray-800 border-gray-700 text-white focus:border-yellow-400 resize-none"
                   placeholder="Enter a brief background or bio"
                   required
-                  disabled={addJudgeMutation.isPending}
+                  disabled={isPending}
                 />
               </div>
 
@@ -147,23 +162,23 @@ export default function AddJudgeModal({
                 <Button
                   type="button"
                   onClick={handleClose}
-                  disabled={addJudgeMutation.isPending}
+                  disabled={isPending}
                   className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  disabled={addJudgeMutation.isPending}
+                  disabled={isPending}
                   className="flex-1 px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {addJudgeMutation.isPending ? (
+                  {isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Adding...
+                      {isEditMode ? 'Saving...' : 'Adding...'}
                     </>
                   ) : (
-                    'Add Judge'
+                    isEditMode ? 'Save Changes' : 'Add Judge'
                   )}
                 </Button>
               </div>

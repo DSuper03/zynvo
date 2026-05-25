@@ -9,7 +9,6 @@ import React, {
 } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 
 interface UserData {
   name: string | null;
@@ -40,31 +39,41 @@ export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
     name: null,
     profileAvatar: null,
   });
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
-      setToken(storedToken);
-      if (sessionStorage.getItem('activeSession') != 'true') {
-         toast('Login required', {
-          action: {
-            label: 'Sign in',
-            onClick: () => router.push('/auth/signin'),
-          },
-        });
+      const hasActiveSession = sessionStorage.getItem('activeSession') === 'true';
+
+      if (!storedToken || !hasActiveSession) {
+        setToken(null);
+        setLoading(false);
         return;
       }
+
+      setToken(storedToken);
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     if (!token) {
       setLoading(false);
       return;
     }
+
+    let isMounted = true;
+
+    const clearSession = () => {
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('activeSession');
+      setToken(null);
+      setUserData({
+        name: null,
+        profileAvatar: null,
+      });
+    };
 
     const fetchUserData = async () => {
       try {
@@ -75,26 +84,37 @@ export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getSidebarUser`,
           {
             headers: {
-              authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
 
-        if (response && response.status === 200) {
+        if (isMounted && response && response.status === 200) {
           setUserData({
             name: response.data.data.name,
             profileAvatar: response.data.data.profileAvatar,
           });
         }
       } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          if (isMounted) clearSession();
+          return;
+        }
+
         console.error('Failed to fetch user data', error);
-        toast.error('Session expired, please log in again.');
+        if (isMounted) {
+          toast.error('Could not load profile data. Please try again.');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchUserData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [token]);
 
   const value = {

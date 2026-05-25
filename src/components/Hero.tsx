@@ -5,8 +5,8 @@ import React from 'react';
 
 const Hero = () => {
   return (
-    <section className="relative w-full overflow-hidden bg-yellow-300">
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-12 px-4 py-14 sm:px-6 md:grid-cols-2 md:gap-12 md:py-20">
+    <section className="relative w-full overflow-hidden border-0 bg-yellow-300">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-12 px-0 py-0 md:grid-cols-2 md:gap-12">
         <div className="space-y-6 text-left">
           <motion.p
             initial={{ opacity: 0, y: 10 }}

@@ -11,7 +11,8 @@ import PerformanceMonitor from '@/components/PerformanceMonitor';
 import { QueryProvider } from '@/providers/QueryProvider';
 import FloatingPWAInstall from '@/components/FloatingPWAInstall';
 import { ClerkKeyDebug } from '@/components/ClerkKeyDebug';
-import { ClerkProvider } from '@clerk/nextjs'
+import ClientTelemetryBootstrap from '@/components/ClientTelemetryBootstrap';
+import { ClerkProvider } from '@clerk/nextjs';
 
 const LEGACY_CLERK_FRONTEND_API_ENCODED = 'Y2xlcmsuenludm8uc29jaWFsJA';
 const ACTIVE_CLERK_FRONTEND_API_ENCODED = 'Y2xlcmsuenludm9zb2NpYWwuY29tJA';
@@ -140,7 +141,14 @@ export default function RootLayout({
       }}
     >
     <html lang="en" suppressHydrationWarning>
-       <head />
+      <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6745473381903668"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
       >
@@ -157,6 +165,7 @@ export default function RootLayout({
           `}
         </Script>
         <ClerkKeyDebug />
+        <ClientTelemetryBootstrap />
         <ErrorBoundary>
           <QueryProvider>
             <WarmupProvider>

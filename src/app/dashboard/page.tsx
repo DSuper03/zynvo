@@ -33,6 +33,8 @@ import { FaSchool } from 'react-icons/fa';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import EventBadgeCard from '@/components/ticket';
 import TextWithLinks from '@/components/TextWithLinks';
+import { getSafeErrorMessage } from '@/lib/safe-error';
+import { logger } from '@/lib/logger';
 
 
 interface Event {
@@ -716,12 +718,18 @@ export default function ZynvoDashboard() {
             navigate.push('/auth/signin');
           }
         } catch (error) {
-          console.error('API Error:', error);
+          logger.error(
+            new Error(getSafeErrorMessage(error, 'Error fetching user details')),
+            'dashboard.fetchUserData.apiError'
+          );
           toast.error('Error fetching user details');
           navigate.push('/auth/signin');
         }
       } catch (error) {
-        console.error('Error:', error);
+        logger.error(
+          new Error(getSafeErrorMessage(error, 'Unexpected dashboard error')),
+          'dashboard.fetchUserData.unexpectedError'
+        );
       } finally {
         setIsLoading(false);
       }
@@ -757,8 +765,8 @@ export default function ZynvoDashboard() {
      if(isfounder.data.founder) {
       sessionStorage.setItem('founder', isfounder.data.founder )
       setFounder(isfounder.data.founder);
-     } else {
-      console.log(isfounder.data.msg);
+    } else {
+      logger.info('dashboard.isClubAdmin.info', isfounder.data.msg);
      }
      return;
    }
@@ -777,6 +785,13 @@ export default function ZynvoDashboard() {
     }));
   };
 
+  const patchProfileForm = (patch: Partial<typeof profileForm>) => {
+    setProfileForm((prev) => ({
+      ...prev,
+      ...patch,
+    }));
+  };
+
   const handleProfileFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
@@ -789,17 +804,9 @@ export default function ZynvoDashboard() {
       return;
     }
 
-    // Combine predefined tags with manual tags
-    const manualTags = profileForm.tags
-      .split(',')
-      .map((tag) => tag.trim())
-      .filter((tag) => tag);
-
-    const allTags = [...new Set([...selectedPredefinedTags, ...manualTags])];
-
     const data = {
       ...profileForm,
-      tags: allTags,
+      tags: [...new Set(selectedPredefinedTags)],
     };
 
     const update = await axios.put<{
@@ -850,8 +857,11 @@ export default function ZynvoDashboard() {
       });
       setQrCodeDataUrl(dataUrl);
     } catch (e: any) {
-      console.error('QR generation failed', e);
-      toast(e?.message || 'Failed to generate QR code. Please try again.');
+      logger.error(
+        new Error(getSafeErrorMessage(e, 'QR generation failed')),
+        'dashboard.generateQrCode.failed'
+      );
+      toast(getSafeErrorMessage(e, 'Failed to generate QR code. Please try again.'));
       setQrCodeDataUrl(null);
     } finally {
       setIsQrGenerating(false);
@@ -928,8 +938,11 @@ export default function ZynvoDashboard() {
         toast('Unable to load ticket');
       }
     } catch (e: any) {
-      console.error('Ticket fetch failed', e);
-      toast(e?.response?.data?.msg || e?.message || 'Unable to load ticket');
+      logger.error(
+        new Error(getSafeErrorMessage(e, 'Ticket fetch failed')),
+        'dashboard.openTicketModal.failed'
+      );
+      toast(getSafeErrorMessage(e, 'Unable to load ticket'));
     }
   };
 
@@ -1093,7 +1106,7 @@ export default function ZynvoDashboard() {
                           toast.success(leave.data.message || leave.data.msg || 'Successfully left the club');
                           setTimeout(() => navigate.refresh(), 1000);
                         } catch (error: any) {
-                          toast.error(error.response?.data?.message || error.response?.data?.msg || 'Error leaving club');
+                          toast.error(getSafeErrorMessage(error, 'Error leaving club'));
                         }
                       }}
                       variant="outline"
@@ -1649,6 +1662,7 @@ export default function ZynvoDashboard() {
         onClose={() => setShowProfileModal(false)}
         profileForm={profileForm}
         onChange={handleProfileFormChange}
+        onProfileFormPatch={patchProfileForm}
         onSubmit={handleProfileFormSubmit}
         selectedPredefinedTags={selectedPredefinedTags}
         onTagsChange={setSelectedPredefinedTags}

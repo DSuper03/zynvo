@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { useSignUp, useAuth , useSignIn} from "@clerk/nextjs";
 import { jwtDecode } from "jwt-decode";
 import { de } from 'date-fns/locale';
+import { getSafeErrorMessage, toSafeUserMessage } from '@/lib/safe-error';
 import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
 import {
   consumeBrowserPostAuthRedirect,
@@ -57,6 +58,7 @@ export default function SignUp() {
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [collegeSearch, setCollegeSearch] = useState<string>('');
   const [signinHref, setSigninHref] = useState('/auth/signin');
+  const [clerkLoadTimedOut, setClerkLoadTimedOut] = useState(false);
 
   // Inline validation error for college select
   const [collegeError, setCollegeError] = useState<string>('');
@@ -77,6 +79,17 @@ export default function SignUp() {
     else clearStoredReturnTo();
     setSigninHref(`/auth/signin${window.location.search}`);
   }, []);
+
+  useEffect(() => {
+    if (isLoaded && authIsLoaded) {
+      setClerkLoadTimedOut(false);
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      setClerkLoadTimedOut(true);
+    }, 8000);
+    return () => window.clearTimeout(timeout);
+  }, [isLoaded, authIsLoaded]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -171,8 +184,7 @@ export default function SignUp() {
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isLoaded) {
-
-      toast("Security check new  loading, please wait...");
+      toast.error("Security check is still loading. Please wait a moment and try again.");
       return;
     };
 
@@ -245,8 +257,9 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         toast.error("Please verify you are not a robot.");
       } else {
         // Fallback for other errors (e.g., Email already taken)
-        const errorMessage = err.errors?.[0]?.message || "Error creating account";
-        toast.error(errorMessage);
+        toast.error(
+          toSafeUserMessage(err.errors?.[0]?.message, "Error creating account")
+        );
       }
     } finally {
       setIsCreatingAccount(false);
@@ -293,8 +306,9 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       if (clerkCode === "verification_code_invalid" || clerkCode === "verification_code_expired") {
         toast.error("Invalid or expired verification code. Please request a new one and try again.");
       } else {
-        const message = clerkError?.message || "Verification failed. Please try again.";
-        toast.error(message);
+        toast.error(
+          toSafeUserMessage(clerkError?.message, "Verification failed. Please try again.")
+        );
       }
 
       setIsVerifyingCode(false);
@@ -356,8 +370,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       router.push(consumeBrowserPostAuthRedirect());
     } catch (err: any) {
       console.error("Post-verification sync failed:", JSON.stringify(err, null, 2));
-      const msg = err?.response?.data?.msg || err?.message || "Signup failed. Please try again.";
-      toast.error(msg);
+      toast.error(getSafeErrorMessage(err, "Signup failed. Please try again."));
     } finally {
       setIsVerifyingCode(false);
     }
@@ -366,7 +379,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
   const handleGoogleVerification = async () => {
     if (!authIsLoaded || !signIn) {
-      toast('Security check loading, please wait...');
+      toast.error('Security check is still loading. Please wait a moment and try again.');
       return;
     }
     try {
@@ -531,8 +544,6 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             </div>
             <div className="mb-6">
               <div className="flex items-center justify-center space-x-3">
-                {/* Clerk Smart CAPTCHA mount point */}
-                <div id="clerk-captcha" />
                 <button
                   type="button"
                   onClick={() => handleGoogleVerification()}
@@ -747,6 +758,11 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   </label>
                 </div>
                       <div id="clerk-captcha" className="my-4"></div>
+                {clerkLoadTimedOut && !isLoaded && (
+                  <p className="text-amber-400 text-xs mt-2">
+                    Security verification is taking longer than expected. Try disabling ad-block/VPN, switch network, or open the site without <code>www</code>.
+                  </p>
+                )}
                 <div className="flex space-x-4">
                   <motion.button
                     type="button"

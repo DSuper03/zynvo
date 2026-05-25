@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   Twitter, Mail, MapPin, ArrowRight, Heart,
@@ -9,17 +11,17 @@ const instagramPosts = [
   {
     id: "ig1",
     permalink: "https://www.instagram.com/reel/DQjEXRrkWvA/",
-    caption: "A post shared by Zynvo (@zynvosocial.com)",
+    caption: "A post shared by Zynvo (@zynvo.social)",
   },
   {
     id: "ig2",
     permalink: "https://www.instagram.com/reel/DUNkZWukZUe/",
-    caption: "A post shared by Zynvo (@zynvosocial.com)",
+    caption: "A post shared by Zynvo (@zynvo.social)",
   },
   {
     id: "ig3",
     permalink: "https://www.instagram.com/reel/DUflpyJEbRn/",
-    caption: "A post shared by Zynvo (@zynvosocial.com)",
+    caption: "A post shared by Zynvo (@zynvo.social)",
   },
 ];
 
@@ -35,7 +37,6 @@ export default function FooterWithSocial() {
   return (
     <div style={{ fontFamily: "'Nunito', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700&display=swap');
         * { box-sizing: border-box; }
 
         /* ── Social section ── */
@@ -81,7 +82,6 @@ export default function FooterWithSocial() {
       ════════════════════════════════════════ */}
       <section className="social-section">
         <div style={{ maxWidth: 1060, margin: "0 auto" }}>
-
           {/* heading */}
           <div style={{ textAlign: "center", marginBottom: 40 }}>
             <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(26px,4vw,40px)", fontWeight: 700, color: "#1a1a1a" }}>
@@ -101,11 +101,11 @@ export default function FooterWithSocial() {
                   <Instagram size={20} color="white" />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 900, fontSize: 16, color: "#1a1a1a" }}>@zynvosocial.com</div>
+                  <div style={{ fontWeight: 900, fontSize: 16, color: "#1a1a1a" }}>@zynvo.social</div>
                   <div style={{ fontSize: 12, color: "#9ca3af", fontWeight: 600 }}>Instagram</div>
                 </div>
               </div>
-              <a href="https://www.instagram.com/zynvosocial.com/" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.instagram.com/zynvo.social/" target="_blank" rel="noopener noreferrer"
                 style={{ display:"flex", alignItems:"center", gap:6, fontSize:13, fontWeight:800, color:"#78350f", textDecoration:"none", background:"#fef3c7", padding:"7px 16px", borderRadius:30, border:"1.5px solid #fde68a" }}>
                 Follow <ExternalLink size={13} />
               </a>
@@ -160,7 +160,7 @@ export default function FooterWithSocial() {
                 </div>
                 <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                   <MapPin size={15} color="#92400e" />
-                  <span style={{ fontSize:13.5, color:"#78350f", fontWeight:700 }}>New Delhi, India</span>
+                  <span style={{ fontSize:13.5, color:"#78350f", fontWeight:700 }}>Kolkata, India</span>
                 </div>
               </div>
 
@@ -219,7 +219,7 @@ export default function FooterWithSocial() {
                 <a href="https://x.com/Zynvonow" target="_blank" rel="noopener noreferrer" className="social-icon-btn" title="Twitter / X">
                   <Twitter size={17} />
                 </a>
-                <a href="https://www.instagram.com/zynvosocial.com/" target="_blank" rel="noopener noreferrer" className="social-icon-btn" title="Instagram">
+                <a href="https://www.instagram.com/zynvo.social/" target="_blank" rel="noopener noreferrer" className="social-icon-btn" title="Instagram">
                   <Instagram size={17} />
                 </a>
                 <a href="mailto:dsuper03.dev@gmail.com" className="social-icon-btn" title="Email">
@@ -234,7 +234,7 @@ export default function FooterWithSocial() {
         {/* ── Bottom bar ── */}
         <div style={{ marginTop:48, borderTop:"1.5px solid rgba(251,191,36,0.5)", background:"rgba(0,0,0,0.06)" }}>
           <div style={{ maxWidth:1060, margin:"0 auto", padding:"14px 24px", display:"flex", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", gap:12 }}>
-            <p style={{ fontSize:13, color:"#78350f", fontWeight:700 }}>© 2025 Zynvo. All rights reserved.</p>
+            <p style={{ fontSize:13, color:"#78350f", fontWeight:700 }}>© 2025 Zynvosocial. All rights reserved.</p>
             <div style={{ display:"flex", gap:20 }}>
               {["Privacy Policy","Terms of Service","Cookie Policy"].map(link => (
                 <a key={link} href="#" style={{ fontSize:13, color:"#78350f", fontWeight:700, textDecoration:"none", transition:"color 0.18s" }}
@@ -254,4 +254,3 @@ export default function FooterWithSocial() {
     </div>
   );
 }
-

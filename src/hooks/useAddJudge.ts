@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
+import { getSafeErrorMessage, readSafeErrorMessageFromResponse } from '@/lib/safe-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 
@@ -37,8 +38,12 @@ async function addJudge(
   });
 
   if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Failed to add judge: ${res.status} ${errText}`);
+    const fallback =
+      res.status >= 500
+        ? 'Unable to add judge right now. Please try again.'
+        : 'Failed to add judge';
+    const message = await readSafeErrorMessageFromResponse(res, fallback);
+    throw new Error(message);
   }
 
   return res.json() as Promise<AddJudgeResponse>;
@@ -63,7 +68,9 @@ export const useAddJudge = () => {
     },
     onError: (error: Error) => {
       logger.error('Error adding judge:', error);
-      toast.error(error.message || 'Failed to add judge');
+      toast.error(
+        getSafeErrorMessage(error, 'Unable to add judge right now. Please try again.')
+      );
     },
   });
 };

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { createErrorId } from '@/lib/safe-error';
 
 export async function POST(request: NextRequest) {
+  const errorId = createErrorId();
   try {
     const { fileName } = await request.json();
 
@@ -13,7 +15,11 @@ export async function POST(request: NextRequest) {
     const expire = Date.now() + 600000; // 10 minutes from now
 
     if (!privateKey) {
-      return NextResponse.json({ error: 'ImageKit private key not configured' }, { status: 500 });
+      console.error(`[${errorId}] ImageKit private key not configured`);
+      return NextResponse.json(
+        { error: 'Unable to generate upload signature right now.', errorId },
+        { status: 500 }
+      );
     }
 
     // SECURITY: Private keys should NEVER use NEXT_PUBLIC_ prefix as they get exposed to the browser
@@ -32,7 +38,10 @@ export async function POST(request: NextRequest) {
       publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY,
     });
   } catch (error) {
-    console.error('Error generating ImageKit signature:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error(`[${errorId}] Error generating ImageKit signature:`, error);
+    return NextResponse.json(
+      { error: 'Unable to generate upload signature right now.', errorId },
+      { status: 500 }
+    );
   }
 }
