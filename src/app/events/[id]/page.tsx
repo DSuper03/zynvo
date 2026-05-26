@@ -48,6 +48,7 @@ import {
 import AchievementCelebration from '@/components/AchievementCelebration';
 import EventSeoHead from '@/components/EventSeoHead';
 import { buildAuthHref } from '@/lib/authReturnTo';
+import { isAdminEmail } from '@/lib/zynvoStaff';
 import { ErrorState, EventDetailSkeleton } from '@/components/feedback';
 import TeamSection from './components/TeamSection';
 import { getSafeErrorMessage } from '@/lib/safe-error';
@@ -141,6 +142,7 @@ const Eventid = () => {
   const updateJudgeMutation = useUpdateJudge();
   const deleteJudgeMutation = useDeleteJudge();
   const [isFounder, setIsFounder] = useState(false);
+  const [userDataLoaded, setUserDataLoaded] = useState(false);
   const [activeDay, setActiveDay] = useState(1);
   const { data: schedule = [] } = useSchedule(id, token);
   const { totalSessions } = getScheduleStats(schedule);
@@ -295,6 +297,14 @@ const Eventid = () => {
 
   const judges = judgesData?.data || [];
 
+  const canViewAttendees = useMemo(
+    () => isFounder || isAdminEmail(currentUser?.email),
+    [isFounder, currentUser?.email]
+  );
+
+  const isResolvingAttendeeAccess =
+    signedin && !isFounder && !userDataLoaded;
+
   // Fetch participants for this event
   const [participantsPage, setParticipantsPage] = useState(1);
   const participantsLimit = 50;
@@ -306,7 +316,7 @@ const Eventid = () => {
     eventId: id,
     page: participantsPage,
     limit: participantsLimit,
-    enabled: activeTab === 'attendees' && !!id && isFounder,
+    enabled: activeTab === 'attendees' && !!id && canViewAttendees,
   });
 
   const participants = participantsData?.data || [];
@@ -349,9 +359,14 @@ const Eventid = () => {
 
   // Fetch user data and attended events
   useEffect(() => {
+    if (!token) {
+      setUserDataLoaded(false);
+      return;
+    }
+
     async function fetchUserData() {
-      if (!token) return;
-      
+      setUserDataLoaded(false);
+
       try {
         const userResponse = await axios.get(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
@@ -376,12 +391,12 @@ const Eventid = () => {
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
+      } finally {
+        setUserDataLoaded(true);
       }
     }
     
-    if (token) {
-      fetchUserData();
-    }
+    fetchUserData();
   }, [token]);
 
   useEffect(() => {
@@ -1497,12 +1512,18 @@ const Eventid = () => {
                   )}
                 </div>
 
-                {!isFounder ? (
-                  <div className="text-center py-8">
-                    <p className="text-gray-400">
-                      You are not allowed to view the attendees list.
-                    </p>
-                  </div>
+                {!canViewAttendees ? (
+                  isResolvingAttendeeAccess ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-400">Loading attendees...</p>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-400">
+                        You are not allowed to view the attendees list.
+                      </p>
+                    </div>
+                  )
                 ) : isParticipantsLoading ? (
                   <div className="text-center py-8">
                     <p className="text-gray-400">Loading attendees...</p>
