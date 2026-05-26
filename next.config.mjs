@@ -43,9 +43,6 @@ const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://zynvosocial-
 const nextConfig = {
   // Next 16 uses Turbopack by default; empty config acknowledges plugins may add webpack
   turbopack: {},
-  env: {
-    NEXT_PUBLIC_BACKEND_URL: 'https://zynvosocial-be-274792984950.asia-south1.run.app',
-  },
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',

@@ -8,7 +8,6 @@ import {
   MapPin,
   Mic2,
   Trash2,
-  Users,
 } from 'lucide-react';
 import type { ScheduleSession } from '@/types/schedule';
 import { cn } from '@/lib/utils';
@@ -116,13 +115,6 @@ export function ScheduleSessionTimeline({
                         <span className="inline-flex items-center gap-1.5 rounded-lg border border-gray-800 bg-black/50 px-2.5 py-1 text-xs text-gray-300">
                           <MapPin className="h-3.5 w-3.5 text-yellow-400" />
                           {session.location}
-                        </span>
-                      )}
-                      {speakers.length > 0 && (
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-gray-800 bg-black/50 px-2.5 py-1 text-xs text-gray-300">
-                          <Users className="h-3.5 w-3.5 text-yellow-400" />
-                          {speakers.length}{' '}
-                          {speakers.length === 1 ? 'speaker' : 'speakers'}
                         </span>
                       )}
                     </div>

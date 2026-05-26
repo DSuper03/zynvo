@@ -1,0 +1,50 @@
+{
+  "days": [
+    {
+      "id": "day-1",
+      "day": 1,
+      "date": "Feb 19, 2026",
+      "name": "Day 1",
+      "sessions": []
+    },
+    {
+      "id": "day-2",
+      "day": 2,
+      "date": "Feb 20, 2026",
+      "name": "Day 2",
+      "sessions": []
+    },
+    {
+      "id": "day-3",
+      "day": 3,
+      "date": "Feb 21, 2026",
+      "name": "Day 3",
+      "sessions": [
+        {
+          "id": "a00e1039-3b6b-4b7a-9bb9-3724c456344c",
+          "time": "12 am",
+          "title": "gaan hobe",
+          "description": "idk",
+          "location": "main hall",
+          "speakers": [
+            "me"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "day-4",
+      "day": 4,
+      "date": "Feb 22, 2026",
+      "name": "Day 4",
+      "sessions": []
+    },
+    {
+      "id": "day-5",
+      "day": 5,
+      "date": "Feb 23, 2026",
+      "name": "Day 5",
+      "sessions": []
+    }
+  ]
+}

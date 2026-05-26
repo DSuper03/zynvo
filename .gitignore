@@ -41,6 +41,3 @@ next-env.d.ts
 
 # SEO cache (generated at runtime)
 /.cache/
-
-# Local event schedule data (Next.js API fallback storage)
-/data/event-schedules/*.json
