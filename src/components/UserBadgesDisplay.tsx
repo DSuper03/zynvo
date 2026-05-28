@@ -7,7 +7,8 @@ import { toast } from 'sonner';
 interface UserBadgesProps {
   isFounder?: boolean;
   isMember?: boolean;
-  eventCount?: number;
+  /** Number of events the user has attended (not created). */
+  attendedEventCount?: number;
   clubName?: string;
   userName?: string;
 }
@@ -39,7 +40,7 @@ const MILESTONES = [
 export const UserBadgesDisplay: React.FC<UserBadgesProps> = ({
   isFounder = false,
   isMember = false,
-  eventCount = 0,
+  attendedEventCount = 0,
   clubName = '',
   userName = 'User',
 }) => {
@@ -65,17 +66,17 @@ export const UserBadgesDisplay: React.FC<UserBadgesProps> = ({
     });
   }
 
-  if (eventCount >= 1) {
+  if (attendedEventCount >= 1) {
     badges.push({
-      id: 'event_creator',
-      name: 'Event Creator',
+      id: 'event_attendee',
+      name: 'Event Goer',
       description: 'Attended their first event',
       Icon: Star,
       tier: 'BRONZE',
     });
   }
 
-  if (eventCount >= 5) {
+  if (attendedEventCount >= 5) {
     badges.push({
       id: 'event_master',
       name: 'Event Master',
@@ -85,7 +86,7 @@ export const UserBadgesDisplay: React.FC<UserBadgesProps> = ({
     });
   }
 
-  if (eventCount >= 10) {
+  if (attendedEventCount >= 10) {
     badges.push({
       id: 'event_legendary',
       name: 'Event Legendary',
@@ -95,7 +96,7 @@ export const UserBadgesDisplay: React.FC<UserBadgesProps> = ({
     });
   }
 
-  if (eventCount >= 20) {
+  if (attendedEventCount >= 20) {
     badges.push({
       id: 'community_champion',
       name: 'Community Champion',
@@ -182,14 +183,14 @@ export const UserBadgesDisplay: React.FC<UserBadgesProps> = ({
       <div className="space-y-3 pt-2 border-t border-gray-800/70">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Progress</p>
         {MILESTONES.map((m) => {
-          const pct = Math.min((eventCount / m.target) * 100, 100);
-          const done = eventCount >= m.target;
+          const pct = Math.min((attendedEventCount / m.target) * 100, 100);
+          const done = attendedEventCount >= m.target;
           return (
             <div key={m.label}>
               <div className="flex justify-between items-center mb-1.5">
                 <span className="text-xs text-gray-400">{m.label}</span>
                 <span className={`text-xs font-semibold ${done ? 'text-green-400' : m.textColor}`}>
-                  {done ? 'Unlocked ✓' : `${m.target - eventCount} to go`}
+                  {done ? 'Unlocked ✓' : `${m.target - attendedEventCount} to go`}
                 </span>
               </div>
               <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
