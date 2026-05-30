@@ -51,6 +51,7 @@ import { buildAuthHref } from '@/lib/authReturnTo';
 import { ErrorState, EventDetailSkeleton } from '@/components/feedback';
 import TeamSection from './components/TeamSection';
 import { getSafeErrorMessage } from '@/lib/safe-error';
+import EventEditModal from '../components/EventEditModal';
 
 interface Speaker {
   id: number;
@@ -134,6 +135,7 @@ const Eventid = () => {
   const updateJudgeMutation = useUpdateJudge();
   const deleteJudgeMutation = useDeleteJudge();
   const [isFounder, setIsFounder] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [schedule, setSchedule] = useState<any[]>([]);
   const [activeDay, setActiveDay] = useState(1);
   const [collegeBlockModal, setCollegeBlockModal] = useState<{
@@ -469,6 +471,20 @@ const Eventid = () => {
    
     fetchEventData();
   }, [token, id, fetchNonce]);
+
+  const handleDeleteEvent = async () => {
+    try {
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event/${id}`,
+        { headers: { authorization: `Bearer ${token}` } }
+      );
+      toast.success('Event deleted successfully');
+      router.push('/events');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to delete event');
+    }
+  };
 
   const handleRegistration = async () => {
     if (!token) {
@@ -815,6 +831,27 @@ const Eventid = () => {
 
                 {/* Action Buttons — stack on narrow screens */}
                 <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2">
+
+                  {isFounder && (
+                    <>
+                      <Button
+                        onClick={() => setIsEditModalOpen(true)}
+                        className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
+                      >
+                        Edit Event
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+                            handleDeleteEvent();
+                          }
+                        }}
+                        className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto"
+                      >
+                        Delete Event
+                      </Button>
+                    </>
+                  )}
                   {signedin ? (
                     isUserAttendingEvent() ? (
                       <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 rounded-lg font-medium">
@@ -1009,6 +1046,17 @@ const Eventid = () => {
             ))}
           </div>
         </div>
+
+        
+      <EventEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        eventId={id as string}
+        eventData={data}
+        onUpdateSuccess={() => {
+          setFetchNonce(n => n + 1);
+        }}
+      />
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
