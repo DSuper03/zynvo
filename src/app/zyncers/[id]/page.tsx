@@ -493,7 +493,7 @@ export default function PublicUserProfile() {
 
   if (!userData) return null;
 
-  const eventCount = userData.events?.length || 0;
+  const attendedEventCount = userData.events?.length || 0;
   const joinedLabel = userData.createdAt
     ? new Date(userData.createdAt).toLocaleString('default', { month: 'short', year: 'numeric' })
     : 'Recently';
@@ -627,7 +627,7 @@ export default function PublicUserProfile() {
             <div className="flex justify-around py-3.5 border-t border-b border-gray-800 mb-4">
               <StatPill value={posts?.length || 0} label="Posts" />
               <div className="w-px bg-gray-800" />
-              <StatPill value={eventCount} label="Events" />
+              <StatPill value={attendedEventCount} label="Attended" />
               <div className="w-px bg-gray-800" />
               <StatPill value={joinedLabel} label="Since" />
             </div>
@@ -700,7 +700,7 @@ export default function PublicUserProfile() {
               <UserBadgesDisplay
                 isFounder={isFounder}
                 isMember={isMember}
-                eventCount={eventCount}
+                attendedEventCount={attendedEventCount}
                 clubName={userData.clubName || ''}
                 userName={userData.name || 'User'}
               />
@@ -773,7 +773,7 @@ export default function PublicUserProfile() {
               <SectionCard
                 icon={<Calendar className="w-4 h-4" />}
                 title="Events Attended"
-                count={eventCount}
+                count={attendedEventCount}
               >
                 {userData.events && userData.events.length > 0 ? (
                   <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">

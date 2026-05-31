@@ -1,449 +1,271 @@
 'use client';
+
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
-import { motion } from 'framer-motion';
-import {
-  FaClock,
-  FaMapMarkerAlt,
-  FaCalendarAlt,
-  FaChevronDown,
-  FaChevronRight,
-} from 'react-icons/fa';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { X, Plus, Edit2, Trash2 } from 'lucide-react';
+import { ArrowLeft, CalendarRange, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { useSchedule } from '@/hooks/useSchedule';
+import { useAddSession } from '@/hooks/useAddSession';
+import { useDeleteSession } from '@/hooks/useDeleteSession';
+import { EventDetailSkeleton } from '@/components/feedback';
+import { formatTimeRange, getDefaultTimeRange } from '@/lib/schedule-time';
+import {
+  AddSessionPanel,
+  getScheduleStats,
+  isValidScheduleTimeRange,
+  ScheduleDayPicker,
+  ScheduleEmptyState,
+  ScheduleSessionTimeline,
+  type SessionFormData,
+} from '../components/schedule';
 
-interface ScheduleSession {
-  id: string;
-  time: string;
-  title: string;
-  description: string;
-  location: string;
-  speakers: string[];
-}
+const defaultRange = getDefaultTimeRange();
 
-interface ScheduleDay {
-  id: string;
-  day: number;
-  date: string;
-  name: string;
-  sessions: ScheduleSession[];
-}
+const emptyForm: SessionFormData = {
+  time: formatTimeRange(defaultRange.start, defaultRange.end),
+  title: '',
+  description: '',
+  location: '',
+  speakers: '',
+};
 
 const SchedulePage = () => {
   const params = useParams();
   const eventId = params.id as string;
   const [token, setToken] = useState<string | null>(null);
   const [isFounder, setIsFounder] = useState(false);
-  const [schedule, setSchedule] = useState<ScheduleDay[]>([]);
   const [activeDay, setActiveDay] = useState(1);
-  const [expandedSession, setExpandedSession] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isAddingSession, setIsAddingSession] = useState(false);
-  const [editingSession, setEditingSession] = useState<string | null>(null);
-  
-  const [formData, setFormData] = useState({
-    time: '',
-    title: '',
-    description: '',
-    location: '',
-    speakers: '',
-  });
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [formData, setFormData] = useState(emptyForm);
+
+  const {
+    data: schedule = [],
+    isLoading,
+  } = useSchedule(eventId, token);
+  const addSessionMutation = useAddSession();
+  const deleteSessionMutation = useDeleteSession();
 
   useEffect(() => {
-    const tok = localStorage.getItem('token');
-    if (tok) setToken(tok);
+    setToken(localStorage.getItem('token'));
   }, []);
 
   useEffect(() => {
     if (!eventId || !token) return;
 
-    const fetchSchedule = async () => {
+    async function checkFounderStatus() {
       try {
-        // Check founder status
-        const founderRes = await axios.get(
+        const checkFounder = await axios.get<{ msg: string }>(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isFounder?id=${eventId}`,
-          {
-            headers: { authorization: `Bearer ${token}` },
-          }
+          { headers: { authorization: `Bearer ${token}` } }
         );
 
-        if (founderRes.status === 200 && founderRes.data.msg === 'identified') {
+        if (checkFounder.status === 200 && checkFounder.data.msg === 'identified') {
           setIsFounder(true);
         }
-
-        // Fetch schedule
-        try {
-          const scheduleRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/schedule/${eventId}`,
-            {
-              headers: { authorization: `Bearer ${token}` },
-            }
-          );
-          if (scheduleRes.data && scheduleRes.data.response) {
-            setSchedule(scheduleRes.data.response);
-          }
-        } catch (e) {
-          console.log('Schedule endpoint not yet available');
-        }
       } catch (error) {
-        console.error('Error fetching schedule:', error);
-      } finally {
-        setIsLoading(false);
+        console.error('Error checking founder status:', error);
       }
-    };
+    }
 
-    fetchSchedule();
+    checkFounderStatus();
   }, [eventId, token]);
 
-  const handleAddSession = async () => {
-    if (
-      !formData.time.trim() ||
-      !formData.title.trim() ||
-      !formData.location.trim()
-    ) {
-      toast('Please fill in required fields');
+  useEffect(() => {
+    if (schedule.length > 0 && !schedule.some((day) => day.day === activeDay)) {
+      setActiveDay(schedule[0].day);
+    }
+  }, [schedule, activeDay]);
+
+  const handleAddSession = () => {
+    if (!formData.time.trim() || !formData.title.trim() || !formData.location.trim()) {
+      toast.error('Please fill in required fields');
       return;
     }
 
-    try {
-      const sessionData = {
+    if (!isValidScheduleTimeRange(formData.time)) {
+      toast.error('End time must be after start time');
+      return;
+    }
+
+    addSessionMutation.mutate(
+      {
+        eventId,
         day: activeDay,
-        time: formData.time,
-        title: formData.title,
-        description: formData.description,
-        location: formData.location,
+        time: formData.time.trim(),
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        location: formData.location.trim(),
         speakers: formData.speakers
           .split(',')
           .map((s) => s.trim())
-          .filter((s) => s),
-      };
-
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/schedule/${eventId}/session`,
-        sessionData,
-        {
-          headers: { authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (res.status === 201 || res.status === 200) {
-        // If the day was default mock day, refresh the entire schedule from backend response
-        try {
-          const scheduleRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/schedule/${eventId}`,
-            {
-              headers: { authorization: `Bearer ${token}` },
-            }
-          );
-          if (scheduleRes.data && scheduleRes.data.response) {
-            setSchedule(scheduleRes.data.response);
-          }
-        } catch (e) {
-          // Fallback manual update
-          const updatedSchedule = schedule.map((day) =>
-            day.day === activeDay
-              ? { ...day, sessions: [...day.sessions, res.data.response] }
-              : day
-          );
-          setSchedule(updatedSchedule);
-        }
-        setFormData({ time: '', title: '', description: '', location: '', speakers: '' });
-        setIsAddingSession(false);
-        toast('Session added successfully');
+          .filter(Boolean),
+      },
+      {
+        onSuccess: () => {
+          setFormData(emptyForm);
+          setIsAddingSession(false);
+        },
       }
-    } catch (error) {
-      console.error('Error adding session:', error);
-      toast('Failed to add session');
-    }
-  };
-
-  const handleDeleteSession = async (sessionId: string) => {
-    if (!token) return;
-
-    try {
-      await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/schedule/${eventId}/session/${sessionId}`,
-        {
-          headers: { authorization: `Bearer ${token}` },
-        }
-      );
-
-      const updatedSchedule = schedule.map((day) => ({
-        ...day,
-        sessions: day.sessions.filter((s) => s.id !== sessionId),
-      }));
-      setSchedule(updatedSchedule);
-      toast('Session deleted');
-    } catch (error) {
-      console.error('Error deleting session:', error);
-      toast('Failed to delete session');
-    }
-  };
-
-  const toggleSession = (sessionId: string) => {
-    if (expandedSession === sessionId) {
-      setExpandedSession(null);
-    } else {
-      setExpandedSession(sessionId);
-    }
+    );
   };
 
   const currentDaySchedule = schedule.find((day) => day.day === activeDay);
+  const currentSessions = currentDaySchedule?.sessions ?? [];
+  const { dayCount, totalSessions } = getScheduleStats(schedule);
+  const activeDayLabel =
+    currentDaySchedule?.name ||
+    (currentDaySchedule?.date
+      ? `${currentDaySchedule.name || `Day ${activeDay}`} · ${currentDaySchedule.date}`
+      : `Day ${activeDay}`);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen p-6 bg-gray-900">
-        <div className="max-w-6xl mx-auto">
-          <p className="text-gray-400">Loading schedule...</p>
-        </div>
-      </div>
-    );
+    return <EventDetailSkeleton />;
   }
 
   return (
-    <div className="min-h-screen p-6 bg-gray-900">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Event Schedule</h1>
-          <p className="text-gray-400">
-            View and manage the event timeline
-          </p>
+    <div className="max-w-6xl mx-auto space-y-8">
+      <Link
+        href={`/events/${eventId}`}
+        className="inline-flex items-center gap-2 rounded-lg border border-gray-800 bg-black/30 px-3 py-2 text-sm text-gray-400 transition-all hover:border-yellow-400/30 hover:text-yellow-400"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to event
+      </Link>
+
+      <div className="relative overflow-hidden rounded-2xl border border-gray-800 bg-[#0B0B0B] p-6 sm:p-8">
+        <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-yellow-400/10 blur-3xl" />
+        <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-yellow-400/20 bg-yellow-400/10 px-3 py-1 text-xs font-semibold text-yellow-300">
+              <CalendarRange className="h-3.5 w-3.5" />
+              Event timeline
+            </div>
+            <h1 className="text-3xl font-bold text-white sm:text-4xl">Schedule</h1>
+            <p className="mt-2 max-w-xl text-sm text-gray-400">
+              Plan sessions, venues, and speakers across each day of your event.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <StatPill label="Days" value={dayCount || '—'} />
+            <StatPill label="Sessions" value={totalSessions} highlight />
+          </div>
         </div>
+      </div>
 
-        {/* Day Selector */}
-        {schedule.length > 0 && (
-          <div className="mb-8 bg-[#0B0B0B] border border-gray-800 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-yellow-400 mb-4">Event Days</h2>
-            <div className="flex flex-wrap gap-3">
-              {schedule.map((day) => (
-                <button
-                  key={day.id}
-                  onClick={() => setActiveDay(day.day)}
-                  className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                    activeDay === day.day
-                      ? 'bg-yellow-400 text-black'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  <div className="text-sm">{day.name}</div>
-                  <div className="text-xs opacity-75">{day.date}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+      {schedule.length > 0 && (
+        <div className="rounded-2xl border border-gray-800 bg-[#0B0B0B] p-6">
+          <ScheduleDayPicker
+            days={schedule}
+            activeDay={activeDay}
+            onDayChange={setActiveDay}
+          />
+        </div>
+      )}
 
-        {/* Schedule Table */}
-        {currentDaySchedule && currentDaySchedule.sessions.length > 0 ? (
-          <div className="mb-8">
-            <div className="bg-[#0B0B0B] border border-gray-800 rounded-xl overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-gray-800 border-b border-gray-700">
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-yellow-400">
-                        <FaClock className="inline mr-2" />
-                        Time
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-yellow-400">
-                        Title
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-yellow-400">
-                        <FaMapMarkerAlt className="inline mr-2" />
-                        Location
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-yellow-400">
-                        Speakers
-                      </th>
-                      {isFounder && (
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-yellow-400">
-                          Actions
-                        </th>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentDaySchedule.sessions.map((session, idx) => (
-                      <tr
-                        key={session.id}
-                        className={`border-b border-gray-700 hover:bg-gray-800/50 transition-colors ${
-                          idx % 2 === 0 ? 'bg-black' : 'bg-gray-900'
-                        }`}
-                      >
-                        <td className="px-6 py-4 text-sm text-gray-300 font-medium">
-                          {session.time}
-                        </td>
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => toggleSession(session.id)}
-                            className="text-sm text-white font-medium hover:text-yellow-400 transition-colors flex items-center gap-2"
-                          >
-                            {session.title}
-                            {session.description && (
-                              <FaChevronDown
-                                className={`w-3 h-3 transition-transform ${
-                                  expandedSession === session.id ? 'rotate-180' : ''
-                                }`}
-                              />
-                            )}
-                          </button>
-                          {expandedSession === session.id && session.description && (
-                            <p className="text-xs text-gray-400 mt-2 ml-0">
-                              {session.description}
-                            </p>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-300">
-                          {session.location}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-300">
-                          {session.speakers.length > 0
-                            ? session.speakers.join(', ')
-                            : '-'}
-                        </td>
-                        {isFounder && (
-                          <td className="px-6 py-4 text-sm">
-                            <button
-                              onClick={() => handleDeleteSession(session.id)}
-                              className="text-red-400 hover:text-red-300 transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        ) : isFounder ? (
-          <div className="mb-8 bg-[#0B0B0B] border border-gray-800 rounded-xl p-6 text-center">
-            <p className="text-gray-400 mb-4">No sessions scheduled for this day</p>
-          </div>
-        ) : null}
-
-        {/* Add Session Form - Only for Founder */}
-        {isFounder && (
-          <div className="bg-[#0B0B0B] border border-gray-800 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-yellow-400">
-                {isAddingSession ? 'Add New Session' : 'Manage Sessions'}
+      <div className={isFounder ? 'grid gap-8 xl:grid-cols-[1fr_380px]' : 'space-y-8'}>
+        <div className="rounded-2xl border border-gray-800 bg-[#0B0B0B] p-6">
+          <div className="mb-6 flex items-center justify-between gap-3 border-b border-gray-800/80 pb-4">
+            <div>
+              <h2 className="text-lg font-bold text-white">
+                {currentDaySchedule?.name || `Day ${activeDay}`}
               </h2>
-              {isAddingSession && (
-                <button
-                  onClick={() => {
-                    setIsAddingSession(false);
-                    setFormData({ time: '', title: '', description: '', location: '', speakers: '' });
-                  }}
-                  className="text-gray-400 hover:text-white"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+              {currentDaySchedule?.date && (
+                <p className="text-sm text-gray-500">{currentDaySchedule.date}</p>
               )}
             </div>
-
-            {!isAddingSession ? (
-              <Button
-                onClick={() => setIsAddingSession(true)}
-                className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Add Session
-              </Button>
-            ) : (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-yellow-400 mb-2">
-                      Time *
-                    </label>
-                    <Input
-                      value={formData.time}
-                      onChange={(e) =>
-                        setFormData({ ...formData, time: e.target.value })
-                      }
-                      placeholder="e.g., 9:00 AM - 10:30 AM"
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-yellow-400 mb-2">
-                      Location *
-                    </label>
-                    <Input
-                      value={formData.location}
-                      onChange={(e) =>
-                        setFormData({ ...formData, location: e.target.value })
-                      }
-                      placeholder="e.g., Main Hall"
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-yellow-400 mb-2">
-                    Title *
-                  </label>
-                  <Input
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
-                    }
-                    placeholder="Session title"
-                    className="bg-gray-800 border-gray-700 text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-yellow-400 mb-2">
-                    Description
-                  </label>
-                  <Textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    placeholder="Session details"
-                    rows={3}
-                    className="bg-gray-800 border-gray-700 text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-yellow-400 mb-2">
-                    Speakers (comma-separated)
-                  </label>
-                  <Input
-                    value={formData.speakers}
-                    onChange={(e) =>
-                      setFormData({ ...formData, speakers: e.target.value })
-                    }
-                    placeholder="John Doe, Jane Smith"
-                    className="bg-gray-800 border-gray-700 text-white"
-                  />
-                </div>
-
-                <Button
-                  onClick={handleAddSession}
-                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded-lg"
-                >
-                  Add Session
-                </Button>
-              </div>
+            {currentSessions.length > 0 && (
+              <span className="rounded-full border border-gray-800 bg-black/40 px-3 py-1 text-xs font-semibold text-gray-400">
+                {currentSessions.length} on this day
+              </span>
             )}
           </div>
+
+          {currentSessions.length > 0 ? (
+            <ScheduleSessionTimeline
+              sessions={currentSessions}
+              manageMode={isFounder}
+              pendingDeleteId={pendingDeleteId}
+              isDeleting={deleteSessionMutation.isPending}
+              onRequestDelete={setPendingDeleteId}
+              onConfirmDelete={(sessionId) =>
+                deleteSessionMutation.mutate(
+                  { eventId, sessionId },
+                  { onSettled: () => setPendingDeleteId(null) }
+                )
+              }
+              onCancelDelete={() => setPendingDeleteId(null)}
+            />
+          ) : (
+            <ScheduleEmptyState
+              dayLabel={activeDayLabel}
+              isFounder={isFounder}
+              inlineManageHint={isFounder}
+              variant="full"
+            />
+          )}
+        </div>
+
+        {isFounder && (
+          <AddSessionPanel
+            isOpen={isAddingSession}
+            isSubmitting={addSessionMutation.isPending}
+            formData={formData}
+            activeDayLabel={activeDayLabel}
+            onOpen={() => setIsAddingSession(true)}
+            onClose={() => {
+              setIsAddingSession(false);
+              setFormData(emptyForm);
+            }}
+            onChange={setFormData}
+            onSubmit={handleAddSession}
+            className="xl:sticky xl:top-6 xl:self-start"
+          />
         )}
       </div>
+
+      {!isFounder && (
+        <div className="rounded-xl border border-gray-800/80 bg-black/20 px-4 py-3 text-center text-sm text-gray-500">
+          <Sparkles className="mx-auto mb-1 h-4 w-4 text-yellow-400/60" />
+          Only event founders can add or edit sessions.
+        </div>
+      )}
     </div>
   );
 };
+
+function StatPill({
+  label,
+  value,
+  highlight = false,
+}: {
+  label: string;
+  value: string | number;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className={
+        highlight
+          ? 'rounded-xl border border-yellow-400/30 bg-yellow-400/10 px-4 py-3 text-center min-w-[88px]'
+          : 'rounded-xl border border-gray-800 bg-black/40 px-4 py-3 text-center min-w-[88px]'
+      }
+    >
+      <div
+        className={
+          highlight ? 'text-2xl font-bold text-yellow-400' : 'text-2xl font-bold text-white'
+        }
+      >
+        {value}
+      </div>
+      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+        {label}
+      </div>
+    </div>
+  );
+}
 
 export default SchedulePage;
