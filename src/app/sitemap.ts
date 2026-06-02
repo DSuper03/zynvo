@@ -55,7 +55,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
 
-  const collegeSlugs = new Set<string>();
+  const collegeSlugs = new Set<string>();    
   const collegePages: MetadataRoute.Sitemap = [];
   for (const c of collegesWithClubs) {
     const slug = slugifySimple(c.college);
