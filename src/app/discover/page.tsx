@@ -1,15 +1,14 @@
 'use client';
 import axios from 'axios';
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { MessageCircle, PenSquare, X } from 'lucide-react';
+import { CalendarDays, Flame, MapPin, MessageCircle, PenSquare, Sparkles, X } from 'lucide-react';
 
 import CreatePostButton from './components/CreatePostButton';
 import CreatePostModal from './components/CreatePostModal';
 import { PostData } from '@/types/global-Interface';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { setPostCache } from '@/lib/postCache';
 import ProfileHeaderCompact from '@/components/ProfileHeaderCompact';
@@ -20,6 +19,121 @@ import { FeedPostCard } from '@/components/discover/FeedPostCard';
 interface ApiResponse {
   msg: string;
   posts: PostData[];
+}
+
+type DiscoverEventPin = {
+  title: string;
+  category: string;
+  date: string;
+  location: string;
+  image: string;
+  heightClass: string;
+  accent: string;
+};
+
+const discoverEventPins: DiscoverEventPin[] = [
+  {
+    title: 'Campus Music Night',
+    category: 'Cultural',
+    date: 'Jun 04',
+    location: 'Main Auditorium',
+    image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=900&auto=format&fit=crop',
+    heightClass: 'h-64',
+    accent: 'from-pink-500/80 via-purple-500/40',
+  },
+  {
+    title: 'AI Hack Sprint',
+    category: 'Hackathon',
+    date: 'Jun 08',
+    location: 'Innovation Lab',
+    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=900&auto=format&fit=crop',
+    heightClass: 'h-80',
+    accent: 'from-cyan-500/80 via-blue-500/40',
+  },
+  {
+    title: 'Open Mic Stories',
+    category: 'Meetup',
+    date: 'Jun 10',
+    location: 'Cafe Court',
+    image: 'https://images.unsplash.com/photo-1521334884684-d80222895322?q=80&w=900&auto=format&fit=crop',
+    heightClass: 'h-56',
+    accent: 'from-amber-500/80 via-orange-500/40',
+  },
+  {
+    title: 'Startup Mixer',
+    category: 'Networking',
+    date: 'Jun 14',
+    location: 'Incubation Cell',
+    image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=900&auto=format&fit=crop',
+    heightClass: 'h-72',
+    accent: 'from-emerald-500/80 via-teal-500/40',
+  },
+  {
+    title: 'Design Jam',
+    category: 'Workshop',
+    date: 'Jun 16',
+    location: 'Design Studio',
+    image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=900&auto=format&fit=crop',
+    heightClass: 'h-60',
+    accent: 'from-violet-500/80 via-fuchsia-500/40',
+  },
+  {
+    title: 'Street Photo Walk',
+    category: 'Photography',
+    date: 'Jun 18',
+    location: 'College Gate',
+    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=900&auto=format&fit=crop',
+    heightClass: 'h-80',
+    accent: 'from-yellow-500/80 via-lime-500/40',
+  },
+];
+
+function EventPinCard({
+  event,
+  onOpenEvents,
+  sizes,
+}: {
+  event: DiscoverEventPin;
+  onOpenEvents: () => void;
+  sizes: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onOpenEvents}
+      className="group relative mb-3 w-full break-inside-avoid overflow-hidden rounded-2xl border border-white/10 bg-gray-900/60 text-left shadow-lg shadow-black/25 transition-all duration-300 hover:-translate-y-1 hover:border-yellow-400/40 hover:shadow-yellow-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/70"
+    >
+      <div className={`relative ${event.heightClass} overflow-hidden`}>
+        <Image
+          src={event.image}
+          alt={event.title}
+          fill
+          sizes={sizes}
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+        <div className={`absolute inset-0 bg-gradient-to-t ${event.accent} to-transparent opacity-85`} />
+        <div className="absolute inset-x-0 bottom-0 p-3">
+          <div className="mb-2 inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/45 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-md">
+            <Sparkles className="h-3 w-3 text-yellow-300" />
+            {event.category}
+          </div>
+          <h3 className="text-sm font-semibold leading-tight text-white drop-shadow">
+            {event.title}
+          </h3>
+          <div className="mt-2 space-y-1 text-[11px] text-white/85">
+            <span className="flex items-center gap-1">
+              <CalendarDays className="h-3 w-3 text-yellow-300" />
+              {event.date}
+            </span>
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3 w-3 text-yellow-300" />
+              {event.location}
+            </span>
+          </div>
+        </div>
+      </div>
+    </button>
+  );
 }
 
 export default function Feed() {
@@ -41,24 +155,8 @@ export default function Feed() {
 
   const router = useRouter();
 
-  // Slider events data
-  const sliderEvents = [
-    {
-      img: '/posters/1.png',
-      title: 'Tech Conference',
-      desc: 'Join the latest in tech innovation.',
-    },
-    {
-      img: '/posters/2.png',
-      title: 'Music Festival',
-      desc: 'Experience live music and fun.',
-    },
-    {
-      img: '/posters/4.png',
-      title: 'Art Expo',
-      desc: 'Explore creative artworks.',
-    },
-  ];
+  // Shared event pins power the desktop masonry sidebar and mobile scroller.
+  const sliderEvents = discoverEventPins;
   const [slideIdx, setSlideIdx] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
 
@@ -155,8 +253,11 @@ export default function Feed() {
     }
   }, []);
 
-  // Memoize slider events length
-  const sliderEventsLength = useMemo(() => sliderEvents.length, [sliderEvents.length]);
+  const sliderEventsLength = sliderEvents.length;
+
+  const openEventsPage = useCallback(() => {
+    router.push('/events');
+  }, [router]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -268,28 +369,38 @@ export default function Feed() {
               
             </div>
 
-            {/* Mobile slider: now placed above posts */}
+            {/* Mobile event pins */}
             <div className="lg:hidden mt-2">
-              <div className="relative w-full overflow-hidden" ref={sliderRef}>
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-yellow-400/80">
+                    Happening soon
+                  </p>
+                  <h2 className="text-lg font-semibold text-white">
+                    Event inspiration
+                  </h2>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={openEventsPage}
+                  className="h-9 text-yellow-300 hover:bg-yellow-500/10 hover:text-yellow-200"
+                >
+                  View all
+                </Button>
+              </div>
+              <div className="relative w-full overflow-hidden rounded-2xl" ref={sliderRef}>
                 <div
                   className="flex transition-transform duration-700"
                   style={{ transform: `translateX(-${slideIdx * 100}%)` }}
                 >
                   {sliderEvents.map((ev, i) => (
                     <div key={i} className="min-w-full px-2">
-                      <Card className="group cursor-pointer">
-                        <div className="relative overflow-hidden rounded-lg mb-2">
-                          <div className="aspect-[3/4] bg-gray-700 rounded-lg overflow-hidden">
-                            <Image
-                              src={ev.img}
-                              alt={ev.title}
-                              layout="fill"
-                              className="object-cover transition-transform group-hover:scale-105"
-                            />
-                          </div>
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3"></div>
-                        </div>
-                      </Card>
+                      <EventPinCard
+                        event={ev}
+                        onOpenEvents={openEventsPage}
+                        sizes="(max-width: 1024px) 100vw, 360px"
+                      />
                     </div>
                   ))}
                 </div>
@@ -377,7 +488,46 @@ export default function Feed() {
             </div>
           </div>
 
-          {/* Column 3: Sidebar (hidden on mobile) */}
+          {/* Column 3: Event masonry sidebar */}
+          <aside className="hidden lg:block">
+            <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:rgba(234,179,8,0.45)_transparent]">
+              <div className="mb-4 rounded-2xl border border-yellow-500/15 bg-gradient-to-br from-yellow-500/10 via-gray-900/70 to-black/70 p-4 shadow-xl shadow-black/30">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-yellow-400/80">
+                      <Flame className="h-3.5 w-3.5" />
+                      Discover events
+                    </p>
+                    <h2 className="mt-2 text-xl font-semibold leading-tight text-white">
+                      Pinterest-style picks for your campus week
+                    </h2>
+                    <p className="mt-2 text-sm leading-relaxed text-gray-400">
+                      Scroll through fresh event ideas, posters, and meetups without leaving the feed.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={openEventsPage}
+                    className="shrink-0 bg-yellow-500 px-3 text-black hover:bg-yellow-400"
+                  >
+                    View all
+                  </Button>
+                </div>
+              </div>
+
+              <div className="columns-2 gap-3">
+                {discoverEventPins.map((event) => (
+                  <EventPinCard
+                    key={event.title}
+                    event={event}
+                    onOpenEvents={openEventsPage}
+                    sizes="(max-width: 1280px) 15vw, 180px"
+                  />
+                ))}
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
 

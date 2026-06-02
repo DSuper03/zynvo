@@ -146,10 +146,18 @@ export default function NotificationDropdown() {
       );
     }
 
-    // Sort by date descending (newest first)
-    return filtered.sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
+    // Upcoming events should surface nearest first; older items stay below.
+    return filtered.sort((a, b) => {
+      const now = Date.now();
+      const aTime = new Date(a.date).getTime();
+      const bTime = new Date(b.date).getTime();
+      const aFuture = aTime >= now;
+      const bFuture = bTime >= now;
+
+      if (aFuture && bFuture) return aTime - bTime;
+      if (!aFuture && !bFuture) return bTime - aTime;
+      return aFuture ? -1 : 1;
+    });
   }, [activeTab]);
 
   // Calculate / refresh dropdown position when open (viewport-safe on all breakpoints)
@@ -380,7 +388,10 @@ export default function NotificationDropdown() {
                   isSelected={selectedIndex === index}
                   onSelect={() => {
                     setSelectedIndex(index);
-                    console.log('Clicked notification:', notification);
+                    if (notification.url) {
+                      window.open(notification.url, '_blank', 'noopener,noreferrer');
+                      setIsOpen(false);
+                    }
                   }}
                 />
               ))
