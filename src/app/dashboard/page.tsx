@@ -35,6 +35,8 @@ import EventBadgeCard from '@/components/ticket';
 import TextWithLinks from '@/components/TextWithLinks';
 import { getSafeErrorMessage } from '@/lib/safe-error';
 import { logger } from '@/lib/logger';
+import DiceBearAvatar from '@/components/DicebearAvatars';
+import { collegesWithClubs } from '@/components/colleges/college';
 
 
 interface Event {
@@ -101,6 +103,10 @@ interface isAdminResponse {
   msg : string;
   founder : string;
 }
+
+const sortedCollegesWithClubs = [...collegesWithClubs].sort((a, b) =>
+  a.college.localeCompare(b.college)
+);
 
 // Add these new components and styles to your dashboard
 // LEGO-like Skills Component
@@ -586,6 +592,12 @@ export default function ZynvoDashboard() {
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const [isQrGenerating, setIsQrGenerating] = useState(false);
   const [qrPreviewOpen, setQrPreviewOpen] = useState(false);
+  const [profileQuickForm, setProfileQuickForm] = useState({
+    profileAvatar: '',
+    collegeName: '',
+  });
+  const [isAvatarUpdating, setIsAvatarUpdating] = useState(false);
+  const [isCollegeUpdating, setIsCollegeUpdating] = useState(false);
   const badgeRef = useRef<HTMLDivElement>(null);
 
   // NEW: compact UI controls
@@ -710,6 +722,10 @@ export default function ZynvoDashboard() {
               linkedin : linkedin || '',
               instagram : instagram || ''
             });
+            setProfileQuickForm({
+              profileAvatar: profileAvatar || '',
+              collegeName: collegeName || '',
+            });
 
             // Set selected predefined tags
             setSelectedPredefinedTags(tags || []);
@@ -790,6 +806,94 @@ export default function ZynvoDashboard() {
       ...prev,
       ...patch,
     }));
+  };
+
+  const getAuthorizedHeaders = () => ({
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  });
+
+  const handleAvatarUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const profileAvatar = profileQuickForm.profileAvatar.trim();
+
+    if (!token) {
+      toast('Login required', {
+        action: {
+          label: 'Sign in',
+          onClick: () => navigate.push('/auth/signin'),
+        },
+      });
+      return;
+    }
+
+    if (!profileAvatar) {
+      toast.error('Please enter an avatar URL');
+      return;
+    }
+
+    try {
+      setIsAvatarUpdating(true);
+      const response = await axios.put<{ msg?: string; message?: string }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/updateAvatar`,
+        { profileAvatar },
+        { headers: getAuthorizedHeaders() }
+      );
+
+      if (response.status === 200) {
+        setUserData((prev) =>
+          prev ? { ...prev, profileAvatar } : prev
+        );
+        setProfileQuickForm((prev) => ({ ...prev, profileAvatar }));
+        toast.success(response.data.msg || response.data.message || 'Avatar updated');
+      }
+    } catch (error: any) {
+      toast.error(getSafeErrorMessage(error, 'Unable to update avatar'));
+    } finally {
+      setIsAvatarUpdating(false);
+    }
+  };
+
+  const handleCollegeNameUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const collegeName = profileQuickForm.collegeName.trim();
+
+    if (!token) {
+      toast('Login required', {
+        action: {
+          label: 'Sign in',
+          onClick: () => navigate.push('/auth/signin'),
+        },
+      });
+      return;
+    }
+
+    if (!collegeName) {
+      toast.error('Please enter your college name');
+      return;
+    }
+
+    try {
+      setIsCollegeUpdating(true);
+      const response = await axios.put<{ msg?: string; message?: string }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/updateCollegeName`,
+        { collegeName },
+        { headers: getAuthorizedHeaders() }
+      );
+
+      if (response.status === 200) {
+        setUserData((prev) =>
+          prev ? { ...prev, collegeName } : prev
+        );
+        setProfileForm((prev) => ({ ...prev, collegeName }));
+        setProfileQuickForm((prev) => ({ ...prev, collegeName }));
+        toast.success(response.data.msg || response.data.message || 'College name updated');
+      }
+    } catch (error: any) {
+      toast.error(getSafeErrorMessage(error, 'Unable to update college name'));
+    } finally {
+      setIsCollegeUpdating(false);
+    }
   };
 
   const handleProfileFormSubmit = async (e: React.FormEvent) => {
@@ -1166,6 +1270,57 @@ export default function ZynvoDashboard() {
                   <span className="truncate max-w-[200px] sm:max-w-[300px] md:max-w-none">
                     {userData.collegeName || 'College not set'}
                   </span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 rounded-xl border border-gray-700/70 bg-gray-950/40 p-3 sm:grid-cols-2">
+                  <form onSubmit={handleAvatarUpdate} className="space-y-3">
+                    <DiceBearAvatar
+                      name={userData.name || 'Zynvo user'}
+                      onAvatarChange={(url: string) =>
+                        setProfileQuickForm((prev) => ({
+                          ...prev,
+                          profileAvatar: url,
+                        }))
+                      }
+                    />
+                    <Button
+                      type="submit"
+                      disabled={isAvatarUpdating}
+                      className="w-full bg-yellow-400 px-3 py-2 text-xs font-semibold text-gray-950 hover:bg-yellow-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isAvatarUpdating ? 'Saving avatar...' : 'Save Avatar'}
+                    </Button>
+                  </form>
+
+                  <form onSubmit={handleCollegeNameUpdate} className="space-y-3">
+                    <label
+                      htmlFor="collegeName"
+                      className="block text-xs font-semibold text-gray-300"
+                    >
+                      College Name
+                    </label>
+                    <div className="space-y-2">
+                      <CollegeSearchSelect
+                        colleges={sortedCollegesWithClubs}
+                        value={profileQuickForm.collegeName}
+                        onChange={(value) =>
+                          setProfileQuickForm((prev) => ({
+                            ...prev,
+                            collegeName: value,
+                          }))
+                        }
+                        placeholder="Search and select your college"
+                        required
+                      />
+                      <Button
+                        type="submit"
+                        disabled={isCollegeUpdating}
+                        className="w-full bg-yellow-400 px-3 py-2 text-xs font-semibold text-gray-950 hover:bg-yellow-500 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isCollegeUpdating ? 'Saving college...' : 'Save College'}
+                      </Button>
+                    </div>
+                  </form>
                 </div>
                 
                 {/* Complete Profile Button - Contextually placed */}
