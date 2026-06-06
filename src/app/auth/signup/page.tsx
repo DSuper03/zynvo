@@ -21,7 +21,7 @@ import { signupRes } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import CollegeSearchSelect from '@/components/colleges/collegeSelect';
 import { Button } from '@/components/ui/button';
-import { useSignUp, useAuth , useSignIn} from "@clerk/nextjs";
+import { useSignUp, useAuth , useSignIn, useUser} from "@clerk/nextjs";
 import { jwtDecode } from "jwt-decode";
 import { de } from 'date-fns/locale';
 import { getSafeErrorMessage, toSafeUserMessage } from '@/lib/safe-error';
@@ -38,7 +38,8 @@ import {
 export default function SignUp() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const { isLoaded: authIsLoaded, signIn } = useSignIn();
-  const { getToken } = useAuth();
+  const { getToken, isLoaded: sessionLoaded, isSignedIn } = useAuth();
+  const { user } = useUser();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -59,6 +60,7 @@ export default function SignUp() {
   const [collegeSearch, setCollegeSearch] = useState<string>('');
   const [signinHref, setSigninHref] = useState('/auth/signin');
   const [clerkLoadTimedOut, setClerkLoadTimedOut] = useState(false);
+  const [hasAppSession, setHasAppSession] = useState(false);
 
   // Inline validation error for college select
   const [collegeError, setCollegeError] = useState<string>('');
@@ -78,7 +80,39 @@ export default function SignUp() {
     if (r) persistReturnTo(r);
     else clearStoredReturnTo();
     setSigninHref(`/auth/signin${window.location.search}`);
+    setHasAppSession(
+      Boolean(
+        localStorage.getItem('token') &&
+          sessionStorage.getItem('activeSession') === 'true'
+      )
+    );
   }, []);
+
+  const continueExistingSession = useCallback(() => {
+    if (hasAppSession) {
+      toast.success("You're already signed in. Redirecting...");
+      router.replace(consumeBrowserPostAuthRedirect());
+      return;
+    }
+
+    const rt = peekReturnTo();
+    const callbackQs = new URLSearchParams({ intent: 'signin' });
+    if (rt) callbackQs.set('returnTo', rt);
+    router.replace(`/auth/sso-callback?${callbackQs.toString()}`);
+  }, [hasAppSession, router]);
+
+  useEffect(() => {
+    if (!sessionLoaded || !isSignedIn || verifying || isVerifyingCode || isCreatingAccount) return;
+    const timeout = window.setTimeout(continueExistingSession, 900);
+    return () => window.clearTimeout(timeout);
+  }, [
+    sessionLoaded,
+    isSignedIn,
+    verifying,
+    isVerifyingCode,
+    isCreatingAccount,
+    continueExistingSession,
+  ]);
 
   useEffect(() => {
     if (isLoaded && authIsLoaded) {
@@ -378,7 +412,12 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
 
   const handleGoogleVerification = async () => {
-    if (!authIsLoaded || !signIn) {
+    if (sessionLoaded && isSignedIn) {
+      continueExistingSession();
+      return;
+    }
+
+    if (!authIsLoaded || !sessionLoaded || !signIn) {
       toast.error('Security check is still loading. Please wait a moment and try again.');
       return;
     }
@@ -396,12 +435,54 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       });
     } catch (err) {
       console.error('SSO redirect error', err);
+      const clerkError = err as { errors?: { code?: string }[]; code?: string; message?: string };
+      const clerkCode = clerkError.errors?.[0]?.code || clerkError.code;
+      if (clerkCode === 'session_exists' || /session.*exist/i.test(clerkError.message || '')) {
+        continueExistingSession();
+        return;
+      }
       toast.error('Failed to initiate Google sign-in');
     }
   };
   
 
 
+
+  if (sessionLoaded && isSignedIn && !verifying && !isVerifyingCode && !isCreatingAccount) {
+    const displayName = user?.fullName || user?.firstName || 'there';
+    const avatarUrl = user?.imageUrl;
+
+    return (
+      <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center px-4">
+        <div className="w-full max-w-md rounded-2xl border border-yellow-500/30 bg-gray-900 p-8 text-center shadow-xl">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={displayName}
+              className="mx-auto h-20 w-20 rounded-full border-2 border-yellow-400 object-cover"
+            />
+          ) : (
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-yellow-500 text-2xl font-bold text-black">
+              {displayName.charAt(0).toUpperCase()}
+            </div>
+          )}
+          <h1 className="mt-5 text-2xl font-bold text-white">
+            You're already signed in
+          </h1>
+          <p className="mt-2 text-sm text-gray-400">
+            Continue as {displayName} to go back to Zynvo.
+          </p>
+          <button
+            type="button"
+            onClick={continueExistingSession}
+            className="mt-6 w-full rounded-lg bg-yellow-500 px-4 py-3 font-semibold text-black transition hover:bg-yellow-400"
+          >
+            Continue to Zynvo
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (verifying) {
     return (

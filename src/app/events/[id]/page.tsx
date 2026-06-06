@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios, { isAxiosError } from 'axios';
-import { useParams, usePathname, useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import Image from 'next/image';
@@ -17,6 +17,8 @@ import {
   Phone,
   Mail,
   Share2,
+  Copy,
+  Check,
   ChevronRight,
   Menu,
   Sparkles,
@@ -116,7 +118,9 @@ const Eventid = () => {
     attendeesCount: 0,
   });
   const router = useRouter();
-  const pathname = usePathname();
+  const eventInvitePath = `/events/${id}`;
+  const signupEventHref = buildAuthHref('/auth/signup', eventInvitePath);
+  const signinEventHref = buildAuthHref('/auth/signin', eventInvitePath);
 
   const [forkedUpId, setForkedUpId] = useState<string | null>(null);
   const [eventTeamSize, setEventTeamSize] = useState<number>(1);
@@ -146,6 +150,9 @@ const Eventid = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [userDataLoaded, setUserDataLoaded] = useState(false);
   const [activeDay, setActiveDay] = useState(1);
+  const [eventInviteFullUrl, setEventInviteFullUrl] = useState('');
+  const [copiedInviteLink, setCopiedInviteLink] = useState(false);
+  const inviteLinkInputRef = useRef<HTMLInputElement>(null);
   const { data: schedule = [] } = useSchedule(id, token);
   const { totalSessions } = getScheduleStats(schedule);
   const [collegeBlockModal, setCollegeBlockModal] = useState<{
@@ -165,6 +172,15 @@ const Eventid = () => {
   const csvEtagRef = useRef(csvEtag);
   csvLastSinceRef.current = csvLastSince;
   csvEtagRef.current = csvEtag;
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      setEventInviteFullUrl(new URL(signupEventHref, window.location.origin).href);
+    } catch {
+      setEventInviteFullUrl('');
+    }
+  }, [signupEventHref]);
 
   const runCsvSync = React.useCallback(async () => {
     if (!id || !isFounder) return;
@@ -236,8 +252,7 @@ const Eventid = () => {
               toast('Login required', {
                 action: {
                   label: 'Sign in',
-                  onClick: () =>
-                    router.push(buildAuthHref('/auth/signin', pathname)),
+                  onClick: () => router.push(signinEventHref),
                 },
               });
               return;
@@ -249,7 +264,7 @@ const Eventid = () => {
         return;
       } 
     }
-  }, [router, pathname]);
+  }, [router, signinEventHref]);
 
   // Fetch speakers for this event (used in the Speakers tab)
   const {
@@ -606,6 +621,24 @@ const Eventid = () => {
     await completeRegistration(proofUrl);
   };
 
+  const handleCopyInviteLink = async () => {
+    if (!eventInviteFullUrl) {
+      toast.error('Invite link is not ready yet. Please try again in a moment.');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(eventInviteFullUrl);
+      setCopiedInviteLink(true);
+      toast.success('Event invite link copied!');
+      setTimeout(() => setCopiedInviteLink(false), 2000);
+    } catch {
+      inviteLinkInputRef.current?.focus();
+      inviteLinkInputRef.current?.select();
+      toast.error('Copy failed. Select the invite link and copy it manually.');
+    }
+  };
+
   // Helper: user is registered — compare ids as strings (params vs API types differ)
   const isUserAttendingEvent = (): boolean => {
     if (!id) return false;
@@ -938,6 +971,44 @@ const Eventid = () => {
                     <CalendarIcon className="w-4 h-4" />
                     <span>Add to Calendar</span>
                   </a>
+                </div>
+
+                <div className="max-w-2xl rounded-xl border border-yellow-500/40 bg-yellow-500/10 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-yellow-300">
+                    <Share2 className="h-3.5 w-3.5" />
+                    Event Invite Link
+                  </div>
+                  <div className="flex overflow-hidden rounded-lg border border-yellow-500/30 bg-black/30">
+                    <input
+                      ref={inviteLinkInputRef}
+                      readOnly
+                      value={eventInviteFullUrl}
+                      onClick={(e) => e.currentTarget.select()}
+                      onFocus={(e) => e.currentTarget.select()}
+                      className="min-w-0 flex-1 bg-transparent px-3 py-2 text-xs text-gray-200 outline-none"
+                      aria-label="Event invite link"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCopyInviteLink}
+                      className="inline-flex cursor-pointer items-center justify-center gap-1.5 bg-yellow-500 px-3 py-2 text-xs font-semibold text-black transition-colors hover:bg-yellow-400"
+                      title="Copy event invite link"
+                    >
+                      {copiedInviteLink ? (
+                        <Check className="h-3.5 w-3.5" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
+                      {copiedInviteLink ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                  {copiedInviteLink ? (
+                    <p className="mt-2 text-xs text-green-300">Invite link copied to clipboard.</p>
+                  ) : (
+                    <p className="mt-2 text-xs text-yellow-100/70">
+                      Share this to bring people back to this event after signup or signin.
+                    </p>
+                  )}
                 </div>
 
                 {/* Success notice */}
@@ -1698,9 +1769,7 @@ const Eventid = () => {
                 Join Zynvo and connect with your campus community.
               </p>
               <Button
-                onClick={() =>
-                  router.push(buildAuthHref('/auth/signup', pathname))
-                }
+                onClick={() => router.push(signupEventHref)}
                 className="bg-yellow-400 hover:bg-yellow-500 text-black font-medium rounded-lg px-5 py-2"
               >
                 Join Zynvo
