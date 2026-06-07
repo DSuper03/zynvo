@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { buildAuthHref } from '@/lib/authReturnTo';
 
 interface apiRespEvents {
   msg: string;
@@ -38,14 +39,16 @@ export default function EventCard({
 
   const handleShare = async (eventId: string, eventName?: string) => {
     try {
-      const shareUrl = typeof window !== 'undefined'
-        ? `${window.location.origin}/events/${eventId}`
-        : `/events/${eventId}`;
+      const eventInvitePath = buildAuthHref('/auth/signup', `/events/${eventId}`);
+      const shareUrl =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}${eventInvitePath}`
+          : eventInvitePath;
 
       if (navigator.share) {
         await navigator.share({
           title: eventName || 'Check out this event',
-          text: `Join me at ${eventName || 'this event'}! ID: ${eventId}`,
+          text: `Join me at ${eventName || 'this event'} on Zynvo.`,
           url: shareUrl,
         });
         return;

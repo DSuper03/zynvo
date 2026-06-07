@@ -1,4 +1,4 @@
-//'use client';
+'use client';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -57,7 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
   return (
     <aside
       className={cn(
-        'group relative h-full min-h-screen border-r border-zinc-900 bg-[#050505] text-white transition-all duration-300 ease-in-out',
+        'group relative z-30 h-full min-h-screen shrink-0 border-r border-zinc-900 bg-[#050505] text-white transition-all duration-300 ease-in-out',
         isOpen ? 'w-56' : 'w-16'
       )}
       aria-label="Primary navigation"

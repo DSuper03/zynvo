@@ -418,93 +418,23 @@ export default function UserSearchPage() {
                 ))}
               </div>
 
-              {/* Elegant Pagination - only for all users view */}
+              {/* Browse controls - avoid exposing total user/page counts */}
               {!searchQuery.trim() && totalPages > 1 && (
-                <div className="flex justify-center items-center space-x-3 mt-16">
-                  {/* Previous button */}
+                <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mt-16">
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage <= 1 || isLoadingUsers}
-                    className="backdrop-blur-md bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:border-yellow-400/30 hover:text-yellow-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="backdrop-blur-md bg-white/5 border border-white/10 rounded-full px-5 py-2.5 text-sm font-medium text-gray-300 hover:bg-white/10 hover:border-yellow-400/30 hover:text-yellow-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Previous
                   </button>
 
-                  {/* Page numbers */}
-                  <div className="flex space-x-1">
-                    {/* First page */}
-                    {currentPage > 3 && (
-                      <>
-                        <button
-                          onClick={() => handlePageChange(1)}
-                          className="backdrop-blur-md bg-white/5 border border-white/10 rounded-full w-8 h-8 text-sm font-medium text-gray-300 hover:bg-white/10 hover:border-yellow-400/30 hover:text-yellow-400 transition-all duration-300"
-                        >
-                          1
-                        </button>
-                        {currentPage > 4 && (
-                          <span className="flex items-center px-2 text-gray-500 text-sm">
-                            ...
-                          </span>
-                        )}
-                      </>
-                    )}
-
-                    {/* Visible page numbers */}
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNum;
-                      if (totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNum = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
-                      } else {
-                        pageNum = currentPage - 2 + i;
-                      }
-
-                      if (pageNum < 1 || pageNum > totalPages) return null;
-
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          disabled={isLoadingUsers}
-                          className={`backdrop-blur-md border rounded-full w-8 h-8 text-sm font-medium transition-all duration-300 ${
-                            pageNum === currentPage
-                              ? 'bg-yellow-400 border-yellow-400 text-gray-900'
-                              : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-yellow-400/30 hover:text-yellow-400'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-
-                    {/* Last page */}
-                    {currentPage < totalPages - 2 && (
-                      <>
-                        {currentPage < totalPages - 3 && (
-                          <span className="flex items-center px-2 text-gray-500 text-sm">
-                            ...
-                          </span>
-                        )}
-                        <button
-                          onClick={() => handlePageChange(totalPages)}
-                          className="backdrop-blur-md bg-white/5 border border-white/10 rounded-full w-8 h-8 text-sm font-medium text-gray-300 hover:bg-white/10 hover:border-yellow-400/30 hover:text-yellow-400 transition-all duration-300"
-                        >
-                          {totalPages}
-                        </button>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Next button */}
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage >= totalPages || isLoadingUsers}
-                    className="backdrop-blur-md bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:border-yellow-400/30 hover:text-yellow-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="backdrop-blur-md bg-yellow-400 border border-yellow-400 rounded-full px-6 py-2.5 text-sm font-semibold text-gray-900 hover:bg-yellow-300 hover:border-yellow-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Next
+                    Show more Zyncers
                   </button>
                 </div>
               )}

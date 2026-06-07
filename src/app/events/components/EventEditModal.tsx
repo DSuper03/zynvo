@@ -1562,58 +1562,58 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
           shareText={`🏆 I just unlocked the "${unlockedBadge.name}" badge on Zynvo! I've created ${unlockedBadge.count} amazing events. Join me and let's build an incredible campus community! 🎉 #Zynvo #EventCreator`}
         />
       )}
-      
+
+      {/* Announcement Prompt Modal */}
+      {showAnnouncementPrompt && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60">
+          <div className="bg-gray-900 p-6 rounded-lg border border-yellow-500 max-w-md w-full">
+            <h3 className="text-xl text-yellow-400 font-bold mb-4">Application Date Extended!</h3>
+            <p className="text-white mb-4">Would you like to post an announcement about this extension?</p>
+            <Textarea
+              value={announcementMsg}
+              onChange={(e) => setAnnouncementMsg(e.target.value)}
+              className="bg-gray-800 text-white border-gray-700 focus:border-yellow-500 mb-6"
+            />
+            <div className="flex justify-end space-x-4">
+              <Button
+                onClick={() => {
+                  setShowAnnouncementPrompt(false);
+                  if (onUpdateSuccess) onUpdateSuccess();
+                  onClose();
+                }}
+                className="bg-gray-700 hover:bg-gray-600 text-white"
+              >
+                No, Skip
+              </Button>
+              <Button
+                onClick={async () => {
+                  try {
+                    await axios.post(
+                      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/announcement/${eventId}`,
+                      { Title: "Deadline Extended!", content: announcementMsg },
+                      { headers: { authorization: `Bearer ${token}` } }
+                    );
+                    toast('Announcement posted!');
+                  } catch(e) {
+                    toast('Failed to post announcement');
+                  }
+                  setShowAnnouncementPrompt(false);
+                  if (onUpdateSuccess) onUpdateSuccess();
+                  onClose();
+                }}
+                className="bg-yellow-500 hover:bg-yellow-400 text-black"
+              >
+                Yes, Post It
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <NoTokenModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} />
     </div>
   );
 };
 
-
-  {/* Announcement Prompt Modal */}
-  {showAnnouncementPrompt && (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60">
-      <div className="bg-gray-900 p-6 rounded-lg border border-yellow-500 max-w-md w-full">
-        <h3 className="text-xl text-yellow-400 font-bold mb-4">Application Date Extended!</h3>
-        <p className="text-white mb-4">Would you like to post an announcement about this extension?</p>
-        <Textarea 
-          value={announcementMsg} 
-          onChange={(e) => setAnnouncementMsg(e.target.value)}
-          className="bg-gray-800 text-white border-gray-700 focus:border-yellow-500 mb-6"
-        />
-        <div className="flex justify-end space-x-4">
-          <Button 
-            onClick={() => {
-              setShowAnnouncementPrompt(false);
-              if (onUpdateSuccess) onUpdateSuccess();
-              onClose();
-            }} 
-            className="bg-gray-700 hover:bg-gray-600 text-white"
-          >
-            No, Skip
-          </Button>
-          <Button 
-            onClick={async () => {
-              try {
-                await axios.post(
-                  `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/announcement/${eventId}`,
-                  { Title: "Deadline Extended!", content: announcementMsg },
-                  { headers: { authorization: `Bearer ${token}` } }
-                );
-                toast('Announcement posted!');
-              } catch(e) {
-                toast('Failed to post announcement');
-              }
-              setShowAnnouncementPrompt(false);
-              if (onUpdateSuccess) onUpdateSuccess();
-              onClose();
-            }} 
-            className="bg-yellow-500 hover:bg-yellow-400 text-black"
-          >
-            Yes, Post It
-          </Button>
-        </div>
-      </div>
-    </div>
-  )}
 
 export default EventEditModal;
