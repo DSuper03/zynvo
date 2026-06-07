@@ -14,6 +14,20 @@ export type Eventtype =
   | 'technical'
   | 'others'
 
+export interface CustomQuestion {
+  id?: string;
+  label: string;
+  type: 'text' | 'select' | 'url';
+  options?: string[]; // for select type
+  required: boolean;
+  sortOrder?: number;
+}
+
+export interface CustomAnswer {
+  questionId: string;
+  answer: string;
+}
+
 export interface EventFormData {
   eventMode: EventMode | '';
   eventName: string;
@@ -41,7 +55,7 @@ export interface EventFormData {
   paymentQRCode?: string; // QR code image URL for payment
   paymentAmount?: number; // Payment amount required for event
   maxParticipants?: number | ''; // Max participation limit (optional)
-  // image: string;
+  customQuestions?: CustomQuestion[];
 }
 
 // this is used in clubs/id/page.tsx where events of colleges are listed
@@ -459,6 +473,7 @@ export interface respnseUseState {
   paymentQRCode?: string;
   paymentAmount?: number;
   maxParticipants?: number;
+  customQuestions?: CustomQuestion[];
 }
 export interface PostData {
  
@@ -528,6 +543,7 @@ export interface EventByIdResponse {
     paymentAmount?: number; // Payment amount required for event
     maxParticipants?: number;
     attendeesCount?: number;
+    customQuestions?: CustomQuestion[];
   };
 }
 
