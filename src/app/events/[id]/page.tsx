@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
+import { CustomAnswer, EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios, { isAxiosError } from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
