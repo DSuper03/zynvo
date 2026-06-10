@@ -30,7 +30,8 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { EventFormData } from '@/types/global-Interface';
+import { EventFormData, CustomQuestion } from '@/types/global-Interface';
+import { Plus, Trash2, GripVertical, Settings2 } from 'lucide-react';
 import { toBase64, uploadImageToImageKit, compressImageToUnder2MB } from '@/lib/imgkit';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -119,6 +120,53 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       return;
     }
   }, []);
+
+  
+  // --- Custom Questions Handlers ---
+  const addCustomQuestion = () => {
+    if ((formData.customQuestions?.length || 0) >= 10) {
+      toast.error('Maximum 10 custom questions allowed.');
+      return;
+    }
+    setFormData((prev: any) => ({
+      ...prev,
+      customQuestions: [
+        ...(prev.customQuestions || []),
+        { id: Date.now().toString(), label: '', type: 'text', required: false, options: [] }
+      ]
+    }));
+  };
+
+  const removeCustomQuestion = (index: number) => {
+    setFormData((prev: any) => {
+      const newQs = [...(prev.customQuestions || [])];
+      newQs.splice(index, 1);
+      return { ...prev, customQuestions: newQs };
+    });
+  };
+
+  const updateCustomQuestion = (index: number, field: string, value: any) => {
+    setFormData((prev: any) => {
+      const newQs = [...(prev.customQuestions || [])];
+      newQs[index] = { ...newQs[index], [field]: value };
+      return { ...prev, customQuestions: newQs };
+    });
+  };
+
+  const addPrebuiltQuestion = (label: string, type: 'text' | 'select' | 'url', options: string[] = []) => {
+    if ((formData.customQuestions?.length || 0) >= 10) {
+      toast.error('Maximum 10 custom questions allowed.');
+      return;
+    }
+    setFormData((prev: any) => ({
+      ...prev,
+      customQuestions: [
+        ...(prev.customQuestions || []),
+        { id: Date.now().toString(), label, type, required: false, options }
+      ]
+    }));
+  };
+  // ---------------------------------
 
   // Auto-fill and lock university to the founder's collegeName
   useEffect(() => {

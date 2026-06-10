@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { EventByIdResponse, respnseUseState } from '@/types/global-Interface';
+import { CustomAnswer, EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios, { isAxiosError } from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -131,6 +131,9 @@ const Eventid = () => {
   const [showWhatsappModal, setShowWhatsappModal] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showCustomQuestionsModal, setShowCustomQuestionsModal] = useState(false);
+  const [pendingCustomAnswers, setPendingCustomAnswers] = useState<CustomAnswer[]>([]);
+  const [customQuestionsForm, setCustomQuestionsForm] = useState<Record<string, string>>({});
   const [token, setToken] = useState<string | null>(null);
   const [registrationNotice, setRegistrationNotice] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
@@ -562,7 +565,7 @@ const Eventid = () => {
     await completeRegistration();
   };
 
-  const completeRegistration = async (paymentProofUrl?: string) => {
+  const completeRegistration = async (paymentProofUrl?: string, customAnswers?: CustomAnswer[]) => {
     try {
       setIsRegistering(true);
       console.log('completeRegistration called with paymentProofUrl:', paymentProofUrl);
@@ -1700,10 +1703,27 @@ const Eventid = () => {
                               </p>
                             )}
 
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-gray-500 mt-1 mb-2">
                               Joined:{' '}
                               {new Date(participant.joinedAt).toLocaleDateString()}
                             </p>
+
+                            {/* Display Custom Answers */}
+                            {(participant as any).customAnswers?.length > 0 && (
+                              <div className="mt-2 space-y-1 bg-gray-900/50 p-2 rounded border border-gray-800">
+                                <p className="text-xs font-semibold text-gray-400 mb-1">Registration Details:</p>
+                                {(participant as any).customAnswers.map((ans: any, i: number) => (
+                                  <div key={i} className="flex text-xs">
+                                    <span className="text-gray-500 mr-2 min-w-[80px]">{ans.label}:</span>
+                                    <span className="text-gray-300 font-medium">
+                                      {ans.answer.startsWith('http') ? (
+                                        <a href={ans.answer} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">{ans.answer}</a>
+                                      ) : ans.answer}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
