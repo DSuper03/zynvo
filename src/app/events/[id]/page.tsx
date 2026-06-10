@@ -116,6 +116,7 @@ const Eventid = () => {
     paymentAmount: 0,
     maxParticipants: undefined,
     attendeesCount: 0,
+    customQuestions: [],
   });
   const router = useRouter();
   const eventInvitePath = `/events/${id}`;
@@ -478,6 +479,7 @@ const Eventid = () => {
             paymentAmount: paymentAmount,
             maxParticipants: res.data.response.maxParticipants,
             attendeesCount: (res.data.response as any)._count?.attendees ?? 0,
+            customQuestions: res.data.response.customQuestions || [],
           });
           // Store TeamSize for team section
           setEventTeamSize(res.data.response.TeamSize || 1);
@@ -529,6 +531,19 @@ const Eventid = () => {
       return;
     }
 
+    if (data.customQuestions?.length) {
+      setCustomQuestionsForm({});
+      setPendingCustomAnswers([]);
+      setShowCustomQuestionsModal(true);
+      return;
+    }
+
+    await startRegistrationAfterQuestions();
+  };
+
+  const startRegistrationAfterQuestions = async (customAnswers: CustomAnswer[] = []) => {
+    setPendingCustomAnswers(customAnswers);
+
     // Debug: Log all payment-related data
     console.log('=== Registration Debug ===');
     console.log('data.isPaidEvent:', data.isPaidEvent, typeof data.isPaidEvent);
@@ -562,7 +577,7 @@ const Eventid = () => {
 
     console.log('✗ Proceeding with direct registration (free event)');
     // For free events, proceed with registration
-    await completeRegistration();
+    await completeRegistration(undefined, customAnswers);
   };
 
   const completeRegistration = async (paymentProofUrl?: string, customAnswers?: CustomAnswer[]) => {
@@ -571,7 +586,8 @@ const Eventid = () => {
       console.log('completeRegistration called with paymentProofUrl:', paymentProofUrl);
       const bodyData = { 
         eventId: id,
-        ...(paymentProofUrl && { paymentProofUrl })
+        ...(paymentProofUrl && { paymentProofUrl }),
+        ...(customAnswers?.length && { customAnswers }),
       };
       console.log('Sending registration request with body:', bodyData);
 
@@ -621,7 +637,33 @@ const Eventid = () => {
 
   const handlePaymentProofSubmitted = async (proofUrl: string) => {
     setShowPaymentModal(false);
-    await completeRegistration(proofUrl);
+    await completeRegistration(proofUrl, pendingCustomAnswers);
+  };
+
+  const handleCustomQuestionsSubmit = async () => {
+    const questions = data.customQuestions || [];
+    const missingRequired = questions.find((question, index) => {
+      const questionId = question.id || String(index);
+      return question.required && !customQuestionsForm[questionId]?.trim();
+    });
+
+    if (missingRequired) {
+      toast.error(`Please answer: ${missingRequired.label}`);
+      return;
+    }
+
+    const answers = questions
+      .map((question, index) => {
+        const questionId = question.id || String(index);
+        return {
+          questionId,
+          answer: customQuestionsForm[questionId]?.trim() || '',
+        };
+      })
+      .filter((answer) => answer.answer);
+
+    setShowCustomQuestionsModal(false);
+    await startRegistrationAfterQuestions(answers);
   };
 
   const handleCopyInviteLink = async () => {
@@ -1910,6 +1952,92 @@ const Eventid = () => {
         paymentAmount={data.paymentAmount || 0}
         isSubmitting={isRegistering}
       />
+
+      {/* Custom Questions Modal */}
+      {showCustomQuestionsModal && data.customQuestions?.length ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-lg rounded-xl border border-gray-800 bg-[#0B0B0B] p-6 shadow-xl">
+            <div className="mb-5">
+              <h2 className="text-2xl font-bold text-white">Registration Questions</h2>
+              <p className="mt-1 text-sm text-gray-400">
+                The organizer needs a few extra details before you register.
+              </p>
+            </div>
+
+            <div className="max-h-[55vh] space-y-4 overflow-y-auto pr-1">
+              {data.customQuestions.map((question, index) => {
+                const questionId = question.id || String(index);
+                const value = customQuestionsForm[questionId] || '';
+
+                return (
+                  <div key={questionId}>
+                    <label
+                      htmlFor={`custom-answer-${questionId}`}
+                      className="mb-1 block text-sm font-medium text-yellow-400"
+                    >
+                      {question.label}
+                      {question.required ? ' *' : ''}
+                    </label>
+
+                    {question.type === 'select' ? (
+                      <select
+                        id={`custom-answer-${questionId}`}
+                        value={value}
+                        onChange={(e) =>
+                          setCustomQuestionsForm((prev) => ({
+                            ...prev,
+                            [questionId]: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-white outline-none focus:border-yellow-500"
+                      >
+                        <option value="">Select an option</option>
+                        {(question.options || []).map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        id={`custom-answer-${questionId}`}
+                        type={question.type === 'url' ? 'url' : 'text'}
+                        value={value}
+                        onChange={(e) =>
+                          setCustomQuestionsForm((prev) => ({
+                            ...prev,
+                            [questionId]: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-white outline-none focus:border-yellow-500"
+                        placeholder={question.type === 'url' ? 'https://...' : 'Your answer'}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowCustomQuestionsModal(false)}
+                className="rounded-lg bg-gray-800 px-4 py-2 font-semibold text-gray-300 transition-colors hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleCustomQuestionsSubmit}
+                disabled={isRegistering}
+                className="rounded-lg bg-yellow-500 px-4 py-2 font-semibold text-black transition-colors hover:bg-yellow-400 disabled:opacity-70"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* Achievement Celebration Modal */}
       <AchievementCelebration
