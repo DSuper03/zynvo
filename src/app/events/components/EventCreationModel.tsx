@@ -1405,6 +1405,83 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       </div>
                     )}
                   </div>
+
+                  {/* Custom Registration Questions */}
+                  <div className="border-t border-gray-800 pt-6 mt-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <div>
+                        <p className="text-sm font-medium text-yellow-400">Custom Registration Questions</p>
+                        <p className="text-xs text-gray-400 mt-1">Ask participants for specific details (Max 10)</p>
+                      </div>
+                      <span className="text-xs bg-gray-800 px-2 py-1 rounded text-gray-300">
+                        {formData.customQuestions?.length || 0}/10 Added
+                      </span>
+                    </div>
+
+                    {/* Pre-built Questions */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <button type="button" onClick={() => addPrebuiltQuestion('GitHub Profile URL', 'url')} className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded flex items-center gap-1 transition-colors border border-gray-700">
+                        <Plus className="w-3 h-3" /> GitHub
+                      </button>
+                      <button type="button" onClick={() => addPrebuiltQuestion('LinkedIn Profile', 'url')} className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded flex items-center gap-1 transition-colors border border-gray-700">
+                        <Plus className="w-3 h-3" /> LinkedIn
+                      </button>
+                      <button type="button" onClick={() => addPrebuiltQuestion('T-Shirt Size', 'select', ['S', 'M', 'L', 'XL', 'XXL'])} className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded flex items-center gap-1 transition-colors border border-gray-700">
+                        <Plus className="w-3 h-3" /> T-Shirt Size
+                      </button>
+                      <button type="button" onClick={() => addPrebuiltQuestion('Food Preference', 'select', ['Veg', 'Non-Veg', 'Vegan'])} className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded flex items-center gap-1 transition-colors border border-gray-700">
+                        <Plus className="w-3 h-3" /> Food Pref
+                      </button>
+                    </div>
+
+                    <div className="space-y-4 mb-4">
+                      {formData.customQuestions?.map((q, idx) => (
+                        <div key={q.id || idx} className="bg-gray-800/40 border border-gray-700 p-4 rounded-lg relative group">
+                          <button type="button" onClick={() => removeCustomQuestion(idx)} className="absolute top-3 right-3 text-gray-500 hover:text-red-400 transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                          <div className="flex items-start gap-3">
+                            <GripVertical className="w-5 h-5 text-gray-600 mt-2 cursor-grab" />
+                            <div className="flex-1 space-y-3">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-400 mb-1">Question Label*</label>
+                                  <input type="text" value={q.label} onChange={(e) => updateCustomQuestion(idx, 'label', e.target.value)} placeholder="e.g. What is your GitHub ID?" className="w-full bg-gray-900 border border-gray-700 focus:border-yellow-500 text-white px-3 py-1.5 rounded text-sm focus:outline-none" />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-400 mb-1">Answer Type</label>
+                                  <Select value={q.type} onValueChange={(val) => updateCustomQuestion(idx, 'type', val)}>
+                                    <SelectTrigger className="bg-gray-900 border border-gray-700 text-white h-8 text-sm">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-black text-white">
+                                      <SelectItem value="text">Short Text</SelectItem>
+                                      <SelectItem value="url">URL / Link</SelectItem>
+                                      <SelectItem value="select">Dropdown Options</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                              {q.type === 'select' && (
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-400 mb-1">Options (comma separated)*</label>
+                                  <input type="text" value={q.options?.join(', ')} onChange={(e) => updateCustomQuestion(idx, 'options', e.target.value.split(',').map(o => o.trim()).filter(Boolean))} placeholder="e.g. S, M, L, XL" className="w-full bg-gray-900 border border-gray-700 focus:border-yellow-500 text-white px-3 py-1.5 rounded text-sm focus:outline-none" />
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2 pt-1">
+                                <input type="checkbox" id={`req-${idx}`} checked={q.required} onChange={(e) => updateCustomQuestion(idx, 'required', e.target.checked)} className="rounded border-gray-700 bg-gray-900 text-yellow-500 focus:ring-yellow-500 focus:ring-offset-gray-900" />
+                                <label htmlFor={`req-${idx}`} className="text-xs text-gray-300 cursor-pointer">Make this question required</label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button type="button" onClick={addCustomQuestion} disabled={(formData.customQuestions?.length || 0) >= 10} className="w-full py-2.5 border border-dashed border-gray-600 rounded-lg text-gray-400 hover:text-yellow-400 hover:border-yellow-500 hover:bg-yellow-500/5 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                      <Plus className="w-4 h-4" /> Add Custom Question
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
