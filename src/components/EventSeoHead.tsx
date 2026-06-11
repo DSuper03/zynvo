@@ -105,6 +105,7 @@ export default function EventSeoHead(props: EventSeoInput & { pageUrl?: string }
     props.eventMode,
     props.posterUrl,
     props.eventUrl,
+    props.venue,
     props.pageUrl,
     props.prizes,
     props.contactEmail,

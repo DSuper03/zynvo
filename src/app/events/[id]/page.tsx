@@ -104,6 +104,7 @@ const Eventid = () => {
     contactEmail: '',
     contactPhone: '',
     university: '',
+    venue: '',
     collegeStudentsOnly: false,
     applicationStatus: 'open',
     posterUrl: '',
@@ -463,6 +464,7 @@ const Eventid = () => {
             endDate: res.data.response.endDate || '',
             prizes: res.data.response.prizes || '',
             university: res.data.response.university || '',
+            venue: res.data.response.Venue || (res.data.response as any).venue || '',
             collegeStudentsOnly: res.data.response.collegeStudentsOnly ?? false,
             contactEmail: res.data.response.contactEmail || '',
             contactPhone: res.data.response.contactPhone || '',
@@ -710,6 +712,11 @@ const Eventid = () => {
     [data.EventMode]
   );
 
+  const displayLocation = useMemo(
+    () => data.venue || (isOnline ? 'Online' : data.university),
+    [data.venue, data.university, isOnline]
+  );
+
   // Check if event has ended
   const isEventEnded = useMemo(() => {
     if (!data.endDate) return false;
@@ -777,7 +784,7 @@ const Eventid = () => {
       action: 'TEMPLATE',
       text: data.EventName || 'Event',
       details: data.description || '',
-      location: data.university || (isOnline ? 'Online' : ''),
+      location: displayLocation,
     });
     if (start && end) {
       params.set('dates', `${start}/${end}`);
@@ -786,10 +793,9 @@ const Eventid = () => {
   }, [
     data.EventName,
     data.description,
-    data.university,
+    displayLocation,
     data.startDate,
     data.endDate,
-    isOnline,
   ]);
 
   if (isLoading) {
@@ -830,6 +836,7 @@ const Eventid = () => {
         eventMode={data.EventMode}
         posterUrl={data.posterUrl}
         eventUrl={data.eventWebsite}
+        venue={displayLocation}
         prizes={data.prizes}
         contactEmail={data.contactEmail}
         pageUrl={typeof window !== 'undefined' ? window.location.href : undefined}
@@ -866,10 +873,10 @@ const Eventid = () => {
                       {formatDateRange(data.startDate, data.endDate)}
                     </span>
                   </div>
-                  {data.university && (
+                  {displayLocation && (
                     <div className="inline-flex items-center gap-2 rounded-md border border-gray-800 bg-gray-900/80 px-3 py-1.5 text-gray-200 max-w-full min-w-0">
                       <MapPin className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 shrink-0" />
-                      <span className="truncate">{data.university}</span>
+                      <span className="truncate">{displayLocation}</span>
                     </div>
                   )}
                   <div className="inline-flex items-center gap-2 rounded-md border border-gray-800 bg-gray-900/80 px-3 py-1.5 text-gray-200">
@@ -965,16 +972,16 @@ const Eventid = () => {
                         {isEventEnded && (
                           <p className="text-xs text-red-700">This event has already ended</p>
                         )}
-                        {isCollegeRestricted && data.university && (
-                          <p className="text-sm text-gray-300 max-w-xl">
-                            Organizer college:{' '}
-                            <span className="text-yellow-300">{data.university}</span>
-                            <span className="text-gray-400">
-                              {' '}
-                              · Limited to students of this college
-                            </span>
-                          </p>
-                        )}
+                        {/* {isCollegeRestricted && data.university && (
+                          // <p className="text-sm text-gray-300 max-w-xl">
+                          //   Organizer college:{' '}
+                          //   <span className="text-yellow-300">{data.university}</span>
+                          //   <span className="text-gray-400">
+                          //     {' '}
+                          //     · Limited to students of this college
+                          //   </span>
+                          // </p>
+                        )} */}
                         {isCollegeNameMissing && (
                           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-300">
                             <span>
@@ -1293,7 +1300,7 @@ const Eventid = () => {
                     <p className="text-xs text-gray-400 uppercase tracking-wide">
                       Location
                     </p>
-                    <p className="text-white">{data.university || 'TBD'}</p>
+                    <p className="text-white">{displayLocation || 'TBD'}</p>
                   </div>
                   <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-4 space-y-1">
                     <p className="text-xs text-gray-400 uppercase tracking-wide">
