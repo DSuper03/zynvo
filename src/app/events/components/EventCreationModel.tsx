@@ -964,36 +964,30 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                     </p>
                   </div>
 
-                  <div>
-                    <Label
-                      htmlFor="venue"
-                      className="block text-sm font-medium text-yellow-400 mb-1"
-                    >
-                      Venue*
-                    </Label>
-                    <Input
-                      id="venue"
-                      name="venue"
-                      type="text"
-                      value={formData.venue}
-                      onChange={handleChange}
-                      disabled={formData.eventMode === 'online'}
-                      className={`w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none ${
-                        formData.eventMode === 'online' ? 'opacity-70 cursor-not-allowed' : ''
-                      }`}
-                      placeholder={formData.eventMode === 'online' ? 'Online' : 'Event venue'}
-                    />
-                    {formData.eventMode === 'online' && (
-                      <p className="mt-1 text-xs text-gray-400">
-                        Venue is automatically set to "Online" for online events
-                      </p>
-                    )}
-                    {errors.venue && (
-                      <p className="mt-1 text-sm text-red-500">
-                        {errors.venue}
-                      </p>
-                    )}
-                  </div>
+                  {formData.eventMode !== 'online' && (
+                    <div>
+                      <Label
+                        htmlFor="venue"
+                        className="block text-sm font-medium text-yellow-400 mb-1"
+                      >
+                        Venue*
+                      </Label>
+                      <Input
+                        id="venue"
+                        name="venue"
+                        type="text"
+                        value={formData.venue}
+                        onChange={handleChange}
+                        className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
+                        placeholder="Event venue"
+                      />
+                      {errors.venue && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.venue}
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   {/* Access & Participation toggles */}
                   <div>
@@ -1048,7 +1042,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       htmlFor="eventWebsite"
                       className="block text-sm font-medium text-yellow-400 mb-1"
                     >
-                      Event Website (optional)
+                      {formData.eventMode === 'online' ? 'Platform Link (e.g. Google Meet, Zoom)' : 'Event Website (optional)'}
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

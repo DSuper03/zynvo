@@ -420,10 +420,6 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
       toast('please login or signup');
       return;
     }
-    if (!clubName) {
-      toast('You haven\'t created any club yet. Please create a club first.');
-      return;
-    }
     if (!validateStep()) return;
 
     setIsSubmitting(true);
@@ -457,7 +453,6 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
     } catch {
       // Non-blocking: if the check endpoint fails, proceed with creation
     }
-  const userUniAndClub = `${lockedUniversity}-${clubName}`;
     let imageLink = '';
     if (!img) {
       toast('you are required to upload a poster');
@@ -554,44 +549,6 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
   };
  
   if (!isOpen) return null;
-
-  // Check if user has created a club
-  if (!clubName) {
-    return (
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-transparent">
-        <Card className="flex min-h-full items-center justify-center p-4 bg-transparent shadow-none">
-          <MagicCard className="group relative bg-gray-900 rounded-xl w-full max-w-md transition-all duration-300 hover:scale-[1.01] border border-transparent hover:border-transparent">
-            <div className="absolute inset-0 rounded-xl -z-10 bg-gray-900" />
-
-            <div className="p-8 text-center">
-              <div className="text-5xl mb-4">🏢</div>
-              <h2 className="text-2xl font-bold text-white mb-3">No Club Found</h2>
-              <p className="text-gray-300 mb-6">
-                You haven't created any club yet. Please create a club first before creating an event.
-              </p>
-              <div className="space-y-3">
-                <Button
-                  onClick={() => {
-                    onClose();
-                    router.push('/clubs');
-                  }}
-                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-lg"
-                >
-                  Create Club Now
-                </Button>
-                <Button
-                  onClick={onClose}
-                  className="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-3 rounded-lg"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          </MagicCard>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-transparent">
@@ -898,36 +855,30 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
                     </p>
                   </div>
 
-                  <div>
-                    <Label
-                      htmlFor="venue"
-                      className="block text-sm font-medium text-yellow-400 mb-1"
-                    >
-                      Venue*
-                    </Label>
-                    <Input
-                      id="venue"
-                      name="venue"
-                      type="text"
-                      value={formData.venue}
-                      onChange={handleChange}
-                      disabled={formData.eventMode === 'online'}
-                      className={`w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none ${
-                        formData.eventMode === 'online' ? 'opacity-70 cursor-not-allowed' : ''
-                      }`}
-                      placeholder={formData.eventMode === 'online' ? 'Online' : 'Event venue'}
-                    />
-                    {formData.eventMode === 'online' && (
-                      <p className="mt-1 text-xs text-gray-400">
-                        Venue is automatically set to "Online" for online events
-                      </p>
-                    )}
-                    {errors.venue && (
-                      <p className="mt-1 text-sm text-red-500">
-                        {errors.venue}
-                      </p>
-                    )}
-                  </div>
+                  {formData.eventMode !== 'online' && (
+                    <div>
+                      <Label
+                        htmlFor="venue"
+                        className="block text-sm font-medium text-yellow-400 mb-1"
+                      >
+                        Venue*
+                      </Label>
+                      <Input
+                        id="venue"
+                        name="venue"
+                        type="text"
+                        value={formData.venue}
+                        onChange={handleChange}
+                        className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
+                        placeholder="Event venue"
+                      />
+                      {errors.venue && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.venue}
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   {/* Access & Participation toggles */}
                   <div>
@@ -982,7 +933,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
                       htmlFor="eventWebsite"
                       className="block text-sm font-medium text-yellow-400 mb-1"
                     >
-                      Event Website (optional)
+                      {formData.eventMode === 'online' ? 'Platform Link (e.g. Google Meet, Zoom)' : 'Event Website (optional)'}
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

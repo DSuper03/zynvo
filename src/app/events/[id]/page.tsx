@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { CustomAnswer, EventByIdResponse, respnseUseState } from '@/types/global-Interface';
+import { CustomAnswer, CustomQuestion, EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios, { isAxiosError } from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -557,12 +557,19 @@ const Eventid = () => {
       paymentAmount: data.paymentAmount
     }, null, 2));
 
+    if (data.customQuestions && data.customQuestions.length > 0) {
+      setShowCustomQuestionsModal(true);
+      return;
+    }
+
+    proceedWithPaymentOrRegistration();
+  };
+
+  const proceedWithPaymentOrRegistration = (customAnswers?: CustomAnswer[]) => {
     // If it's a paid event, show payment modal instead of registering immediately
     // Check multiple indicators: isPaidEvent flag, paymentQRCode, or paymentAmount > 0
-    // Use the same logic as the UI check (line 533) for consistency
     const hasQRCode = !!data.paymentQRCode && data.paymentQRCode.trim().length > 0;
     const hasPaymentAmount = data.paymentAmount !== undefined && data.paymentAmount !== null && Number(data.paymentAmount) > 0;
-    // Check isPaidEvent first (same as UI), then fallback to other indicators
     const isPaidEvent = Boolean(data.isPaidEvent) || hasQRCode || hasPaymentAmount;
     
     console.log('Check results:');
@@ -573,13 +580,40 @@ const Eventid = () => {
     
     if (isPaidEvent) {
       console.log('✓ Showing payment modal...');
+      if (customAnswers) {
+        setPendingCustomAnswers(customAnswers);
+      }
       setShowPaymentModal(true);
       return;
     }
 
     console.log('✗ Proceeding with direct registration (free event)');
     // For free events, proceed with registration
-    await completeRegistration(undefined, customAnswers);
+    completeRegistration(undefined, customAnswers);
+  };
+
+  const handleCustomQuestionsSubmit = () => {
+    if (!data.customQuestions) return;
+
+    const answers: CustomAnswer[] = [];
+    
+    // Validation
+    for (const q of data.customQuestions) {
+      const questionId = q.id || '';
+      if (!questionId) continue;
+      
+      const val = customQuestionsForm[questionId];
+      if (q.required && (!val || val.trim() === '')) {
+        toast.error(`Please answer the required question: ${q.label}`);
+        return;
+      }
+      if (val && val.trim() !== '') {
+        answers.push({ questionId: questionId, answer: val });
+      }
+    }
+
+    setShowCustomQuestionsModal(false);
+    proceedWithPaymentOrRegistration(answers);
   };
 
   const completeRegistration = async (paymentProofUrl?: string, customAnswers?: CustomAnswer[]) => {
@@ -589,7 +623,7 @@ const Eventid = () => {
       const bodyData = { 
         eventId: id,
         ...(paymentProofUrl && { paymentProofUrl }),
-        ...(customAnswers?.length && { customAnswers }),
+        ...(customAnswers && customAnswers.length > 0 && { customAnswers })
       };
       console.log('Sending registration request with body:', bodyData);
 
@@ -640,32 +674,6 @@ const Eventid = () => {
   const handlePaymentProofSubmitted = async (proofUrl: string) => {
     setShowPaymentModal(false);
     await completeRegistration(proofUrl, pendingCustomAnswers);
-  };
-
-  const handleCustomQuestionsSubmit = async () => {
-    const questions = data.customQuestions || [];
-    const missingRequired = questions.find((question, index) => {
-      const questionId = question.id || String(index);
-      return question.required && !customQuestionsForm[questionId]?.trim();
-    });
-
-    if (missingRequired) {
-      toast.error(`Please answer: ${missingRequired.label}`);
-      return;
-    }
-
-    const answers = questions
-      .map((question, index) => {
-        const questionId = question.id || String(index);
-        return {
-          questionId,
-          answer: customQuestionsForm[questionId]?.trim() || '',
-        };
-      })
-      .filter((answer) => answer.answer);
-
-    setShowCustomQuestionsModal(false);
-    await startRegistrationAfterQuestions(answers);
   };
 
   const handleCopyInviteLink = async () => {
