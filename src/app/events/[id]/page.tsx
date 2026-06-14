@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { CustomAnswer, EventByIdResponse, respnseUseState } from '@/types/global-Interface';
+import { CustomAnswer, CustomQuestion, EventByIdResponse, respnseUseState } from '@/types/global-Interface';
 import axios, { isAxiosError } from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -540,12 +540,19 @@ const Eventid = () => {
       paymentAmount: data.paymentAmount
     }, null, 2));
 
+    if (data.customQuestions && data.customQuestions.length > 0) {
+      setShowCustomQuestionsModal(true);
+      return;
+    }
+
+    proceedWithPaymentOrRegistration();
+  };
+
+  const proceedWithPaymentOrRegistration = (customAnswers?: CustomAnswer[]) => {
     // If it's a paid event, show payment modal instead of registering immediately
     // Check multiple indicators: isPaidEvent flag, paymentQRCode, or paymentAmount > 0
-    // Use the same logic as the UI check (line 533) for consistency
     const hasQRCode = !!data.paymentQRCode && data.paymentQRCode.trim().length > 0;
     const hasPaymentAmount = data.paymentAmount !== undefined && data.paymentAmount !== null && Number(data.paymentAmount) > 0;
-    // Check isPaidEvent first (same as UI), then fallback to other indicators
     const isPaidEvent = Boolean(data.isPaidEvent) || hasQRCode || hasPaymentAmount;
     
     console.log('Check results:');
@@ -556,13 +563,37 @@ const Eventid = () => {
     
     if (isPaidEvent) {
       console.log('✓ Showing payment modal...');
+      if (customAnswers) {
+        setPendingCustomAnswers(customAnswers);
+      }
       setShowPaymentModal(true);
       return;
     }
 
     console.log('✗ Proceeding with direct registration (free event)');
     // For free events, proceed with registration
-    await completeRegistration();
+    completeRegistration(undefined, customAnswers);
+  };
+
+  const handleCustomQuestionsSubmit = () => {
+    if (!data.customQuestions) return;
+
+    const answers: CustomAnswer[] = [];
+    
+    // Validation
+    for (const q of data.customQuestions) {
+      const val = customQuestionsForm[q.id];
+      if (q.required && (!val || val.trim() === '')) {
+        toast.error(`Please answer the required question: ${q.label}`);
+        return;
+      }
+      if (val && val.trim() !== '') {
+        answers.push({ questionId: q.id, answer: val });
+      }
+    }
+
+    setShowCustomQuestionsModal(false);
+    proceedWithPaymentOrRegistration(answers);
   };
 
   const completeRegistration = async (paymentProofUrl?: string, customAnswers?: CustomAnswer[]) => {
@@ -571,7 +602,8 @@ const Eventid = () => {
       console.log('completeRegistration called with paymentProofUrl:', paymentProofUrl);
       const bodyData = { 
         eventId: id,
-        ...(paymentProofUrl && { paymentProofUrl })
+        ...(paymentProofUrl && { paymentProofUrl }),
+        ...(customAnswers && customAnswers.length > 0 && { customAnswers })
       };
       console.log('Sending registration request with body:', bodyData);
 
@@ -621,7 +653,7 @@ const Eventid = () => {
 
   const handlePaymentProofSubmitted = async (proofUrl: string) => {
     setShowPaymentModal(false);
-    await completeRegistration(proofUrl);
+    await completeRegistration(proofUrl, pendingCustomAnswers);
   };
 
   const handleCopyInviteLink = async () => {
@@ -1899,6 +1931,64 @@ const Eventid = () => {
           );
         }}
       />
+
+      {/* Custom Questions Modal */}
+      {showCustomQuestionsModal && data.customQuestions && data.customQuestions.length > 0 && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCustomQuestionsModal(false)} />
+          <div className="relative z-10 w-full max-w-lg bg-[#0a0a0a] border border-gray-800 rounded-xl shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-center p-4 border-b border-gray-800">
+              <div>
+                <h3 className="text-xl font-bold text-white">Additional Details</h3>
+                <p className="text-xs text-gray-400 mt-1">Please answer these questions to complete your registration</p>
+              </div>
+              <button onClick={() => setShowCustomQuestionsModal(false)} className="text-gray-400 hover:text-white p-1">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-4 overflow-y-auto space-y-4">
+              {data.customQuestions.map((q) => (
+                <div key={q.id} className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-300">
+                    {q.label} {q.required && <span className="text-red-400">*</span>}
+                  </label>
+                  
+                  {q.type === 'select' ? (
+                    <select
+                      className="w-full bg-gray-900 border border-gray-700 text-white p-2 rounded focus:border-yellow-500 focus:outline-none text-sm"
+                      value={customQuestionsForm[q.id] || ''}
+                      onChange={(e) => setCustomQuestionsForm(prev => ({ ...prev, [q.id]: e.target.value }))}
+                    >
+                      <option value="" disabled>Select an option</option>
+                      {q.options?.map((opt, i) => (
+                        <option key={i} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type={q.type === 'url' ? 'url' : 'text'}
+                      className="w-full bg-gray-900 border border-gray-700 text-white p-2 rounded focus:border-yellow-500 focus:outline-none text-sm"
+                      placeholder={q.type === 'url' ? 'https://...' : 'Your answer...'}
+                      value={customQuestionsForm[q.id] || ''}
+                      onChange={(e) => setCustomQuestionsForm(prev => ({ ...prev, [q.id]: e.target.value }))}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="p-4 border-t border-gray-800 flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowCustomQuestionsModal(false)} className="bg-transparent border-gray-700 text-white hover:bg-gray-800">
+                Cancel
+              </Button>
+              <Button onClick={handleCustomQuestionsSubmit} className="bg-yellow-500 hover:bg-yellow-600 text-black font-medium">
+                Continue
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Payment Proof Modal for Paid Events */}
       <PaymentProofModal
