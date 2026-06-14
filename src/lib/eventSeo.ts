@@ -19,6 +19,7 @@ export interface EventSeoInput {
   eventUrl?: string;
   prizes?: string;
   contactEmail?: string;
+  venue?: string;
 }
 
 export interface EventSeoOutput {
@@ -88,6 +89,7 @@ export function generateEventSeo(input: EventSeoInput): EventSeoOutput {
     eventUrl,
     prizes,
     contactEmail,
+    venue,
   } = input;
 
   const city = input.city || cityFromCollege(collegeName);
@@ -154,7 +156,7 @@ export function generateEventSeo(input: EventSeoInput): EventSeoOutput {
       }
     : {
         "@type": "Place",
-        name: collegeName,
+        name: venue || collegeName,
         address: {
           "@type": "PostalAddress",
           name: collegeName,

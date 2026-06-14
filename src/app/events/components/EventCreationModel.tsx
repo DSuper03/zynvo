@@ -79,6 +79,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     paymentQRCode: '',
     paymentAmount: 0,
     maxParticipants: '',
+    customQuestions: [],
   });
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -336,6 +337,18 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         if (!formData.maxTeamSize)
           newErrors.maxTeamSize = 'Maximum team size is required';
         if (!formData.venue?.trim()) newErrors.venue = 'Venue is required';
+        formData.customQuestions?.forEach((question, index) => {
+          if (!question.label.trim()) {
+            newErrors[`customQuestion.${index}.label`] = 'Question label is required';
+          }
+          if (
+            question.type === 'select' &&
+            !question.options?.some((option) => option.trim())
+          ) {
+            newErrors[`customQuestion.${index}.options`] =
+              'Add at least one option for dropdown questions';
+          }
+        });
         // Validate paid event fields
         if (formData.isPaidEvent) {
           if (!qrCodeImg) newErrors.paymentQRCode = 'QR code is required for paid events';
@@ -510,6 +523,21 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       payload.maxParticipants = null;
     } else {
       payload.maxParticipants = parseInt(payload.maxParticipants.toString(), 10);
+    }
+    payload.maxTeamSize = parseInt(payload.maxTeamSize.toString(), 10);
+    payload.customQuestions = (formData.customQuestions || [])
+      .map((question, index) => ({
+        ...question,
+        label: question.label.trim(),
+        options:
+          question.type === 'select'
+            ? (question.options || []).map((option) => option.trim()).filter(Boolean)
+            : [],
+        sortOrder: index,
+      }))
+      .filter((question) => question.label);
+    if (!payload.customQuestions.length) {
+      delete payload.customQuestions;
     }
 
     // Map isPaidEvent to isPaid for backend
@@ -869,7 +897,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                         <SelectItem value="cultural">Cultural</SelectItem>
                         <SelectItem value="sports">Sports</SelectItem>
                         <SelectItem value="technical">Technical</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="others">Other</SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.eventType && (
@@ -1082,6 +1110,178 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                     <p className="mt-1 text-xs text-gray-400">
                       Share WhatsApp group link with registered participants
                     </p>
+                  </div>
+
+                  <div className="border-t border-gray-800 pt-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
+                      <div>
+                        <p className="text-sm font-medium text-yellow-400">
+                          Registration Questions (Optional)
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Ask participants for extra details during registration.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={addCustomQuestion}
+                        className="bg-gray-800 hover:bg-gray-700 text-yellow-400 border border-gray-700"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Add Question
+                      </Button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <button
+                        type="button"
+                        onClick={() => addPrebuiltQuestion('GitHub profile', 'url')}
+                        className="text-xs px-3 py-1.5 rounded-full bg-gray-800 text-gray-300 hover:text-yellow-400 border border-gray-700"
+                      >
+                        GitHub profile
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => addPrebuiltQuestion('Portfolio / LinkedIn', 'url')}
+                        className="text-xs px-3 py-1.5 rounded-full bg-gray-800 text-gray-300 hover:text-yellow-400 border border-gray-700"
+                      >
+                        Portfolio / LinkedIn
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          addPrebuiltQuestion('Experience level', 'select', [
+                            'Beginner',
+                            'Intermediate',
+                            'Advanced',
+                          ])
+                        }
+                        className="text-xs px-3 py-1.5 rounded-full bg-gray-800 text-gray-300 hover:text-yellow-400 border border-gray-700"
+                      >
+                        Experience level
+                      </button>
+                    </div>
+
+                    {(formData.customQuestions || []).length > 0 && (
+                      <div className="space-y-3">
+                        {formData.customQuestions?.map((question, index) => (
+                          <div
+                            key={question.id || index}
+                            className="rounded-lg border border-gray-700 bg-gray-800/50 p-4 space-y-3"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-center gap-2 text-xs text-gray-400">
+                                <GripVertical className="w-4 h-4" />
+                                Question {index + 1}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeCustomQuestion(index)}
+                                className="text-red-400 hover:text-red-300"
+                                aria-label="Remove custom question"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+
+                            <div>
+                              <Label
+                                htmlFor={`custom-question-${index}`}
+                                className="block text-sm font-medium text-yellow-400 mb-1"
+                              >
+                                Question Label*
+                              </Label>
+                              <Input
+                                id={`custom-question-${index}`}
+                                value={question.label}
+                                onChange={(e) =>
+                                  updateCustomQuestion(index, 'label', e.target.value)
+                                }
+                                className="w-full bg-gray-900 border border-gray-700 focus:border-yellow-500 text-white"
+                                placeholder="What do you want to ask?"
+                              />
+                              {errors[`customQuestion.${index}.label`] && (
+                                <p className="mt-1 text-sm text-red-500">
+                                  {errors[`customQuestion.${index}.label`]}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <Label className="block text-sm font-medium text-yellow-400 mb-1">
+                                  Answer Type
+                                </Label>
+                                <Select
+                                  value={question.type}
+                                  onValueChange={(value: 'text' | 'select' | 'url') =>
+                                    updateCustomQuestion(index, 'type', value)
+                                  }
+                                >
+                                  <SelectTrigger className="bg-gray-900 border border-gray-700 focus:border-yellow-500 text-white">
+                                    <SelectValue placeholder="Select answer type" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-black text-white">
+                                    <SelectItem value="text">Text</SelectItem>
+                                    <SelectItem value="url">URL</SelectItem>
+                                    <SelectItem value="select">Dropdown</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateCustomQuestion(index, 'required', !question.required)
+                                }
+                                className={`mt-6 flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
+                                  question.required
+                                    ? 'border-yellow-500 bg-yellow-500/10'
+                                    : 'border-gray-700 bg-gray-900 hover:border-gray-600'
+                                }`}
+                              >
+                                <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border ${question.required ? 'bg-yellow-500 border-yellow-500' : 'border-gray-600'}`}>
+                                  {question.required && <Check className="w-3 h-3 text-black" />}
+                                </div>
+                                <span className="text-sm text-gray-300">Required</span>
+                              </button>
+                            </div>
+
+                            {question.type === 'select' && (
+                              <div>
+                                <Label
+                                  htmlFor={`custom-question-options-${index}`}
+                                  className="block text-sm font-medium text-yellow-400 mb-1"
+                                >
+                                  Dropdown Options*
+                                </Label>
+                                <Input
+                                  id={`custom-question-options-${index}`}
+                                  value={(question.options || []).join(', ')}
+                                  onChange={(e) =>
+                                    updateCustomQuestion(
+                                      index,
+                                      'options',
+                                      e.target.value.split(',').map((option) => option.trim())
+                                    )
+                                  }
+                                  className="w-full bg-gray-900 border border-gray-700 focus:border-yellow-500 text-white"
+                                  placeholder="Beginner, Intermediate, Advanced"
+                                />
+                                <p className="mt-1 text-xs text-gray-400">
+                                  Separate options with commas.
+                                </p>
+                                {errors[`customQuestion.${index}.options`] && (
+                                  <p className="mt-1 text-sm text-red-500">
+                                    {errors[`customQuestion.${index}.options`]}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Fee — single Free / Paid selector */}

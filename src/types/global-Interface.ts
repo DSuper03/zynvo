@@ -462,6 +462,7 @@ export interface respnseUseState {
   contactEmail: string;
   contactPhone: string;
   university: string;
+  venue?: string;
   collegeStudentsOnly: boolean;
   applicationStatus: string;
   posterUrl?: string;

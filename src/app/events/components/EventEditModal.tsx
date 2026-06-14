@@ -788,7 +788,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
                         <SelectItem value="cultural">Cultural</SelectItem>
                         <SelectItem value="sports">Sports</SelectItem>
                         <SelectItem value="technical">Technical</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="others">Other</SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.eventType && (

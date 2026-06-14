@@ -104,6 +104,7 @@ const Eventid = () => {
     contactEmail: '',
     contactPhone: '',
     university: '',
+    venue: '',
     collegeStudentsOnly: false,
     applicationStatus: 'open',
     posterUrl: '',
@@ -116,6 +117,7 @@ const Eventid = () => {
     paymentAmount: 0,
     maxParticipants: undefined,
     attendeesCount: 0,
+    customQuestions: [],
   });
   const router = useRouter();
   const eventInvitePath = `/events/${id}`;
@@ -462,6 +464,7 @@ const Eventid = () => {
             endDate: res.data.response.endDate || '',
             prizes: res.data.response.prizes || '',
             university: res.data.response.university || '',
+            venue: res.data.response.Venue || (res.data.response as any).venue || '',
             collegeStudentsOnly: res.data.response.collegeStudentsOnly ?? false,
             contactEmail: res.data.response.contactEmail || '',
             contactPhone: res.data.response.contactPhone || '',
@@ -478,6 +481,7 @@ const Eventid = () => {
             paymentAmount: paymentAmount,
             maxParticipants: res.data.response.maxParticipants,
             attendeesCount: (res.data.response as any)._count?.attendees ?? 0,
+            customQuestions: res.data.response.customQuestions || [],
           });
           // Store TeamSize for team section
           setEventTeamSize(res.data.response.TeamSize || 1);
@@ -528,6 +532,19 @@ const Eventid = () => {
       }
       return;
     }
+
+    if (data.customQuestions?.length) {
+      setCustomQuestionsForm({});
+      setPendingCustomAnswers([]);
+      setShowCustomQuestionsModal(true);
+      return;
+    }
+
+    await startRegistrationAfterQuestions();
+  };
+
+  const startRegistrationAfterQuestions = async (customAnswers: CustomAnswer[] = []) => {
+    setPendingCustomAnswers(customAnswers);
 
     // Debug: Log all payment-related data
     console.log('=== Registration Debug ===');
@@ -582,13 +599,16 @@ const Eventid = () => {
     
     // Validation
     for (const q of data.customQuestions) {
-      const val = customQuestionsForm[q.id];
+      const questionId = q.id || '';
+      if (!questionId) continue;
+      
+      const val = customQuestionsForm[questionId];
       if (q.required && (!val || val.trim() === '')) {
         toast.error(`Please answer the required question: ${q.label}`);
         return;
       }
       if (val && val.trim() !== '') {
-        answers.push({ questionId: q.id, answer: val });
+        answers.push({ questionId: questionId, answer: val });
       }
     }
 
@@ -700,6 +720,11 @@ const Eventid = () => {
     [data.EventMode]
   );
 
+  const displayLocation = useMemo(
+    () => data.venue || (isOnline ? 'Online' : data.university),
+    [data.venue, data.university, isOnline]
+  );
+
   // Check if event has ended
   const isEventEnded = useMemo(() => {
     if (!data.endDate) return false;
@@ -767,7 +792,7 @@ const Eventid = () => {
       action: 'TEMPLATE',
       text: data.EventName || 'Event',
       details: data.description || '',
-      location: data.university || (isOnline ? 'Online' : ''),
+      location: displayLocation,
     });
     if (start && end) {
       params.set('dates', `${start}/${end}`);
@@ -776,10 +801,9 @@ const Eventid = () => {
   }, [
     data.EventName,
     data.description,
-    data.university,
+    displayLocation,
     data.startDate,
     data.endDate,
-    isOnline,
   ]);
 
   if (isLoading) {
@@ -820,6 +844,7 @@ const Eventid = () => {
         eventMode={data.EventMode}
         posterUrl={data.posterUrl}
         eventUrl={data.eventWebsite}
+        venue={displayLocation}
         prizes={data.prizes}
         contactEmail={data.contactEmail}
         pageUrl={typeof window !== 'undefined' ? window.location.href : undefined}
@@ -856,10 +881,10 @@ const Eventid = () => {
                       {formatDateRange(data.startDate, data.endDate)}
                     </span>
                   </div>
-                  {data.university && (
+                  {displayLocation && (
                     <div className="inline-flex items-center gap-2 rounded-md border border-gray-800 bg-gray-900/80 px-3 py-1.5 text-gray-200 max-w-full min-w-0">
                       <MapPin className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 shrink-0" />
-                      <span className="truncate">{data.university}</span>
+                      <span className="truncate">{displayLocation}</span>
                     </div>
                   )}
                   <div className="inline-flex items-center gap-2 rounded-md border border-gray-800 bg-gray-900/80 px-3 py-1.5 text-gray-200">
@@ -955,16 +980,16 @@ const Eventid = () => {
                         {isEventEnded && (
                           <p className="text-xs text-red-700">This event has already ended</p>
                         )}
-                        {isCollegeRestricted && data.university && (
-                          <p className="text-sm text-gray-300 max-w-xl">
-                            Organizer college:{' '}
-                            <span className="text-yellow-300">{data.university}</span>
-                            <span className="text-gray-400">
-                              {' '}
-                              · Limited to students of this college
-                            </span>
-                          </p>
-                        )}
+                        {/* {isCollegeRestricted && data.university && (
+                          // <p className="text-sm text-gray-300 max-w-xl">
+                          //   Organizer college:{' '}
+                          //   <span className="text-yellow-300">{data.university}</span>
+                          //   <span className="text-gray-400">
+                          //     {' '}
+                          //     · Limited to students of this college
+                          //   </span>
+                          // </p>
+                        )} */}
                         {isCollegeNameMissing && (
                           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-300">
                             <span>
@@ -1283,7 +1308,7 @@ const Eventid = () => {
                     <p className="text-xs text-gray-400 uppercase tracking-wide">
                       Location
                     </p>
-                    <p className="text-white">{data.university || 'TBD'}</p>
+                    <p className="text-white">{displayLocation || 'TBD'}</p>
                   </div>
                   <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-4 space-y-1">
                     <p className="text-xs text-gray-400 uppercase tracking-wide">
@@ -1932,64 +1957,6 @@ const Eventid = () => {
         }}
       />
 
-      {/* Custom Questions Modal */}
-      {showCustomQuestionsModal && data.customQuestions && data.customQuestions.length > 0 && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCustomQuestionsModal(false)} />
-          <div className="relative z-10 w-full max-w-lg bg-[#0a0a0a] border border-gray-800 rounded-xl shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="flex justify-between items-center p-4 border-b border-gray-800">
-              <div>
-                <h3 className="text-xl font-bold text-white">Additional Details</h3>
-                <p className="text-xs text-gray-400 mt-1">Please answer these questions to complete your registration</p>
-              </div>
-              <button onClick={() => setShowCustomQuestionsModal(false)} className="text-gray-400 hover:text-white p-1">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-4 overflow-y-auto space-y-4">
-              {data.customQuestions.map((q) => (
-                <div key={q.id} className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-300">
-                    {q.label} {q.required && <span className="text-red-400">*</span>}
-                  </label>
-                  
-                  {q.type === 'select' ? (
-                    <select
-                      className="w-full bg-gray-900 border border-gray-700 text-white p-2 rounded focus:border-yellow-500 focus:outline-none text-sm"
-                      value={customQuestionsForm[q.id] || ''}
-                      onChange={(e) => setCustomQuestionsForm(prev => ({ ...prev, [q.id]: e.target.value }))}
-                    >
-                      <option value="" disabled>Select an option</option>
-                      {q.options?.map((opt, i) => (
-                        <option key={i} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      type={q.type === 'url' ? 'url' : 'text'}
-                      className="w-full bg-gray-900 border border-gray-700 text-white p-2 rounded focus:border-yellow-500 focus:outline-none text-sm"
-                      placeholder={q.type === 'url' ? 'https://...' : 'Your answer...'}
-                      value={customQuestionsForm[q.id] || ''}
-                      onChange={(e) => setCustomQuestionsForm(prev => ({ ...prev, [q.id]: e.target.value }))}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="p-4 border-t border-gray-800 flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setShowCustomQuestionsModal(false)} className="bg-transparent border-gray-700 text-white hover:bg-gray-800">
-                Cancel
-              </Button>
-              <Button onClick={handleCustomQuestionsSubmit} className="bg-yellow-500 hover:bg-yellow-600 text-black font-medium">
-                Continue
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Payment Proof Modal for Paid Events */}
       <PaymentProofModal
         isOpen={showPaymentModal}
@@ -2000,6 +1967,92 @@ const Eventid = () => {
         paymentAmount={data.paymentAmount || 0}
         isSubmitting={isRegistering}
       />
+
+      {/* Custom Questions Modal */}
+      {showCustomQuestionsModal && data.customQuestions?.length ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-lg rounded-xl border border-gray-800 bg-[#0B0B0B] p-6 shadow-xl">
+            <div className="mb-5">
+              <h2 className="text-2xl font-bold text-white">Registration Questions</h2>
+              <p className="mt-1 text-sm text-gray-400">
+                The organizer needs a few extra details before you register.
+              </p>
+            </div>
+
+            <div className="max-h-[55vh] space-y-4 overflow-y-auto pr-1">
+              {data.customQuestions.map((question, index) => {
+                const questionId = question.id || String(index);
+                const value = customQuestionsForm[questionId] || '';
+
+                return (
+                  <div key={questionId}>
+                    <label
+                      htmlFor={`custom-answer-${questionId}`}
+                      className="mb-1 block text-sm font-medium text-yellow-400"
+                    >
+                      {question.label}
+                      {question.required ? ' *' : ''}
+                    </label>
+
+                    {question.type === 'select' ? (
+                      <select
+                        id={`custom-answer-${questionId}`}
+                        value={value}
+                        onChange={(e) =>
+                          setCustomQuestionsForm((prev) => ({
+                            ...prev,
+                            [questionId]: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-white outline-none focus:border-yellow-500"
+                      >
+                        <option value="">Select an option</option>
+                        {(question.options || []).map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        id={`custom-answer-${questionId}`}
+                        type={question.type === 'url' ? 'url' : 'text'}
+                        value={value}
+                        onChange={(e) =>
+                          setCustomQuestionsForm((prev) => ({
+                            ...prev,
+                            [questionId]: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-white outline-none focus:border-yellow-500"
+                        placeholder={question.type === 'url' ? 'https://...' : 'Your answer'}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowCustomQuestionsModal(false)}
+                className="rounded-lg bg-gray-800 px-4 py-2 font-semibold text-gray-300 transition-colors hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleCustomQuestionsSubmit}
+                disabled={isRegistering}
+                className="rounded-lg bg-yellow-500 px-4 py-2 font-semibold text-black transition-colors hover:bg-yellow-400 disabled:opacity-70"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* Achievement Celebration Modal */}
       <AchievementCelebration
