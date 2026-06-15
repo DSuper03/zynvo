@@ -39,6 +39,7 @@ import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
 import { useRouter } from 'next/navigation';
 import AchievementUnlockModal from '@/components/AchievementUnlockModal';
+
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -53,7 +54,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [qrCodeImg, setQrCodeImg] = useState<File | null>(null);
   const [qrCodePreviewUrl, setQrCodePreviewUrl] = useState('');
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<EventFormData>({
+  
+  // Added acceptanceBased to the initial state
+  const [formData, setFormData] = useState<EventFormData & { acceptanceBased?: boolean }>({
     eventMode: '',
     eventName: '',
     university: '',
@@ -65,6 +68,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     collegeStudentsOnly: false,
     noParticipationFee: false,
     coreTeamOnly: false,
+    acceptanceBased: false, // New Field Added Here
     eventWebsite: '',
     eventStartDate: '',
     eventEndDate: '',
@@ -81,6 +85,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     maxParticipants: '',
     customQuestions: [],
   });
+
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -101,13 +106,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     const day = String(today.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
+
   useEffect(() => {
     const tok = localStorage.getItem('token');
     if (tok) setToken(tok);
     else {
        toast('Login required', {
           action: {
-            
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),
           },
@@ -318,7 +323,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   // Validate form based on current step
   const validateStep = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData) return false; // Add this check
+    if (!formData) return false;
 
     switch (step) {
       case 1:
@@ -333,7 +338,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         break;
 
       case 2:
-        // Don't repeat step 1 validations here - only validate step 2 fields
         if (!formData.maxTeamSize)
           newErrors.maxTeamSize = 'Maximum team size is required';
         if (!formData.venue?.trim()) newErrors.venue = 'Venue is required';
@@ -349,7 +353,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
               'Add at least one option for dropdown questions';
           }
         });
-        // Validate paid event fields
         if (formData.isPaidEvent) {
           if (!qrCodeImg) newErrors.paymentQRCode = 'QR code is required for paid events';
           if (!formData.paymentAmount || formData.paymentAmount <= 0) 
@@ -366,7 +369,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        // Validate start date is not in the past
         if (formData.eventStartDate) {
           const startDate = new Date(formData.eventStartDate);
           if (startDate < today) {
@@ -374,7 +376,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           }
         }
         
-        // Validate application start date is not in the past
         if (formData.applicationStartDate) {
           const appStartDate = new Date(formData.applicationStartDate);
           if (appStartDate < today) {
@@ -382,7 +383,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           }
         }
         
-        // Validate end date is not before start date
         if (formData.eventStartDate && formData.eventEndDate) {
           const startDate = new Date(formData.eventStartDate);
           const endDate = new Date(formData.eventEndDate);
@@ -391,7 +391,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           }
         }
         
-        // Validate application end date is not before application start date
         if (formData.applicationStartDate && formData.applicationEndDate) {
           const appStartDate = new Date(formData.applicationStartDate);
           const appEndDate = new Date(formData.applicationEndDate);
@@ -407,7 +406,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         break;
 
       case 4:
-        // Step 4 validation - Image is required
         if (!img) {
           newErrors.image = 'Event image is required';
         }
@@ -417,7 +415,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  // Navigate to next step
+  
   const nextStep = () => {
     if (validateStep()) {
       setStep((prev) => Math.min(prev + 1, 4));
@@ -427,12 +425,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     }
   };
 
-  // Navigate to previous step
   const prevStep = () => {
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
-  // Submit the form
   const handleSubmit = async () => {
     if (!token) {
       toast('please login or signup');
@@ -446,7 +442,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
     setIsSubmitting(true);
 
-    // Server-side date conflict check
     try {
       const dateCheckRes = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/checkEventDates`,
@@ -475,7 +470,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     } catch {
       // Non-blocking: if the check endpoint fails, proceed with creation
     }
-  const userUniAndClub = `${lockedUniversity}-${clubName}`;
+    
     let imageLink = '';
     if (!img) {
       toast('you are required to upload a poster');
@@ -496,7 +491,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       toast('Image uploaded');
     }
 
-    // Handle QR code upload for paid events
     let qrCodeLink = '';
     if (formData.isPaidEvent && qrCodeImg) {
       const maxBytes = 2 * 1024 * 1024;
@@ -513,7 +507,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       toast('Payment QR code uploaded');
     }
 
-    // Build payload - only include paid event fields if it's a paid event
     const payload: any = {
       ...formData,
       image: imageLink,
@@ -540,22 +533,18 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       delete payload.customQuestions;
     }
 
-    // Map isPaidEvent to isPaid for backend
     if (formData.isPaidEvent) {
       payload.isPaid = true;
       payload.paymentQRCode = qrCodeLink;
       payload.paymentAmount = formData.paymentAmount;
     } else {
       payload.isPaid = false;
-      // For free events, ensure these are not sent or are null
       delete payload.isPaidEvent;
       delete payload.paymentQRCode;
       delete payload.paymentAmount;
     }
-    // Remove the frontend-only field
     delete payload.isPaidEvent;
 
-    // Submit with the correct image link and QR code link
     const createEvent = await axios.post<{
       msg: string;
       id: string;
@@ -570,12 +559,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     );
 
     if (createEvent.status === 201 || createEvent.status === 200  ) {
-      // Update event count
       const previousCount = eventCount;
       const newCount = previousCount + 1;
       setEventCount(newCount);
       
-      // Check for achievement unlocks (crossing thresholds)
       let badgeUnlocked = null;
       if (previousCount < 20 && newCount >= 20) {
         badgeUnlocked = {
@@ -607,7 +594,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       setIsSubmitting(false);
       
       if (!badgeUnlocked) {
-        // Close after a short delay when no achievement modal is shown
         setTimeout(() => {
           onClose();
         }, 500);
@@ -621,7 +607,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
  
   if (!isOpen) return null;
 
-  // Check if user has created a club
   if (!clubName) {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto bg-transparent">
@@ -753,7 +738,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                             setFormData((prev: any) => ({
                               ...prev,
                               eventMode: modeValue,
-                              // If online, set venue to "Online"
                               venue: modeValue === 'online' ? 'Online' : prev.venue,
                             }));
                             if (errors.eventMode) {
@@ -798,29 +782,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       </p>
                     )}
                   </div>
-
-                { /* <div>
-                    <label
-                      htmlFor="university"
-                      className="block text-sm font-medium text-yellow-400 mb-1"
-                    >
-                      University/College* (locked to your club)
-                    </label>
-                    <input
-                      id="university"
-                      name="university"
-                      type="text"
-                      value={`${lockedUniversity}${clubName ? `-${clubName}` : ''}` || formData.university}
-                      readOnly
-                      className="w-full bg-gray-800 border border-gray-700 text-white px-4 py-2 rounded-lg opacity-80 cursor-not-allowed"
-                    />
-                    {errors.university && (
-                      <p className="mt-1 text-sm text-red-500">
-                        {errors.university}
-                      </p>
-                    )}
-                  </div>
-                  */}
 
                   <div>
                     <label
@@ -1032,6 +993,27 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                             Core team only
                           </p>
                           <p className="text-xs text-gray-500">Internal club members</p>
+                        </div>
+                      </button>
+
+                      {/* Approval Required (Acceptance Based) */}
+                      <button
+                        type="button"
+                        onClick={() => setFormData((prev: any) => ({ ...prev, acceptanceBased: !prev.acceptanceBased }))}
+                        className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
+                          formData.acceptanceBased
+                            ? 'border-yellow-500 bg-yellow-500/10'
+                            : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border ${formData.acceptanceBased ? 'bg-yellow-500 border-yellow-500' : 'border-gray-600'}`}>
+                          {formData.acceptanceBased && <Check className="w-3 h-3 text-black" />}
+                        </div>
+                        <div>
+                          <p className={`text-sm font-medium ${formData.acceptanceBased ? 'text-yellow-400' : 'text-gray-300'}`}>
+                            Approval Required
+                          </p>
+                          <p className="text-xs text-gray-500">Manually accept participants</p>
                         </div>
                       </button>
                     </div>
@@ -1784,7 +1766,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       ))}
                     </div>
 
-                    {(formData.collegeStudentsOnly || formData.coreTeamOnly) && (
+                    {(formData.collegeStudentsOnly || formData.coreTeamOnly || formData.acceptanceBased) && (
                       <div className="px-5 py-3 border-t border-gray-700 flex gap-2 flex-wrap">
                         {formData.collegeStudentsOnly && (
                           <span className="text-xs bg-yellow-500/15 text-yellow-400 border border-yellow-500/20 px-2 py-0.5 rounded-full">
@@ -1794,6 +1776,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                         {formData.coreTeamOnly && (
                           <span className="text-xs bg-yellow-500/15 text-yellow-400 border border-yellow-500/20 px-2 py-0.5 rounded-full">
                             Core team only
+                          </span>
+                        )}
+                        {formData.acceptanceBased && (
+                          <span className="text-xs bg-yellow-500/15 text-yellow-400 border border-yellow-500/20 px-2 py-0.5 rounded-full">
+                            Approval Required
                           </span>
                         )}
                       </div>
