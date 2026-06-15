@@ -94,6 +94,8 @@ const Eventid = () => {
   const params = useParams();
   const id = params.id as string;
 
+  const [registrationStatus, setRegistrationStatus] = useState<string>('');
+
   const [data, setData] = useState<respnseUseState & { attendeesCount?: number }>({
     EventName: '',
     description: '',
@@ -630,6 +632,7 @@ const Eventid = () => {
       const resp = await axios.post<{
         msg: string;
         ForkedUpId: string;
+        approvalStatus : string;
       }>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/registerEvent`,
         bodyData,
@@ -639,6 +642,10 @@ const Eventid = () => {
           },
         }
       );
+
+      setRegistrationStatus(resp.data.approvalStatus || '');
+      console.log('Registration response status:', resp.data.approvalStatus);
+
 
       if (resp && resp.status === 200) {
         console.log('Registration successful');
@@ -932,31 +939,38 @@ const Eventid = () => {
                 {/* Action Buttons — stack on narrow screens */}
                 <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2">
 
-                  {isFounder && (
-                    <>
-                      <Button
-                        onClick={() => setIsEditModalOpen(true)}
-                        className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
-                      >
-                        Edit Event
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
-                            handleDeleteEvent();
-                          }
-                        }}
-                        className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto"
-                      >
-                        Delete Event
-                      </Button>
-                    </>
-                  )}
+                 {isFounder && (
+  <>
+    <Button
+      onClick={() => router.push(`/events/${id}/queue`)}
+      className="min-h-11 rounded-lg px-5 py-2.5 font-bold bg-yellow-500 hover:bg-yellow-400 text-black w-full sm:w-auto flex items-center justify-center gap-2"
+    >
+      <CheckSquare className="w-4 h-4" />
+      Approval Queue
+    </Button>
+    <Button
+      onClick={() => setIsEditModalOpen(true)}
+      className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
+    >
+      Edit Event
+    </Button>
+    <Button
+      onClick={() => {
+        if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+          handleDeleteEvent();
+        }
+      }}
+      className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto"
+    >
+      Delete Event
+    </Button>
+  </>
+)}
                   {signedin ? (
                     isUserAttendingEvent() ? (
                       <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 rounded-lg font-medium">
                         <CheckSquare className="w-4 h-4" />
-                        <span>You're attending</span>
+                        <span>{registrationStatus === "confirmed" ? "You're In!" : registrationStatus === "pending" ? "Almost There!" : "Yayyyyy!"}</span>
                       </div>
                     ) : (
                       <>
@@ -2059,6 +2073,7 @@ const Eventid = () => {
         isOpen={showCelebration}
         onClose={() => setShowCelebration(false)}
         eventName={data.EventName || 'Event'}
+        status={registrationStatus}
       />
 
       {/* WhatsApp Group Modal */}
