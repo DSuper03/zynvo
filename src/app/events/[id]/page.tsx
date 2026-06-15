@@ -352,8 +352,8 @@ const Eventid = () => {
 
     async function checkFounderStatus() {
       try {
-        const checkFounder = await axios.get<{ msg: string }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isFounder?id=${id}`,
+        const checkFounder = await axios.get<{ msg: string , founder : boolean }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isClubAdmin`,
           {
             headers: {
               authorization: `Bearer ${token}`,
@@ -363,9 +363,11 @@ const Eventid = () => {
 
         if (
           checkFounder.status === 200 &&
-          checkFounder.data.msg === 'identified'
+          checkFounder.data.msg === 'Fetched'
         ) {
-          setIsFounder(true);
+          setIsFounder(checkFounder.data.founder);
+        } else {
+          setIsFounder(false);
         }
       } catch (error) {
         console.error('Error checking founder status:', error);
