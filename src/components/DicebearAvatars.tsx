@@ -1,17 +1,22 @@
 // DiceBearAvatar.js
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { FiRefreshCw } from 'react-icons/fi';
+import Image from 'next/image';
 
 const DiceBearAvatar = ({
   name,
   onAvatarChange,
 }: {
-  name: any;
-  onAvatarChange: any;
+  name: string;
+  onAvatarChange?: (url: string) => void;
 }) => {
   const [avatarStyle, setAvatarStyle] = useState('lorelei');
-  const [randomSeed, setRandomSeed] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [randomSeed, setRandomSeed] = useState(() =>
+    Math.random().toString(36).substring(2, 10)
+  );
+  const [useNameAsSeed, setUseNameAsSeed] = useState(true);
+  const onAvatarChangeRef = useRef(onAvatarChange);
+  const safeName = typeof name === 'string' ? name : String(name ?? '');
 
   // Available DiceBear styles that work well with your theme
   const avatarStyles = [
@@ -28,31 +33,30 @@ const DiceBearAvatar = ({
     return Math.random().toString(36).substring(2, 10);
   }, []);
 
-  // Initialize random seed only once when component mounts
+  // Keep the latest parent callback without making avatar generation depend on its identity.
   useEffect(() => {
-    if (!randomSeed) {
-      setRandomSeed(generateRandomSeed());
-    }
-  }, [generateRandomSeed, randomSeed]);
+    onAvatarChangeRef.current = onAvatarChange;
+  }, [onAvatarChange]);
 
-  // Update the avatar URL when name, seed, or style changes
+  const avatarUrl = useMemo(() => {
+    const seed =
+      useNameAsSeed && safeName.trim()
+        ? safeName.trim()
+        : randomSeed || 'default';
+
+    return `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${encodeURIComponent(seed)}`;
+  }, [safeName, randomSeed, avatarStyle, useNameAsSeed]);
+
+  // Pass the avatar URL back only when the generated URL actually changes.
   useEffect(() => {
-    // Only proceed if we have a randomSeed (prevents initial render issues)
-    if (!randomSeed && !name.trim()) return;
-
-    const seed = name.trim() || randomSeed;
-    const url = `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${encodeURIComponent(seed)}`;
-    setAvatarUrl(url);
-
-    // Pass the avatar URL back to the parent component
-    if (onAvatarChange) {
-      onAvatarChange(url);
-    }
-  }, [name, randomSeed, avatarStyle]); // Removed onAvatarChange from dependencies
+    onAvatarChangeRef.current?.(avatarUrl);
+  }, [avatarUrl]);
 
   // Handle regenerate button click
   const handleRegenerate = () => {
-    setRandomSeed(generateRandomSeed());
+    const newSeed = generateRandomSeed();
+    setRandomSeed(newSeed);
+    setUseNameAsSeed(false); // Switch to random mode when regenerating
   };
 
   // Handle style change
@@ -61,47 +65,76 @@ const DiceBearAvatar = ({
   };
 
   return (
-    <div className="mb-6">
-      <label className="block text-gray-300 text-sm font-medium mb-2">
+    <div className="space-y-2">
+      <label className="block text-gray-300 text-sm font-medium">
         Profile Avatar
       </label>
-      <div className="flex items-center space-x-4">
-        <div className="relative">
+      <div className="flex items-start space-x-4">
+        <div className="relative group">
           {avatarUrl && (
-            <div className="w-20 h-20 bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center border border-gray-700">
-              <img
+            <div className="w-20 h-20 bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center border border-gray-700 group-hover:border-yellow-500 transition-colors duration-200">
+              <Image
                 src={avatarUrl}
                 alt="Profile Avatar"
-                className="w-full h-full"
+                width={80}
+                height={80}
+                className="w-full h-full object-cover"
               />
             </div>
           )}
           <button
             type="button"
             onClick={handleRegenerate}
-            className="absolute -bottom-2 -right-2 bg-yellow-500 text-black rounded-full p-2 shadow-md hover:bg-yellow-400 transition duration-300 transform hover:-translate-y-1"
-            aria-label="Regenerate avatar"
+            className="absolute -bottom-2 -right-2 bg-yellow-500 text-black rounded-full p-2 shadow-md hover:bg-yellow-400 transition duration-300 transform hover:-translate-y-1 hover:scale-110"
+            aria-label="Generate new avatar"
+            title="Generate new avatar"
           >
             <FiRefreshCw size={12} />
           </button>
         </div>
-        <div className="flex-1">
-          <select
-            value={avatarStyle}
-            onChange={handleStyleChange}
-            className="bg-gray-800 text-white w-full py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 border border-gray-700"
-          >
-            {avatarStyles.map((style) => (
-              <option key={style} value={style}>
-                {style.charAt(0).toUpperCase() +
-                  style.slice(1).replace('-', ' ')}
-              </option>
-            ))}
-          </select>
-          <p className="text-gray-400 text-xs mt-2">
-            Your avatar is generated based on your name. Click the refresh
-            button to get a different one.
-          </p>
+        <div className="flex-1 space-y-3">
+          <div>
+            <label className="block text-gray-300 text-xs font-medium mb-1">
+              Avatar Style
+            </label>
+            <select
+              value={avatarStyle}
+              onChange={handleStyleChange}
+              className="bg-gray-800 text-white w-full py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 border border-gray-700 transition-all duration-200"
+            >
+              {avatarStyles.map((style) => (
+                <option key={style} value={style}>
+                  {style.charAt(0).toUpperCase() +
+                    style.slice(1).replace('-', ' ')}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="useNameSeed"
+                checked={useNameAsSeed}
+                onChange={(e) => setUseNameAsSeed(e.target.checked)}
+                className="h-3 w-3 rounded border-gray-700 bg-gray-800 text-yellow-500 focus:ring-yellow-500"
+              />
+              <label htmlFor="useNameSeed" className="text-gray-300 text-xs">
+                Use my name for avatar generation
+              </label>
+            </div>
+            <p className="text-gray-400 text-xs">
+              {useNameAsSeed && safeName.trim()
+                ? `Avatar generated from your name: "${safeName.trim()}"`
+                : useNameAsSeed 
+                  ? "Avatar will be generated from your name when you enter it"
+                  : "Avatar generated with random seed"
+              }
+            </p>
+            <p className="text-gray-500 text-xs">
+              Click the refresh button to generate a random avatar, or change the style above.
+            </p>
+          </div>
         </div>
       </div>
     </div>

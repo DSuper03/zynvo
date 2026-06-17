@@ -3,11 +3,14 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline';
+      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://challenges.cloudflare.com https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://www.gstatic.com https://va.vercel-scripts.com;
+      script-src-elem 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://challenges.cloudflare.com https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://www.gstatic.com https://va.vercel-scripts.com;
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://via.placeholder.com https://api.dicebear.com https://example.com;
-      connect-src 'self' https://backend.zynvo.social;
+      img-src 'self' data: blob: https: http: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com https://api.qrserver.com https://img.clerk.com https://*.clerk.accounts.dev https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://*.googleusercontent.com https://ssl.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com https://s3-us-west-2.amazonaws.com https://*.tile.openstreetmap.org https://tiles.openfreemap.org https://demotiles.maplibre.org;
+      connect-src 'self' data: http://localhost:* https://backend.zynvosocial.com https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com https://zynvo-backend-1.onrender.com https://zynvo-backend.onrender.com https://zynvosocial-be-274792984950.asia-south1.run.app https://zynvo-be-31292664726.asia-south1.run.app https://*.asia-south1.run.app https://api.dicebear.com https://api.qrserver.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://www.google-analytics.com https://www.googletagmanager.com https://tiles.openfreemap.org https://demotiles.maplibre.org https://accounts.google.com https://www.googleapis.com https://oauth2.googleapis.com https://www.gstatic.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://clerk-telemetry.com;
       font-src 'self' data:;
+      frame-src 'self' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://accounts.google.com https://challenges.cloudflare.com https://www.instagram.com https://instagram.com;
+      worker-src 'self' blob:;
     `
       .replace(/\s{2,}/g, ' ')
       .trim(),
@@ -25,9 +28,25 @@ const securityHeaders = [
     value: 'strict-origin-when-cross-origin',
   },
 ];
+
+import bundleAnalyzer from '@next/bundle-analyzer';
+import withPWA from 'next-pwa';
+import { withSentryConfig } from '@sentry/nextjs';
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://zynvosocial-be-274792984950.asia-south1.run.app').replace(/\/$/, '');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Next 16 uses Turbopack by default; empty config acknowledges plugins may add webpack
+  turbopack: {},
   images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: 'https',
@@ -55,12 +74,6 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'via.placeholder.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
         hostname: 'api.dicebear.com',
         port: '',
         pathname: '/**',
@@ -76,19 +89,106 @@ const nextConfig = {
         hostname: 'i.pinimg.com',
         port: '',
         pathname: '/**',
-      },
+      },{
+        protocol: 'https',
+        hostname: 'api.qrserver.com',
+        port: '',
+        pathname: '/**',
+      },{
+        protocol: 'https',
+        hostname: 'img.clerk.com',
+        port: '',
+        pathname: '/**',
+      }
     ],
   },
-  reactStrictMode: false,
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
+  
+  reactStrictMode: true,
+  // ESLint is configured via next lint / eslint config (not in next.config in Next 15+)
   experimental: {
-    optimizeCss: true,
+    // optimizeCss requires critters package - disabled for now
+    optimizeCss: false,
+    externalDir: true,
   },
+  
+  // Performance optimizations
+  compiler: {
+    // Remove console.log in production
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
+  },
+  
+  // Tree-shake some icon libraries for smaller bundles
+  // NOTE: React Icons is left as-is because its package layout
+  // does not support per-icon deep imports like "react-icons/fa/FaSchool".
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
+    },
+    '@tabler/icons-react': {
+      transform: '@tabler/icons-react/dist/esm/icons/{{member}}',
+    },
+  },
+  
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
+  
+  // Webpack optimizations for better bundle splitting
+  webpack: (config, { dev, isServer }) => {
+    // Optimize bundle splitting in production
+    if (!dev && !isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Framework chunk (React, Next.js)
+            framework: {
+              chunks: 'all',
+              name: 'framework',
+              test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+              priority: 40,
+              enforce: true,
+            },
+            // UI libraries chunk
+            ui: {
+              name: 'ui',
+              chunks: 'all',
+              test: /[\\/]node_modules[\\/](@radix-ui|lucide-react|framer-motion)[\\/]/,
+              priority: 30,
+            },
+            // Vendor chunk
+            vendor: {
+              name: 'vendor',
+              chunks: 'all',
+              test: /node_modules/,
+              priority: 20,
+            },
+            // Common chunk
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              priority: 10,
+              reuseExistingChunk: true,
+            },
+          },
+        },
+      };
+    }
+    return config;
+  },
+  
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
+      },
+    ];
+  },
   async headers() {
     return [
       {
@@ -163,4 +263,24 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// Apply PWA configuration
+const pwaConfig = withPWA({
+  dest: "public",         // destination directory for the PWA files
+  disable: false,        // enable PWA in all environments
+  register: true,         // register the PWA service worker
+  skipWaiting: true,      // skip waiting for service worker activation
+})(nextConfig);
+
+// Apply bundle analyzer and export
+const bundledConfig = withBundleAnalyzer(pwaConfig);
+
+export default withSentryConfig(bundledConfig, {
+  // Set SENTRY_AUTH_TOKEN in CI to upload source maps.
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: !process.env.CI,
+  tunnelRoute: '/monitoring',
+  disableLogger: true,
+  widenClientFileUpload: true,
+});

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent, useCallback } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
@@ -12,36 +12,168 @@ import {
   FiEyeOff,
   FiLoader,
 } from 'react-icons/fi';
-import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
-import dotenv from 'dotenv';
+import { FaGoogle } from 'react-icons/fa';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { signinRes } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useAuth, useSignIn, useUser } from '@clerk/nextjs';
+import { getSafeErrorMessage, toSafeUserMessage } from '@/lib/safe-error';
+import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
+import {
+  consumeBrowserPostAuthRedirect,
+  persistReturnTo,
+  clearStoredReturnTo,
+  peekReturnTo,
+} from '@/lib/authReturnTo';
 
-dotenv.config();
-// const BASE_URL = process.env.BASE_URL
+
 
 export default function SignIn() {
+  const { isLoaded: authIsLoaded, signIn } = useSignIn();
+  const { isLoaded: sessionLoaded, isSignedIn } = useAuth();
+  const { user } = useUser();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+
   const [formData, setFormData] = useState({
-    name: 'zynvo',
-    collegeName: 'zynvo college',
     email: '',
     password: '',
   });
   const [rememberMe, setRem] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [signupHref, setSignupHref] = useState('/auth/signup');
+  const [suggestGoogle, setSuggestGoogle] = useState(false);
+  const [hasAppSession, setHasAppSession] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const r = params.get('returnTo');
+    if (r) persistReturnTo(r);
+    else clearStoredReturnTo();
+    setSignupHref(`/auth/signup${window.location.search}`);
+    setHasAppSession(
+      Boolean(
+        localStorage.getItem('token') &&
+          sessionStorage.getItem('activeSession') === 'true'
+      )
+    );
+  }, []);
+
+  const continueExistingSession = useCallback(() => {
+    if (hasAppSession) {
+      toast.success("You're already signed in. Redirecting...");
+      router.replace(consumeBrowserPostAuthRedirect());
+      return;
+    }
+
+    const rt = peekReturnTo();
+    const callbackQs = new URLSearchParams({ intent: 'signin' });
+    if (rt) callbackQs.set('returnTo', rt);
+    router.replace(`/auth/sso-callback?${callbackQs.toString()}`);
+  }, [hasAppSession, router]);
+
+  useEffect(() => {
+    if (!sessionLoaded || !isSignedIn) return;
+    const timeout = window.setTimeout(continueExistingSession, 900);
+    return () => window.clearTimeout(timeout);
+  }, [sessionLoaded, isSignedIn, continueExistingSession]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
+    if (name === 'email') setSuggestGoogle(false);
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
   };
+
+  const checkIfGoogleAccount = async (email: string) => {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/checkUserExists`,
+        { email }
+      );
+      if (res.data?.exists) setSuggestGoogle(true);
+    } catch {
+      // silently ignore — this is a best-effort hint
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (sessionLoaded && isSignedIn) {
+      continueExistingSession();
+      return;
+    }
+
+    if (!authIsLoaded || !sessionLoaded || !signIn) {
+      toast('Authentication loading, please wait...');
+      console.log('Clerk not loaded yet:', { authIsLoaded, signIn: !!signIn });
+      return;
+    }
+    try {
+      console.log('Starting Google OAuth redirect...');
+      const origin = window.location.origin;
+      setSsoIntentBeforeOAuth('signin');
+      const rt = peekReturnTo();
+      const callbackQs = new URLSearchParams({ intent: 'signin' });
+      if (rt) callbackQs.set('returnTo', rt);
+      const callbackPath = `/auth/sso-callback?${callbackQs.toString()}`;
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: `${origin}${callbackPath}`,
+        redirectUrlComplete: `${origin}${callbackPath}`,
+      });
+    } catch (err: any) {
+      console.error('SSO redirect error:', err);
+      console.error('SSO error details:', JSON.stringify(err?.errors, null, 2));
+      const clerkCode = err?.errors?.[0]?.code || err?.code;
+      if (clerkCode === 'session_exists' || /session.*exist/i.test(err?.message || '')) {
+        continueExistingSession();
+        return;
+      }
+      toast.error(
+        toSafeUserMessage(err?.errors?.[0]?.message, 'Failed to initiate Google sign-in')
+      );
+    }
+  };
+
+  if (sessionLoaded && isSignedIn) {
+    const displayName = user?.fullName || user?.firstName || 'there';
+    const avatarUrl = user?.imageUrl;
+
+    return (
+      <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center px-4">
+        <div className="w-full max-w-md rounded-2xl border border-yellow-500/30 bg-gray-900 p-8 text-center shadow-xl">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={displayName}
+              className="mx-auto h-20 w-20 rounded-full border-2 border-yellow-400 object-cover"
+            />
+          ) : (
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-yellow-500 text-2xl font-bold text-black">
+              {displayName.charAt(0).toUpperCase()}
+            </div>
+          )}
+          <h1 className="mt-5 text-2xl font-bold text-white">
+            You're already signed in
+          </h1>
+          <p className="mt-2 text-sm text-gray-400">
+            Continue as {displayName} to go back to Zynvo.
+          </p>
+          <button
+            type="button"
+            onClick={continueExistingSession}
+            className="mt-6 w-full rounded-lg bg-yellow-500 px-4 py-3 font-semibold text-black transition hover:bg-yellow-400"
+          >
+            Continue to Zynvo
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -52,24 +184,48 @@ export default function SignIn() {
       return;
     }
     setLoading(true);
-    setTimeout(async () => {
-      const msg = await axios.post<signinRes>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/syncWithClerk`,
         formData
       );
-      setLoading(false);
-      if (!msg) {
-        toast('Some Internal Server Error Occured');
-      } else if (msg && msg.data.msg !== 'login success') {
-        toast(msg.data.msg);
+
+      if (!res || !res.data) {
+        toast.error('Unable to sign in right now. Please try again.');
+        return;
       }
-      if (msg.data.msg == 'login success') {
-        localStorage.setItem('token', msg.data.token);
+
+      if (res.data.msg === 'login success') {
+        localStorage.setItem('token', res.data.token);
         sessionStorage.setItem('activeSession', 'true');
-        toast('login success');
-        router.push('/dashboard');
+        toast.success('Login successful!');
+        router.push(consumeBrowserPostAuthRedirect());
+        return;
       }
-    }, 5000);
+
+      toast.error(
+        toSafeUserMessage(res.data.msg, 'Login failed. Please try again.')
+      );
+    } catch (error: any) {
+      if (error.response) {
+        const errorMsg = error.response.data?.msg || 'Login failed';
+        if (error.response.status === 404) {
+          toast.error('No account found with this email. Please sign up first.');
+        } else if (errorMsg.includes('Invalid email or password')) {
+          toast.error('Invalid email or password. Please check your credentials and try again.');
+          checkIfGoogleAccount(formData.email);
+        } else {
+          toast.error(getSafeErrorMessage(error, 'Login failed. Please try again.'));
+          checkIfGoogleAccount(formData.email);
+        }
+      } else if (error.request) {
+        toast.error('Network error. Please check your connection and try again.');
+      } else {
+        toast.error(getSafeErrorMessage(error, 'An unexpected error occurred. Please try again.'));
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -158,13 +314,61 @@ export default function SignIn() {
               <p className="text-gray-400">
                 New to Zynvo?{' '}
                 <Link
-                  href="/auth/signup"
+                  href={signupHref}
                   className="text-yellow-500 hover:text-yellow-400 transition"
                 >
                   Create an account
                 </Link>
               </p>
             </div>
+
+            {/* Clerk Smart CAPTCHA mount point — required for bot protection */}
+            <div id="clerk-captcha" />
+
+            <div className="mb-6">
+              <div className="flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => handleGoogleSignIn()}
+                  className={`flex items-center justify-center w-full max-w-xs py-2 px-4 rounded-lg shadow transition ${
+                    suggestGoogle
+                      ? 'bg-white text-black ring-2 ring-yellow-400 ring-offset-2 ring-offset-[#0F0F0F] animate-pulse'
+                      : 'bg-white text-black hover:opacity-90'
+                  }`}
+                  aria-label="Sign in with Google"
+                >
+                  <FaGoogle className="mr-3" />
+                  Sign in with Google
+                </button>
+              </div>
+            </div>
+
+            {suggestGoogle && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-5 flex items-start gap-3 rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-4 py-3"
+              >
+                <FaGoogle className="mt-0.5 shrink-0 text-yellow-400" />
+                <div>
+                  <p className="text-sm font-medium text-yellow-300">
+                    Looks like you signed up with Google
+                  </p>
+                  <p className="mt-0.5 text-xs text-yellow-200/70">
+                    Your account was created via Google, so there&apos;s no
+                    password set. Use the&nbsp;
+                    <button
+                      type="button"
+                      onClick={handleGoogleSignIn}
+                      className="underline underline-offset-2 hover:text-yellow-300"
+                    >
+                      Sign in with Google
+                    </button>
+                    &nbsp;button above instead.
+                  </p>
+                </div>
+              </motion.div>
+            )}
 
             <div className="flex items-center justify-center mb-6">
               <div className="h-px bg-gray-700 flex-1"></div>
@@ -207,7 +411,7 @@ export default function SignIn() {
                   <Link
                     href="/auth/forgot-password"
                     className="text-sm text-yellow-500 hover:text-yellow-400 transition"
-                  ></Link>
+                  >Forgot Password</Link>
                 </div>
                 <div className="relative">
                   <FiLock className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
@@ -268,6 +472,19 @@ export default function SignIn() {
                   </>
                 )}
               </motion.button>
+
+              {/* Sign Up Button Below Sign In */}
+              <div className="mt-4">
+                <Link href={signupHref} className="block">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full bg-transparent text-yellow-500 border border-yellow-500 hover:bg-yellow-500 hover:text-black p-4"
+                  >
+                    Sign up
+                  </Button>
+                </Link>
+              </div>
             </form>
 
             <p className="text-gray-400 text-xs text-center mt-8">

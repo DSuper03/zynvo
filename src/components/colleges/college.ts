@@ -1,115 +1,136 @@
 export const collegesWithClubs = [
   {
-    college: 'Indian Institute of Technology Madras, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Indian Institute of Technology Madras, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'College of Engineering, Anna University, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Bethune College, Kolkata, West Bengal',
+    State: 'West Bengal',
   },
   {
-    college: 'NIT Trichy, Tiruchirappalli, Tamil nadu',
-    State: 'Tamil nadu',
+    college:'MCKV Institute of Engineering, Kolkata, West Bengal',
+    State: 'West Bengal',
   },
   {
-    college: 'Vellore Institute of Technology, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Aliah University, Kolkata, West Bengal',
+    State: 'West Bengal',
   },
   {
-    college: 'SRM Engineering College, Kanchipuram, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'St. Xavier\'s College, Kolkata, West Bengal',
+    State: 'West Bengal',
   },
   {
-    college: 'SSN College of Engineering, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'University of Calcutta, Kolkata, West Bengal',
+    State: 'West Bengal',
+  },
+  
+  {
+    college: 'College of Engineering, Anna University, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'SASTRA University, Thanjavur, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'NIT Trichy, Tiruchirappalli, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'P.S.G College of Technology, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Vellore Institute of Technology, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Thiagarajar College of Engineering, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'SRM Engineering College, Kanchipuram, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Coimbatore Institute of Technology, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'SSN College of Engineering, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Karunya Institute of Technology and Sciences, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'SASTRA University, Thanjavur, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Kumaraguru College of Technology, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'P.S.G College of Technology, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'VEL Tech, Chennai, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Thiagarajar College of Engineering, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Mepco Schlenk Engineering College, Sivakasi, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Coimbatore Institute of Technology, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Government College of Technology, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Karunya Institute of Technology and Sciences, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Hindustan Institute of Technology and Science, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Kumaraguru College of Technology, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Sri Krishna College of Engineering and Technology, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'VEL Tech, Chennai, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Kongu Engineering College, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Mepco Schlenk Engineering College, Sivakasi, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Bannari Amman Institute of Technology, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Government College of Technology, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Sona College of Technology, Salem, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Hindustan Institute of Technology and Science, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Tamil Nadu Veterinary and Animal Sciences University, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Sri Krishna College of Engineering and Technology, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'St. Joseph College Of Engineering, Kanchipuram, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Kongu Engineering College, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Saveetha Engineering College, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Bannari Amman Institute of Technology, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Sri Sairam Engineering College, Chennai, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Sona College of Technology, Salem, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'B.S. Abdur Rahman Crescent Institute of Science, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Tamil Nadu Veterinary and Animal Sciences University, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Sri Ramakrishna Engineering College, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'St. Joseph College Of Engineering, Kanchipuram, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Rajalakshmi Engineering College, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Saveetha Engineering College, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
-    college: 'Sri Venkateswara College of Engineering, Tamil nadu',
-    State: 'Tamil nadu',
+    college: 'Sri Sairam Engineering College, Chennai, Tamil Nadu',
+    State: 'Tamil Nadu',
+  },
+  {
+    college: 'B.S. Abdur Rahman Crescent Institute of Science, Tamil Nadu',
+    State: 'Tamil Nadu',
+  },
+  {
+    college: 'Sri Ramakrishna Engineering College, Tamil Nadu',
+    State: 'Tamil Nadu',
+  },
+  {
+    college: 'Rajalakshmi Engineering College, Tamil Nadu',
+    State: 'Tamil Nadu',
+  },
+  {
+    college: 'Sri Venkateswara College of Engineering, Tamil Nadu',
+    State: 'Tamil Nadu',
   },
   {
     college: 'IIT Bombay, Maharashtra',
@@ -152,7 +173,7 @@ export const collegesWithClubs = [
     State: 'Maharashtra',
   },
   {
-    college: 'Mukesh Patel School of Technology Management and, Maharashtra',
+    college: 'Mukesh Patel School of Technology Management and Engineering, Maharashtra',
     State: 'Maharashtra',
   },
   {
@@ -201,7 +222,7 @@ export const collegesWithClubs = [
     State: 'Maharashtra',
   },
   {
-    college: "MKSSS's Cummins College of Engineering for Women,, Maharashtra",
+    college: "MKSSS's Cummins College of Engineering for Women, Maharashtra",
     State: 'Maharashtra',
   },
   {
@@ -234,25 +255,25 @@ export const collegesWithClubs = [
     State: 'Maharashtra',
   },
   {
-    college: 'Indian Institute of Technology, (IITBHU)',
-    State: 'Uttar pradesh',
+    college: 'Indian Institute of Technology (BHU), Varanasi, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Amity University, Noida, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Amity University, Noida, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Aligarh Muslim University, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Aligarh Muslim University, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'MNNIT Allahabad, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'MNNIT Allahabad, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
     college:
-      'Jaypee Institute of Information Technology University, Uttar pradesh',
-    State: 'Uttar pradesh',
+      'Jaypee Institute of Information Technology University, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
     college: 'Techno Main Salt Lake',
@@ -264,125 +285,122 @@ export const collegesWithClubs = [
   },
   {
     college:
-      'Dayalbagh Educational Institute Faculty of Engineering, Agra, Uttar pradesh',
-    State: 'Uttar pradesh',
+      'Dayalbagh Educational Institute Faculty of Engineering, Agra, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Sharda University, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Sharda University, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Galgotias University, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Galgotias University, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Bennett University, Greater Noida, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Bennett University, Greater Noida, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Shiv Nadar University, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Shiv Nadar University, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Integral University, Lucknow, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Integral University, Lucknow, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'J.S. University, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'J.S. University, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'GLA University, Mathura, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'GLA University, Mathura, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Institute of Engineering and Technology, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Institute of Engineering and Technology, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Sanskriti University, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Sanskriti University, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
-  {
-    college: 'Monad University, Hapur, Uttar pradesh',
-    State: 'Uttar pradesh',
-  },
+  
   {
     college: 'Indian Institute of Information Technology, Uttar pradesh',
-    State: 'Uttar pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'IFTM University, Moradabad, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'IFTM University, Moradabad, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Shobhit University, Meerut, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Shobhit University, Meerut, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Glocal University, Saharanpur, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Glocal University, Saharanpur, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Rama University, Kanpur, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Rama University, Kanpur, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Noida Institute of Engineering and Technology, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Noida Institute of Engineering and Technology, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'ABES Engineering College, Ghaziabad, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'ABES Engineering College, Ghaziabad, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Bundelkhand Institute of Engineering & Technology, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Bundelkhand Institute of Engineering & Technology, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Harcourt Butler Technological University, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Harcourt Butler Technological University, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Rajiv Gandhi Institute of Petroleum Technology, Uttar pradesh',
-    State: 'Uttar pradesh',
+    college: 'Rajiv Gandhi Institute of Petroleum Technology, Uttar Pradesh',
+    State: 'Uttar Pradesh',
   },
   {
-    college: 'Indian Institute of Technology, Delhi ncr',
-    State: 'Delhi ncr',
+    college: 'Indian Institute of Technology Delhi, Delhi NCR',
+    State: 'Delhi NCR',
   },
   {
-    college: 'Jamia Millia Islamia University-[JMI], New Delhi, Delhi ncr',
-    State: 'Delhi ncr',
+    college: 'Jamia Millia Islamia University [JMI], New Delhi, Delhi NCR',
+    State: 'Delhi NCR',
   },
   {
-    college: 'Delhi Technological University, Delhi ncr',
-    State: 'Delhi ncr',
+    college: 'Delhi Technological University, Delhi NCR',
+    State: 'Delhi NCR',
   },
   {
-    college: 'Amity University, Noida, Delhi ncr',
-    State: 'Delhi ncr',
+    college: 'Amity University, Noida, Delhi NCR',
+    State: 'Delhi NCR',
   },
   {
-    college: 'Indraprastha Institute of Information Technology, Delhi ncr',
-    State: 'Delhi ncr',
+    college: 'Indraprastha Institute of Information Technology, Delhi NCR',
+    State: 'Delhi NCR',
   },
   {
-    college: 'Guru Gobind Singh Indraprastha University, Delhi ncr',
-    State: 'Delhi ncr',
+    college: 'Guru Gobind Singh Indraprastha University, Delhi NCR',
+    State: 'Delhi NCR',
   },
   {
-    college: 'Jaypee Institute of Information Technology University, Delhi ncr',
-    State: 'Delhi ncr',
+    college: 'Jaypee Institute of Information Technology University, Delhi NCR',
+    State: 'Delhi NCR',
   },
   {
     college:
-      'National Institute of Food Technology Entrepreneurship and, Delhi ncr',
-    State: 'Delhi ncr',
+      'National Institute of Food Technology Entrepreneurship and Management, Delhi NCR',
+    State: 'Delhi NCR',
   },
   {
-    college: 'School of Engineering and Technology, NCU, Delhi ncr',
-    State: 'Delhi ncr',
+    college: 'School of Engineering and Technology, NCU, Delhi NCR',
+    State: 'Delhi NCR',
   },
   {
     college: 'J.C. Bose University Of Science And Technology,, Delhi ncr',
@@ -513,6 +531,10 @@ export const collegesWithClubs = [
     college: 'Sagi Ramakrishnam Raju Engineering College, Andhra pradesh',
     State: 'Andhra pradesh',
   },
+  {
+    college :'Indian Institute of Technology Kalyani (IIIT, Kalyani ), West Bengal',
+    State: 'West Bengal'
+,  },
   {
     college: 'Gayatri Vidya Parishad College of Engineering, Andhra pradesh',
     State: 'Andhra pradesh',
@@ -1179,14 +1201,8 @@ export const collegesWithClubs = [
     college: 'J.C. Bose University Of Science And Technology,, Haryana',
     State: 'Haryana',
   },
-  {
-    college: 'Manav Rachna International Institute Of Research And, Haryana',
-    State: 'Haryana',
-  },
-  {
-    college: 'Manav Rachna International Institute of Research and, Haryana',
-    State: 'Haryana',
-  },
+  
+ 
   {
     college: 'Gurugram University, Gurgaon, Haryana',
     State: 'Haryana',
@@ -1244,10 +1260,7 @@ export const collegesWithClubs = [
     college: 'Chandigarh College of Engineering and Technology, Haryana',
     State: 'Haryana',
   },
-  {
-    college: 'Manav Rachna University, Haryana',
-    State: 'Haryana',
-  },
+  
   {
     college: 'Seth Jai Parkash Mukand Lal Institute of, Haryana',
     State: 'Haryana',
@@ -1489,6 +1502,10 @@ export const collegesWithClubs = [
     State: 'West bengal',
   },
   {
+    college: 'NSHM Knowledge Campus, Durgapur, West bengal',
+    State: 'West bengal',
+  },
+  {
     college:
       'Indian Institute of Engineering Science and Technology, West bengal',
     State: 'West bengal',
@@ -1497,14 +1514,8 @@ export const collegesWithClubs = [
     college: 'National Institute of Technology, West bengal',
     State: 'West bengal',
   },
-  {
-    college: 'Institute of Engineering and Management, West bengal',
-    State: 'West bengal',
-  },
-  {
-    college: 'Heritage Institute of Technology, West bengal',
-    State: 'West bengal',
-  },
+  
+ 
   {
     college: 'Maulana Abul Kalam Azad University of Technology, West bengal',
     State: 'West bengal',
@@ -1513,10 +1524,7 @@ export const collegesWithClubs = [
     college: 'Narula Institute of Technology, West bengal',
     State: 'West bengal',
   },
-  {
-    college: 'Haldia Institute of Technology, West bengal',
-    State: 'West bengal',
-  },
+ 
   {
     college: 'Amity University, Kolkata, West bengal',
     State: 'West bengal',
@@ -1538,17 +1546,14 @@ export const collegesWithClubs = [
     State: 'West bengal',
   },
   {
-    college: 'University of Engineering and Management, West bengal',
+    college:"JIS University, Agarpara, West bengal",
     State: 'West bengal',
   },
   {
     college: 'JIS College of Engineering, West bengal',
     State: 'West bengal',
   },
-  {
-    college: 'Kalyani Government Engineering College, West bengal',
-    State: 'West bengal',
-  },
+  
   {
     college: 'Indian Institute of Information Technology, West bengal',
     State: 'West bengal',
@@ -1565,15 +1570,13 @@ export const collegesWithClubs = [
     college: 'Siliguri Institute of Technology, West bengal',
     State: 'West bengal',
   },
+  
   {
     college:
-      'University Institute of Technology, University Of Burdwan, West bengal',
+      'University Institute of Technology, West bengal',
     State: 'West bengal',
   },
-  {
-    college: 'Jalpaiguri Government Engineering College, West bengal',
-    State: 'West bengal',
-  },
+
   {
     college: 'Techno India Salt Lake, Kolkata, West bengal',
     State: 'West bengal',
@@ -1586,10 +1589,7 @@ export const collegesWithClubs = [
     college: 'Dr. B.C. Roy Engineering College, West bengal',
     State: 'West bengal',
   },
-  {
-    college: 'Bengal College of Engineering, West bengal',
-    State: 'West bengal',
-  },
+  
   {
     college: 'Seacom Skills University, West bengal',
     State: 'West bengal',
@@ -1597,6 +1597,29 @@ export const collegesWithClubs = [
   {
     college: 'National Institute of Technology, Orissa',
     State: 'Orissa',
+  },
+  {
+    college:"St Xavier's College ,kolkata, West bengal",
+    State: 'West bengal',
+  },
+  {
+    college:"DY Patil International University ,kolkata, West bengal",
+    State: 'West bengal',
+  },
+  {
+college:"Punjab Agricultural University, Ludhiana, Punjab",
+State: 'Punjab',
+  },
+  {
+    college :"Dr. D. Y. Patil Vidyapeeth, Pimpri, Pune",
+    State: 'Maharashtra',
+  },
+  {
+    college:"St Xavier's university ,kolkata, West bengal",
+    State: 'West bengal',
+  },
+  {college:"Brainware university, west bengal",
+    State: 'West bengal',
   },
   {
     college: 'Indian Institute of Technology, Orissa',
@@ -3020,6 +3043,7 @@ export const collegesWithClubs = [
     college: 'Future Institute of Engineering and Management (FIEM), Kolkata',
     State: 'West Bengal',
   },
+  
   {
     college: 'Guru Nanak Institute of Technology, Kolkata',
     State: 'West Bengal',
@@ -3081,7 +3105,7 @@ export const collegesWithClubs = [
   },
   {
     college:
-      'Government College of Engineering and Leather Technology, Kolkata',
+      'Government College of Engineering and Leather Technology(GCELT), Kolkata',
     State: 'West Bengal',
   },
   {
@@ -3125,6 +3149,9 @@ export const collegesWithClubs = [
   {
     college: 'Maulana Azad Medical College, Delhi',
     State: 'Delhi',
+  },{
+    college:"University of Burdwan, West Bengal",
+    State:"West Bengal"
   },
   {
     college: 'Lady Hardinge Medical College, Delhi',
@@ -3157,6 +3184,10 @@ export const collegesWithClubs = [
   },
   {
     college: 'Jalpaiguri Government Engineering College, Jalpaiguri',
+    State: 'West Bengal',
+  },
+  {
+    college:"Durgapur Government College , Durgapur",
     State: 'West Bengal',
   },
   {
@@ -3215,6 +3246,10 @@ export const collegesWithClubs = [
     State: 'West Bengal',
   },
   {
+    college:' VMMC and Safdarjung Hospital, Delhi',
+    State: 'Delhi',
+  },
+  {
     college: 'Maulana Azad College, Kolkata',
     State: 'West Bengal',
   },
@@ -3230,7 +3265,7 @@ export const collegesWithClubs = [
     college: 'NIT Rourkela',
     State: 'Odisha',
   },
-  { college: 'Bhawanipur Education Society College', State: 'West Bengal' },
+
 
   {
     college: 'Bangabasi College, Kolkata',
@@ -3436,6 +3471,10 @@ export const collegesWithClubs = [
     State: 'Jharkhand',
   },
   {
+    college: 'Srinath University, Jamshedpur',
+    State: 'Jharkhand',
+  },
+  {
     college: 'Indian Institute of Information Technology Nagpur',
     State: 'Maharashtra',
   },
@@ -3464,7 +3503,118 @@ export const collegesWithClubs = [
     State: 'Karnataka',
   },
   {
+    college:'Visva-Bharati University, Santiniketan',
+    State: 'West Bengal',
+  },
+
+ 
+  // Additional West Bengal Engineering Colleges
+  {
+    college: 'Indian Institute of Engineering Science and Technology (IIEST), Shibpur',
+    State: 'West Bengal',
+  },
+  {
+    college:'West Bengal University of Animal & Fishery Science, Kolkata',
+    State: 'West Bengal',
+    
+  },
+  {
+    college: "MJP Rohilkhand University, Bareilly",
+    State: "Uttar Pradesh"
+  },
+  {
+
+    college: 'Cooch Behar Government Engineering College',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Government College of Engineering and Textile Technology, Berhampore',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Hooghly Engineering & Technology College',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Academy of Technology (AOT), Adisaptagram',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Abacus Institute of Engineering and Management, Hooghly',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Dumkal Institute of Engineering & Technology',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Durgapur Institute of Advanced Technology and Management',
+    State: 'West Bengal',
+  },
+  // West Bengal Medical Colleges
+  {
+    college: 'Bankura Sammilani Medical College',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Burdwan Medical College',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Midnapore Medical College',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Malda Medical College',
+    State: 'West Bengal',
+  },
+  {
+    college: 'North Bengal Medical College, Siliguri',
+    State: 'West Bengal',
+  },
+  {
     college: 'Indian Institute of Information Technology Una',
     State: 'Himachal Pradesh',
   },
+  {
+    college: 'Scottish Church College, Kolkata',
+    State: 'West Bengal',
+  },
+  {
+    college: 'RCC Institute of Information Technology, Kolkata',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Indian Institute of Technology Kanpur, Kanpur, Uttar Pradesh',
+    State: 'Uttar Pradesh',
+  },
+  {
+    college: 'Indian Institute of Technology Roorkee, Roorkee, Uttarakhand',
+    State: 'Uttarakhand',
+  },
+  {
+    college: 'Indian Institute of Technology Kharagpur, Kharagpur, West Bengal',
+    State: 'West Bengal',
+  },
+  {
+    college: 'Indian Institute of Technology Guwahati, Guwahati, Assam',
+    State: 'Assam',
+  },
+  {
+    college: 'Birla Institute of Technology and Science, Pilani, Rajasthan',
+    State: 'Rajasthan',
+  },
+  {
+    college:
+      'International Institute of Information Technology, Hyderabad, Telangana',
+    State: 'Telangana',
+  },
+  {
+    college: 'International Institute of Information Technology Bangalore, Karnataka',
+    State: 'Karnataka',
+  },
+  {
+    college: 'Lovely Professional University, Phagwara, Punjab',
+    State: 'Punjab',
+  }
 ];

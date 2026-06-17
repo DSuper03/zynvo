@@ -1,6 +1,30 @@
+@import "maplibre-gl/dist/maplibre-gl.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Mobile Optimizations */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+}
 
 @layer base {
   :root {
@@ -59,6 +83,8 @@
   }
   .theme {
     --animate-aurora: aurora 8s ease-in-out infinite alternate;
+    --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+    --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
   }
 }
 
@@ -104,6 +130,98 @@
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
+}
+
+.club-maplibre-container.maplibregl-map {
+  height: 100%;
+  width: 100%;
+  background: #050505;
+  font: inherit;
+  outline: none;
+}
+
+.maplibregl-ctrl-bottom-right {
+  margin-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .maplibregl-ctrl-bottom-right {
+    margin-bottom: 12px;
+  }
+}
+
+.maplibregl-ctrl-group {
+  overflow: hidden;
+  border: 1px solid rgba(63, 63, 70, 0.9) !important;
+  border-radius: 10px !important;
+  background: rgba(0, 0, 0, 0.82) !important;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.maplibregl-ctrl-group button {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.maplibregl-ctrl-group button:hover {
+  background-color: rgba(250, 204, 21, 0.14) !important;
+}
+
+.maplibregl-ctrl-attrib {
+  margin: 0 0 6px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #a1a1aa;
+  font-size: 10px;
+  padding: 3px 8px;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: #fde047;
+}
+
+.maplibregl-popup-content {
+  border: 1px solid rgba(63, 63, 70, 0.9);
+  border-radius: 10px;
+  background: rgba(9, 9, 11, 0.94);
+  color: #f4f4f5;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.36);
+  backdrop-filter: blur(12px);
+  padding: 10px 12px;
+  min-width: 180px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.maplibregl-popup-content span,
+.maplibregl-popup-content small {
+  color: #a1a1aa;
+}
+
+.maplibregl-popup-close-button {
+  color: #71717a;
+  font-size: 18px;
+  padding: 4px 8px;
+}
+
+.zynvo-map-marker {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+.zynvo-map-marker span {
+  display: block;
+  height: 18px;
+  width: 18px;
+  border: 3px solid #050505;
+  border-radius: 999px;
+  background: #facc15;
+  box-shadow:
+    0 0 0 2px rgba(250, 204, 21, 0.55),
+    0 0 26px rgba(250, 204, 21, 0.6);
 }
 
 @theme inline {
@@ -159,6 +277,25 @@
       box-shadow: 0 0 40px rgba(250, 204, 21, 0.2);
     }
   }
+  @keyframes shimmer-slide {
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+    }
+  }
+  @keyframes spin-around {
+  0% {
+    transform: translateZ(0) rotate(0);
+    }
+  15%, 35% {
+    transform: translateZ(0) rotate(90deg);
+    }
+  65%, 85% {
+    transform: translateZ(0) rotate(270deg);
+    }
+  100% {
+    transform: translateZ(0) rotate(360deg);
+    }
+  }
 }
 
 .animate-shimmer {
@@ -186,4 +323,136 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* LEGO-style animations and effects */
+@keyframes lego-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  40% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+  60% {
+    transform: translateY(-5px) rotate(-1deg);
+  }
+}
+
+@keyframes lego-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(250, 204, 21, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(250, 204, 21, 0.6), 0 0 60px rgba(250, 204, 21, 0.3);
+  }
+}
+
+@keyframes lego-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(-4px) rotate(-1deg);
+  }
+}
+
+@keyframes lego-pulse-3d {
+  0%, 100% {
+    transform: scale(1) rotateX(0deg);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    transform: scale(1.05) rotateX(2deg);
+    box-shadow: 0 8px 16px rgba(250, 204, 21, 0.2);
+  }
+}
+
+.animate-lego-bounce {
+  animation: lego-bounce 2s ease-in-out infinite;
+}
+
+.animate-lego-glow {
+  animation: lego-glow 3s ease-in-out infinite;
+}
+
+.animate-lego-float {
+  animation: lego-float 4s ease-in-out infinite;
+}
+
+.animate-lego-pulse-3d {
+  animation: lego-pulse-3d 2s ease-in-out infinite;
+}
+
+/* LEGO-style button hover effects */
+.lego-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lego-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.lego-button:hover::before {
+  left: 100%;
+}
+
+.lego-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(250, 204, 21, 0.3);
+}
+
+/* LEGO-style card effects */
+.lego-card {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lego-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(250, 204, 21, 0.1) 50%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.lego-card:hover::before {
+  opacity: 1;
+}
+
+.lego-card:hover {
+  transform: translateY(-4px) rotateX(2deg);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(250, 204, 21, 0.2);
+}
+
+/* Fast graffiti particle animation */
+@keyframes particle {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx, 0), var(--ty, 0)) scale(0);
+    opacity: 0;
+  }
+}
+
+.animate-particle {
+  animation: particle 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }

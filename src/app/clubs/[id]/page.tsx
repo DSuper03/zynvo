@@ -1,8 +1,6 @@
 'use client';
 
-//need to add a leave club button
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/legacy/image';
 import Link from 'next/link';
 import {
@@ -10,66 +8,105 @@ import {
   Users,
   MapPin,
   Globe,
-  Instagram,
-  Twitter,
-  Heart,
-  MessageCircle,
   Share2,
   Clock,
-  ChevronRight,
   Flag,
+  Mail,
+  Phone,
+  Star,
+  Heart,
+  Zap,
+  Award,
+  Sparkles,
+  Copy,
+  Check,
+  ExternalLink,
+  ChevronRight,
+  UserPlus,
+  MessageCircle,
+  BookOpen,
+  Target,
+  TrendingUp,
+  Crown,
+  Shield,
+  Building,
+  ArrowLeft,
+  Calendar,
+  UserCheck,
+  Settings,
+  MoreVertical,
+  Bookmark,
+  Share,
+  Bell,
+  Activity,
+  Briefcase,
+  GraduationCap,
+  Search,
+  Filter,
+  Plus,
+  Eye,
+  ThumbsUp,
+  Instagram,
+  Linkedin,
+  Twitter,
 } from 'lucide-react';
 import JoinClubModal from '../joinclub';
-import { useParams } from 'next/navigation';
+import CreateEventModal from '../../events/components/EventCreationModel';
+import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import {
-  ClubPageProps,
   ClubTypeProps,
   EventResponse,
   EventType,
-  Response,
 } from '@/types/global-Interface';
+
+interface ClubApiResponse {
+  msg: string;
+  club: {
+    id: string;
+    name: string;
+    collegeName: string;
+    description: string;
+    type: string;
+    founderEmail: string;
+    clubContact: string;
+    requirements: string;
+    facultyEmail: string;
+    profilePicUrl: string;
+    wings: string;
+    members: {
+      id: string;
+      name: string;
+      email: string;
+      profileAvatar: string;
+      course: string;
+      year: string;
+      role?: 'founder' | 'admin' | 'member';
+    }[];
+  };
+}
+
+interface UserApiResponse {
+  user: {
+    email: string;
+    name?: string;
+    id?: string;
+  };
+}
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import ZynvoClubAnnouncement from '@/components/ZynvoClubAnnouncement';
+import NoTokenModal from '@/components/modals/remindModal';
+import { buildAuthHref } from '@/lib/authReturnTo';
+import { getSafeErrorMessage } from '@/lib/safe-error';
 
-// Mock upcoming events
+// All dynamic content is driven by backend data; no hardcoded demo content
 
-// Mock announcements/posts
-const clubPosts = [
-  {
-    id: 1,
-    content:
-      'Applications for the Core Team 2025-26 are now open! Apply through the link in bio.',
-    timestamp: '2 days ago',
-    likes: 45,
-    comments: 12,
-  },
-  {
-    id: 2,
-    content:
-      'Congratulations to our members who won the National Coding Championship! Proud moment for our club. 🏆',
-    timestamp: '1 week ago',
-    likes: 89,
-    comments: 24,
-    image: '/pic1.jpg',
-  },
-  {
-    id: 3,
-    content:
-      "Weekly meeting reminder: Thursday at 7 PM in the Central Hall. We'll be discussing the upcoming hackathon preparations.",
-    timestamp: '2 weeks ago',
-    likes: 32,
-    comments: 8,
-  },
-];
-
-export default function ClubPage({}: ClubPageProps) {
+export default function ClubPage() {
   const param = useParams();
   const id = param.id as string;
-
-  const [activeTab, setActiveTab] = useState<'about' | 'events' | 'posts'>(
-    'about'
-  );
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'announcements' | 'events' | 'members' | 'social'>('events');
   const [isJoined, setIsJoined] = useState(false);
   const [club, setClub] = useState<ClubTypeProps>({
     id: '',
@@ -79,82 +116,238 @@ export default function ClubPage({}: ClubPageProps) {
     members: [],
     image: '/default-club-image.jpg',
     category: 'tech',
+    profileAvatar: '',
     founderEmail: '',
     facultyEmail: '',
+    type: 'tech',
+    profilePicUrl: '',
+    clubContact: '',
+    requirements: '',
+    wings: '',
   });
   const [event, setEvent] = useState<EventType[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
   const [token, setToken] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+ const [usersClub,setUserClub]=useState<boolean>(false)
+  const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [currentUser, setCurrentUser] = useState<{ email?: string; id?: string; clubName?: string } | null>(null);
+  const [userJoinedClubIds, setUserJoinedClubIds] = useState<string[]>([]);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [socialLinks, setSocialLinks] = useState<{
+    instagram?: string;
+    linkedin?: string;
+    twitter?: string;
+  }>({});
+  const [openCriteriaModal, setOpenCriteriaModal] = useState<boolean>(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState<boolean>(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [hasTokenForModal, setHasTokenForModal] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [requiresSignin, setRequiresSignin] = useState(false);
+  const [copiedInviteLink, setCopiedInviteLink] = useState(false);
+  const [inviteFullUrl, setInviteFullUrl] = useState('');
+  const inviteLinkInputRef = useRef<HTMLInputElement>(null);
+  const clubInvitePath = `/clubs/${id}`;
+  const signupInviteHref = buildAuthHref('/auth/signup', clubInvitePath);
+  const signinInviteHref = buildAuthHref('/auth/signin', clubInvitePath);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      setInviteFullUrl(new URL(signupInviteHref, window.location.origin).href);
+    } catch {
+      setInviteFullUrl('');
+    }
+  }, [signupInviteHref]);
+
+  const getMemberCount = (c: { members?: unknown; memberCount?: number; membersCount?: number }): number => {
+    if (typeof c?.members === 'number') return c.members as number;
+    if (Array.isArray(c?.members)) return c.members.length;
+    if (typeof c?.memberCount === 'number') return c.memberCount;
+    if (typeof c?.membersCount === 'number') return c.membersCount;
+    return 0;
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const tok = localStorage.getItem('token');
-      if (tok) setToken(tok);
-      else {
-        toast('login please');
+      const session = sessionStorage.getItem('activeSession');
+      
+      if (tok) {
+        setHasTokenForModal(true);
+      } else {
+        // No token - user needs to sign up
+        setHasTokenForModal(false);
+        setRequiresSignin(false);
+        setIsAuthModalOpen(true);
+        setLoading(false);
+        setAuthChecked(true);
         return;
       }
-      if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('login please');
+      
+      if (session !== 'true') {
+        // Has token but no session - user needs to sign in
+        toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push(signinInviteHref),
+          },
+        });
+        setHasTokenForModal(true);
+        setRequiresSignin(true);
+        setIsAuthModalOpen(true);
+        setLoading(false);
+        setAuthChecked(true);
         return;
       }
+      setToken(tok);
+      setRequiresSignin(false);
+      setAuthChecked(true);
     }
-  }, []);
+  }, [router, signinInviteHref]);
   useEffect(() => {
     async function call() {
       if (!token) {
-        toast('login please');
+         toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push(signinInviteHref),
+          },
+        });
         return;
       }
-      const response = await axios.get<Response>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClub?id=${id}`,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
+      
+      try {
+        setLoading(true);
+        
+        // Fetch club data
+        const response = await axios.get<ClubApiResponse>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/${id}`,
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        
+        console.log('Club data:', response.data.club);
+        
+        // Set club data
+        const clubData = response.data.club;
+        setClub({
+          id: clubData.id,
+          name: clubData.name,
+          collegeName: clubData.collegeName,
+          description: clubData.description,
+          members: clubData.members || [],
+          profileAvatar: clubData.members?.[0]?.profileAvatar,
+          founderEmail: clubData.founderEmail,
+          facultyEmail: clubData.facultyEmail,
+          image: clubData.profilePicUrl || '/logozynvo.jpg',
+          category: clubData.type || 'tech',
+          requirements: (clubData as any).requirements || '',
+          clubContact: (clubData as any).clubContact || '',
+          wings: (clubData as any).wings || '',
+        });
+
+        // Set social media links
+        setSocialLinks({
+          instagram: (clubData as any).instagram || undefined,
+          linkedin: (clubData as any).linkedin || undefined,
+          twitter: (clubData as any).twitter || undefined,
+        });
+
+        try {
+          const response2 = await axios.get<EventResponse>(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/eventByClub/${id}`,
+            {
+              headers: {
+                authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          const events = response2.data.event;
+
+          const filteredEvents = events.map((e) => {
+            const imageUrl = e.posterUrl || e.eventHeaderImage || '/default-event-image.jpg';
+            console.log('Event image mapping:', {
+              eventId: e.id,
+              eventName: e.EventName,
+              posterUrl: e.posterUrl,
+              eventHeaderImage: e.eventHeaderImage,
+              finalImage: imageUrl
+            });
+            return {
+              id: e.id,
+              EventName: e.EventName,
+              description: e.description,
+              clubName: e.clubName,
+              createdAt: new Date(e.createdAt), // Convert string to Date
+              image: imageUrl,
+              title: e.EventName,
+              Venue: e.Venue,
+            };
+          });
+
+          setEvent(filteredEvents);
+        } catch (eventError) {
+          console.error('Error fetching events:', eventError);
+          // Set empty events array if events fetch fails
+          setEvent([]);
         }
-      );
-
-      const response2 = await axios.get<EventResponse>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/events/eventByClub/${id}`,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
+        
+      } catch (error: any) {
+        console.error('Error fetching club data:', error);
+        if (error.response?.status === 404) {
+          toast('Club not found');
+        } else {
+          toast('Failed to load club data');
         }
-      );
-
-      const events = response2.data.event;
-
-      const filteredEvents = events.map((e) => ({
-        id: e.id,
-        EventName: e.EventName,
-        description: e.description,
-        clubName: e.clubName,
-        createdAt: e.createdAt,
-        image: e.eventHeaderImage || '/default-event-image.jpg',
-        title: e.EventName,
-      }));
-
-      setEvent(filteredEvents);
-
-      setClub({
-        id: response.data.response.id,
-        name: response.data.response.name,
-        collegeName: response.data.response.collegeName,
-        description: response.data.response.description,
-        members: response.data.response.members,
-        founderEmail: response.data.response.founderEmail,
-        facultyEmail: response.data.response.facultyEmail,
-        image: '/default-club-image.jpg',
-        category: 'tech',
-      });
+      } finally {
+        setLoading(false);
+      }
     }
 
-    call();
-  }, [id, token]);
+    if (token && id) {
+      call();
+    }
+  }, [id, token, router, signinInviteHref]);
+useEffect(() => {
+  const fetchUserData = async () => {
+    try {
+      const userResponse = await axios.get<UserApiResponse>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const userData = userResponse.data.user as any;
+     
+      // Check if the user's club ID matches the current club ID
+      if (userData.clubId === id) {
+        setUserClub(true);
+       
+      }
+     
+      
+      setCurrentUser(userData);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
-  if (!club) {
+  if (token) {
+    fetchUserData();
+  }
+}, [token]);
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
@@ -162,518 +355,1072 @@ export default function ClubPage({}: ClubPageProps) {
     );
   }
 
+  if (authChecked && (!token || requiresSignin)) {
+    const primaryHref = requiresSignin ? signinInviteHref : signupInviteHref;
+    const primaryLabel = requiresSignin ? 'Sign in to continue' : 'Sign up to join';
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center px-4">
+        <div className="max-w-lg w-full rounded-2xl border border-yellow-400/30 bg-gray-950/90 p-6 text-center shadow-[0_0_30px_rgba(255,215,0,0.08)]">
+          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-yellow-400 text-black">
+            <UserPlus className="h-7 w-7" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-2">Join this club on Zynvo</h1>
+          <p className="text-gray-300 mb-6">
+            Sign up or sign in with this invite link and we will bring you back to this club page.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link href={primaryHref} className="flex-1">
+              <Button className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-semibold">
+                {primaryLabel}
+              </Button>
+            </Link>
+            <Link href={signinInviteHref} className="flex-1">
+              <Button
+                variant="outline"
+                className="w-full border-yellow-500/50 text-yellow-300 hover:bg-yellow-500/10"
+              >
+                Sign in
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!club || !club.id) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-center">
+          <h1 className="text-2xl font-bold mb-4">Club not found</h1>
+          <p className="text-gray-400">The club you're looking for doesn't exist or has been removed.</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleJoinClick = () => {
     if (!isJoined) {
       setIsJoinModalOpen(true);
-    } else {
-      setIsJoined(false); // Just leave the club if already joined
     }
   };
 
+  const handleLeaveClub = async () => {
+    if (!token) {
+      toast('Login required', {
+        action: {
+          label: 'Sign in',
+          onClick: () => router.push(signinInviteHref),
+        },
+      });
+      return;
+    }
+
+    try {
+      const leaveResponse = await axios.put<{ message?: string; msg?: string }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/leaveClub`,
+        null,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      toast.success(leaveResponse.data.message || leaveResponse.data.msg || 'Successfully left the club');
+      setIsJoined(false);
+      
+      // Refresh the page to update the UI
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error: any) {
+      console.error('Error leaving club:', error);
+      toast.error(getSafeErrorMessage(error, 'Failed to leave club. Please try again.'));
+    }
+  };
+
+  const copyToClipboard = async (text: string, type: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedEmail(type);
+      toast.success(`${type} copied to clipboard!`);
+      setTimeout(() => setCopiedEmail(null), 2000);
+    } catch (err) {
+      toast.error('Failed to copy to clipboard');
+    }
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: `${club.name} - ${club.collegeName}`,
+      text: `Check out this amazing club: ${club.name} at ${club.collegeName}. ${club.description}`,
+      url: window.location.href,
+    };
+
+    // Check if Web Share API is supported
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        toast.success('Club shared successfully!');
+      } catch (err) {
+        // User cancelled sharing or error occurred
+        if (err instanceof Error && err.name !== 'AbortError') {
+          console.error('Error sharing:', err);
+          toast.error('Failed to share club');
+        }
+      }
+    } else {
+      // Fallback: Copy URL to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Club link copied to clipboard!');
+      } catch (err) {
+        console.error('Error copying to clipboard:', err);
+        toast.error('Failed to copy link to clipboard');
+      }
+    }
+  };
+
+  const handleCopyInviteLink = () => {
+    const inviteUrl = inviteFullUrl;
+    if (!inviteUrl) {
+      toast.error('Invite link is not ready yet — wait a moment and try again.');
+      return;
+    }
+
+    const copyFromElement = (el: HTMLInputElement | HTMLTextAreaElement): boolean => {
+      const wasReadOnly = 'readOnly' in el ? el.readOnly : false;
+      try {
+        if ('readOnly' in el) el.readOnly = false;
+        el.focus();
+        el.select();
+        el.setSelectionRange(0, inviteUrl.length);
+        return document.execCommand('copy');
+      } catch {
+        return false;
+      } finally {
+        if ('readOnly' in el) el.readOnly = wasReadOnly;
+      }
+    };
+
+    const copyViaOverlayTextarea = (): boolean => {
+      const ta = document.createElement('textarea');
+      ta.value = inviteUrl;
+      ta.style.position = 'fixed';
+      ta.style.top = '0';
+      ta.style.left = '0';
+      ta.style.width = '100%';
+      ta.style.height = '100%';
+      ta.style.opacity = '0';
+      ta.style.zIndex = '2147483647';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, inviteUrl.length);
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    };
+
+    // Prefer synchronous copy (same user gesture) — Clipboard API can fail or detach from gesture.
+    let ok =
+      (inviteLinkInputRef.current && copyFromElement(inviteLinkInputRef.current)) ||
+      copyViaOverlayTextarea();
+
+    if (ok) {
+      setCopiedInviteLink(true);
+      toast.success('Invite link copied!');
+      setTimeout(() => setCopiedInviteLink(false), 2000);
+      return;
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText && window.isSecureContext) {
+      void navigator.clipboard.writeText(inviteUrl).then(
+        () => {
+          setCopiedInviteLink(true);
+          toast.success('Invite link copied!');
+          setTimeout(() => setCopiedInviteLink(false), 2000);
+        },
+        () => {
+          toast.error('Could not copy — tap the link field, select all, then copy.');
+          inviteLinkInputRef.current?.focus();
+          inviteLinkInputRef.current?.select();
+        }
+      );
+      return;
+    }
+
+    toast.error('Could not copy automatically — tap the link field, select all, then copy.');
+    inviteLinkInputRef.current?.focus();
+    inviteLinkInputRef.current?.select();
+  };
+
+  const getTypeColor = (type: string) => {
+    const typeLower = type.toLowerCase();
+    switch (typeLower) {
+      case 'tech':
+      case 'technology':
+        return 'from-cyan-500/20 to-blue-500/20 text-cyan-300 border-cyan-400/30';
+      case 'cultural':
+        return 'from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-400/30';
+      case 'business':
+        return 'from-emerald-500/20 to-green-500/20 text-emerald-300 border-emerald-400/30';
+      case 'social':
+        return 'from-yellow-500/20 to-amber-500/20 text-yellow-300 border-yellow-400/30';
+      case 'literature':
+      case 'literary':
+        return 'from-orange-500/20 to-red-500/20 text-orange-300 border-orange-400/30';
+      case 'design':
+        return 'from-pink-500/20 to-rose-500/20 text-pink-300 border-pink-400/30';
+      case 'sports':
+        return 'from-red-500/20 to-orange-500/20 text-red-300 border-red-400/30';
+      case 'music':
+        return 'from-indigo-500/20 to-purple-500/20 text-indigo-300 border-indigo-400/30';
+      default:
+        return 'from-gray-500/20 to-slate-500/20 text-gray-300 border-gray-400/30';
+    }
+  };
+
+  // Helper function to get member role
+  const getMemberRole = (member: any): 'founder' | 'admin' | 'member' => {
+    if (member.role) return member.role;
+    if (member.email && club.founderEmail && member.email.toLowerCase() === club.founderEmail.toLowerCase()) {
+      return 'founder';
+    }
+    return 'member';
+  };
+
+  // Helper function to get the founder member
+  const getFounder = (): any => {
+    return club.members?.find(
+      (member: any) => member.email && club.founderEmail && member.email.toLowerCase() === club.founderEmail.toLowerCase()
+    );
+  };
+
+  // Helper function to sort members with founder first
+  const getSortedMembers = () => {
+    if (!Array.isArray(club.members)) return [];
+    
+    return [...club.members].sort((a: any, b: any) => {
+      const roleA = getMemberRole(a);
+      const roleB = getMemberRole(b);
+      const roleOrder = { founder: 0, admin: 1, member: 2 };
+      return roleOrder[roleA] - roleOrder[roleB];
+    });
+  };
+
+  // Helper function to get role badge config
+  const getRoleBadgeConfig = (role: 'founder' | 'admin' | 'member') => {
+    const config: Record<string, { emoji: string; label: string; color: string; bgColor: string; borderColor: string }> = {
+      founder: {
+        emoji: '👑',
+        label: 'Club Founder',
+        color: 'text-yellow-400',
+        bgColor: 'bg-yellow-400/10',
+        borderColor: 'border-yellow-400/30',
+      },
+      admin: {
+        emoji: '⚡',
+        label: 'Club Admin',
+        color: 'text-purple-400',
+        bgColor: 'bg-purple-400/10',
+        borderColor: 'border-purple-400/30',
+      },
+      member: {
+        emoji: '🤝',
+        label: 'Club Member',
+        color: 'text-blue-400',
+        bgColor: 'bg-blue-400/10',
+        borderColor: 'border-blue-400/30',
+      },
+    };
+    return config[role] || config.member;
+  };
+
   return (
-    <div className="min-h-screen bg-gray-900 pb-16">
-      {/* Club Header Section with Hero Image */}
-      <div className="relative h-64 md:h-80 w-full">
-        {/* Background image with gradient overlay */}
-        <div className="absolute inset-0 z-0">
-          <div className="relative w-full h-full">
-            <Image
-              src={club.image || '/default-club-image.jpg'}
-              alt={club.name}
-              width={1000}
-              height={500}
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-gray-900"></div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 w-full h-full">
+      {/* Hero Section - Compact & Minimalist */}
+      <div className="relative w-full bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
         </div>
 
-        {/* Floating Club Logo */}
-        <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-10">
-          <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-yellow-500 shadow-lg shadow-black/50">
-            <Image
-              src={club.image || 'default-club-image.jpg'}
-              alt={club.name}
-              width={128}
-              height={128}
-              className="object-cover"
-              priority
-            />
-          </div>
-        </div>
+        {/* Compact Header with Club Info */}
+        <div className="relative max-w-7xl mx-auto px-4 pt-8 pb-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            {/* Club Logo - Compact */}
+            <div className="relative flex-shrink-0">
+              <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-yellow-400/30 shadow-lg bg-gray-900/50 backdrop-blur-sm">
+                <Image
+                  src={club.image || '/logozynvo.jpg'}
+                  alt={club.name}
+                  width={128}
+                  height={128}
+                  className="object-cover w-full h-full"
+                  priority
+                />
+              </div>
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 rounded-2xl bg-yellow-400/10 blur-xl -z-10"></div>
+            </div>
 
-        {/* College Name */}
-        <div className="absolute top-8 left-4 md:left-8 z-10">
-          <div className="flex items-center">
-            <MapPin size={16} className="text-yellow-400 mr-2" />
-            <span className="text-white text-sm font-medium">
-              {club.collegeName}
-            </span>
+            {/* Club Info Section */}
+            <div className="flex-1 min-w-0">
+              {/* College Name - Compact */}
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin size={14} className="text-yellow-400 flex-shrink-0" />
+                <span className="text-gray-300 text-sm font-medium truncate">
+                  {club.collegeName}
+                </span>
+              </div>
+
+              {/* Club Name */}
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 leading-tight">
+                {club.name}
+              </h1>
+
+              {/* Quick Stats - Compact */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center text-gray-300 bg-gray-800/50 px-2.5 py-1 rounded-lg text-xs">
+                  <Users size={12} className="mr-1.5 text-yellow-400" />
+                  <span>{getMemberCount(club)} members</span>
+                </div>
+                <span className="bg-gray-800/50 text-gray-200 px-2.5 py-1 rounded-lg text-xs border border-gray-700/50">
+                  {String(club.category || club.type || 'general').toString()}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Club Details */}
-      <div className="max-w-6xl mx-auto px-4 pt-20">
-        {/* Club Name and Basic Info */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-            {club.name}
-          </h1>
-
-          <div className="flex items-center justify-center gap-3 mb-4">
-            {/* <span className={`px-3 py-1 rounded-full text-sm ${getCategoryStyle(club.category)}`}>
-              {club.category.charAt(0).toUpperCase() + club.category.slice(1)}
-            </span> */}
-
-            <div className="flex items-center text-gray-300">
-              <Users size={16} className="mr-1" />
-              <span>{club.members} members</span>
-            </div>
-
-            {club.isPopular && (
-              <span className="bg-gray-800 text-yellow-400 px-3 py-1 rounded-full text-sm border border-yellow-400/30">
-                Popular
-              </span>
-            )}
-
-            {club.isNew && (
-              <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-medium">
-                New
-              </span>
-            )}
-          </div>
-
-          <p className="text-gray-300 max-w-2xl mx-auto mb-6">
-            {club.description}
-          </p>
-
-          <div className="flex justify-center gap-3">
-            <button
-              onClick={handleJoinClick}
-              className={`px-6 py-2 rounded-lg font-medium ${
-                isJoined
-                  ? 'bg-gray-700 text-white hover:bg-gray-600'
-                  : 'bg-yellow-500 text-black hover:bg-yellow-400'
-              } transition-colors`}
-            >
-              {isJoined ? 'Leave Club' : 'Join Club'}
-            </button>
-
-            <button className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors">
-              <Share2 size={20} />
-            </button>
-
-            <button className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors">
-              <Flag size={20} />
-            </button>
-          </div>
-        </div>
-
-        {/* Tabs Navigation */}
-        <div className="flex border-b border-gray-700 mb-6">
-          <button
-            onClick={() => setActiveTab('about')}
-            className={`px-4 py-3 font-medium text-sm ${
-              activeTab === 'about'
-                ? 'text-yellow-400 border-b-2 border-yellow-400'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            About
-          </button>
-
-          <button
-            onClick={() => setActiveTab('events')}
-            className={`px-4 py-3 font-medium text-sm ${
-              activeTab === 'events'
-                ? 'text-yellow-400 border-b-2 border-yellow-400'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Events
-          </button>
-
-          <button
-            onClick={() => setActiveTab('posts')}
-            className={`px-4 py-3 font-medium text-sm ${
-              activeTab === 'posts'
-                ? 'text-yellow-400 border-b-2 border-yellow-400'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Announcements
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content Area */}
-          <div className="lg:col-span-2">
-            {/* About Tab Content */}
-            {activeTab === 'about' && (
-              <div className="bg-gray-800 rounded-lg p-6 space-y-6">
-                <div>
-                  <h2 className="text-xl font-bold text-white mb-3">
-                    About {club.name}
-                  </h2>
-                  <p className="text-gray-300">
-                    {club.name} is a dynamic student club at {club.collegeName}{' '}
-                    focused on{' '}
-                    {club.category === 'tech'
-                      ? 'technology and innovation'
-                      : club.category === 'cultural'
-                        ? 'arts and cultural activities'
-                        : club.category === 'business'
-                          ? 'entrepreneurship and business skills'
-                          : club.category === 'social'
-                            ? 'community service and social impact'
-                            : club.category === 'literary'
-                              ? 'literature, debate, and academic pursuits'
-                              : 'creativity and design'}
-                    . Our mission is to provide students with opportunities to
-                    enhance their skills, network with like-minded peers, and
-                    gain practical experience through various events, workshops,
-                    and projects.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Club Achievements
-                  </h3>
-                  <ul className="list-disc list-inside text-gray-300 space-y-1">
-                    <li>
-                      Winner of the National Intercollegiate Competition 2024
-                    </li>
-                    <li>
-                      Organized over 15 successful workshops and events in the
-                      past year
-                    </li>
-                    <li>
-                      Collaborated with industry professionals for mentorship
-                      programs
-                    </li>
-                    <li>
-                      Featured in the Campus Annual Magazine for outstanding
-                      contributions
-                    </li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Contact Information
-                  </h3>
-                  <div className="space-y-2 text-gray-300">
-                    <p className="flex items-center">
-                      <Globe size={18} className="mr-2" />
-                      <a href="#" className="text-yellow-400 hover:underline">
-                        www.{club.name}.org
-                      </a>
-                    </p>
-                    <p className="flex items-center">
-                      <Instagram size={18} className="mr-2" />
-                      <a href="#" className="text-yellow-400 hover:underline">
-                        @{club.name}
-                      </a>
-                    </p>
-                    <p className="flex items-center">
-                      <Twitter size={18} className="mr-2" />
-                      <a href="#" className="text-yellow-400 hover:underline">
-                        @{club.name}
-                      </a>
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Meeting Schedule
-                  </h3>
-                  <p className="text-gray-300 flex items-center">
-                    <CalendarDays size={18} className="mr-2" />
-                    Weekly on Thursdays, 7:00 PM - 9:00 PM
-                  </p>
-                  <p className="text-gray-300 flex items-center">
-                    <MapPin size={18} className="mr-2" />
-                    {club.collegeName} - Block C, Room 204
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Events Tab Content */}
-            {activeTab === 'events' && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-bold text-white">
-                  Upcoming Events
-                </h2>
-
-                {event.map((event: EventType) => (
-                  <div
-                    key={event.id}
-                    className="bg-gray-800 rounded-lg overflow-hidden hover:border hover:border-yellow-500/30 transition-all duration-300 shadow-md"
-                  >
-                    <div className="relative h-48 w-full">
-                      <Image
-                        src={event.image || '/default-event-image.jpg'}
-                        alt={event.title || 'Event Image'}
-                        width={100}
-                        height={100}
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-
-                      <div className="absolute bottom-0 left-0 p-4 w-full">
-                        <h3 className="text-xl font-bold text-white">
-                          {event.EventName}
-                        </h3>
-                        <div className="flex items-center text-yellow-400 mt-1">
-                          <CalendarDays size={16} className="mr-1" />
-                          <span className="text-sm">
-                            {event.createdAt.toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-4">
-                      <div className="flex items-center text-gray-300 mb-2">
-                        <Clock size={16} className="mr-1" />
-                        <span className="text-sm">{event.time}</span>
-                      </div>
-
-                      <div className="flex items-center text-gray-300 mb-4">
-                        <MapPin size={16} className="mr-1" />
-                        <span className="text-sm">{club.collegeName}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center text-gray-400">
-                          <Users size={16} className="mr-1" />
-                          <span className="text-sm">{100} going</span>
-                        </div>
-
-                        <Button className="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg text-sm font-medium transition-colors">
-                          RSVP
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                <Link
-                  href="#"
-                  className="flex items-center justify-center text-yellow-400 hover:text-yellow-300 py-3"
+      {/* Club Details - Compact Layout */}
+      <div className="max-w-7xl mx-auto px-4 pt-6 pb-4">
+        <div className="flex flex-col lg:flex-row gap-6 mb-6">
+          {/* Left: Description & Info */}
+          <div className="flex-1 space-y-4">
+            {/* Description */}
+            <div className="bg-gray-900/30 backdrop-blur-sm rounded-xl p-4 border border-gray-800/50">
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <h3 className="text-sm font-semibold text-yellow-400 uppercase tracking-wide">About</h3>
+                <button
+                  onClick={() => setOpenCriteriaModal(true)}
+                  className="text-xs text-yellow-400/80 hover:text-yellow-300 transition-colors"
+                  title="View membership criteria"
                 >
-                  <span className="mr-1">View all events</span>
-                  <ChevronRight size={16} />
-                </Link>
+                  Membership Criteria →
+                </button>
               </div>
-            )}
-
-            {/* Posts Tab Content */}
-            {activeTab === 'posts' && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-bold text-white">
-                  Club Announcements
-                </h2>
-
-                {clubPosts.map((post) => (
-                  <div
-                    key={post.id}
-                    className="bg-gray-800 rounded-lg overflow-hidden p-4 shadow-md"
-                  >
-                    <div className="flex items-center mb-3">
-                      <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                        <Image
-                          src={club.image || ''}
-                          alt={club.name}
-                          width={40}
-                          height={40}
-                          className="object-cover"
-                        />
-                      </div>
-
-                      <div>
-                        <h4 className="font-bold text-white">{club.name}</h4>
-                        <p className="text-gray-400 text-xs">
-                          {post.timestamp}
-                        </p>
-                      </div>
-                    </div>
-
-                    <p className="text-gray-300 mb-4">{post.content}</p>
-
-                    {post.image && (
-                      <div className="rounded-lg overflow-hidden mb-4">
-                        <div className="relative h-60 w-full">
-                          <Image
-                            src={post.image}
-                            alt="Post image"
-                            width={100}
-                            height={100}
-                            className="object-cover"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between text-gray-400 border-t border-gray-700 pt-3">
-                      <Button className="flex items-center hover:text-yellow-400">
-                        <Heart size={18} className="mr-1" />
-                        <span>{post.likes}</span>
-                      </Button>
-
-                      <Button className="flex items-center hover:text-yellow-400">
-                        <MessageCircle size={18} className="mr-1" />
-                        <span>{post.comments}</span>
-                      </Button>
-
-                      <Button className="flex items-center hover:text-yellow-400">
-                        <Share2 size={18} className="mr-1" />
-                        <span>Share</span>
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-
-                <Link
-                  href="#"
-                  className="flex items-center justify-center text-yellow-400 hover:text-yellow-300 py-3"
-                >
-                  <span className="mr-1">View all announcements</span>
-                  <ChevronRight size={16} />
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Stats */}
-            <div className="bg-gray-800 rounded-lg p-4">
-              <h3 className="text-lg font-bold text-white mb-3">Club Stats</h3>
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="bg-gray-900 rounded-lg p-3">
-                  <p className="text-yellow-400 text-xl font-bold">
-                    {club.members}
-                  </p>
-                  <p className="text-gray-300 text-sm">Members</p>
-                </div>
-                <div className="bg-gray-900 rounded-lg p-3">
-                  <p className="text-yellow-400 text-xl font-bold">15</p>
-                  <p className="text-gray-300 text-sm">Events</p>
-                </div>
-                <div className="bg-gray-900 rounded-lg p-3">
-                  <p className="text-yellow-400 text-xl font-bold">4.8</p>
-                  <p className="text-gray-300 text-sm">Rating</p>
-                </div>
-                <div className="bg-gray-900 rounded-lg p-3">
-                  <p className="text-yellow-400 text-xl font-bold">2018</p>
-                  <p className="text-gray-300 text-sm">Founded</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Core Team */}
-            <div className="bg-gray-800 rounded-lg p-4">
-              <h3 className="text-lg font-bold text-white mb-3">Core Team</h3>
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                    <Image
-                      src="https://i.pravatar.cc/150?img=11"
-                      alt="President"
-                      width={40}
-                      height={40}
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-medium">
-                      {club.founderEmail}
-                    </h4>
-                    <p className="text-gray-400 text-xs">President</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                    <Image
-                      src="https://i.pravatar.cc/150?img=20"
-                      alt="Vice President"
-                      width={40}
-                      height={40}
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-medium">
-                      {club.facultyEmail}
-                    </h4>
-                    <p className="text-gray-400 text-xs">Faculty</p>
-                  </div>
-                </div>
-
-                {/* <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                    <Image
-                      src="https://i.pravatar.cc/150?img=21"
-                      alt="Secretary"
-                      width={40}
-                      height={40}
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-medium">Dev Patel</h4>
-                    <p className="text-gray-400 text-xs">Secretary</p>
-                  </div>
-                </div> */}
-
-                {/* <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                    <Image
-                      src="https://i.pravatar.cc/150?img=32"
-                      alt="Treasurer"
-                      width={40}
-                      height={40}
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-medium">Neha Kapoor</h4>
-                    <p className="text-gray-400 text-xs">Treasurer</p>
-                  </div>
-                </div> */}
-              </div>
-            </div>
-
-            {/* Join CTA */}
-            <div className="bg-yellow-500 rounded-lg p-4 text-center">
-              <h3 className="text-xl font-bold text-black mb-2">
-                Join {club.name} Today!
-              </h3>
-              <p className="text-gray-800 mb-4">
-                Connect with like-minded peers and grow your skills.
+              <p
+                className="text-gray-300 text-sm leading-relaxed"
+                style={
+                  isDescriptionExpanded
+                    ? undefined
+                    : {
+                        display: '-webkit-box',
+                        WebkitBoxOrient: 'vertical' as any,
+                        WebkitLineClamp: 3,
+                        overflow: 'hidden',
+                      }
+                }
+              >
+                {club.description || 'No description available.'}
               </p>
-              {!isJoined && (
-                <Button
-                  onClick={() => setIsJoinModalOpen(true)}
-                  className="w-full py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              {club?.description && club.description.length > 150 && (
+                <button
+                  onClick={() => setIsDescriptionExpanded((v) => !v)}
+                  className="mt-2 text-xs text-yellow-400 hover:text-yellow-300 font-medium transition-colors"
                 >
-                  Become a Member
+                  {isDescriptionExpanded ? 'Show less' : 'Read more'}
+                </button>
+              )}
+            </div>
+
+            {/* Additional Info Tags */}
+            <div className="flex flex-wrap gap-2">
+              {club.isPopular && (
+                <span className="bg-yellow-500/20 text-yellow-400 px-2.5 py-1 rounded-lg text-xs border border-yellow-400/30 font-medium">
+                  Popular
+                </span>
+              )}
+              {club.isNew && (
+                <span className="bg-yellow-500 text-black px-2.5 py-1 rounded-lg text-xs font-medium">
+                  New
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Right: Action Buttons - Compact */}
+          <div className="flex flex-col gap-3 lg:min-w-[200px]">
+            {usersClub ? (
+              <div className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/10 border border-green-500/40 text-green-300 text-sm font-medium">
+                <UserCheck className="w-4 h-4" />
+                Hi member
+              </div>
+            ) : (
+              <Button
+                onClick={handleJoinClick}
+                className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-medium py-2.5 transition-all shadow-lg shadow-yellow-500/20"
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Join Club
+              </Button>
+            )}
+
+            {isAdmin && (
+              <Link href={`/admin/${id}`}>
+                <Button
+                  variant="outline"
+                  className="w-full bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/50 text-blue-400 hover:text-blue-300 font-medium py-2.5 transition-all text-sm"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Admin Controls
                 </Button>
+              </Link>
+            )}
+
+            <div className="rounded-xl border border-yellow-500/40 bg-yellow-500/10 p-3">
+              <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-yellow-300">
+                <UserPlus className="h-3.5 w-3.5" />
+                Invite Link
+              </div>
+              <div className="flex overflow-hidden rounded-lg border border-yellow-500/30 bg-black/30">
+                <input
+                  ref={inviteLinkInputRef}
+                  readOnly
+                  value={inviteFullUrl}
+                  onClick={(e) => e.currentTarget.select()}
+                  onFocus={(e) => e.currentTarget.select()}
+                  className="min-w-0 flex-1 bg-transparent px-3 py-2 text-xs text-gray-200 outline-none"
+                  aria-label="Club invite link"
+                />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleCopyInviteLink();
+                  }}
+                  className="relative z-10 inline-flex cursor-pointer items-center justify-center gap-1.5 bg-yellow-500 px-3 py-2 text-xs font-semibold text-black transition-colors hover:bg-yellow-400"
+                  title="Copy invite link"
+                >
+                  {copiedInviteLink ? (
+                    <Check className="h-3.5 w-3.5" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                  {copiedInviteLink ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+              {copiedInviteLink ? (
+                <p className="mt-2 text-xs text-green-300">Invite link copied to clipboard.</p>
+              ) : (
+                <p className="mt-2 text-xs text-yellow-100/70">Share this with students to bring them back here after signup.</p>
               )}
-              {isJoined && (
-                <p className="font-medium text-black">You are a member! 🎉</p>
-              )}
+            </div>
+
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleShare}
+                variant="outline"
+                size="icon"
+                className="flex-1 bg-gray-800/50 hover:bg-gray-700/50 text-white border-gray-700/50 transition-colors"
+                title="Share this club"
+              >
+                <Share2 size={18} />
+              </Button>
+              <Button 
+                variant="outline"
+                size="icon"
+                className="flex-1 bg-gray-800/50 hover:bg-gray-700/50 text-white border-gray-700/50 transition-colors"
+                title="Report club"
+              >
+                <Flag size={18} />
+              </Button>
             </div>
           </div>
         </div>
       </div>
+
+       {/* Navigation Tabs - Responsive Design */}
+       <div className="sticky top-0 z-40 backdrop-blur-xl mt-6 sm:mt-8">
+         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8">
+           {/* Mobile: Horizontal scroll tabs */}
+           <div className="block sm:hidden py-4">
+             <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+               <Button
+                 onClick={() => setActiveTab('events')}
+                 className={`flex-shrink-0 px-4 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
+                   activeTab === 'events'
+                     ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg'
+                     : 'text-gray-400 bg-gray-800/50 hover:text-white hover:bg-gray-700/50'
+                 }`}
+               >
+                 <Calendar className="w-4 h-4" />
+                 <span className="text-sm">Events</span>
+                 <span className="px-1.5 py-0.5 bg-gray-600/50 text-xs rounded-full">{event.length}</span>
+               </Button>
+               <Button
+                 onClick={() => setActiveTab('members')}
+                 className={`flex-shrink-0 px-4 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
+                   activeTab === 'members'
+                     ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg'
+                     : 'text-gray-400 bg-gray-800/50 hover:text-white hover:bg-gray-700/50'
+                 }`}
+               >
+                 <Users className="w-4 h-4" />
+                 <span className="text-sm">Members</span>
+                 <span className="px-1.5 py-0.5 bg-gray-600/50 text-xs rounded-full">{getMemberCount(club)}</span>
+               </Button>
+               <Button
+                 onClick={() => setActiveTab('social')}
+                 className={`flex-shrink-0 px-4 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
+                   activeTab === 'social'
+                     ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg'
+                     : 'text-gray-400 bg-gray-800/50 hover:text-white hover:bg-gray-700/50'
+                 }`}
+               >
+                 <Share2 className="w-4 h-4" />
+                 <span className="text-sm">Social</span>
+               </Button>
+               <Button
+                 onClick={() => setActiveTab('announcements')}
+                 className={`flex-shrink-0 px-4 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
+                   activeTab === 'announcements'
+                     ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg'
+                     : 'text-gray-400 bg-gray-800/50 hover:text-white hover:bg-gray-700/50'
+                 }`}
+               >
+                 <Bell className="w-4 h-4" />
+                 <span className="text-sm">Announcements</span>
+               </Button>
+             </div>
+           </div>
+
+           {/* Desktop: Centered tabs */}
+           <div className="hidden sm:flex justify-center py-6">
+             <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-2 shadow-2xl">
+               <div className="flex items-center gap-2">
+                 <Button
+                   onClick={() => setActiveTab('events')}
+                   className={`px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 lg:gap-3 ${
+                     activeTab === 'events'
+                       ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg shadow-yellow-500/25 transform scale-105'
+                       : 'text-gray-400 hover:text-white hover:bg-gray-700/50 hover:scale-105'
+                   }`}
+                 >
+                   <Calendar className="w-4 h-4 lg:w-5 lg:h-5" />
+                   <span className="text-sm lg:text-base">Events</span>
+                   <span className="px-2 py-1 bg-gray-600/50 text-xs rounded-full">{event.length}</span>
+                 </Button>
+                 <Button
+                   onClick={() => setActiveTab('members')}
+                   className={`px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 lg:gap-3 ${
+                     activeTab === 'members'
+                       ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg shadow-yellow-500/25 transform scale-105'
+                       : 'text-gray-400 hover:text-white hover:bg-gray-700/50 hover:scale-105'
+                   }`}
+                 >
+                   <Users className="w-4 h-4 lg:w-5 lg:h-5" />
+                   <span className="text-sm lg:text-base">Members</span>
+                   <span className="px-2 py-1 bg-gray-600/50 text-xs rounded-full">{getMemberCount(club)}</span>
+                 </Button>
+                 <Button
+                   onClick={() => setActiveTab('social')}
+                   className={`px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 lg:gap-3 ${
+                     activeTab === 'social'
+                       ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg shadow-yellow-500/25 transform scale-105'
+                       : 'text-gray-400 hover:text-white hover:bg-gray-700/50 hover:scale-105'
+                   }`}
+                 >
+                   <Share2 className="w-4 h-4 lg:w-5 lg:h-5" />
+                   <span className="text-sm lg:text-base">Social</span>
+                 </Button>
+                 <Button
+                   onClick={() => setActiveTab('announcements')}
+                   className={`px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 lg:gap-3 ${
+                     activeTab === 'announcements'
+                       ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black shadow-lg shadow-yellow-500/25 transform scale-105'
+                       : 'text-gray-400 hover:text-white hover:bg-gray-700/50 hover:scale-105'
+                   }`}
+                 >
+                   <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
+                   <span className="text-sm lg:text-base">Announcements</span>
+                 </Button>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+
+      {/* Main Content - Responsive Design */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-4 sm:py-6 md:py-8 bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        {/* Tab Content */}
+        <div className="space-y-4 sm:space-y-6 md:space-y-8">
+          {/* Events Tab */}
+          {activeTab === 'events' && (
+            <div className="space-y-4 sm:space-y-6">
+              {/* Events Header - Responsive Design */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">Club Events</h2>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="relative flex-1 sm:flex-none">
+                    <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search events..."
+                      className="bg-gray-800/50 rounded-lg sm:rounded-lg md:rounded-xl px-4 py-2 pl-10 text-white text-sm w-full sm:w-48 lg:w-64"
+                    />
+                  </div>
+                  <button className="p-2 bg-gray-800/50 rounded-lg sm:rounded-lg md:rounded-xl text-gray-400 hover:text-white transition-colors touch-manipulation">
+                    <Filter className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {event.length === 0 ? (
+                <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-8 sm:p-12 md:p-16 text-center">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto bg-gray-800/50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                    <CalendarDays className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">No Events Yet</h3>
+                  <p className="text-gray-400 mb-4 sm:mb-6 text-sm sm:text-base">This club hasn't posted any events yet. Be the first to create one!</p>
+                  <Button onClick={() => setIsCreateEventModalOpen(true)} className="px-4 py-2 sm:px-6 sm:py-3 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg sm:rounded-xl font-semibold transition-colors text-sm sm:text-base touch-manipulation">
+                    Create First Event
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {event.map((eventItem: EventType) => (
+                    <Link
+                      key={eventItem.id}
+                      href={`/events/${eventItem.id}`}
+                      className="block group bg-gray-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl transition-all duration-300 overflow-hidden hover:ring-2 hover:ring-yellow-400/50 cursor-pointer"
+                    >
+                      <div className="flex flex-col md:flex-row">
+                        {/* Event Image - Mobile Optimized */}
+                        <div className="relative w-full md:w-80 h-40 sm:h-48 md:h-auto overflow-hidden">
+                          <Image
+                            src={eventItem.image || '/pic1.jpg'}
+                            alt={eventItem.title || 'Event Image'}
+                            width={320}
+                            height={200}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 via-transparent to-transparent"></div>
+                          <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
+                            <span className="px-2 py-1 sm:px-3 sm:py-1 bg-yellow-500/90 text-black text-xs font-semibold rounded-full">
+                              {eventItem.createdAt.toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Event Content - Mobile Optimized */}
+                        <div className="flex-1 p-4 sm:p-6">
+                          <div className="flex flex-col h-full">
+                            <div className="flex-1">
+                              <div className="flex items-start justify-between mb-2 sm:mb-3">
+                                <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-yellow-400 transition-colors leading-tight">
+                                  {eventItem.EventName}
+                                </h3>
+                                <button
+                                  type="button"
+                                  onClick={(e) => e.preventDefault()}
+                                  className="p-1.5 sm:p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white transition-all touch-manipulation"
+                                >
+                                  <Bookmark className="w-3 h-3 sm:w-4 sm:h-4" />
+                                </button>
+                              </div>
+                              
+                              <p className="text-gray-300 mb-3 sm:mb-4 leading-relaxed text-sm sm:text-base line-clamp-2">
+                                {eventItem.description}
+                              </p>
+
+                              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm text-gray-400">
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                   <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                  <span className="truncate">{eventItem.Venue}</span> 
+                                </div>
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                  <span className="hidden sm:inline">Posted {eventItem.createdAt.toLocaleDateString()}</span>
+                                  <span className="sm:hidden">{eventItem.createdAt.toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                  
+                                </div>
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                  <Eye className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                  
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Event Actions - Mobile Optimized */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 pt-3 sm:pt-4">
+                              <div className="flex items-center gap-2 sm:gap-3">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    router.push(`/events/${eventItem.id}`);
+                                  }}
+                                  className="px-4 py-2 sm:px-6 sm:py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation"
+                                >
+                                  <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
+                                  RSVP
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleShare();
+                                  }}
+                                  className="px-3 py-2 sm:px-4 sm:py-2 bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-white rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm transition-all touch-manipulation"
+                                  title="Share this event"
+                                >
+                                  <Share className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
+                                  <span className="hidden sm:inline">Share</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => e.preventDefault()}
+                                  className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-red-400 transition-all touch-manipulation"
+                                >
+                                  <ThumbsUp className="w-3 h-3 sm:w-4 sm:h-4" />
+                                </button>
+                              </div>
+                              <span
+                                className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white transition-all touch-manipulation self-end sm:self-auto inline-flex"
+                                title="View event"
+                              >
+                                <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Members Tab */}
+          {activeTab === 'members' && (
+            <div className="space-y-4 sm:space-y-6">
+              {/* Members Header - Responsive Design */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">Club Members</h2>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="relative flex-1 sm:flex-none">
+                    <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search members..."
+                      className="bg-gray-800/50 rounded-lg sm:rounded-xl px-4 py-2 pl-10 text-white text-sm w-full sm:w-48 lg:w-64"
+                    />
+                  </div>
+                  <select className="bg-gray-800/50 rounded-lg sm:rounded-xl px-3 py-2 text-white text-sm">
+                    <option>All</option>
+                    <option>Admins</option>
+                    <option>Recent</option>
+                  </select>
+                </div>
+              </div>
+
+              {Array.isArray(club.members) && club.members.length > 0 ? (
+                <div className="space-y-4">
+                  {/* Founder Info Card */}
+                  {(() => {
+                    const founder = getFounder();
+                    if (founder) {
+                      const founderRole = getRoleBadgeConfig('founder');
+                      return (
+                        <div className="bg-gradient-to-r from-yellow-500/10 to-yellow-400/5 border-2 border-yellow-400/40 rounded-xl sm:rounded-2xl p-4 sm:p-5">
+                          <div className="flex items-start gap-4">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl overflow-hidden border-2 border-yellow-400/50">
+                                <Image
+                                  src={founder.profileAvatar || '/default-avatar.jpg'}
+                                  alt={founder.name || 'Founder'}
+                                  width={64}
+                                  height={64}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-black text-lg font-bold">👑</div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="text-base sm:text-lg font-bold text-yellow-300">
+                                  {founder.name || founder.fullName || founder.username || 'Founder'}
+                                </h3>
+                                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${founderRole.bgColor} ${founderRole.color} border ${founderRole.borderColor}`}>
+                                  {founderRole.label}
+                                </span>
+                              </div>
+                              {founder.course && (
+                                <p className="text-sm text-gray-300">
+                                  {founder.course} {founder.year && `• ${founder.year} Year`}
+                                </p>
+                              )}
+                              {founder.email && (
+                                <p className="text-xs text-gray-400 truncate mt-1">{founder.email}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+
+                  {/* Other Members List */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide pl-1">
+                      Other Members ({getSortedMembers().filter(m => getMemberRole(m) !== 'founder').length})
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      {getSortedMembers().filter(m => getMemberRole(m) !== 'founder').slice(0, 20).map((member: any, index: number) => {
+                        const memberRole = getMemberRole(member);
+                        const roleConfig = getRoleBadgeConfig(memberRole);
+                        return (
+                          <div
+                            key={member.id || index}
+                            className="group bg-gray-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all duration-300 border border-gray-800 hover:border-gray-700"
+                          >
+                            <div className="flex items-center gap-3 sm:gap-4">
+                              {/* Avatar - Mobile Optimized */}
+                              <div className="relative flex-shrink-0">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl overflow-hidden transition-colors">
+                                  <Image
+                                    src={member.profileAvatar || '/default-avatar.jpg'}
+                                    alt={member.name || 'Member'}
+                                    width={48}
+                                    height={48}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full"></div>
+                              </div>
+
+                              {/* Member Info - Mobile Optimized */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="text-white font-semibold truncate text-sm sm:text-base">
+                                    {member.name || member.fullName || member.username || 'Member'}
+                                  </h4>
+                                </div>
+                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${roleConfig.bgColor} ${roleConfig.color} border ${roleConfig.borderColor} mb-1`}>
+                                  {roleConfig.emoji} {roleConfig.label}
+                                </span>
+                                <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-400">
+                                  {member.course && (
+                                    <span className="truncate">{member.course}</span>
+                                  )}
+                                  {member.course && member.year && <span>•</span>}
+                                  {member.year && (
+                                    <span>{member.year} Year</span>
+                                  )}
+                                </div>
+                                {member.email && (
+                                  <p className="text-xs text-gray-500 truncate">{member.email}</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Load More */}
+                  {club.members.length > 20 && (
+                    <div className="text-center">
+                      <button className="px-6 py-3 bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-white rounded-xl font-medium transition-all">
+                        Load More Members ({club.members.length - 20} remaining)
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl p-16 text-center">
+                  <div className="w-24 h-24 mx-auto bg-gray-800/50 rounded-full flex items-center justify-center mb-6">
+                    <Users className="w-12 h-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">No Members Yet</h3>
+                  <p className="text-gray-400 mb-6">Be the first to join this amazing club!</p>
+                  {isJoined ? (
+                    <div className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl font-semibold flex items-center justify-center">
+                      <UserCheck className="w-5 h-5 mr-2" />
+                      You are already joined
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleJoinClick}
+                      className="px-6 py-3 bg-yellow-500 hover:bg-yellow-400 text-black rounded-xl font-semibold transition-colors"
+                    >
+                      Join Now
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Social Tab */}
+          {activeTab === 'social' && (
+            <div className="space-y-4 sm:space-y-6">
+              {/* Social Header - Responsive Design */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Share2 className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">Social Media</h2>
+                </div>
+              </div>
+
+              {/* Social Links */}
+              {(socialLinks.instagram || socialLinks.linkedin || socialLinks.twitter) ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {/* Instagram */}
+                  {socialLinks.instagram && (
+                    <a
+                      href={socialLinks.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 rounded-xl sm:rounded-2xl p-6 sm:p-8 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-pink-500/25"
+                    >
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                          <Instagram className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Instagram</h3>
+    
+                        </div>
+                        <div className="flex items-center text-white/90 text-sm group-hover:text-white transition-colors">
+                          <span>Visit Profile</span>
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        </div>
+                      </div>
+                    </a>
+                  )}
+
+                  {/* LinkedIn */}
+                  {socialLinks.linkedin && (
+                    <a
+                      href={socialLinks.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl p-6 sm:p-8 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25"
+                    >
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                          <Linkedin className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">LinkedIn</h3>
+                          <p className="text-white/80 text-sm truncate max-w-full overflow-hidden">{socialLinks.linkedin}</p>
+                        </div>
+                        <div className="flex items-center text-white/90 text-sm group-hover:text-white transition-colors">
+                          <span>Visit Profile</span>
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        </div>
+                      </div>
+                    </a>
+                  )}
+
+                  {/* Twitter */}
+                  {socialLinks.twitter && (
+                    <a
+                      href={socialLinks.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group bg-gradient-to-br from-sky-500 to-blue-500 rounded-xl sm:rounded-2xl p-6 sm:p-8 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-sky-500/25"
+                    >
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                          <Twitter className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Twitter</h3>
+                        
+                        </div>
+                        <div className="flex items-center text-white/90 text-sm group-hover:text-white transition-colors">
+                          <span>Visit Profile</span>
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        </div>
+                      </div>
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-8 sm:p-12 md:p-16 text-center">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto bg-gray-800/50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                    <Share2 className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">No Social Media Links</h3>
+                  <p className="text-gray-400 mb-4 sm:mb-6 text-sm sm:text-base">This club hasn't added any social media links yet.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Announcements Tab */}
+          {activeTab === 'announcements' && (
+            <div className="space-y-4 sm:space-y-6">
+              {/* Show announcement component for everyone */}
+              <ZynvoClubAnnouncement club={club} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Footer - Mobile Optimized */}
+      <footer className="bg-black/80 backdrop-blur-sm mt-8 sm:mt-12 md:mt-16 border-t border-gray-800/50 w-full">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-lg flex items-center justify-center">
+                <span className="text-black font-bold text-sm sm:text-base">Z</span>
+              </div>
+              <span className="text-base sm:text-lg font-bold text-white">Zynvo</span>
+              <span className="text-gray-500 text-xs sm:text-sm hidden sm:inline">• Campus Communities</span>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors touch-manipulation">
+                  <Globe className="w-4 h-4" />
+                </a>
+                <button 
+                  onClick={handleShare}
+                  className="text-gray-400 hover:text-yellow-400 transition-colors touch-manipulation"
+                  title="Share this club"
+                >
+                  <Share2 className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-gray-500 text-xs sm:text-sm text-center sm:text-left">
+                © 2026 Zynvo. All rights reserved.
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
 
       {/* Join Club Modal */}
       {club && (
@@ -681,10 +1428,40 @@ export default function ClubPage({}: ClubPageProps) {
           isOpen={isJoinModalOpen}
           onClose={() => setIsJoinModalOpen(false)}
           clubName={club.name}
-          clubImage={club.image || '/default-club-image.jpg'}
+          clubImage={club.image || '/logozynvo.jpg'}
           clubId={id}
+          requirements={club.requirements}
         />
       )}
+
+      {/* Create Event Modal */}
+      <CreateEventModal
+        isOpen={isCreateEventModalOpen}
+        onClose={() => setIsCreateEventModalOpen(false)}
+      />
+
+      {/* Membership Criteria Modal */}
+      {openCriteriaModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/70" onClick={() => setOpenCriteriaModal(false)}></div>
+          <div className="relative z-10 w-full max-w-xl mx-4 bg-gray-950 border border-yellow-400/30 rounded-2xl p-6 text-white shadow-[0_0_30px_rgba(255,215,0,0.08)]">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xl font-semibold text-yellow-300">Membership Criteria</h3>
+              <button
+                onClick={() => setOpenCriteriaModal(false)}
+                className="text-sm text-yellow-400/80 hover:text-yellow-300"
+              >
+                Close
+              </button>
+            </div>
+            <div className="max-h-80 overflow-auto pr-1 text-gray-200 leading-relaxed whitespace-pre-wrap">
+              {club?.requirements?.trim() ? club.requirements : 'No membership criteria provided.'}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <NoTokenModal isOpen={isAuthModalOpen} onOpenChange={setIsAuthModalOpen} hasToken={hasTokenForModal} />
     </div>
   );
 }

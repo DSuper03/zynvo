@@ -94,7 +94,10 @@ export default function CollegeSearchSelect({
   };
 
   const handleInputClick = () => {
-    setIsOpen(true);
+    if (!isOpen) {
+      setIsOpen(true);
+      setSearchTerm('');
+    }
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -118,6 +121,9 @@ export default function CollegeSearchSelect({
           placeholder={value || placeholder}
           readOnly={!isOpen}
           required={required}
+          autoComplete="new-password"
+          autoCorrect="off"
+          spellCheck={false}
         />
         <FiChevronDown
           className={`text-gray-500 absolute right-3 top-1/2 transform -translate-y-1/2 transition-transform ${

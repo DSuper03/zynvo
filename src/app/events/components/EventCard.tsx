@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapPin, Calendar } from 'lucide-react';
+import { MapPin, Calendar, Share2, Castle, House, CreditCard } from 'lucide-react';
 import { Modal, ModalTrigger } from '@/components/ui/animated-modal';
 import { eventData } from '@/types/global-Interface';
 import Image from 'next/legacy/image';
@@ -10,41 +10,64 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { buildAuthHref } from '@/lib/authReturnTo';
 
 interface apiRespEvents {
   msg: string;
   response: eventData[];
 }
 
-export default function EventCard() {
+interface EventCardProps {
+  events?: eventData[] | null;
+  isLoading?: boolean;
+  error?: string | null;
+  searchTerm?: string;
+  isUserAttendingEvent?: (event: eventData) => boolean;
+}
+
+export default function EventCard({ 
+  events = null, 
+  isLoading = true, 
+  error = null, 
+  searchTerm = '',
+  isUserAttendingEvent
+}: EventCardProps) {
   const [activeFilter, setActiveFilter] = useState('all');
-  const [events, setEvents] = useState<eventData[] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
 
   const router = useRouter();
 
-  useEffect(() => {
-    async function fetchEvents() {
+  const handleShare = async (eventId: string, eventName?: string) => {
+    try {
+      const eventInvitePath = buildAuthHref('/auth/signup', `/events/${eventId}`);
+      const shareUrl =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}${eventInvitePath}`
+          : eventInvitePath;
+
+      if (navigator.share) {
+        await navigator.share({
+          title: eventName || 'Check out this event',
+          text: `Join me at ${eventName || 'this event'} on Zynvo.`,
+          url: shareUrl,
+        });
+        return;
+      }
+
+      await navigator.clipboard.writeText(shareUrl);
+      alert('Event link copied to clipboard');
+    } catch (err) {
       try {
-        setIsLoading(true);
-        setError(null);
-        const response = await axios.get<apiRespEvents>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/all`
-        );
-        setEvents(response.data.response);
-      } catch (err) {
-        setError('Failed to load events');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
+        await navigator.clipboard.writeText(`${eventName || 'Event'} - ID: ${eventId}`);
+        alert('Event ID copied to clipboard');
+      } catch (copyErr) {
+        console.error(copyErr);
+        alert('Unable to share. Please copy the URL from the address bar.');
       }
     }
+  };
 
-    fetchEvents();
-  }, []);
+  // Events are now passed as props, no need to fetch them here
 
   // Filter events based on active filter and search term
   const filteredEvents = events?.filter((event) => {
@@ -159,17 +182,22 @@ export default function EventCard() {
                   transition={{ type: 'spring', stiffness: 300, damping: 24 }}
                 >
                   <Image
-                    src={
-                      event.eventHeaderImage ||
-                      event.posterUrl ||
-                      '/logozynvo.jpg'
-                    }
+                    src={ event.posterUrl || '/logozynvo.jpg' }
                     alt={event.description || event.EventName}
                     width={600}
                     height={300}
                     className="w-full h-48 sm:h-40 object-cover"
                     priority={false}
                   />
+                  
+                  {/* Paid Event Badge */}
+                  {event.isPaidEvent && (
+                    <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                      <CreditCard size={14} />
+                      Paid (₹{event.paymentAmount})
+                    </div>
+                  )}
+                  
                   {/* subtle glow on hover */}
                   <motion.div
                     aria-hidden
@@ -198,11 +226,11 @@ export default function EventCard() {
                       </span>
                     </div>
                     <div className="flex items-center text-gray-300 text-sm">
-                      <MapPin className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
+                      <House className="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0" />
                       <span className="truncate">
-                        {event.clubName
-                          ? `${event.clubName}'s College`
-                          : 'Location TBD'}
+                        {event.university
+                          ? event.university
+                          : `${event.clubName} Club`}
                       </span>
                     </div>
                   </div>
@@ -210,18 +238,37 @@ export default function EventCard() {
                     <span className="text-gray-400 text-xs md:text-sm">
                       {event.attendees?.length || 0} attending
                     </span>
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Button
-                        className="bg-black text-white font-bold rounded-2xl border border-yellow-400"
-                        onClick={() => router.push(`events/${event.id}`)}
-                      >
-                        Check
-                      </Button>
-                    </motion.div>
+                    <div className="flex items-center gap-2">
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button
+                          variant="outline"
+                          className="bg-black text-white font-bold rounded-2xl border border-yellow-400 flex items-center gap-2"
+                          onClick={() => handleShare(event.id, event.EventName)}
+                          aria-label="Share event"
+                        >
+                          <Share2 className="w-4 h-4" />
+                          Share
+                        </Button>
+                      </motion.div>
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button
+                          className="bg-black text-white font-bold rounded-2xl border border-yellow-400"
+                          onClick={() => router.push(`events/${event.id}`)}
+                        >
+                          Check
+                        </Button>
+                      </motion.div>
+                    </div>
                   </div>
+                  
+                  {/* Show attendance status above buttons */}
+                  {isUserAttendingEvent && isUserAttendingEvent(event) && (
+                    <div className="mt-2 text-center">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-600 text-white">
+                        ✓ You are attending
+                      </span>
+                    </div>
+                  )}
                 </div>
                 {/* highlight ring */}
                 <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-yellow-400/0 group-hover:ring-yellow-400/25 transition" />
@@ -235,14 +282,6 @@ export default function EventCard() {
                 ? 'No events found matching your search'
                 : 'No events found'}
             </p>
-            {searchTerm && (
-              <button
-                className="mt-4 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                onClick={() => setSearchTerm('')}
-              >
-                Clear Search
-              </button>
-            )}
           </div>
         )}
       </motion.div>

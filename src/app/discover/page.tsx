@@ -1,36 +1,142 @@
 'use client';
 import axios from 'axios';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import {
-  Heart,
-  MessageCircle,
-  Share,
-  Home,
-  MoreHorizontal,
-  Plus,
-  Calendar,
-  User,
-  Building,
-  Users,
-} from 'lucide-react';
+import { CalendarDays, Flame, MapPin, MessageCircle, PenSquare, Sparkles, X } from 'lucide-react';
+
 import CreatePostButton from './components/CreatePostButton';
 import CreatePostModal from './components/CreatePostModal';
 import { PostData } from '@/types/global-Interface';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { AuroraText } from '@/components/magicui/aurora-text';
 import { toast } from 'sonner';
+import { setPostCache } from '@/lib/postCache';
+import ProfileHeaderCompact from '@/components/ProfileHeaderCompact';
+import { NotificationDropdown } from '@/components/notifications';
+import { EmptyState, ErrorState, FeedPostSkeleton } from '@/components/feedback';
+import { FeedPostCard } from '@/components/discover/FeedPostCard';
 
 interface ApiResponse {
   msg: string;
   posts: PostData[];
 }
 
-export default function Feed() {
-  const [activeTab, setActiveTab] = useState<'recents' | 'friends' | 'popular'>(
-    'recents'
+type DiscoverEventPin = {
+  title: string;
+  category: string;
+  date: string;
+  location: string;
+  image: string;
+  heightClass: string;
+  accent: string;
+};
+
+const discoverEventPins: DiscoverEventPin[] = [
+  {
+    title: 'Campus Music Night',
+    category: 'Cultural',
+    date: 'Jun 04',
+    location: 'Main Auditorium',
+    image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=900&auto=format&fit=crop',
+    heightClass: 'h-64',
+    accent: 'from-pink-500/80 via-purple-500/40',
+  },
+  {
+    title: 'AI Hack Sprint',
+    category: 'Hackathon',
+    date: 'Jun 08',
+    location: 'Innovation Lab',
+    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=900&auto=format&fit=crop',
+    heightClass: 'h-80',
+    accent: 'from-cyan-500/80 via-blue-500/40',
+  },
+  {
+    title: 'Open Mic Stories',
+    category: 'Meetup',
+    date: 'Jun 10',
+    location: 'Cafe Court',
+    image: 'https://images.unsplash.com/photo-1521334884684-d80222895322?q=80&w=900&auto=format&fit=crop',
+    heightClass: 'h-56',
+    accent: 'from-amber-500/80 via-orange-500/40',
+  },
+  {
+    title: 'Startup Mixer',
+    category: 'Networking',
+    date: 'Jun 14',
+    location: 'Incubation Cell',
+    image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=900&auto=format&fit=crop',
+    heightClass: 'h-72',
+    accent: 'from-emerald-500/80 via-teal-500/40',
+  },
+  {
+    title: 'Design Jam',
+    category: 'Workshop',
+    date: 'Jun 16',
+    location: 'Design Studio',
+    image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=900&auto=format&fit=crop',
+    heightClass: 'h-60',
+    accent: 'from-violet-500/80 via-fuchsia-500/40',
+  },
+  {
+    title: 'Street Photo Walk',
+    category: 'Photography',
+    date: 'Jun 18',
+    location: 'College Gate',
+    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=900&auto=format&fit=crop',
+    heightClass: 'h-80',
+    accent: 'from-yellow-500/80 via-lime-500/40',
+  },
+];
+
+function EventPinCard({
+  event,
+  onOpenEvents,
+  sizes,
+}: {
+  event: DiscoverEventPin;
+  onOpenEvents: () => void;
+  sizes: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onOpenEvents}
+      className="group relative mb-3 w-full break-inside-avoid overflow-hidden rounded-2xl border border-white/10 bg-gray-900/60 text-left shadow-lg shadow-black/25 transition-all duration-300 hover:-translate-y-1 hover:border-yellow-400/40 hover:shadow-yellow-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/70"
+    >
+      <div className={`relative ${event.heightClass} overflow-hidden`}>
+        <Image
+          src={event.image}
+          alt={event.title}
+          fill
+          sizes={sizes}
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+        <div className={`absolute inset-0 bg-gradient-to-t ${event.accent} to-transparent opacity-85`} />
+        <div className="absolute inset-x-0 bottom-0 p-3">
+          <div className="mb-2 inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/45 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-md">
+            <Sparkles className="h-3 w-3 text-yellow-300" />
+            {event.category}
+          </div>
+          <h3 className="text-sm font-semibold leading-tight text-white drop-shadow">
+            {event.title}
+          </h3>
+          <div className="mt-2 space-y-1 text-[11px] text-white/85">
+            <span className="flex items-center gap-1">
+              <CalendarDays className="h-3 w-3 text-yellow-300" />
+              {event.date}
+            </span>
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3 w-3 text-yellow-300" />
+              {event.location}
+            </span>
+          </div>
+        </div>
+      </div>
+    </button>
   );
+}
+
+export default function Feed() {
   const [posts, setPost] = useState<PostData[]>([]);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,25 +146,17 @@ export default function Feed() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
+  const [feedRetryNonce, setFeedRetryNonce] = useState(0);
 
-  // Slider events data
-  const sliderEvents = [
-    {
-      img: '/posters/1.png',
-      title: 'Tech Conference',
-      desc: 'Join the latest in tech innovation.',
-    },
-    {
-      img: '/posters/2.png',
-      title: 'Music Festival',
-      desc: 'Experience live music and fun.',
-    },
-    {
-      img: '/posters/4.png',
-      title: 'Art Expo',
-      desc: 'Explore creative artworks.',
-    },
-  ];
+  // Image modal state
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string } | null>(null);
+
+  const router = useRouter();
+
+  // Shared event pins power the desktop masonry sidebar and mobile scroller.
+  const sliderEvents = discoverEventPins;
   const [slideIdx, setSlideIdx] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
 
@@ -88,12 +186,85 @@ export default function Feed() {
     return formatDate(date);
   };
 
+  // Function to handle image modal - memoized
+  const handleImageClick = useCallback((src: string, alt: string) => {
+    setSelectedImage({ src, alt });
+    setIsImageModalOpen(true);
+  }, []);
+
+  const closeImageModal = useCallback(() => {
+    setIsImageModalOpen(false);
+    setSelectedImage(null);
+  }, []);
+
+  // Handle escape key to close modal — PERFORMANCE: cleanup always runs; closeImageModal in deps for stable handler
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isImageModalOpen) {
+        closeImageModal();
+      }
+    };
+
+    if (isImageModalOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isImageModalOpen, closeImageModal]);
+
+
+  // Function to handle post sharing - memoized
+  const handleSharePost = useCallback(async (postId: string, postTitle: string) => {
+    try {
+      const postUrl = `${window.location.origin}/post/${postId}`;
+
+      // Check if Web Share API is supported (mobile devices)
+      if (navigator.share) {
+        await navigator.share({
+          title: postTitle,
+          text: `Check out this post: ${postTitle}`,
+          url: postUrl,
+        });
+        toast('Post shared successfully!');
+      } else {
+        // Fallback to clipboard copy
+        await navigator.clipboard.writeText(postUrl);
+        toast('Post link copied to clipboard!');
+      }
+    } catch (error) {
+      // Error already surfaced via toast fallbacks
+      // Fallback method for older browsers
+      try {
+        const postUrl = `${window.location.origin}/post/${postId}`;
+        const textArea = document.createElement('textarea');
+        textArea.value = postUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        toast('Post link copied to clipboard!');
+      } catch (fallbackError) {
+        toast('Unable to copy link. Please try again.');
+      }
+    }
+  }, []);
+
+  const sliderEventsLength = sliderEvents.length;
+
+  const openEventsPage = useCallback(() => {
+    router.push('/events');
+  }, [router]);
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setSlideIdx((idx) => (idx + 1) % sliderEvents.length);
+      setSlideIdx((idx) => (idx + 1) % sliderEventsLength);
     }, 3500);
     return () => clearInterval(interval);
-  }, [sliderEvents.length]);
+  }, [sliderEventsLength]);
 
   useEffect(() => {
     const postData = async () => {
@@ -124,57 +295,70 @@ export default function Feed() {
     };
 
     postData();
-  }, [page]);
+  }, [page, feedRetryNonce]);
 
-  // Infinite scroll handler
+  // Infinite scroll handler with debouncing
   useEffect(() => {
+    let ticking = false;
+    
     const handleScroll = () => {
-      if (
-        window.innerHeight + window.scrollY >=
-          document.body.offsetHeight - 200 &&
-        hasMore &&
-        !isLoading &&
-        !isFetchingMore
-      ) {
-        setPage((prev) => prev + 1);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (
+            window.innerHeight + window.scrollY >=
+            document.body.offsetHeight - 200 &&
+            hasMore &&
+            !isLoading &&
+            !isFetchingMore
+          ) {
+            setPage((prev) => prev + 1);
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
-    window.addEventListener('scroll', handleScroll);
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMore, isLoading, isFetchingMore]);
 
   return (
     <div className="min-h-screen w-full bg-transparent overflow-y-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        {/* Page heading */}
-        <header className="mb-4 sm:mb-6">
-          <h1 className="text-center">
-            <AuroraText className="text-3xl sm:text-4xl font-bold leading-tight tracking-tight">
-              Discover
-            </AuroraText>
-          </h1>
-        </header>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Column 1-2: Main Content */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Responsive buttons/actions row */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              {/* Mobile View - Only Create Post Button */}
-              <div className="flex sm:hidden items-center justify-end w-full">
-                <div className="flex items-center space-x-3">
-                  {/* Circular Create Post Button for Mobile */}
+              {/* Mobile View - Profile Header and Create Post Button */}
+              <div className="flex sm:hidden items-center justify-between gap-3 w-full">
+                {/* Profile Header Compact - Left side */}
+                <div className="flex-1 min-w-0">
+                  <ProfileHeaderCompact />
+                </div>
+                
+                {/* Right side actions */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {/* Notification Dropdown */}
+                  <NotificationDropdown />
+                  
+                  {/* Circular Create Post Button */}
                   <Button
                     onClick={() => setIsPostModalOpen(true)}
-                    className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-600 hover:to-yellow-500 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-105"
+                    className="w-12 h-12 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_10px_35px_rgb(0,0,0,0.18)] transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-yellow-500 via-yellow-400 to-amber-300 hover:from-yellow-500 hover:via-yellow-500 hover:to-yellow-400 border border-yellow-300/40 relative overflow-hidden"
                   >
-                    <Plus className="h-6 w-6 text-black" />
+                    <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                      <span className="absolute -inset-[120%] bg-white/20 rotate-12 translate-x-[-20%] group-hover:translate-x-[60%] transition-transform duration-700 ease-out" />
+                    </span>
+                    <PenSquare className="h-5 w-5 text-black" />
                   </Button>
                 </div>
               </div>
 
-              {/* Desktop View - Original Create Post Button */}
-              <div className="hidden sm:block">
+              {/* Desktop View - Create Post Button and Notifications */}
+              <div className="hidden sm:flex items-center gap-3">
+                <NotificationDropdown />
                 <CreatePostButton
                   onClick={() => setIsPostModalOpen(true)}
                   className="w-full sm:w-auto"
@@ -182,64 +366,41 @@ export default function Feed() {
               </div>
 
               {/* Tab navigation - Hidden on mobile */}
-              <div className="hidden sm:block overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-                <div className="flex space-x-2 min-w-max">
-                  <Button
-                    onClick={() => setActiveTab('recents')}
-                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
-                      activeTab === 'recents'
-                        ? 'bg-yellow-500 text-black'
-                        : 'text-yellow-400 hover:bg-yellow-500/10'
-                    }`}
-                  >
-                    Recents
-                  </Button>
-                  <Button
-                    onClick={() => setActiveTab('friends')}
-                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
-                      activeTab === 'friends'
-                        ? 'bg-yellow-500 text-black'
-                        : 'text-yellow-400 hover:bg-yellow-500/10'
-                    }`}
-                  >
-                    Friends
-                  </Button>
-                  <Button
-                    onClick={() => setActiveTab('popular')}
-                    className={`flex-1 py-2 px-4 rounded-md font-medium text-sm transition-colors ${
-                      activeTab === 'popular'
-                        ? 'bg-yellow-500 text-black'
-                        : 'text-yellow-400 hover:bg-yellow-500/10'
-                    }`}
-                  >
-                    Popular
-                  </Button>
-                </div>
-              </div>
+              
             </div>
 
-            {/* Mobile slider: now placed above posts */}
+            {/* Mobile event pins */}
             <div className="lg:hidden mt-2">
-              <div className="relative w-full overflow-hidden" ref={sliderRef}>
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-yellow-400/80">
+                    Happening soon
+                  </p>
+                  <h2 className="text-lg font-semibold text-white">
+                    Event inspiration
+                  </h2>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={openEventsPage}
+                  className="h-9 text-yellow-300 hover:bg-yellow-500/10 hover:text-yellow-200"
+                >
+                  View all
+                </Button>
+              </div>
+              <div className="relative w-full overflow-hidden rounded-2xl" ref={sliderRef}>
                 <div
                   className="flex transition-transform duration-700"
                   style={{ transform: `translateX(-${slideIdx * 100}%)` }}
                 >
                   {sliderEvents.map((ev, i) => (
                     <div key={i} className="min-w-full px-2">
-                      <Card className="group cursor-pointer">
-                        <div className="relative overflow-hidden rounded-lg mb-2">
-                          <div className="aspect-[3/4] bg-gray-700 rounded-lg overflow-hidden">
-                            <Image
-                              src={ev.img}
-                              alt={ev.title}
-                              layout="fill"
-                              className="object-cover transition-transform group-hover:scale-105"
-                            />
-                          </div>
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3"></div>
-                        </div>
-                      </Card>
+                      <EventPinCard
+                        event={ev}
+                        onOpenEvents={openEventsPage}
+                        sizes="(max-width: 1024px) 100vw, 360px"
+                      />
                     </div>
                   ))}
                 </div>
@@ -258,153 +419,60 @@ export default function Feed() {
             {/* Posts Display */}
             <div className="space-y-4 sm:space-y-6">
               {isLoading ? (
-                // Loading state
-                <div className="flex justify-center items-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
-                  <span className="ml-3 text-yellow-400">Loading posts...</span>
-                </div>
+                <FeedPostSkeleton count={3} />
               ) : error ? (
-                // Error state
-                <div className="bg-red-900/20 border border-red-500/30 rounded-md p-4">
-                  <p className="text-red-400">{error}</p>
-                  <Button
-                    onClick={() => window.location.reload()}
-                    className="mt-2 text-sm text-red-300 hover:text-red-200 underline"
-                  >
-                    Try again
-                  </Button>
-                </div>
+                <ErrorState
+                  title="Could not load the feed"
+                  message={error}
+                  onRetry={() => {
+                    setError(null);
+                    setPage(1);
+                    setFeedRetryNonce((n) => n + 1);
+                  }}
+                  retryLabel="Try again"
+                />
               ) : posts && posts.length > 0 ? (
                 posts.map((post) => (
-                  <div
+                  <FeedPostCard
                     key={post.id}
-                    className="bg-gray-800 p-6 rounded-lg border border-yellow-500/20 hover:border-yellow-500/40 transition-colors"
-                  >
-                    {/* Author Info Header */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="relative w-10 h-10">
-                        {post.author.profileAvatar ? (
-                          <img
-                            src={post.author.profileAvatar}
-                            alt={post.author.name || 'User'}
-                            className="rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-400 rounded-full flex items-center justify-center">
-                            <User className="w-5 h-5 text-black" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-white">
-                            {post.author.name || 'Anonymous User'}
-                          </span>
-                          {!post.published && (
-                            <span className="px-2 py-0.5 bg-gray-600 text-xs rounded-full text-gray-300">
-                              Draft
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-400">
-                          <Calendar className="w-3 h-3" />
-                          <span>{getTimeAgo(post.createdAt)}</span>
-                          {post.createdAt !== post.updatedAt && (
-                            <span className="text-gray-500">• Edited</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Post Content */}
-                    <div className="mb-4">
-                      <h3 className="text-xl font-semibold text-yellow-400 mb-2">
-                        {post.title}
-                      </h3>
-                      <p className="text-gray-300 leading-relaxed mb-4">
-                        {post.description}
-                      </p>
-
-                      {/* Post Image */}
-                      {post.image && (
-                        <div className="relative w-full max-w-2xl mx-auto mb-4">
-                          <div className="aspect-video bg-gray-700 rounded-lg overflow-hidden">
-                            <Image
-                              src={post.image}
-                              alt={post.title}
-                              layout="fill"
-                              className="object-cover"
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Post Metadata */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {post.collegeName && (
-                        <span className="flex items-center gap-1 text-sm bg-blue-500/10 text-blue-300 px-2 py-1 rounded">
-                          <Building className="w-3 h-3" />
-                          {post.collegeName}
-                        </span>
-                      )}
-                      {post.clubName && (
-                        <span className="flex items-center gap-1 text-sm bg-purple-500/10 text-purple-300 px-2 py-1 rounded">
-                          <Users className="w-3 h-3" />
-                          {post.clubName}
-                        </span>
-                      )}
-                      <span className="text-sm text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
-                        Post #{post.id.slice(-6)}
-                      </span>
-                    </div>
-
-                    {/* Post Actions */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-700">
-                      <div className="flex items-center space-x-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-gray-400 hover:text-yellow-400 hover:bg-black transition-colors"
-                          onClick={() => {
-                            toast('share feature coming soon');
-                          }}
-                        >
-                          <Share className="w-4 h-4 mr-1" />
-                          <span className="text-sm">Share</span>
-                        </Button>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-400 hover:text-gray-300"
-                      >
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
+                    post={post}
+                    timeLabel={getTimeAgo(post.createdAt)}
+                    isDescriptionExpanded={expandedPosts.has(post.id)}
+                    onToggleDescription={(e) => {
+                      e.stopPropagation();
+                      setExpandedPosts((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(post.id)) next.delete(post.id);
+                        else next.add(post.id);
+                        return next;
+                      });
+                    }}
+                    onOpenPost={() => {
+                      setPostCache(post.id, post);
+                      router.push(`/post/${post.id}`);
+                    }}
+                    onImageClick={handleImageClick}
+                    onShare={(e) => {
+                      e.stopPropagation();
+                      handleSharePost(post.id, post.title);
+                    }}
+                  />
                 ))
               ) : (
-                // No posts state
-                <div className="text-center py-12">
-                  <div className="bg-gray-800 rounded-lg p-8 border border-yellow-500/20">
-                    <MessageCircle
-                      size={48}
-                      className="text-yellow-500 mx-auto mb-4"
-                    />
-                    <h3 className="text-xl font-semibold text-yellow-400 mb-2">
-                      No posts yet
-                    </h3>
-                    <AuroraText className="">
-                      Be the first to create a post!
-                    </AuroraText>
+                <div className="rounded-xl border border-yellow-500/15 bg-gray-900/40 p-2 sm:p-4">
+                  <EmptyState
+                    icon={MessageCircle}
+                    title="No posts yet"
+                    description="Be the first to share something with your campus — updates, events, or questions."
+                  >
                     <Button
+                      type="button"
                       onClick={() => setIsPostModalOpen(true)}
-                      className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2 rounded-md font-medium transition-colors mt-4"
+                      className="min-h-11 bg-yellow-500 hover:bg-yellow-400 text-black px-6 font-medium"
                     >
-                      Create Post
+                      Create post
                     </Button>
-                  </div>
+                  </EmptyState>
                 </div>
               )}
 
@@ -420,45 +488,46 @@ export default function Feed() {
             </div>
           </div>
 
-          {/* Column 3: Sidebar (hidden on mobile) */}
-          <div>
-            {/* Desktop sidebar */}
-            <div className="hidden lg:block">
-              <div className="sticky top-4">
-                <div className="bg-gray-800 rounded-lg border border-yellow-500/20 overflow-hidden">
-                  <div className="bg-gradient-to-r from-yellow-500 to-yellow-400 px-4 py-3">
-                    <h3 className="text-black font-semibold">
-                      Powered by Zynvo
-                    </h3>
+          {/* Column 3: Event masonry sidebar */}
+          <aside className="hidden lg:block">
+            <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:rgba(234,179,8,0.45)_transparent]">
+              <div className="mb-4 rounded-2xl border border-yellow-500/15 bg-gradient-to-br from-yellow-500/10 via-gray-900/70 to-black/70 p-4 shadow-xl shadow-black/30">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-yellow-400/80">
+                      <Flame className="h-3.5 w-3.5" />
+                      Discover events
+                    </p>
+                    <h2 className="mt-2 text-xl font-semibold leading-tight text-white">
+                      Pinterest-style picks for your campus week
+                    </h2>
+                    <p className="mt-2 text-sm leading-relaxed text-gray-400">
+                      Scroll through fresh event ideas, posters, and meetups without leaving the feed.
+                    </p>
                   </div>
-                  <div className="space-y-4">
-                    {sliderEvents.map((ev, i) => (
-                      <Card key={i} className="group cursor-pointer">
-                        <div className="relative overflow-hidden rounded-lg mb-2">
-                          <div className="aspect-[3/4] bg-gray-700 rounded-lg overflow-hidden">
-                            <Image
-                              src={ev.img}
-                              alt={ev.title}
-                              layout="fill"
-                              className="object-cover transition-transform group-hover:scale-105"
-                            />
-                          </div>
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                            <span className="text-black text-xs font-medium px-2 py-1 rounded-full">
-                              {ev.title}
-                            </span>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                    <Button className="w-full py-2 text-sm text-yellow-400 hover:text-yellow-300 transition-colors">
-                      View all events →
-                    </Button>
-                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={openEventsPage}
+                    className="shrink-0 bg-yellow-500 px-3 text-black hover:bg-yellow-400"
+                  >
+                    View all
+                  </Button>
                 </div>
               </div>
+
+              <div className="columns-2 gap-3">
+                {discoverEventPins.map((event) => (
+                  <EventPinCard
+                    key={event.title}
+                    event={event}
+                    onOpenEvents={openEventsPage}
+                    sizes="(max-width: 1280px) 15vw, 180px"
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
 
@@ -466,6 +535,40 @@ export default function Feed() {
         isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
       />
+
+      {/* Image Modal - click backdrop to close */}
+      {isImageModalOpen && selectedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={closeImageModal}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image preview"
+        >
+          <div
+            className="relative max-w-7xl max-h-full w-full h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              onClick={closeImageModal}
+              className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white border border-gray-600 hover:border-gray-500 rounded-full p-2 transition-all duration-200"
+              aria-label="Close preview"
+            >
+              <X className="w-6 h-6" />
+            </Button>
+            <div className="relative w-full h-full flex items-center justify-center">
+              <Image
+                src={selectedImage.src}
+                alt={selectedImage.alt}
+                width={1200}
+                height={800}
+                className="max-w-full max-h-full object-contain rounded-lg"
+                priority
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

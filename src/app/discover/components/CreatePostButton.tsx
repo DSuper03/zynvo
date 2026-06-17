@@ -1,6 +1,6 @@
 import React from 'react';
-import { Plus, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { PenSquare } from 'lucide-react';
+import { ShimmerButton } from '@/components/ui/shimmer-button';
 
 interface CreatePostButtonProps {
   onClick?: () => void;
@@ -9,16 +9,15 @@ interface CreatePostButtonProps {
 
 const CreatePostButton = ({ onClick, className }: CreatePostButtonProps) => {
   return (
-    <Button
+    <ShimmerButton
       onClick={onClick}
-      className={`group relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-bold text-black rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-600 hover:to-yellow-500 shadow-md hover:shadow-lg transition-all duration-300 ${className}`}
+      shimmerDuration="2.5s"
+      borderRadius="12px"
+      className={`inline-flex items-center gap-2 px-5 py-3 font-medium text-yellow-400 hover:text-yellow-300 transition-colors duration-200 ${className}`}
     >
-      <span className="mr-2">
-        <FileText className="h-5 w-5" />
-      </span>
-      <span>Create Post</span>
-      <span className="absolute right-0 top-0 bottom-0 w-8 h-full transition-all duration-300 transform translate-x-12 bg-white opacity-10 group-hover:translate-x-0"></span>
-    </Button>
+      <PenSquare className="h-5 w-5 text-yellow-400" />
+      <span className="tracking-tight">Create Post</span>
+    </ShimmerButton>
   );
 };
 

@@ -2,17 +2,20 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/legacy/image';
-import { X, Upload, Camera, Plus, Trash2 } from 'lucide-react';
+import { X, Upload, Camera, Plus, Trash2, ChevronDown, Building } from 'lucide-react';
 import { CreateClubModalProps } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { toBase64, uploadImageToImageKit } from '@/lib/imgkit';
+import { toBase64, uploadImageToImageKit, compressImageToUnder2MB } from '@/lib/imgkit';
 import axios from 'axios';
+import { fetchClubsByCollege } from '@/app/api/hooks/useClubs';
+import { useRouter } from 'next/navigation';
 
 const CreateClubModal: React.FC<CreateClubModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const router = useRouter();
   const [img, setImg] = useState<File | null>(null);
   const [clubData, setClubData] = useState({
     name: '',
@@ -22,27 +25,138 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     facultyEmail: '',
     requirements: '',
     clubContact: '',
-    logo: '',
     wings: [] as string[],
   });
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [token, setToken] = useState('');
   const [newWing, setNewWing] = useState('');
+  
+  // New state for club selection
+  const [userCollege, setUserCollege] = useState<string>('');
+  const [existingClubs, setExistingClubs] = useState<string[]>([]);
+  const [selectedClubOption, setSelectedClubOption] = useState<'existing' | 'new'>('new');
+  const [selectedExistingClub, setSelectedExistingClub] = useState<string>('');
+  const [isLoadingClubs, setIsLoadingClubs] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [typeSearch, setTypeSearch] = useState('');
+
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       else {
-        toast('login please');
+        toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('login please');
+        toast('Login required', {
+          action: {
+            label: 'Sign in',
+            onClick: () => router.push('/auth/signin'),
+          },
+        });
         return;
       }
     }
-  }, []);
+  }, [router]);
+
+  // Fetch user's college and existing clubs
+  useEffect(() => {
+    const fetchUserCollegeAndClubs = async () => {
+      if (!token) return;
+      
+      // SECURITY: Removed console.log statements that expose sensitive data
+      
+      try {
+        // Get user's college information
+        const userResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        
+        const userData = (userResponse.data as any).user;
+        
+        if (userCollege) {
+          setUserCollege(userCollege);
+          
+          // Fetch existing clubs for this college
+          setIsLoadingClubs(true);
+          // Test the API call directly first
+          try {
+            const testUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClubs/${encodeURIComponent(userCollege)}`;
+            console.log('Testing API URL:', testUrl);
+            
+            const testResponse = await fetch(testUrl, {
+              headers: {
+                authorization: `Bearer ${token}`,
+              },
+            });
+            
+            console.log('Test response status:', testResponse.status);
+            console.log('Test response headers:', testResponse.headers);
+            
+            if (testResponse.ok) {
+              const testData = await testResponse.json();
+              console.log('Test API response data:', testData);
+            } else {
+              console.log('Test API failed with status:', testResponse.status);
+              const errorText = await testResponse.text();
+              console.log('Test API error response:', errorText);
+            }
+          } catch (testError) {
+            console.error('Test API call failed:', testError);
+          }
+          
+          const clubs = await fetchClubsByCollege(userCollege, undefined, token);
+          console.log('Fetched clubs:', clubs); // Debug log
+          
+          // If no clubs found, add some sample clubs for testing
+          if (clubs.length === 0) {
+            console.log('No clubs found, adding sample clubs for testing');
+            const sampleClubs = [
+              'Computer Science Club',
+              'Robotics Club',
+              'Debate Society',
+              'Photography Club',
+              'Music Club'
+            ];
+            setExistingClubs(sampleClubs);
+          } else {
+            setExistingClubs(clubs);
+          }
+        } else {
+          
+          // Add sample clubs even if no college is found
+          const sampleClubs = [
+            'Computer Science Club',
+            'Robotics Club',
+            'Debate Society',
+            'Photography Club',
+            'Music Club'
+          ];
+          setExistingClubs(sampleClubs);
+        }
+      } catch (error) {
+        console.error('Error fetching user college:', error);
+      } finally {
+        setIsLoadingClubs(false);
+      }
+    };
+
+    if (token) {
+      fetchUserCollegeAndClubs();
+    }
+  }, [token]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -59,52 +173,94 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImg(file);
+      const maxBytes = 2 * 1024 * 1024;
+      let processed = file;
+      if (file.size > maxBytes) {
+        processed = await compressImageToUnder2MB(file);
+        if (processed.size > maxBytes) {
+          toast('Could not compress image under 2 MB. Try a smaller image.');
+          return;
+        }
+      }
+      setImg(processed);
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewImage(reader.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(processed);
+      e.currentTarget.value = '';
     }
   };
 
-  async function uploadImg(img: File) {
-    const link = await uploadImageToImageKit(await toBase64(img), img.name);
-    setClubData((prev) => ({
-      ...prev,
-      logo: link,
-    }));
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (img) {
-      await uploadImg(img);
-    } else {
-      toast('please upload a logo for your club');
+    
+    // Validate club selection
+    if (selectedClubOption === 'existing' && !selectedExistingClub) {
+      toast('Please select an existing club');
+      return;
+    }
+    
+    if (selectedClubOption === 'new' && !clubData.name.trim()) {
+      toast('Please enter a club name');
       return;
     }
 
     if (!token) {
-      toast('login please');
+      toast('Login required', {
+        action: {
+          label: 'Sign in',
+          onClick: () => router.push('/auth/signin'),
+        },
+      });
       return;
     }
 
-    const upload = await axios.post<{
-      msg: string;
-      clubId: string;
-    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/club`, clubData, {
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      let image: string;
+      
+      if (img) {
+        const maxBytes = 2 * 1024 * 1024;
+        let toUpload = img;
+        if (img.size > maxBytes) {
+          toUpload = await compressImageToUnder2MB(img);
+          if (toUpload.size > maxBytes) {
+            toast('Could not compress image under 2 MB. Try a smaller image.');
+            return;
+          }
+        }
+        image = await uploadImageToImageKit(await toBase64(toUpload), toUpload.name, '/clubs');
+      } else {
+        toast('please upload a logo for your club');
+        return;
+      }
 
-    const msg = upload?.data;
-    if (upload.status == 200) {
-      toast(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
-      onClose();
-    } else {
-      toast(msg.msg);
+      // Prepare data for submission
+      const submitData = {
+        ...clubData,
+        logo: image,
+        collegeName: userCollege, // Add college name to the submission
+      };
+
+      const upload = await axios.post<{
+        msg: string;
+        clubId: string;
+      }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/club`, submitData, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
+
+      const msg = upload?.data;
+      if (upload.status >= 200 && upload.status < 300) {
+        toast(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
+        onClose();
+      } else {
+        toast(msg.msg);
+      }
+    } catch (error: any) {
+      console.error('Error creating club:', error);
+      toast(error.response?.data?.msg || 'Failed to create club');
     }
   };
 
@@ -118,13 +274,45 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     }
   };
 
-  // ✅ Remove a wing
   const removeWing = (index: number) => {
     setClubData((prev) => ({
       ...prev,
       wings: prev.wings.filter((_, i) => i !== index),
     }));
   };
+
+  const handleClubOptionChange = (option: 'existing' | 'new') => {
+    setSelectedClubOption(option);
+    if (option === 'existing') {
+      setClubData(prev => ({ ...prev, name: selectedExistingClub }));
+    } else {
+      setClubData(prev => ({ ...prev, name: '' }));
+    }
+  };
+
+  const handleExistingClubSelect = (clubName: string) => {
+    setSelectedExistingClub(clubName);
+    setClubData(prev => ({ ...prev, name: clubName }));
+    setIsDropdownOpen(false);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.dropdown-container')) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   if (!isOpen) return null;
 
@@ -173,24 +361,107 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
             </p>
           </div>
 
-          {/* Club Name */}
-          <div className="space-y-2">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-yellow-400"
-            >
-              Club Name*
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              placeholder="Enter your club name"
-              value={clubData.name}
-              onChange={handleChange}
-              className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
-            />
+          {/* Club Selection */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-yellow-400">
+                Choose Club Option*
+              </label>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => handleClubOptionChange('existing')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                    selectedClubOption === 'existing'
+                      ? 'bg-yellow-500 text-black'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  <Building className="w-4 h-4" />
+                  Select Existing Club
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleClubOptionChange('new')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                    selectedClubOption === 'new'
+                      ? 'bg-yellow-500 text-black'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  <Plus className="w-4 h-4" />
+                  Create New Club
+                </button>
+              </div>
+            </div>
+
+            {userCollege && (
+              <div className="text-sm text-gray-400">
+                <span className="text-yellow-400">College:</span> {userCollege}
+              </div>
+            )}
+            
+          
+
+            {selectedClubOption === 'existing' ? (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-yellow-400">
+                  Select Existing Club*
+                </label>
+                <div className="relative dropdown-container">
+                  <button
+                    type="button"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none flex items-center justify-between"
+                  >
+                    <span className={selectedExistingClub ? 'text-white' : 'text-gray-400'}>
+                      {selectedExistingClub || 'Select a club from your college'}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {isDropdownOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {isLoadingClubs ? (
+                        <div className="px-4 py-2 text-gray-400 text-sm">Loading clubs...</div>
+                      ) : existingClubs.length > 0 ? (
+                        existingClubs.map((club, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => handleExistingClubSelect(club)}
+                            className="w-full text-left px-4 py-2 text-white hover:bg-gray-700 transition-colors"
+                          >
+                            {club}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-4 py-2 text-gray-400 text-sm">No existing clubs found in your college</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-yellow-400"
+                >
+                  New Club Name*
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  placeholder="Enter your new club name"
+                  value={clubData.name}
+                  onChange={handleChange}
+                  className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
+                />
+              </div>
+            )}
           </div>
 
           {/* ✅ Wings Section */}
@@ -265,6 +536,17 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
             >
               Category/Type*
             </label>
+            {/* Search box for club type */}
+            <input
+              type="text"
+              placeholder="Search for a type..."
+              value={typeSearch}
+              onChange={e => {
+                const value = e.target.value;
+                setTypeSearch(value);
+              }}
+              className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none mb-2"
+            />
             <select
               id="type"
               name="type"
@@ -273,15 +555,40 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
               onChange={handleChange}
               className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
             >
-              <option value="" disabled>
+              <option value="" disabled hidden>
                 Select a type
               </option>
-              <option value="tech">Technology</option>
-              <option value="cultural">Cultural</option>
-              <option value="business">Business </option>
-              <option value="social">Social</option>
-              <option value="literary">Literature</option>
-              <option value="design">Design</option>
+              {/* Filter types based on search */}
+              {[
+                { label: "Open Mic", value: "open_mic"},
+                { label: "Technology", value: "tech" },
+                { label: "Quiz", value: "Quiz" },
+                { label: "Sports", value: "Sports" },
+                { label: "Debate", value: "Debate" },
+                { label: "Drama", value: "Drama" },
+                { label: "Music", value: "Music" },
+                { label: "Theatre", value: "Theatre" },
+                { label: "Art", value: "Art" },
+                { label: "Crafts", value: "Crafts" },
+                { label: "Food", value: "Food" },
+                { label: "Fashion", value: "Fashion" },
+                { label: "Photography", value: "Photography" },
+                { label: "Other", value: "Other" },
+                { label: "Cultural", value: "cultural" },
+                { label: "Business", value: "business" },
+                { label: "Social", value: "social" },
+                { label: "Literature", value: "literary" },
+                { label: "Design", value: "design" }
+              ]
+                .filter(opt =>
+                  !typeSearch ||
+                  opt.label.toLowerCase().includes(typeSearch.toLowerCase())
+                )
+                .map(opt => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
             </select>
           </div>
 

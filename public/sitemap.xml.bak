@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sitemap for Zynvo - Agentic Social Media Platform -->
+<!-- Optimized for search engines to discover our intelligent campus networking platform -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+  
+  <!-- Homepage - Main agentic social media platform entry point -->
+  <url>
+    <loc>https://zynvosocial.com/</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <mobile:mobile/>
+  </url>
+
+  <!-- Authentication Pages -->
+  <url>
+    <loc>https://zynvosocial.com/auth/signup</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://zynvosocial.com/auth/signin</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <mobile:mobile/>
+  </url>
+
+  <!-- Core Platform Features -->
+  <url>
+    <loc>https://zynvosocial.com/discover</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://zynvosocial.com/events</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://zynvosocial.com/clubs</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://zynvosocial.com/zyncers</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://zynvosocial.com/leaderboard</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+
+  <!-- AI and Resources -->
+  <url>
+    <loc>https://zynvosocial.com/ai</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://zynvosocial.com/resources</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://zynvosocial.com/news</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+
+  <!-- About and Team -->
+  <url>
+    <loc>https://zynvosocial.com/founders</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://zynvosocial.com/founders/story</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://zynvosocial.com/testimonials</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+
+  <!-- Support and Information -->
+  <url>
+    <loc>https://zynvosocial.com/faq</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://zynvosocial.com/contact</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://zynvosocial.com/feedback</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+    <mobile:mobile/>
+  </url>
+
+  <!-- Legal Pages -->
+  <url>
+    <loc>https://zynvosocial.com/privacy</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://zynvosocial.com/terms</loc>
+    <lastmod>2026-12-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+    <mobile:mobile/>
+  </url>
+
+</urlset>

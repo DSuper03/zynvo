@@ -1,10 +1,30 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
+import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@/components/ui/sonner';
 import { WarmupProvider } from '@/components/WarmupProvider';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import PerformanceMonitor from '@/components/PerformanceMonitor';
+import { QueryProvider } from '@/providers/QueryProvider';
+import FloatingPWAInstall from '@/components/FloatingPWAInstall';
+import { ClerkKeyDebug } from '@/components/ClerkKeyDebug';
+import ClientTelemetryBootstrap from '@/components/ClientTelemetryBootstrap';
+import { ClerkProvider } from '@clerk/nextjs';
+
+const LEGACY_CLERK_FRONTEND_API_ENCODED = 'Y2xlcmsuenludm8uc29jaWFsJA';
+const ACTIVE_CLERK_FRONTEND_API_ENCODED = 'Y2xlcmsuenludm9zb2NpYWwuY29tJA';
+
+function normalizeClerkPublishableKey(key: string | undefined): string | undefined {
+  if (!key) return key;
+  if (!key.includes(LEGACY_CLERK_FRONTEND_API_ENCODED)) return key;
+  return key.replace(
+    LEGACY_CLERK_FRONTEND_API_ENCODED,
+    ACTIVE_CLERK_FRONTEND_API_ENCODED
+  );
+}
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -18,8 +38,10 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://zynvosocial.com'),
+  manifest: "/manifest.json",
   title:
-    'Zynvo - Agentic Social Media Platform for Campus Communities | Student Network',
+    'Zynvo -Social Media Platform for Campus Communities | Student Network',
   description:
     'Zynvo is the leading agentic social media platform connecting college students, clubs, and societies. Discover events, join communities, compete in challenges, and build meaningful campus connections through AI-powered networking.',
   keywords: [
@@ -43,14 +65,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://zynvo.com',
+    url: 'https://zynvosocial.com',
     siteName: 'Zynvo',
     title: 'Zynvo - Agentic Social Media Platform for Campus Communities',
     description:
       'The intelligent social platform revolutionizing how college students connect, discover events, join clubs, and build meaningful campus relationships through AI-powered networking.',
     images: [
       {
-        url: '/landing page.png',
+        url: '/titlecard.png',
         width: 1200,
         height: 630,
         alt: 'Zynvo - Agentic Social Media Platform for Students',
@@ -68,10 +90,33 @@ export const metadata: Metadata = {
   },
   category: 'Social Media',
   classification: 'Agentic Social Media Platform',
-  verification: {
-    google: 'your-google-verification-code',
-    yandex: 'your-yandex-verification-code',
-    yahoo: 'your-yahoo-verification-code',
+
+  icons: {
+    icon: [
+      {
+        url: 'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226&v=2',
+        type: 'image/png',
+        sizes: '32x32',
+      },
+      {
+        url: 'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226&v=2',
+        type: 'image/png',
+        sizes: '192x192',
+      },
+    ],
+    shortcut: [
+      {
+        url: 'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226&v=2',
+        type: 'image/png',
+      },
+    ],
+    apple: [
+      {
+        url: 'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226&v=2',
+        type: 'image/png',
+        sizes: '180x180',
+      },
+    ],
   },
 };
 
@@ -80,16 +125,61 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const publishableKey = normalizeClerkPublishableKey(
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+  );
+  
   return (
-    <html lang="en">
+    <ClerkProvider
+      publishableKey={publishableKey}
+      signInFallbackRedirectUrl="/auth/sso-callback"
+      signUpFallbackRedirectUrl="/auth/sso-callback"
+      appearance={{
+        elements: {
+          rootBox: "mx-auto",
+        },
+      }}
+    >
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6745473381903668"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
       >
-        <WarmupProvider>{children}</WarmupProvider>
-        <Analytics />
-        <SpeedInsights />
-        <Toaster />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-0E7B1VF3JX"
+          strategy="afterInteractive"
+        />
+        <Script id="ga" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-0E7B1VF3JX');
+          `}
+        </Script>
+        <ClerkKeyDebug />
+        <ClientTelemetryBootstrap />
+        <ErrorBoundary>
+          <QueryProvider>
+            <WarmupProvider>
+              {children}
+            </WarmupProvider>
+          </QueryProvider>
+          <Analytics />
+          <SpeedInsights />
+          <PerformanceMonitor />
+          <Toaster />
+          <FloatingPWAInstall />
+        </ErrorBoundary>
       </body>
     </html>
+    </ClerkProvider>
   );
 }
