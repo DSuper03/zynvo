@@ -734,10 +734,12 @@ const Eventid = () => {
     [data.venue, data.university, isOnline]
   );
 
-  // Check if event has ended
+  // Treat date-only end dates as local end-of-day, then allow one extra day.
   const isEventEnded = useMemo(() => {
     if (!data.endDate) return false;
-    return new Date(data.endDate) < new Date();
+    const graceEnd = new Date(`${data.endDate}T23:59:59.999`);
+    graceEnd.setDate(graceEnd.getDate() + 1);
+    return new Date() > graceEnd;
   }, [data.endDate]);
 
   const normalizedUserCollege = useMemo(
@@ -776,7 +778,7 @@ const Eventid = () => {
   // Check if registration is disabled (event ended or applications closed or full)
   /** Ended / closed only — college rules are handled on click (modal), so wrong-college users can tap Register. */
   const isRegistrationDisabled = useMemo(() => {
-    return isEventEnded && data.applicationStatus !== 'open' || isEventFull;
+    return isEventEnded || data.applicationStatus !== 'open' || isEventFull;
   }, [isEventEnded, data.applicationStatus, isEventFull]);
 
   const googleCalendarHref = useMemo(() => {
