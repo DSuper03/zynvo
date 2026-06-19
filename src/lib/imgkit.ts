@@ -41,8 +41,8 @@ export async function uploadImageToImageKit(
     
     // Try backend first, then fallback to local API
     const uploadUrls = [
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/upload/image`,
-      '/api/upload/image'
+      `/api/upload/image`,
+      
     ];
     
     for (const url of uploadUrls) {
@@ -99,8 +99,8 @@ export async function uploadImageDirectly(file: File, folder: string = '/posts')
     
     // Try backend first, then fallback to local API
     const uploadUrls = [
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/upload/image`,
-      '/api/upload/image'
+      `/api/upload/image`,
+      
     ];
     
     for (const url of uploadUrls) {
