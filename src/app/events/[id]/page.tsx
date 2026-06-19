@@ -734,10 +734,12 @@ const Eventid = () => {
     [data.venue, data.university, isOnline]
   );
 
-  // Treat date-only end dates as local end-of-day, then allow one extra day.
+  // Use only the calendar date so the event stays active through the full local day,
+  // even if the backend sends a timestamp.
   const isEventEnded = useMemo(() => {
     if (!data.endDate) return false;
-    const graceEnd = new Date(`${data.endDate}T23:59:59.999`);
+    const dateOnly = String(data.endDate).slice(0, 10);
+    const graceEnd = new Date(`${dateOnly}T23:59:59.999`);
     graceEnd.setDate(graceEnd.getDate() + 1);
     return new Date() > graceEnd;
   }, [data.endDate]);
