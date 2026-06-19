@@ -776,7 +776,7 @@ const Eventid = () => {
   // Check if registration is disabled (event ended or applications closed or full)
   /** Ended / closed only — college rules are handled on click (modal), so wrong-college users can tap Register. */
   const isRegistrationDisabled = useMemo(() => {
-    return isEventEnded || data.applicationStatus !== 'open' || isEventFull;
+    return isEventEnded && data.applicationStatus !== 'open' || isEventFull;
   }, [isEventEnded, data.applicationStatus, isEventFull]);
 
   const googleCalendarHref = useMemo(() => {
