@@ -226,7 +226,7 @@ const nextConfig = {
           ...securityHeaders,
           {
             key: 'Link',
-            value: '<</llms.txt>>; rel="llms", <</sitemap.xml>>; rel="sitemap", <</.well-known/agent-index.json>>; rel="http://dns-aid.org/rel/agent-index", <</.well-known/agent-card.json>>; rel="service-doc", <</.well-known/api-catalog>>; rel="api-catalog"',
+            value: '</llms.txt>; rel="llms", </sitemap.xml>; rel="sitemap", </.well-known/agent-index.json>; rel="http://dns-aid.org/rel/agent-index", </.well-known/agent-card.json>; rel="service-doc", </.well-known/api-catalog>; rel="api-catalog"',
           },
         ],
       },
