@@ -41,3 +41,4 @@ next-env.d.ts
 
 # SEO cache (generated at runtime)
 /.cache/
+.env.local

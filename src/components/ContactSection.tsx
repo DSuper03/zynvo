@@ -1,5 +1,6 @@
 'use client';
 
+import posthog from 'posthog-js';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Icons } from './Icons';
@@ -32,6 +33,9 @@ const ContactSection = () => {
         formState
       );
       if (submit.status == 200) {
+        posthog.capture('contact_form_submitted', {
+          subject: formState.subject,
+        });
         setSubmitStatus('success');
         setFormState({ name: '', email: '', subject: '', message: '' });
         toast(submit.data.msg);

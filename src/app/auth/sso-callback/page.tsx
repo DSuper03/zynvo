@@ -1,29 +1,34 @@
 'use client';
 
-import { Suspense, useEffect, useRef, useState } from "react";
-import { AuthenticateWithRedirectCallback, useAuth, useUser } from "@clerk/nextjs";
-import { useRouter, useSearchParams } from "next/navigation";
-import axios from "axios";
-import { toast } from "sonner";
-import CollegeSearchSelect from "@/components/colleges/collegeSelect";
-import { collegesWithClubs } from "@/components/colleges/college";
-import DiceBearAvatar from "@/components/DicebearAvatars";
-import { resolveSsoIntentStable } from "@/lib/ssoIntent";
+import posthog from 'posthog-js';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import {
+  AuthenticateWithRedirectCallback,
+  useAuth,
+  useUser,
+} from '@clerk/nextjs';
+import { useRouter, useSearchParams } from 'next/navigation';
+import axios from 'axios';
+import { toast } from 'sonner';
+import CollegeSearchSelect from '@/components/colleges/collegeSelect';
+import { collegesWithClubs } from '@/components/colleges/college';
+import DiceBearAvatar from '@/components/DicebearAvatars';
+import { resolveSsoIntentStable } from '@/lib/ssoIntent';
 import {
   extractCollegeFromUserRecord,
   shouldPromptForCollege,
-} from "@/lib/collegeProfile";
+} from '@/lib/collegeProfile';
 import {
   buildAuthHref,
   consumePostAuthRedirect,
   peekReturnTo,
-} from "@/lib/authReturnTo";
-import { getSafeErrorMessage } from "@/lib/safe-error";
+} from '@/lib/authReturnTo';
+import { getSafeErrorMessage } from '@/lib/safe-error';
 
 function getBackendBase(): string | null {
   const base = process.env.NEXT_PUBLIC_BACKEND_URL;
-  if (!base || base === "undefined") return null;
-  return base.replace(/\/$/, "");
+  if (!base || base === 'undefined') return null;
+  return base.replace(/\/$/, '');
 }
 
 /**
@@ -31,7 +36,17 @@ function getBackendBase(): string | null {
  * plus aliases many backends expect (profileAvatar, username, imgUrl).
  */
 const PLACEHOLDER_COLLEGES = new Set(
-  ["not joined", "not_joined", "n/a", "na", "none", "null", "undefined", "-", "—"].map(s => s.toLowerCase())
+  [
+    'not joined',
+    'not_joined',
+    'n/a',
+    'na',
+    'none',
+    'null',
+    'undefined',
+    '-',
+    '—',
+  ].map((s) => s.toLowerCase())
 );
 
 function buildClerkLoginCompleteBody(params: {
@@ -44,14 +59,18 @@ function buildClerkLoginCompleteBody(params: {
 }) {
   const { clerkId, email, displayName, avatarUrl, college, phone } = params;
   // Don't send college fields when value is a placeholder — avoids overwriting real college on backend
-  const isRealCollege = college.trim() !== "" && !PLACEHOLDER_COLLEGES.has(college.trim().toLowerCase());
+  const isRealCollege =
+    college.trim() !== '' &&
+    !PLACEHOLDER_COLLEGES.has(college.trim().toLowerCase());
   return {
     clerkId,
     email,
     name: displayName,
     username: displayName,
-    ...(isRealCollege ? { collegeName: college, college, college_name: college } : {}),
-    phone: phone || "",
+    ...(isRealCollege
+      ? { collegeName: college, college, college_name: college }
+      : {}),
+    phone: phone || '',
     ...(avatarUrl
       ? { avatarUrl, profileAvatar: avatarUrl, imgUrl: avatarUrl }
       : {}),
@@ -79,20 +98,20 @@ function SSOCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const intentQuery = searchParams.get("intent");
+  const intentQuery = searchParams.get('intent');
 
   const oauthStartedRef = useRef(false);
   /** Signup intent: show form before any backend call. */
   const [needsCollege, setNeedsCollege] = useState(false);
   /** Sign-in intent but profile incomplete (no campus / placeholder). */
   const [needsCollegeSignin, setNeedsCollegeSignin] = useState(false);
-  const [collegeName, setCollegeName] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [customAvatarUrl, setCustomAvatarUrl] = useState("");
+  const [collegeName, setCollegeName] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [customAvatarUrl, setCustomAvatarUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [backendSyncing, setBackendSyncing] = useState(false);
-  const [authType, setAuthType] = useState<"signin" | "signup" | null>(null);
+  const [authType, setAuthType] = useState<'signin' | 'signup' | null>(null);
   const [clerkUserInfo, setClerkUserInfo] = useState<{
     email: string;
     clerkId: string;
@@ -103,8 +122,8 @@ function SSOCallbackContent() {
   useEffect(() => {
     if (!backendSyncing) return;
     const t = setTimeout(() => {
-      toast.error("Could not sync your profile. Please try signing in again.");
-      router.push(buildAuthHref("/auth/signin", peekReturnTo()));
+      toast.error('Could not sync your profile. Please try signing in again.');
+      router.push(buildAuthHref('/auth/signin', peekReturnTo()));
     }, 120000);
     return () => clearTimeout(t);
   }, [backendSyncing, router]);
@@ -118,12 +137,12 @@ function SSOCallbackContent() {
 
     const email = user.emailAddresses[0]?.emailAddress;
     const clerkId = user.id;
-    const name = user.fullName || user.firstName || "User";
+    const name = user.fullName || user.firstName || 'User';
     const avatarUrl = `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(name)}&size=128`;
 
     if (!email || !clerkId) {
-      toast.error("Missing required user information");
-      router.push(buildAuthHref("/auth/signup", peekReturnTo()));
+      toast.error('Missing required user information');
+      router.push(buildAuthHref('/auth/signup', peekReturnTo()));
       return;
     }
 
@@ -137,8 +156,8 @@ function SSOCallbackContent() {
 
     const base = getBackendBase();
     if (!base) {
-      toast.error("App configuration error: backend URL is missing.");
-      router.push(buildAuthHref("/auth/signin", peekReturnTo()));
+      toast.error('App configuration error: backend URL is missing.');
+      router.push(buildAuthHref('/auth/signin', peekReturnTo()));
       return;
     }
 
@@ -159,7 +178,9 @@ function SSOCallbackContent() {
         } catch {
           // If check fails, leave userExists as null (unknown)
           // The clerkLogin call will handle both existing and new users correctly
-          console.warn("[sso-callback] checkUserExists failed, proceeding with clerkLogin");
+          console.warn(
+            '[sso-callback] checkUserExists failed, proceeding with clerkLogin'
+          );
         }
 
         if (cancelled) return;
@@ -176,29 +197,31 @@ function SSOCallbackContent() {
               clerkId,
               email,
               displayName: name,
-              college: "not joined",
-              phone: "",
+              college: 'not joined',
+              phone: '',
             })
           );
 
           if (cancelled) return;
 
           if (!res.data?.token) {
-            toast.error("Login failed: no session from server.");
+            toast.error('Login failed: no session from server.');
             setTimeout(
-              () => router.push(buildAuthHref("/auth/signin", peekReturnTo())),
+              () => router.push(buildAuthHref('/auth/signin', peekReturnTo())),
               2000
             );
             return;
           }
 
           const token = res.data.token as string;
-          localStorage.setItem("token", token);
-          sessionStorage.setItem("activeSession", "true");
+          localStorage.setItem('token', token);
+          sessionStorage.setItem('activeSession', 'true');
 
           // If we already know they have a real college, skip the profile fetch
           if (userHasCollege) {
-            toast.success("Login successful!");
+            posthog.identify(email, { name });
+            posthog.capture('user_oauth_signin', { auth_method: 'google' });
+            toast.success('Login successful!');
             router.push(consumePostAuthRedirect(searchParams));
             return;
           }
@@ -211,7 +234,10 @@ function SSOCallbackContent() {
             });
             profile = userRes.data?.user ?? null;
           } catch (e) {
-            console.warn("[sso-callback] getUser failed, will show full profile form", e);
+            console.warn(
+              '[sso-callback] getUser failed, will show full profile form',
+              e
+            );
           }
 
           if (cancelled) return;
@@ -227,7 +253,9 @@ function SSOCallbackContent() {
             return;
           }
 
-          toast.success("Login successful!");
+          posthog.identify(email, { name });
+          posthog.capture('user_oauth_signin', { auth_method: 'google' });
+          toast.success('Login successful!');
           router.push(consumePostAuthRedirect(searchParams));
         } else if (userExists === null) {
           // Check failed (endpoint down) — call clerkLogin anyway, let backend handle it
@@ -239,25 +267,25 @@ function SSOCallbackContent() {
               clerkId,
               email,
               displayName: name,
-              college: "not joined",
-              phone: "",
+              college: 'not joined',
+              phone: '',
             })
           );
 
           if (cancelled) return;
 
           if (!res.data?.token) {
-            toast.error("Login failed: no session from server.");
+            toast.error('Login failed: no session from server.');
             setTimeout(
-              () => router.push(buildAuthHref("/auth/signin", peekReturnTo())),
+              () => router.push(buildAuthHref('/auth/signin', peekReturnTo())),
               2000
             );
             return;
           }
 
           const token = res.data.token as string;
-          localStorage.setItem("token", token);
-          sessionStorage.setItem("activeSession", "true");
+          localStorage.setItem('token', token);
+          sessionStorage.setItem('activeSession', 'true');
 
           // Fetch profile to determine if they need to complete it
           let profile: unknown = null;
@@ -267,7 +295,7 @@ function SSOCallbackContent() {
             });
             profile = userRes.data?.user ?? null;
           } catch (e) {
-            console.warn("[sso-callback] getUser failed after clerkLogin", e);
+            console.warn('[sso-callback] getUser failed after clerkLogin', e);
           }
 
           if (cancelled) return;
@@ -283,35 +311,39 @@ function SSOCallbackContent() {
             return;
           }
 
-          toast.success("Login successful!");
+          posthog.identify(email, { name });
+          posthog.capture('user_oauth_signin', { auth_method: 'google' });
+          toast.success('Login successful!');
           router.push(consumePostAuthRedirect(searchParams));
         } else {
           // userExists === false — new user, show profile form
           // Pre-populate Google name but let them edit it
           setClerkUserInfo({ email, clerkId, name, avatarUrl });
           setDisplayName(name); // Pre-fill with Google name but editable
-          setCustomAvatarUrl(""); // Empty for new signup — user must choose their own avatar
-          setAuthType("signup");
+          setCustomAvatarUrl(''); // Empty for new signup — user must choose their own avatar
+          setAuthType('signup');
           setNeedsCollege(true);
           setBackendSyncing(false);
         }
       } catch (err: unknown) {
         if (cancelled) return;
-        const ax = err as { response?: { status?: number; data?: { msg?: string } } };
+        const ax = err as {
+          response?: { status?: number; data?: { msg?: string } };
+        };
         const status = ax.response?.status;
         if (status === 404) {
           // User not found in backend — show profile form inline for new Google signups
           // Pre-populate Google name but let them edit it
           setClerkUserInfo({ email, clerkId, name, avatarUrl });
           setDisplayName(name); // Pre-fill with Google name but editable
-          setCustomAvatarUrl(""); // Empty for new signup — user must choose their own avatar
-          setAuthType("signup");
+          setCustomAvatarUrl(''); // Empty for new signup — user must choose their own avatar
+          setAuthType('signup');
           setNeedsCollege(true);
           setBackendSyncing(false);
         } else {
-          toast.error(getSafeErrorMessage(err, "Login failed"));
+          toast.error(getSafeErrorMessage(err, 'Login failed'));
           setTimeout(
-            () => router.push(buildAuthHref("/auth/signin", peekReturnTo())),
+            () => router.push(buildAuthHref('/auth/signin', peekReturnTo())),
             2000
           );
         }
@@ -330,7 +362,7 @@ function SSOCallbackContent() {
 
   if (showProfileCompletion && clerkUserInfo) {
     const fromSigninIncomplete = needsCollegeSignin && !needsCollege;
-    const finalName = displayName.trim() || clerkUserInfo.name || "User";
+    const finalName = displayName.trim() || clerkUserInfo.name || 'User';
     // Don't fall back to Google photo — user must pick their own avatar
     const finalAvatarUrl =
       customAvatarUrl ||
@@ -341,12 +373,14 @@ function SSOCallbackContent() {
         <div className="w-full max-w-md p-8 bg-gray-900 rounded-xl border border-gray-800">
           <div className="mb-4">
             <h2 className="text-2xl font-bold text-white">
-              {fromSigninIncomplete ? "Welcome! Set up your profile" : "Almost there!"}
+              {fromSigninIncomplete
+                ? 'Welcome! Set up your profile'
+                : 'Almost there!'}
             </h2>
             <p className="text-gray-400 text-sm mt-1">
               {fromSigninIncomplete
-                ? "Choose a display name, avatar, and college so your campus feed and profile are complete."
-                : "Tell us a bit about you to finish creating your account."}
+                ? 'Choose a display name, avatar, and college so your campus feed and profile are complete.'
+                : 'Tell us a bit about you to finish creating your account.'}
             </p>
             <p className="text-gray-500 text-xs mt-2">{clerkUserInfo.email}</p>
           </div>
@@ -355,19 +389,23 @@ function SSOCallbackContent() {
             onSubmit={async (e) => {
               e.preventDefault();
               const college = collegeName.trim();
-              const validCollege = collegesWithClubs.some((c) => c.college === college);
+              const validCollege = collegesWithClubs.some(
+                (c) => c.college === college
+              );
               if (!college || !validCollege) {
-                toast.error("Please select your college/university from the list");
+                toast.error(
+                  'Please select your college/university from the list'
+                );
                 return;
               }
               if (!displayName.trim()) {
-                toast.error("Please enter a display name");
+                toast.error('Please enter a display name');
                 return;
               }
               setSubmitting(true);
               try {
                 const base = getBackendBase();
-                if (!base) throw new Error("Missing backend URL");
+                if (!base) throw new Error('Missing backend URL');
                 const res = await axios.post(
                   `${base}/api/v2/user/auth/clerkLogin`,
                   buildClerkLoginCompleteBody({
@@ -380,22 +418,37 @@ function SSOCallbackContent() {
                   })
                 );
                 if (res.data.token) {
-                  localStorage.setItem("token", res.data.token);
-                  sessionStorage.setItem("activeSession", "true");
+                  localStorage.setItem('token', res.data.token);
+                  sessionStorage.setItem('activeSession', 'true');
+                  posthog.identify(clerkUserInfo.email, {
+                    name: displayName.trim(),
+                    college,
+                  });
+                  posthog.capture(
+                    fromSigninIncomplete
+                      ? 'user_oauth_signin'
+                      : 'user_oauth_signup',
+                    {
+                      auth_method: 'google',
+                      college,
+                    }
+                  );
                   toast.success(
                     fromSigninIncomplete
-                      ? "Profile saved — welcome to Zynvo!"
-                      : "Account created successfully!"
+                      ? 'Profile saved — welcome to Zynvo!'
+                      : 'Account created successfully!'
                   );
                   router.push(consumePostAuthRedirect(searchParams));
                 } else {
-                  throw new Error("No token received");
+                  throw new Error('No token received');
                 }
               } catch (err: unknown) {
                 toast.error(
                   getSafeErrorMessage(
                     err,
-                    fromSigninIncomplete ? "Could not save your profile." : "Signup failed."
+                    fromSigninIncomplete
+                      ? 'Could not save your profile.'
+                      : 'Signup failed.'
                   )
                 );
               } finally {
@@ -407,7 +460,7 @@ function SSOCallbackContent() {
             <div>
               <p className="text-gray-400 text-sm mb-2">Avatar</p>
               <DiceBearAvatar
-                name={displayName.trim() || clerkUserInfo.name || "User"}
+                name={displayName.trim() || clerkUserInfo.name || 'User'}
                 onAvatarChange={(url: string) => setCustomAvatarUrl(url)}
               />
             </div>
@@ -425,7 +478,8 @@ function SSOCallbackContent() {
                 autoComplete="nickname"
               />
               <p className="text-gray-500 text-xs mt-1">
-                This is your public name on Zynvo (you can edit it later in settings).
+                This is your public name on Zynvo (you can edit it later in
+                settings).
               </p>
             </div>
 
@@ -446,7 +500,7 @@ function SSOCallbackContent() {
 
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-1">
-                Phone number{" "}
+                Phone number{' '}
                 <span className="text-gray-500 font-normal">(optional)</span>
               </label>
               <input
@@ -461,16 +515,22 @@ function SSOCallbackContent() {
 
             <button
               type="submit"
-              disabled={submitting || !collegeName.trim() || !displayName.trim()}
+              disabled={
+                submitting || !collegeName.trim() || !displayName.trim()
+              }
               className={`w-full py-3 rounded-lg font-semibold transition duration-300 ${
                 submitting || !collegeName.trim() || !displayName.trim()
-                  ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                  : "bg-yellow-500 text-black hover:bg-yellow-400"
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : 'bg-yellow-500 text-black hover:bg-yellow-400'
               }`}
             >
               {submitting
-                ? ((authType ?? "signin") === "signin" ? "Logging in..." : "Creating account...")
-                : ((authType ?? "signin") === "signin" ? "Complete Login" : "Complete Signup")}
+                ? (authType ?? 'signin') === 'signin'
+                  ? 'Logging in...'
+                  : 'Creating account...'
+                : (authType ?? 'signin') === 'signin'
+                  ? 'Complete Login'
+                  : 'Complete Signup'}
             </button>
           </form>
         </div>
@@ -481,17 +541,19 @@ function SSOCallbackContent() {
   const showOAuthHandler = authLoaded && !isSignedIn;
 
   const statusMessage = !isSignedIn
-    ? "Signing you in with Google…"
+    ? 'Signing you in with Google…'
     : backendSyncing
-      ? "Syncing your profile with Zynvo…"
-      : "Verifying your account…";
+      ? 'Syncing your profile with Zynvo…'
+      : 'Verifying your account…';
 
   return (
     <>
       {showOAuthHandler && <AuthenticateWithRedirectCallback />}
       <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-center text-white px-4">
         <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-xl font-medium animate-pulse text-center">{statusMessage}</p>
+        <p className="text-xl font-medium animate-pulse text-center">
+          {statusMessage}
+        </p>
         <p className="text-gray-500 text-sm mt-3 text-center max-w-sm">
           If this takes more than a minute, check your connection and try again.
         </p>

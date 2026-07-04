@@ -1,5 +1,6 @@
 'use client';
 
+import posthog from 'posthog-js';
 import React, { useEffect, useState } from 'react';
 import { X, Info, CheckCircle2, AlertTriangle } from 'lucide-react';
 import Image from 'next/legacy/image';
@@ -30,7 +31,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
       const storedToken = localStorage.getItem('token');
       setToken(storedToken);
       if (sessionStorage.getItem('activeSession') != 'true') {
-         toast('Login required', {
+        toast('Login required', {
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),
@@ -56,12 +57,12 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
-       toast('Login required', {
-          action: {
-            label: 'Sign in',
-            onClick: () => router.push('/auth/signin'),
-          },
-        });
+      toast('Login required', {
+        action: {
+          label: 'Sign in',
+          onClick: () => router.push('/auth/signin'),
+        },
+      });
       return;
     }
     try {
@@ -75,13 +76,23 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
         }
       );
       if (res.status == 200) {
-        toast.success(toSafeUserMessage(res.data.msg, 'Successfully joined club.'));
+        posthog.capture('club_joined', { club_name: clubName });
+        toast.success(
+          toSafeUserMessage(res.data.msg, 'Successfully joined club.')
+        );
         onClose();
       } else {
-        toast.error(toSafeUserMessage(res.data.msg, 'Failed to join club. Please try again.'));
+        toast.error(
+          toSafeUserMessage(
+            res.data.msg,
+            'Failed to join club. Please try again.'
+          )
+        );
       }
     } catch (error: unknown) {
-      toast.error(getSafeErrorMessage(error, 'Failed to join club. Please try again.'));
+      toast.error(
+        getSafeErrorMessage(error, 'Failed to join club. Please try again.')
+      );
     }
     // console.log('Join request data:', formData);
   };
@@ -118,7 +129,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
               priority
             />
           </div>
-          
+
           {/* Membership Criteria Badge */}
           {requirements && requirements.trim() && (
             <Badge
@@ -177,7 +188,9 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
               <div className="flex items-center gap-2 min-w-0">
                 <CheckCircle2 className="w-5 h-5 text-yellow-400 flex-shrink-0" />
                 <div className="min-w-0">
-                  <h3 className="text-lg font-bold text-white truncate">{clubName}</h3>
+                  <h3 className="text-lg font-bold text-white truncate">
+                    {clubName}
+                  </h3>
                   <p className="text-xs text-gray-400">Membership Criteria</p>
                 </div>
               </div>
@@ -190,14 +203,14 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
                 <X size={20} />
               </Button>
             </div>
-            
+
             <div className="p-6">
               <div className="bg-gray-800/50 border border-gray-700/50 rounded-lg p-4">
                 <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
                   {requirements}
                 </p>
               </div>
-              
+
               <div className="flex justify-end mt-6">
                 <Button
                   onClick={() => setShowCriteriaModal(false)}
