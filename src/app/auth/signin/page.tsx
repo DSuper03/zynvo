@@ -1,5 +1,6 @@
 'use client';
 
+import posthog from 'posthog-js';
 import { useState, useEffect, ChangeEvent, useCallback } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
@@ -26,8 +27,6 @@ import {
   clearStoredReturnTo,
   peekReturnTo,
 } from '@/lib/authReturnTo';
-
-
 
 export default function SignIn() {
   const { isLoaded: authIsLoaded, signIn } = useSignIn();
@@ -129,12 +128,18 @@ export default function SignIn() {
       console.error('SSO redirect error:', err);
       console.error('SSO error details:', JSON.stringify(err?.errors, null, 2));
       const clerkCode = err?.errors?.[0]?.code || err?.code;
-      if (clerkCode === 'session_exists' || /session.*exist/i.test(err?.message || '')) {
+      if (
+        clerkCode === 'session_exists' ||
+        /session.*exist/i.test(err?.message || '')
+      ) {
         continueExistingSession();
         return;
       }
       toast.error(
-        toSafeUserMessage(err?.errors?.[0]?.message, 'Failed to initiate Google sign-in')
+        toSafeUserMessage(
+          err?.errors?.[0]?.message,
+          'Failed to initiate Google sign-in'
+        )
       );
     }
   };
@@ -198,6 +203,8 @@ export default function SignIn() {
       if (res.data.msg === 'login success') {
         localStorage.setItem('token', res.data.token);
         sessionStorage.setItem('activeSession', 'true');
+        posthog.identify(formData.email);
+        posthog.capture('user_signed_in', { auth_method: 'email' });
         toast.success('Login successful!');
         router.push(consumeBrowserPostAuthRedirect());
         return;
@@ -210,18 +217,31 @@ export default function SignIn() {
       if (error.response) {
         const errorMsg = error.response.data?.msg || 'Login failed';
         if (error.response.status === 404) {
-          toast.error('No account found with this email. Please sign up first.');
+          toast.error(
+            'No account found with this email. Please sign up first.'
+          );
         } else if (errorMsg.includes('Invalid email or password')) {
-          toast.error('Invalid email or password. Please check your credentials and try again.');
+          toast.error(
+            'Invalid email or password. Please check your credentials and try again.'
+          );
           checkIfGoogleAccount(formData.email);
         } else {
-          toast.error(getSafeErrorMessage(error, 'Login failed. Please try again.'));
+          toast.error(
+            getSafeErrorMessage(error, 'Login failed. Please try again.')
+          );
           checkIfGoogleAccount(formData.email);
         }
       } else if (error.request) {
-        toast.error('Network error. Please check your connection and try again.');
+        toast.error(
+          'Network error. Please check your connection and try again.'
+        );
       } else {
-        toast.error(getSafeErrorMessage(error, 'An unexpected error occurred. Please try again.'));
+        toast.error(
+          getSafeErrorMessage(
+            error,
+            'An unexpected error occurred. Please try again.'
+          )
+        );
       }
     } finally {
       setLoading(false);
@@ -411,7 +431,9 @@ export default function SignIn() {
                   <Link
                     href="/auth/forgot-password"
                     className="text-sm text-yellow-500 hover:text-yellow-400 transition"
-                  >Forgot Password</Link>
+                  >
+                    Forgot Password
+                  </Link>
                 </div>
                 <div className="relative">
                   <FiLock className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
