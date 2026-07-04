@@ -5,7 +5,7 @@
  * - Security headers are added to every proxy response.
  * - Cookies, Origin, Referer, Host, and Connection are never forwarded.
  */
-import type { ReadonlyHeaders } from 'next/dist/server/web/spec-extension/adapters/headers';
+type HeaderLike = Pick<Headers, 'forEach'>;
 
 /** Headers forwarded from the browser request to the upstream backend. */
 const FORWARD_REQUEST_HEADERS = new Set([
