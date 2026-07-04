@@ -12,6 +12,7 @@ import { QueryProvider } from '@/providers/QueryProvider';
 import FloatingPWAInstall from '@/components/FloatingPWAInstall';
 import { ClerkKeyDebug } from '@/components/ClerkKeyDebug';
 import ClientTelemetryBootstrap from '@/components/ClientTelemetryBootstrap';
+import WebMcpBootstrap from '@/components/WebMcpBootstrap';
 import { ClerkProvider } from '@clerk/nextjs';
 
 const LEGACY_CLERK_FRONTEND_API_ENCODED = 'Y2xlcmsuenludm8uc29jaWFsJA';
@@ -166,6 +167,7 @@ export default function RootLayout({
         </Script>
         <ClerkKeyDebug />
         <ClientTelemetryBootstrap />
+        <WebMcpBootstrap />
         <ErrorBoundary>
           <QueryProvider>
             <WarmupProvider>

@@ -1,0 +1,24 @@
+{
+  "organization": {
+    "name": "Zynvo",
+    "description": "Agentic Social Media Platform for Campus Communities",
+    "url": "https://zynvosocial.com"
+  },
+  "agents": [
+    {
+      "name": "Zynvo AI Assistant",
+      "description": "AI-powered campus event intelligence agent that discovers, extracts, and recommends student events from web sources",
+      "url": "https://zynvosocial.com/ai",
+      "endpoint": "https://zynvosocial.com/api/ai",
+      "protocol": "a2a",
+      "version": "1.0",
+      "capabilities": [
+        "event-discovery",
+        "event-extraction",
+        "campus-intelligence",
+        "student-event-recommendation"
+      ],
+      "category": "ai-assistant"
+    }
+  ]
+}
