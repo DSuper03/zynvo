@@ -40,7 +40,7 @@ const BLOCKED_REQUEST_HEADERS = new Set([
  * @param proxySecret - x-internal-proxy-secret value from env
  */
 export function buildUpstreamHeaders(
-  incomingHeaders: Headers | ReadonlyHeaders,
+  incomingHeaders: HeaderLike,
   requestId: string,
   authToken: string | null,
   proxySecret: string,
