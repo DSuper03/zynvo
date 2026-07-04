@@ -35,7 +35,7 @@ const CampusReminderModal = () => {
         }
 
         const response = await axios.get<UserResponse>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          `/api/v1/user/getUser`,
           {
             headers: {
               authorization: `Bearer ${token}`,

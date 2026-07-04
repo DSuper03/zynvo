@@ -26,9 +26,8 @@ import {
 import { getSafeErrorMessage } from '@/lib/safe-error';
 
 function getBackendBase(): string | null {
-  const base = process.env.NEXT_PUBLIC_BACKEND_URL;
-  if (!base || base === 'undefined') return null;
-  return base.replace(/\/$/, '');
+  // All API calls go through the same-origin proxy — the real backend URL is server-only.
+  return '';
 }
 
 /**
@@ -155,11 +154,6 @@ function SSOCallbackContent() {
     // See lines below which check `shouldPromptForCollege(collegeStr)`.
 
     const base = getBackendBase();
-    if (!base) {
-      toast.error('App configuration error: backend URL is missing.');
-      router.push(buildAuthHref('/auth/signin', peekReturnTo()));
-      return;
-    }
 
     setBackendSyncing(true);
 
@@ -405,7 +399,6 @@ function SSOCallbackContent() {
               setSubmitting(true);
               try {
                 const base = getBackendBase();
-                if (!base) throw new Error('Missing backend URL');
                 const res = await axios.post(
                   `${base}/api/v2/user/auth/clerkLogin`,
                   buildClerkLoginCompleteBody({

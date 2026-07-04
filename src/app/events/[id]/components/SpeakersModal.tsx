@@ -60,7 +60,7 @@ export default function SpeakersModal({
     queryFn: async () => {
       if (!eventId || !token) throw new Error('Missing id or token');
       const res = await axios.get<speakerResponse>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/getSpeakers?id=${eventId}`,
+        `/api/v1/events/getSpeakers?id=${eventId}`,
         {
           headers: {
             authorization: `Bearer ${token}`,
@@ -82,7 +82,7 @@ export default function SpeakersModal({
     async function checkFounderStatus() {
       try {
         const checkFounder = await axios.get<{ msg: string }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isFounder?id=${eventId}`,
+          `/api/v1/user/isFounder?id=${eventId}`,
           {
             headers: {
               authorization: `Bearer ${token}`,

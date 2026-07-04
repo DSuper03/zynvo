@@ -50,7 +50,7 @@ const DEFAULT_CLUB_IMAGE =
       </text>
     </svg>
   `);
-const BACKEND_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://zynvosocial-be-274792984950.asia-south1.run.app').replace(/\/$/, '');
+const BACKEND_BASE_URL = ('').replace(/\/$/, '');
 const TOP_CLUBS_CACHE_KEY = 'zynvo.topclubs.cache.v1';
 
 const resolveClubImageUrl = (url?: string | null) => {

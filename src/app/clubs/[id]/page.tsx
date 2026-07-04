@@ -225,7 +225,7 @@ export default function ClubPage() {
         
         // Fetch club data
         const response = await axios.get<ClubApiResponse>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/${id}`,
+          `/api/v1/clubs/${id}`,
           {
             headers: {
               authorization: `Bearer ${token}`,
@@ -262,7 +262,7 @@ export default function ClubPage() {
 
         try {
           const response2 = await axios.get<EventResponse>(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/eventByClub/${id}`,
+            `/api/v1/events/eventByClub/${id}`,
             {
               headers: {
                 authorization: `Bearer ${token}`,
@@ -320,7 +320,7 @@ useEffect(() => {
   const fetchUserData = async () => {
     try {
       const userResponse = await axios.get<UserApiResponse>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+        `/api/v1/user/getUser`,
         {
           headers: {
             authorization: `Bearer ${token}`,
@@ -419,7 +419,7 @@ useEffect(() => {
 
     try {
       const leaveResponse = await axios.put<{ message?: string; msg?: string }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/leaveClub`,
+        `/api/v1/user/leaveClub`,
         null,
         {
           headers: {

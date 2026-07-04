@@ -227,8 +227,7 @@ const Eventid = () => {
       const result = await syncParticipantsCsv(
         id,
         currentLastSince,
-        currentEtag,
-        token
+        currentEtag
       );
       setCsvLastSince(result.lastSince);
       setCsvEtag(result.etag);
@@ -244,7 +243,7 @@ const Eventid = () => {
         setCsvEtag(null);
         setSyncBackoffMs(0);
         try {
-          const result = await syncParticipantsCsv(id, null, null, token);
+          const result = await syncParticipantsCsv(id, null, null);
           setCsvLastSince(result.lastSince);
           setCsvEtag(result.etag);
           setLastCsvUpdatedAt(new Date());
@@ -315,7 +314,7 @@ const Eventid = () => {
       queryFn: async () => {
         if (!id || !token) throw new Error('Missing id or token');
         const res = await axios.get<SpeakerResponse>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/getSpeakers?id=${id}`,
+          `/api/v1/events/getSpeakers?id=${id}`,
           {
             headers: {
               authorization: `Bearer ${token}`,
@@ -337,7 +336,7 @@ const Eventid = () => {
       queryFn: async () => {
         if (!id || !token) throw new Error('Missing id or token');
         const res = await axios.get<JudgesResponse>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/${id}/judges`,
+          `/api/v1/events/${id}/judges`,
           {
             headers: {
               authorization: `Bearer ${token}`,
@@ -383,7 +382,7 @@ const Eventid = () => {
     async function checkFounderStatus() {
       try {
         const checkFounder = await axios.get<{ msg: string }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isFounder?id=${id}`,
+          `/api/v1/user/isFounder?id=${id}`,
           {
             headers: {
               authorization: `Bearer ${token}`,
@@ -425,7 +424,7 @@ const Eventid = () => {
 
       try {
         const userResponse = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          `/api/v1/user/getUser`,
           {
             headers: {
               authorization: `Bearer ${token}`,
@@ -463,7 +462,7 @@ const Eventid = () => {
         setIsLoading(true);
         setLoadError(null);
         const res = await axios.get<EventByIdResponse>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event/${id}`,
+          `/api/v1/events/event/${id}`,
           {
             headers: {
               authorization: `Bearer ${token}`,
@@ -554,7 +553,7 @@ const Eventid = () => {
   const handleDeleteEvent = async () => {
     try {
       await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event/${id}`,
+        `/api/v1/events/event/${id}`,
         { headers: { authorization: `Bearer ${token}` } }
       );
       toast.success('Event deleted successfully');
@@ -711,7 +710,7 @@ const Eventid = () => {
         ForkedUpId: string;
         approvalStatus: string;
       }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/registerEvent`,
+        `/api/v1/events/registerEvent`,
         bodyData,
         {
           headers: {
@@ -1838,7 +1837,7 @@ const Eventid = () => {
                       <Button
                         onClick={async () => {
                           try {
-                            await downloadParticipantsCSV(id, token);
+                            await downloadParticipantsCSV(id);
                           } catch (error) {
                             console.error('Error downloading CSV:', error);
                           }

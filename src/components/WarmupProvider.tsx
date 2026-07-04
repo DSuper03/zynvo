@@ -81,7 +81,7 @@ export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
           msg: string;
           data: { name: string; profileAvatar: string };
         }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getSidebarUser`,
+          `/api/v1/user/getSidebarUser`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

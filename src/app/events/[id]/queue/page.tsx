@@ -76,7 +76,7 @@ export default function EventQueuePage() {
                 }
 
                 // 1. Check Admin Status
-                const adminRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isClubAdmin`, {
+                const adminRes = await fetch(`/api/v1/user/isClubAdmin`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -94,7 +94,7 @@ export default function EventQueuePage() {
 
                 // 2. Fetch Event Queue
                 setIsLoadingQueue(true);
-                const queueRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/eventQueue/${eventId}`, {
+                const queueRes = await fetch(`/api/v1/events/eventQueue/${eventId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -123,7 +123,7 @@ export default function EventQueuePage() {
         try {
             const token = localStorage.getItem('token');
             
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/eventQueue/${eventId}/approve`, {
+            const res = await fetch(`/api/v1/events/eventQueue/${eventId}/approve`, {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',

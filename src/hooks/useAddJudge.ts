@@ -1,9 +1,11 @@
+/**
+ * Add judge hook — requests go through the same-origin proxy.
+ * Auth is handled server-side; no localStorage token needed.
+ */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 import { getSafeErrorMessage, readSafeErrorMessageFromResponse } from '@/lib/safe-error';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 
 export type AddJudgePayload = {
   eventId: string;
@@ -23,17 +25,11 @@ export type AddJudgeResponse = {
   };
 };
 
-async function addJudge(
-  payload: AddJudgePayload,
-  token: string
-): Promise<AddJudgeResponse> {
+async function addJudge(payload: AddJudgePayload): Promise<AddJudgeResponse> {
   const { eventId, name, description, achievement } = payload;
-  const res = await fetch(`${API_BASE_URL}/api/v1/events/${eventId}/judges`, {
+  const res = await fetch(`/api/v1/events/${eventId}/judges`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, description, achievement }),
   });
 
@@ -53,17 +49,9 @@ export const useAddJudge = () => {
   const queryClient = useQueryClient();
 
   return useMutation<AddJudgeResponse, Error, AddJudgePayload>({
-    mutationFn: async (payload: AddJudgePayload): Promise<AddJudgeResponse> => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      return addJudge(payload, token);
-    },
+    mutationFn: addJudge,
     onSuccess: (data, variables) => {
       toast.success(data.msg || 'Judge added successfully!');
-      // Invalidate judges query to refetch the list
       queryClient.invalidateQueries({ queryKey: ['judges', variables.eventId] });
     },
     onError: (error: Error) => {

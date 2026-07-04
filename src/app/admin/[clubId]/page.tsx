@@ -64,7 +64,7 @@ export default function ClubAdminPage() {
     if (!clubId || !isClient || !token) return;
     try {
       setLoading(true);
-      const fetch = await axios.get<any>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/${clubId}`, { 
+      const fetch = await axios.get<any>(`/api/v1/clubs/${clubId}`, { 
         headers: { authorization: `Bearer ${token}` }
       });
       setEvent(fetch.data.club.events);
@@ -90,7 +90,7 @@ export default function ClubAdminPage() {
   const updateClubLinks = async () => {
     try {
       const res = await axios.put<any>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/admin/updateClubLinks/${clubId}`,
+        `/api/v2/admin/updateClubLinks/${clubId}`,
         { instagram, twitter, linkedin },
         { headers: { authorization: `Bearer ${token}` } }
       );
@@ -103,7 +103,7 @@ export default function ClubAdminPage() {
   const addCoreMembers = async () => {
     try {
       const res = await axios.post<any>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/admin/addCoreMembers/${clubId}`,
+        `/api/v2/admin/addCoreMembers/${clubId}`,
         { coremember1, coremember2, coremember3 },
         { headers: { authorization: `Bearer ${token}` } }
       );
@@ -116,7 +116,7 @@ export default function ClubAdminPage() {
   const addWings = async () => {
     try {
       const res = await axios.put<any>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/admin/addWings/${clubId}`,
+        `/api/v2/admin/addWings/${clubId}`,
         { wings },
         { headers: { authorization: `Bearer ${token}` } }
       );
@@ -129,7 +129,7 @@ export default function ClubAdminPage() {
   const removeMember = async () => {
     try {
       const res = await axios.post<any>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/admin/removeMember/${clubId}`,
+        `/api/v2/admin/removeMember/${clubId}`,
         { member: removeMemberId },
         { headers: { authorization: `Bearer ${token}` } }
       );
@@ -142,7 +142,7 @@ export default function ClubAdminPage() {
   const transferOwnership = async () => {
     try {
       const res = await axios.put<any>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/admin/transferOwnership/${clubId}`,
+        `/api/v2/admin/transferOwnership/${clubId}`,
         { newOwnerEmail },
         { headers: { authorization: `Bearer ${token}` } }
       );
@@ -155,7 +155,7 @@ export default function ClubAdminPage() {
   const removeCoreMembers = async () => {
     try {
       const res = await axios.post<any>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/admin/removeCoremembers/${clubId}`,
+        `/api/v2/admin/removeCoremembers/${clubId}`,
         { coremember1, coremember2, coremember3 },
         { headers: { authorization: `Bearer ${token}` } }
       );

@@ -91,7 +91,7 @@ export default function SignIn() {
   const checkIfGoogleAccount = async (email: string) => {
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/checkUserExists`,
+        `/api/v2/user/auth/checkUserExists`,
         { email }
       );
       if (res.data?.exists) setSuggestGoogle(true);
@@ -191,7 +191,7 @@ export default function SignIn() {
     setLoading(true);
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/syncWithClerk`,
+        `/api/v1/user/syncWithClerk`,
         formData
       );
 

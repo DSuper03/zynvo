@@ -67,7 +67,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
     }
     try {
       const res = await axios.post<{ msg: string }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/joinClub/${clubId}`,
+        `/api/v1/user/joinClub/${clubId}`,
         {},
         {
           headers: {

@@ -1,24 +1,19 @@
+/**
+ * Team hooks — all requests go through the same-origin proxy (/api/v1/teams/*).
+ * Auth is managed server-side; no token is needed in the request headers.
+ */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { toast } from 'sonner';
 import type { TeamApiResponse, CreateTeamPayload, JoinTeamPayload } from '@/types/teamTypes';
 import { getSafeErrorMessage } from '@/lib/safe-error';
 
-const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+const API_BASE = '/api';
 
-/**
- * Custom hook for all team-related operations.
- *
- * Fetches the user's current team (if any) for a given event and provides
- * mutation helpers for create / join / leave.
- */
-export function useTeam(eventId: string, token: string | null, enabled = true) {
+export function useTeam(eventId: string, _token: string | null, enabled = true) {
   const queryClient = useQueryClient();
-  const queryKey = ['my-team', eventId, token];
+  const queryKey = ['my-team', eventId];
 
-  const headers = token ? { authorization: `Bearer ${token}` } : undefined;
-
-  // ── Fetch current team ─────────────────────────────────────────────────────
   const {
     data: myTeamData,
     isLoading,
@@ -27,24 +22,21 @@ export function useTeam(eventId: string, token: string | null, enabled = true) {
     queryKey,
     queryFn: async () => {
       const res = await axios.get<TeamApiResponse>(
-        `${API}/api/v1/teams/my-team/${eventId}`,
-        { headers }
+        `${API_BASE}/v1/teams/my-team/${eventId}`
       );
       return res.data;
     },
-    enabled: !!eventId && !!token && enabled,
+    enabled: !!eventId && enabled,
     staleTime: 30_000,
   });
 
   const myTeam = myTeamData?.team ?? null;
 
-  // ── Create team ────────────────────────────────────────────────────────────
   const createMutation = useMutation({
     mutationFn: async (payload: CreateTeamPayload) => {
       const res = await axios.post<TeamApiResponse>(
-        `${API}/api/v1/teams/create`,
-        payload,
-        { headers }
+        `${API_BASE}/v1/teams/create`,
+        payload
       );
       return res.data;
     },
@@ -56,13 +48,11 @@ export function useTeam(eventId: string, token: string | null, enabled = true) {
     },
   });
 
-  // ── Join team ──────────────────────────────────────────────────────────────
   const joinMutation = useMutation({
     mutationFn: async (payload: JoinTeamPayload) => {
       const res = await axios.post<TeamApiResponse>(
-        `${API}/api/v1/teams/join`,
-        payload,
-        { headers }
+        `${API_BASE}/v1/teams/join`,
+        payload
       );
       return res.data;
     },
@@ -74,12 +64,9 @@ export function useTeam(eventId: string, token: string | null, enabled = true) {
     },
   });
 
-  // ── Leave team ─────────────────────────────────────────────────────────────
   const leaveMutation = useMutation({
     mutationFn: async (teamId: string) => {
-      const res = await axios.delete(`${API}/api/v1/teams/leave/${teamId}`, {
-        headers,
-      });
+      const res = await axios.delete(`${API_BASE}/v1/teams/leave/${teamId}`);
       return res.data;
     },
     onSuccess: () => {

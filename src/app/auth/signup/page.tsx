@@ -199,7 +199,7 @@ export default function SignUp() {
     }
     try {
       const msg = await axios.post<signupRes>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
+        `/api/v1/user/signup`,
         formData
       );
 
@@ -247,7 +247,7 @@ export default function SignUp() {
       // 0. Pre-check: does this email already exist in our backend DB?
       try {
         const checkRes = await axios.post(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/checkUserExists`,
+          `/api/v2/user/auth/checkUserExists`,
           { email: formData.email.trim().toLowerCase() }
         );
         if (checkRes.data?.exists) {
@@ -404,7 +404,7 @@ export default function SignUp() {
       // 4. Sync with backend (send college under common key variants — some APIs only map `college` / `college_name`)
       const college = formData.collegeName.trim();
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
+        `/api/v2/user/auth/clerkLogin`,
         {
           clerkId,
           collegeName: college,

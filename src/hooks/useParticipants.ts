@@ -1,11 +1,13 @@
+/**
+ * Participants hook — all requests go through the same-origin proxy.
+ * Auth headers are injected server-side; no localStorage tokens are used.
+ */
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/safe-error';
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  'https://zynvosocial-be-274792984950.asia-south1.run.app';
+const API_BASE = '/api';
 
 export interface ParticipantUser {
   id: string;
@@ -22,7 +24,7 @@ export interface Participant {
   joinedAt: string;
   passId: string | null;
   user: ParticipantUser;
-  paymentProofUrl?: string; // For paid events - payment screenshot URL
+  paymentProofUrl?: string;
 }
 
 export interface ParticipantsResponse {
@@ -46,28 +48,12 @@ export interface UseParticipantsOptions {
 async function fetchParticipants(
   eventId: string,
   page: number = 1,
-  limit: number = 50,
-  token?: string | null
+  limit: number = 50
 ): Promise<ParticipantsResponse> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
   const response = await axios.get<ParticipantsResponse>(
-    `${BASE_URL}/api/v1/events/participants/${eventId}`,
-    {
-      params: {
-        page,
-        limit,
-      },
-      headers,
-    }
+    `${API_BASE}/v1/events/participants/${eventId}`,
+    { params: { page, limit } }
   );
-
   return response.data;
 }
 
@@ -77,27 +63,22 @@ export function useParticipants({
   limit = 50,
   enabled = true,
 }: UseParticipantsOptions) {
-  const token =
-    typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-
   return useQuery<ParticipantsResponse, Error>({
     queryKey: ['participants', eventId, page, limit],
-    queryFn: () => fetchParticipants(eventId, page, limit, token),
+    queryFn: () => fetchParticipants(eventId, page, limit),
     enabled: enabled && !!eventId,
-    staleTime: 30000, // 30 seconds
+    staleTime: 30000,
     retry: 2,
   });
 }
 
-const PARTICIPANTS_CSV_PATH = (eventId: string) =>
-  `${BASE_URL}/api/v1/events/participants/${eventId}`;
-
-/**
- * Parse CSV text into rows of objects (header row determines keys).
- * Handles quoted fields and returns the last row's joinedAt for incremental sync.
- */
-export function parseCsv(csvText: string): { joinedAt?: string; [k: string]: string | undefined }[] {
-  const lines = csvText.trim().split(/\r?\n/).filter(Boolean);
+export function parseCsv(
+  csvText: string
+): { joinedAt?: string; [k: string]: string | undefined }[] {
+  const lines = csvText
+    .trim()
+    .split(/\r?\n/)
+    .filter(Boolean);
   if (lines.length === 0) return [];
   const header = lines[0].split(',').map((h) => h.replace(/^"|"$/g, '').trim());
   const rows: { joinedAt?: string; [k: string]: string | undefined }[] = [];
@@ -160,22 +141,15 @@ export class InvalidSinceError extends Error {
   }
 }
 
-/**
- * Sync participants CSV: initial fetch (no since/etag) or incremental (since + If-None-Match).
- * On 304 returns unchanged. On 200 parses new rows and returns newest joinedAt and etag.
- * On 400 Invalid since, throws InvalidSinceError so caller can reset lastSince and refetch full.
- */
 export async function syncParticipantsCsv(
   eventId: string,
   lastSince: string | null,
-  etag: string | null,
-  token?: string | null
+  etag: string | null
 ): Promise<SyncCsvResult> {
   const params = new URLSearchParams({ format: 'csv' });
   if (lastSince) params.set('since', lastSince);
-  const url = `${PARTICIPANTS_CSV_PATH(eventId)}?${params}`;
+  const url = `${API_BASE}/v1/events/participants/${eventId}?${params}`;
   const headers: Record<string, string> = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
   if (etag) headers['If-None-Match'] = etag;
 
   const res = await fetch(url, { method: 'GET', headers });
@@ -205,56 +179,32 @@ export async function syncParticipantsCsv(
     ? (appendedRows.at(-1)?.joinedAt ?? lastSince)
     : lastSince;
 
-  return {
-    appended: appendedRows.length,
-    etag: newEtag,
-    lastSince: newestJoinedAt,
-  };
+  return { appended: appendedRows.length, etag: newEtag, lastSince: newestJoinedAt };
 }
 
-/**
- * Downloads participants data as CSV
- */
-export async function downloadParticipantsCSV(
-  eventId: string,
-  token?: string | null
-): Promise<void> {
+export async function downloadParticipantsCSV(eventId: string): Promise<void> {
   try {
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const response = await fetch(
-      `${PARTICIPANTS_CSV_PATH(eventId)}?format=csv`,
-      {
-        method: 'GET',
-        headers,
-      }
+      `${API_BASE}/v1/events/participants/${eventId}?format=csv`,
+      { method: 'GET' }
     );
 
     if (!response.ok) {
       throw new Error(`Failed to download CSV: ${response.status}`);
     }
 
-    // Get the blob from the response
     const blob = await response.blob();
-    
-    // Create a download link
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = `participants_${eventId}.csv`;
     document.body.appendChild(link);
     link.click();
-    
-    // Cleanup
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-    
+
     toast.success('CSV downloaded successfully!');
   } catch (error: any) {
-    console.error('Error downloading CSV:', error);
     toast.error(
       getSafeErrorMessage(error, 'Unable to download CSV right now. Please try again.')
     );

@@ -118,9 +118,9 @@ export default function PostPage() {
       try {
         const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
         const endpoints = [
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/${postId}`,
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/get/${postId}`,
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/details/${postId}`,
+          `/api/v1/post/${postId}`,
+          `/api/v1/post/get/${postId}`,
+          `/api/v1/post/details/${postId}`,
         ];
 
         let resp = null as any;

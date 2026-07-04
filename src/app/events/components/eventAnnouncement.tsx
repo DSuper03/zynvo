@@ -23,7 +23,7 @@ interface EventAnnouncementsProps {
   isFounder: boolean;
 }
 
-const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+const API = '';
 
 const timeAgo = (dateStr?: string) => {
   if (!dateStr) return '';

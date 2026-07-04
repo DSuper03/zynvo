@@ -10,9 +10,7 @@ export const useDeleteSession = () => {
 
   return useMutation<void, Error, DeleteSessionPayload>({
     mutationFn: async (payload: DeleteSessionPayload) => {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Please sign in to delete sessions');
-      return deleteScheduleSession(payload.eventId, payload.sessionId, token);
+      return deleteScheduleSession(payload.eventId, payload.sessionId);
     },
     onSuccess: (_data, variables) => {
       queryClient.setQueryData<ScheduleDay[]>(

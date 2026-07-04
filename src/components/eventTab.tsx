@@ -26,7 +26,7 @@ export default function EventTab({ token, events }: { token: string; events: any
   const EventModal = async (id: string) => {
     try {
       const eventRes = await axios.get<any>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event/${id}`
+        `/api/v1/events/event/${id}`
       );
       setEventDetails(eventRes.data.response);
       setOpenEventModal(true);
@@ -38,7 +38,7 @@ export default function EventTab({ token, events }: { token: string; events: any
   const updateLinks = async (id: string) => {
     try {
       const res = await axios.put<any>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/admin/updateEventLinks/${id}`,
+        `/api/v2/admin/updateEventLinks/${id}`,
         { link1, link2, link3 },
         { headers: { authorization: `Bearer ${token}` } }
       );
@@ -51,7 +51,7 @@ export default function EventTab({ token, events }: { token: string; events: any
   const deleteEvent = async (eventId: string) => {
     try {
       const res = await axios.post<any>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/admin/deleteEvent/${eventId}`,
+        `/api/v2/admin/deleteEvent/${eventId}`,
         {},
         { headers: { authorization: `Bearer ${token}` } }
       );

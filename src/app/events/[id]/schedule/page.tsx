@@ -58,7 +58,7 @@ const SchedulePage = () => {
     async function checkFounderStatus() {
       try {
         const checkFounder = await axios.get<{ msg: string }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isFounder?id=${eventId}`,
+          `/api/v1/user/isFounder?id=${eventId}`,
           { headers: { authorization: `Bearer ${token}` } }
         );
 

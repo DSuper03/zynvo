@@ -133,7 +133,7 @@ export default function FeedbackForm() {
       };
 
       const feedback = await axios.post<{ msg: string }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/contact/feedback`,
+        `/api/v1/contact/feedback`,
         emailData,
         {
           headers: {
