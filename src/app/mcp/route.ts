@@ -17,20 +17,20 @@ const responseBody = {
 export async function GET() {
   return NextResponse.json(responseBody, {
     status: 501,
-    headers: getMcpResponseHeaders('GET, POST, OPTIONS'),
+    headers: { ...getMcpResponseHeaders('GET, POST, OPTIONS'), 'Cache-Control': 'no-store' },
   });
 }
 
 export async function POST(_request: NextRequest) {
   return NextResponse.json(responseBody, {
     status: 501,
-    headers: getMcpResponseHeaders('GET, POST, OPTIONS'),
+    headers: { ...getMcpResponseHeaders('GET, POST, OPTIONS'), 'Cache-Control': 'no-store' },
   });
 }
 
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
-    headers: getMcpResponseHeaders('GET, POST, OPTIONS'),
+    headers: { ...getMcpResponseHeaders('GET, POST, OPTIONS'), 'Cache-Control': 'no-store' },
   });
 }
