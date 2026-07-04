@@ -79,10 +79,11 @@ export function createRateLimiter(options: RateLimitOptions): RateLimiter {
       }
 
       entry.timestamps.push(now);
+      const resetAtMs = entry.timestamps[0]! + options.windowMs;
       return {
         allowed: true,
         remaining: options.max - entry.timestamps.length,
-        resetAtMs: now + options.windowMs,
+        resetAtMs,
       };
     },
 
