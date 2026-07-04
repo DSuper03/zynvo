@@ -56,9 +56,11 @@ export function buildAgentAuthMetadata() {
     register_uri: AGENT_REGISTER_URI,
     claim_uri: AGENT_CLAIM_URI,
     revocation_uri: AGENT_REVOCATION_URI,
+    events_supported: ['credential_revoked'],
     identity_types_supported: ['anonymous', 'identity_assertion'],
     anonymous: {
       credential_types_supported: ['access_token'],
+      claim_uri: AGENT_CLAIM_URI,
     },
     identity_assertion: {
       assertion_types_supported: ['verified_email'],

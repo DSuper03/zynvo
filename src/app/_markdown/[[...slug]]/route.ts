@@ -38,11 +38,16 @@ export async function GET(
     });
 
     if (!response.ok) {
+      const errorMarkdown = `# Error\n\nFailed to fetch ${originalPath} (HTTP ${response.status})`;
       return new NextResponse(
-        `# Error\n\nFailed to fetch ${originalPath} (HTTP ${response.status})`,
+        errorMarkdown,
         {
           status: response.status,
-          headers: { 'Content-Type': 'text/markdown' },
+          headers: {
+            'Content-Type': 'text/markdown; charset=utf-8',
+            Vary: 'Accept',
+            'x-markdown-tokens': String(errorMarkdown.split(/\s+/).filter(Boolean).length),
+          },
         },
       );
     }
@@ -75,18 +80,25 @@ export async function GET(
     return new NextResponse(markdown, {
       status: 200,
       headers: {
-        'Content-Type': 'text/markdown',
+        'Content-Type': 'text/markdown; charset=utf-8',
+        'Cache-Control': 'public, max-age=300, s-maxage=300',
+        Vary: 'Accept',
         'x-markdown-tokens': String(tokenCount),
         'x-markdown-source': originalPath,
       },
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    const errorMarkdown = `# Error\n\nFailed to convert page to markdown: ${message}`;
     return new NextResponse(
-      `# Error\n\nFailed to convert page to markdown: ${message}`,
+      errorMarkdown,
       {
         status: 502,
-        headers: { 'Content-Type': 'text/markdown' },
+        headers: {
+          'Content-Type': 'text/markdown; charset=utf-8',
+          Vary: 'Accept',
+          'x-markdown-tokens': String(errorMarkdown.split(/\s+/).filter(Boolean).length),
+        },
       },
     );
   }
