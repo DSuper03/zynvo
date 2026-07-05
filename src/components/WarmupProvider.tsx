@@ -44,6 +44,13 @@ export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      if (path.startsWith('/auth')) {
+        setToken(null);
+        setLoading(false);
+        return;
+      }
+
       const storedToken = localStorage.getItem('token');
       const hasActiveSession = sessionStorage.getItem('activeSession') === 'true';
 

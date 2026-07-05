@@ -734,6 +734,12 @@ export default function ZynvoDashboard() {
             navigate.push('/auth/signin');
           }
         } catch (error) {
+          if (axios.isAxiosError(error) && error.response?.status === 401) {
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('activeSession');
+            navigate.push('/auth/signin');
+            return;
+          }
           logger.error(
             new Error(getSafeErrorMessage(error, 'Error fetching user details')),
             'dashboard.fetchUserData.apiError'
@@ -771,18 +777,26 @@ export default function ZynvoDashboard() {
    } 
 
    const fetch = async() => {
-     const isfounder = await axios.get<isAdminResponse>(`/api/v1/user/isClubAdmin`
-      , {
-        headers : {
-          authorization : `Bearer ${token}`
+     try {
+       const isfounder = await axios.get<isAdminResponse>(`/api/v1/user/isClubAdmin`
+        , {
+          headers : {
+            authorization : `Bearer ${token}`
+          }
         }
-      }
-     )
-     if(isfounder.data.founder) {
-      sessionStorage.setItem('founder', isfounder.data.founder )
-      setFounder(isfounder.data.founder);
-    } else {
-      logger.info('dashboard.isClubAdmin.info', isfounder.data.msg);
+       )
+       if(isfounder.data.founder) {
+        sessionStorage.setItem('founder', isfounder.data.founder )
+        setFounder(isfounder.data.founder);
+      } else {
+        logger.info('dashboard.isClubAdmin.info', isfounder.data.msg);
+       }
+     } catch (error) {
+       if (axios.isAxiosError(error) && error.response?.status === 401) {
+         localStorage.removeItem('token');
+         sessionStorage.removeItem('activeSession');
+         navigate.push('/auth/signin');
+       }
      }
      return;
    }
