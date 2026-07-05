@@ -18,7 +18,6 @@ const PUBLIC_V2_PREFIXES = [
 
 function isPublicV2Path(method: string, path: string): boolean {
   if (method === 'GET') {
-    // Most public GET reads
     if (path.startsWith('/api/v2/user/getPublicUser')) return true;
   }
   return PUBLIC_V2_PREFIXES.some((prefix) => path.startsWith(prefix));
@@ -87,20 +86,31 @@ async function directFetch(
   });
 }
 
-function handler(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
-  return params.then(({ path }) => {
+async function handler(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  try {
+    const { path } = await params;
     const backendPath = '/api/v2/' + path.join('/');
 
     if (process.env.NODE_ENV === 'development') {
-      return directFetch(request, backendPath);
+      return await directFetch(request, backendPath);
     }
 
     if (isPublicV2Path(request.method, backendPath)) {
-      return proxyPublicRequest(request, backendPath);
+      return await proxyPublicRequest(request, backendPath);
     }
 
-    return proxyAuthenticatedRequest(request, backendPath);
-  });
+    return await proxyAuthenticatedRequest(request, backendPath);
+  } catch (error) {
+    console.error('[v2 proxy] Unhandled error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'An internal error occurred.',
+        timestamp: new Date().toISOString(),
+      },
+      { status: 500 },
+    );
+  }
 }
 
 export const GET = handler;

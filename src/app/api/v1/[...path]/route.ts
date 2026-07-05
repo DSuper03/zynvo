@@ -107,20 +107,31 @@ async function directFetch(
   });
 }
 
-function handler(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
-  return params.then(({ path }) => {
+async function handler(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  try {
+    const { path } = await params;
     const backendPath = '/api/v1/' + path.join('/');
 
     if (process.env.NODE_ENV === 'development') {
-      return directFetch(request, backendPath);
+      return await directFetch(request, backendPath);
     }
 
     if (isPublicPath(request.method, backendPath)) {
-      return proxyPublicRequest(request, backendPath, { cache: 'no-store' });
+      return await proxyPublicRequest(request, backendPath, { cache: 'no-store' });
     }
 
-    return proxyAuthenticatedRequest(request, backendPath);
-  });
+    return await proxyAuthenticatedRequest(request, backendPath);
+  } catch (error) {
+    console.error('[v1 proxy] Unhandled error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'An internal error occurred.',
+        timestamp: new Date().toISOString(),
+      },
+      { status: 500 },
+    );
+  }
 }
 
 export const GET = handler;
