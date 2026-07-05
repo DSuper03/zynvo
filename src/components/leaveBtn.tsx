@@ -12,6 +12,7 @@ export default function LeaveBtn({ token }: { token: string }) {
       setLoading(true);
       const leave = await axios.put<any>(
         `/api/v1/user/leaveClub`,
+        {},
         {
           headers: {
             authorization: `Bearer ${token}`,

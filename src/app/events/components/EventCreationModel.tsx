@@ -531,6 +531,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           eventEndDate: formData.eventEndDate,
           applicationStartDate: formData.applicationStartDate,
           applicationEndDate: formData.applicationEndDate,
+        },
+        {
+          headers: { authorization: `Bearer ${token}` },
         }
       );
       const {

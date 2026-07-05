@@ -14,9 +14,13 @@ import { proxyAuthenticatedRequest, proxyPublicRequest } from '@/lib/server/prox
 const PUBLIC_GET_PREFIXES = [
   '/api/v1/events/events',
   '/api/v1/events/event/',
+  '/api/v1/events/all',
+  '/api/v1/events/event-details',
+  '/api/v1/events/user-details',
   '/api/v1/clubs/getAll',
   '/api/v1/clubs/getClubs',
   '/api/v1/post/all',
+  '/api/v1/post/',
   '/api/v1/user/getAllUsers',
   '/api/v1/user/getPublicUser',
   '/api/v1/user/SearchUser',
