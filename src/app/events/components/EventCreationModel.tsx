@@ -367,7 +367,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       case 2:
         if (!formData.maxTeamSize)
           newErrors.maxTeamSize = 'Maximum team size is required';
-        if (!formData.venue?.trim()) newErrors.venue = 'Venue is required';
+        if (formData.eventMode !== 'online') {
+          const normalizedVenue = formData.venue?.trim().toLowerCase();
+          if (!normalizedVenue) {
+            newErrors.venue = 'Venue is required';
+          } else if (normalizedVenue === 'online') {
+            newErrors.venue = 'Please enter a real event venue for offline or hybrid events';
+          }
+        }
         formData.customQuestions?.forEach((question, index) => {
           if (!question.label.trim()) {
             newErrors[`customQuestion.${index}.label`] =
@@ -448,12 +455,51 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
+  const notifyStepValidationErrors = useCallback(
+    (currentStep: number) => {
+      const stepFieldOrder: Record<number, string[]> = {
+        1: ['eventMode', 'eventName', 'university', 'description', 'eventType'],
+        2: ['maxTeamSize', 'venue', 'paymentQRCode', 'paymentAmount'],
+        3: [
+          'eventStartDate',
+          'eventEndDate',
+          'applicationStartDate',
+          'applicationEndDate',
+          'contactEmail',
+          'contactPhone',
+        ],
+        4: ['image'],
+      };
+
+      const prioritizedMessages = (stepFieldOrder[currentStep] || [])
+        .map((field) => errors[field])
+        .filter(Boolean);
+
+      const customQuestionMessages = Object.entries(errors)
+        .filter(([key]) => key.startsWith('customQuestion.'))
+        .map(([, message]) => message);
+
+      const uniqueMessages = Array.from(
+        new Set([...prioritizedMessages, ...customQuestionMessages].filter(Boolean))
+      );
+
+      if (uniqueMessages.length === 0) {
+        toast.error('Please fill in the required fields before continuing.');
+        return;
+      }
+
+      toast.error(
+        `Please fill in the required fields: ${uniqueMessages.join(', ')}`
+      );
+    },
+    [errors]
+  );
+
   const nextStep = () => {
     if (validateStep()) {
       setStep((prev) => Math.min(prev + 1, 4));
     } else {
-      console.log('Validation failed for step:', step);
-      console.log('Current errors:', errors);
+      notifyStepValidationErrors(step);
     }
   };
 
@@ -470,7 +516,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       toast("You haven't created any club yet. Please create a club first.");
       return;
     }
-    if (!validateStep()) return;
+    if (!validateStep()) {
+      notifyStepValidationErrors(step);
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -818,12 +867,17 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                               ...prev,
                               eventMode: modeValue,
                               venue:
-                                modeValue === 'online' ? 'Online' : prev.venue,
+                                modeValue === 'online'
+                                  ? 'Online'
+                                  : prev.venue?.trim().toLowerCase() === 'online'
+                                    ? ''
+                                    : prev.venue,
                             }));
                             if (errors.eventMode) {
                               setErrors((prev) => {
                                 const newErrors = { ...prev };
                                 delete newErrors.eventMode;
+                                delete newErrors.venue;
                                 return newErrors;
                               });
                             }

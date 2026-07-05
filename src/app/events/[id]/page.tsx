@@ -123,6 +123,7 @@ const Eventid = () => {
     eventWebsite: '',
     form: '',
     isPaidEvent: false,
+    acceptanceBased: false,
     paymentQRCode: '',
     paymentAmount: 0,
     maxParticipants: undefined,
@@ -484,6 +485,8 @@ const Eventid = () => {
             res.data.response.paymentQRCode ||
             '';
           const paymentAmount = res.data.response.paymentAmount || 0;
+          const acceptanceBased =
+            (res.data.response as any).acceptanceBased ?? false;
 
           console.log('Event data received:', {
             isPaid: (res.data.response as any).isPaid,
@@ -491,6 +494,7 @@ const Eventid = () => {
             qrCodeUrl: (res.data.response as any).qrCodeUrl,
             paymentQRCode: res.data.response.paymentQRCode,
             paymentAmount: paymentAmount,
+            acceptanceBased,
           });
 
           // If paymentQRCode/qrCodeUrl exists, treat as paid event even if isPaid/isPaidEvent flag is not set
@@ -527,6 +531,7 @@ const Eventid = () => {
               res.data.response.registrationForm ||
               '',
             isPaidEvent: hasPaidEvent,
+            acceptanceBased,
             paymentQRCode: qrCodeUrl,
             paymentAmount: paymentAmount,
             maxParticipants: res.data.response.maxParticipants,
@@ -1031,13 +1036,15 @@ const Eventid = () => {
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2">
                 {isFounder && (
                   <>
-                    <Button
-                      onClick={() => router.push(`/events/${id}/queue`)}
-                      className="min-h-11 rounded-lg px-5 py-2.5 font-bold bg-yellow-500 hover:bg-yellow-400 text-black w-full sm:w-auto flex items-center justify-center gap-2"
-                    >
-                      <CheckSquare className="w-4 h-4" />
-                      Approval Queue
-                    </Button>
+                    {data.acceptanceBased && (
+                      <Button
+                        onClick={() => router.push(`/events/${id}/queue`)}
+                        className="min-h-11 rounded-lg px-5 py-2.5 font-bold bg-yellow-500 hover:bg-yellow-400 text-black w-full sm:w-auto flex items-center justify-center gap-2"
+                      >
+                        <CheckSquare className="w-4 h-4" />
+                        Approval Queue
+                      </Button>
+                    )}
                     <Button
                       onClick={() => setIsEditModalOpen(true)}
                       className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
