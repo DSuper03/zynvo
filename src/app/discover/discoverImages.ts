@@ -20,11 +20,8 @@ export type DiscoverPostPreview = {
   comments?: number;
 };
 
-const backendBaseUrl =
-  (
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    'https://zynvosocial-be-274792984950.asia-south1.run.app'
-  ).replace(/\/$/, '');
+// All API calls go through the same-origin proxy.
+const backendBaseUrl = '';
 
 export const isUsableDiscoverImage = (image: string | null): image is string =>
   typeof image === 'string' &&

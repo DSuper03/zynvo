@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchEventSchedule } from '@/lib/schedule-api';
 
-export function useSchedule(eventId: string, token?: string | null, enabled = true) {
+export function useSchedule(eventId: string, _token?: string | null, enabled = true) {
   return useQuery({
     queryKey: ['schedule', eventId],
-    queryFn: () => fetchEventSchedule(eventId, token),
+    queryFn: () => fetchEventSchedule(eventId),
     enabled: !!eventId && enabled,
     staleTime: 5 * 60 * 1000,
     retry: false,

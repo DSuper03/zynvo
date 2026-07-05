@@ -32,6 +32,7 @@ Disallow: /verify-event/
 Disallow: /ticket/
 Disallow: /_next/
 Crawl-Delay: 1
+Content-Signal: ai-train=no, search=yes, ai-input=no
 
 User-agent: Googlebot
 Allow: /
@@ -51,9 +52,6 @@ User-agent: Claude-Web
 Allow: /
 
 Sitemap: ${SITE}/sitemap.xml
-
-# Content Signals — AI content usage preferences (draft-romm-aipref-contentsignals)
-Content-Signal: ai-train=no, search=yes, ai-input=no
 `;
 
   return new NextResponse(body, {

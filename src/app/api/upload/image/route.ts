@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import ImageKit from 'imagekit';
 import { createErrorId } from '@/lib/safe-error';
+import { resolveRequestId } from '@/lib/server/request';
+import { applySecurityHeaders } from '@/lib/server/headers';
 
 function getImageKitClient() {
   const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY;
@@ -21,39 +23,42 @@ function getImageKitClient() {
 
 export async function POST(request: NextRequest) {
   const errorId = createErrorId();
+  const requestId = resolveRequestId(request.headers.get('x-request-id'));
+
+  const secureHeaders = new Headers();
+  secureHeaders.set('x-request-id', requestId);
+  applySecurityHeaders(secureHeaders);
+
   try {
     const formData = await request.formData();
     const file = formData.get('image') as File;
-    const folder = (formData.get('folder') as string) || '/posts'; // Default to posts folder
-    
+    const folder = (formData.get('folder') as string) || '/posts';
+
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'No file provided' },
+        { status: 400, headers: secureHeaders }
+      );
     }
 
-    console.log('Received file:', file.name, 'Size:', file.size, 'Folder:', folder);
-
-    // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Upload to ImageKit with specified folder
     const uploadResponse = await getImageKitClient().upload({
       file: buffer,
       fileName: file.name,
-      folder: folder, // Organize uploads in folders (posts, events, clubs)
+      folder,
     });
 
-    console.log('ImageKit upload successful:', uploadResponse.url);
-
-    return NextResponse.json({
-      url: uploadResponse.url,
-      fileId: uploadResponse.fileId,
-    });
+    return NextResponse.json(
+      { url: uploadResponse.url, fileId: uploadResponse.fileId },
+      { headers: secureHeaders }
+    );
   } catch (error) {
     console.error(`[${errorId}] Upload failed:`, error);
     return NextResponse.json(
       { error: 'Upload failed. Please try again later.', errorId },
-      { status: 500 }
+      { status: 500, headers: secureHeaders }
     );
   }
 }

@@ -274,7 +274,7 @@ export default function Feed() {
         setError(null);
 
         const response = await axios.get<ApiResponse>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/all?page=${page}`
+          `/api/v1/post/all?page=${page}`
         );
 
         const newPosts = response.data?.posts || [];

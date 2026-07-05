@@ -37,12 +37,8 @@ export const useAddSession = () => {
 
   return useMutation<ScheduleSession, Error, AddSessionPayload>({
     mutationFn: async (payload: AddSessionPayload) => {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Please sign in to add sessions');
-
       return sendScheduleSession({
         eventId: payload.eventId,
-        token,
         day: payload.day,
         time: payload.time,
         title: payload.title,
@@ -62,7 +58,7 @@ export const useAddSession = () => {
       logger.error('Error adding session:', error);
       const is404 = /404|not found/i.test(error.message);
       const fallback = is404
-        ? 'Schedule endpoint not found — check NEXT_PUBLIC_BACKEND_URL and backend deploy'
+        ? 'Schedule endpoint not found — check the backend service is running'
         : 'Unable to add session right now. Please try again.';
       toast.error(getSafeErrorMessage(error, fallback));
     },

@@ -300,7 +300,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       const submit = await axios.post<{
         msg: string;
         id: string;
-      }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/create`, payload, {
+      }>(`/api/v1/post/create`, payload, {
         headers: {
           authorization: `Bearer ${token}`,
         },

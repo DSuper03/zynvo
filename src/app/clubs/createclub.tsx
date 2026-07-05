@@ -90,7 +90,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
       try {
         // Get user's college information
         const userResponse = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          `/api/v1/user/getUser`,
           {
             headers: {
               authorization: `Bearer ${token}`,
@@ -107,7 +107,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
           setIsLoadingClubs(true);
           // Test the API call directly first
           try {
-            const testUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClubs/${encodeURIComponent(userCollege)}`;
+            const testUrl = `/api/v1/clubs/getClubs/${encodeURIComponent(userCollege)}`;
             console.log('Testing API URL:', testUrl);
 
             const testResponse = await fetch(testUrl, {
@@ -267,7 +267,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
         msg: string;
         clubId: string;
       }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/club`,
+        `/api/v1/clubs/club`,
         submitData,
         {
           headers: {

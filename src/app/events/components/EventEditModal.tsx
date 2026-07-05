@@ -169,7 +169,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
       try {
         if (!token) return;
         const res = await axios.get<{ user: { collegeName: string , clubName: string} }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          `/api/v1/user/getUser`,
           {
             headers: { authorization: `Bearer ${token}` },
           }
@@ -188,7 +188,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
         // Fetch event count for this founder
         try {
           const eventRes = await axios.get<{ count: number }>(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/founder-event-count`,
+            `/api/v1/events/founder-event-count`,
             {
               headers: { authorization: `Bearer ${token}` },
             }
@@ -427,7 +427,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
     // Server-side date conflict check
     try {
       const dateCheckRes = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/checkEventDates`,
+        `/api/v1/events/checkEventDates`,
         {
           eventStartDate: formData.eventStartDate,
           eventEndDate: formData.eventEndDate,
@@ -519,7 +519,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
 
     // Submit update request
     const updateResult = await axios.put<{ msg: string; id: string; }>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event/${eventId}`,
+      `/api/v1/events/event/${eventId}`,
       payload,
       { headers: { authorization: `Bearer ${token}` } }
     );
@@ -1540,7 +1540,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
                 onClick={async () => {
                   try {
                     await axios.post(
-                      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/announcement/${eventId}`,
+                      `/api/v1/events/announcement/${eventId}`,
                       { Title: "Deadline Extended!", content: announcementMsg },
                       { headers: { authorization: `Bearer ${token}` } }
                     );

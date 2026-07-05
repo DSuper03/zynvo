@@ -654,7 +654,7 @@ export default function ZynvoDashboard() {
 
         try {
           const response = await axios.get<ApiResponse>(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+            `/api/v1/user/getUser`,
             {
               headers: {
                 authorization: `Bearer ${token}`,
@@ -771,7 +771,7 @@ export default function ZynvoDashboard() {
    } 
 
    const fetch = async() => {
-     const isfounder = await axios.get<isAdminResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isClubAdmin`
+     const isfounder = await axios.get<isAdminResponse>(`/api/v1/user/isClubAdmin`
       , {
         headers : {
           authorization : `Bearer ${token}`
@@ -835,7 +835,7 @@ export default function ZynvoDashboard() {
     try {
       setIsAvatarUpdating(true);
       const response = await axios.put<{ msg?: string; message?: string }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/updateAvatar`,
+        `/api/v1/user/updateAvatar`,
         { profileAvatar },
         { headers: getAuthorizedHeaders() }
       );
@@ -876,7 +876,7 @@ export default function ZynvoDashboard() {
     try {
       setIsCollegeUpdating(true);
       const response = await axios.put<{ msg?: string; message?: string }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/updateCollegeName`,
+        `/api/v1/user/updateCollegeName`,
         { collegeName },
         { headers: getAuthorizedHeaders() }
       );
@@ -916,7 +916,7 @@ export default function ZynvoDashboard() {
     const update = await axios.put<{
       msg: string;
     }>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/updateProfile`,
+      `/api/v1/user/updateProfile`,
       data,
       {
         headers: {
@@ -985,7 +985,7 @@ export default function ZynvoDashboard() {
       const qrValue = buildPassUrl(passId);
       await generateQrCode(qrValue);
       const safeId = encodeURIComponent(eventId);
-      const base = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
+      const base = ('').replace(/\/$/, '');
       const url = base
         ? `${base}/api/v1/events/event-details?id=${safeId}`
         : `/api/v1/events/event-details?id=${safeId}`;
@@ -1196,7 +1196,7 @@ export default function ZynvoDashboard() {
                       onClick={async () => {
                         try {
                           const leave = await axios.put<any>(
-                            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/leaveClub`,
+                            `/api/v1/user/leaveClub`,
                             {
                               clubId: userData.clubId,
                               clubname: userData.clubName,

@@ -201,7 +201,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         if (!token) return;
         const res = await axios.get<{
           user: { collegeName: string; clubName: string };
-        }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`, {
+        }>(`/api/v1/user/getUser`, {
           headers: { authorization: `Bearer ${token}` },
         });
         const collegeName = res.data?.user?.collegeName || '';
@@ -217,7 +217,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         // Fetch event count for this founder
         try {
           const eventRes = await axios.get<{ count: number }>(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/founder-event-count`,
+            `/api/v1/events/founder-event-count`,
             {
               headers: { authorization: `Bearer ${token}` },
             }
@@ -525,7 +525,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
     try {
       const dateCheckRes = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/checkEventDates`,
+        `/api/v1/events/checkEventDates`,
         {
           eventStartDate: formData.eventStartDate,
           eventEndDate: formData.eventEndDate,
@@ -657,7 +657,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     const createEvent = await axios.post<{
       msg: string;
       id: string;
-    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event`, payload, {
+    }>(`/api/v1/events/event`, payload, {
       headers: {
         authorization: `Bearer ${token}`,
       },

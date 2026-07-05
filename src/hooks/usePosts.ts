@@ -1,3 +1,6 @@
+/**
+ * Posts hook — all requests go through the same-origin proxy (/api/v1/post/*).
+ */
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { PostData } from '@/types/global-Interface';
@@ -21,10 +24,6 @@ interface UsePostsReturn {
   setPosts: React.Dispatch<React.SetStateAction<PostData[]>>;
 }
 
-/**
- * Custom hook for fetching posts with authentication
- * Handles pagination and infinite scroll
- */
 export function usePosts({ page }: UsePostsOptions): UsePostsReturn {
   const [posts, setPosts] = useState<PostData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,40 +37,23 @@ export function usePosts({ page }: UsePostsOptions): UsePostsReturn {
       setIsFetchingMore(page > 1);
       setError(null);
 
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
+      // No auth header needed — server-side Clerk token is injected by the proxy
       const response = await axios.get<ApiResponse>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/all?page=${page}`,
-        { headers }
+        `/api/v1/post/all?page=${page}`
       );
 
       const newPosts = response.data?.posts || [];
-      
-      console.log('[usePosts] Fetched posts:', {
-        page,
-        count: newPosts.length,
-        hasVoteData: newPosts.some(p => 'upvoteCount' in p || 'userVote' in p),
-        samplePost: newPosts[0] ? {
-          id: newPosts[0].id,
-          upvoteCount: (newPosts[0] as any).upvoteCount,
-          downvoteCount: (newPosts[0] as any).downvoteCount,
-          userVote: (newPosts[0] as any).userVote
-        } : null
-      });
-      
+
       if (page === 1) {
         setPosts(newPosts);
       } else {
         setPosts((prev) => [...prev, ...newPosts]);
       }
-      
-      // If less than 10 posts returned, no more data
+
       setHasMore(newPosts.length === 10);
-    } catch (err) {
+    } catch {
       setError('Failed to fetch posts');
       if (page === 1) setPosts([]);
-      console.error('Failed to fetch posts:', err);
     } finally {
       setIsLoading(false);
       setIsFetchingMore(false);

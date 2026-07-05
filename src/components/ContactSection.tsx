@@ -29,7 +29,7 @@ const ContactSection = () => {
 
     try {
       const submit = await axios.post<{ msg: string }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/contact/contact`,
+        `/api/v1/contact/contact`,
         formState
       );
       if (submit.status == 200) {

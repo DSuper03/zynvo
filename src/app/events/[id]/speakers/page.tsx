@@ -81,7 +81,7 @@ const router = useRouter();
     queryFn: async () => {
       if (!id || !token) throw new Error('Missing id or token');
       const res = await axios.get<speakerResponse>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/getSpeakers?id=${id}`,
+        `/api/v1/events/getSpeakers?id=${id}`,
         {
           headers: {
             authorization: `Bearer ${token}`,
@@ -103,7 +103,7 @@ const router = useRouter();
     async function checkFounderStatus() {
       try {
         const checkFounder = await axios.get<{ msg: string }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isFounder?id=${id}`,
+          `/api/v1/user/isFounder?id=${id}`,
           {
             headers: {
               authorization: `Bearer ${token}`,

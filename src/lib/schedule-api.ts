@@ -1,3 +1,7 @@
+/**
+ * Schedule API helpers — all requests go through the same-origin proxy (/api/v1/events/schedule/*).
+ * Auth headers are injected server-side. No token parameters are needed.
+ */
 import {
   DEFAULT_SCHEDULE_DAYS,
   type ScheduleDay,
@@ -7,25 +11,18 @@ import {
 import { normalizeSchedule, parseSessionFromResponse } from '@/lib/schedule-normalize';
 import { logger } from '@/lib/logger';
 
-/** Backend base URL from NEXT_PUBLIC_BACKEND_URL */
-export function getScheduleApiBase(): string {
-  return (
-    process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
-  ).replace(/\/$/, '');
-}
+const API_BASE = '/api';
 
 export const scheduleEndpoints = {
-  list: (eventId: string) =>
-    `${getScheduleApiBase()}/api/v1/events/schedule/${eventId}`,
+  list: (eventId: string) => `${API_BASE}/v1/events/schedule/${eventId}`,
   addSession: (eventId: string) =>
-    `${getScheduleApiBase()}/api/v1/events/schedule/${eventId}/session`,
+    `${API_BASE}/v1/events/schedule/${eventId}/session`,
   deleteSession: (eventId: string, sessionId: string) =>
-    `${getScheduleApiBase()}/api/v1/events/schedule/${eventId}/session/${sessionId}`,
+    `${API_BASE}/v1/events/schedule/${eventId}/session/${sessionId}`,
 } as const;
 
 export type SendScheduleSessionInput = {
   eventId: string;
-  token: string;
   day: number;
   time: string;
   title: string;
@@ -34,28 +31,15 @@ export type SendScheduleSessionInput = {
   speakers?: string[];
 };
 
-/**
- * POST /api/v1/events/schedule/:eventId/session
- * Body: { day, time, title, description, location, speakers }
- */
-export async function sendScheduleSession({
-  eventId,
-  token,
-  day,
-  time,
-  title,
-  description,
-  location,
-  speakers,
-}: SendScheduleSessionInput): Promise<ScheduleSession> {
+export async function sendScheduleSession(
+  input: SendScheduleSessionInput
+): Promise<ScheduleSession> {
+  const { eventId, day, time, title, description, location, speakers } = input;
   const url = scheduleEndpoints.addSession(eventId);
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       day,
       time,
@@ -85,16 +69,11 @@ export async function sendScheduleSession({
   };
 }
 
-export async function fetchEventSchedule(
-  eventId: string,
-  token?: string | null
-): Promise<ScheduleDay[]> {
+export async function fetchEventSchedule(eventId: string): Promise<ScheduleDay[]> {
   const url = scheduleEndpoints.list(eventId);
 
   try {
-    const res = await fetch(url, {
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    });
+    const res = await fetch(url);
 
     if (!res.ok) {
       logger.error(`Schedule GET failed (${res.status}) ${url}`);
@@ -112,17 +91,11 @@ export async function fetchEventSchedule(
 
 export async function deleteScheduleSession(
   eventId: string,
-  sessionId: string,
-  token: string
+  sessionId: string
 ): Promise<void> {
   const url = scheduleEndpoints.deleteSession(eventId, sessionId);
 
-  const res = await fetch(url, {
-    method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const res = await fetch(url, { method: 'DELETE' });
 
   if (!res.ok) {
     const message = await res.text();

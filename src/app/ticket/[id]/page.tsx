@@ -39,7 +39,7 @@ export default function Page() {
     async function call() {
       try {
         const res = await axios.get<{ data: EventData }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event-details?id=${id}`
+          `/api/v1/events/event-details?id=${id}`
         );
         if (res.data?.data) {
           const eventData = res.data.data;
@@ -58,7 +58,7 @@ export default function Page() {
         if (token) {
           try {
             const userRes = await axios.get(
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+              `/api/v1/user/getUser`,
               { headers: { authorization: `Bearer ${token}` } }
             );
             if (userRes.data?.user) {

@@ -205,7 +205,7 @@ const ClubsPage = () => {
       setIsLoadingAll(true);
       try {
         const response = await axios.get<response>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getAll?limit=100`,
+          `/api/v1/clubs/getAll?limit=100`,
           
           {
             headers: {
@@ -257,7 +257,7 @@ const ClubsPage = () => {
       try {
         // Get current user data
         const userResponse = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          `/api/v1/user/getUser`,
           {
             headers: {
               authorization: `Bearer ${token}`,

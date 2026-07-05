@@ -21,6 +21,7 @@ Zynvo publishes agent authentication and registration discovery metadata for pro
 - Authorization server metadata: ${SITE_URL}/.well-known/oauth-authorization-server
 - OpenID Connect discovery: ${SITE_URL}/.well-known/openid-configuration
 - Agent registration skill: ${AUTH_MD_URL}
+- DNS-AID records: publish under the \`_agents.${SITE_URL.replace('https://', '')}\` zone at your DNS provider
 
 ## Authorization server
 
