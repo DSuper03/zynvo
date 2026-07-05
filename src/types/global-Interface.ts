@@ -473,6 +473,7 @@ export interface respnseUseState {
   isPaidEvent?: boolean;
   paymentQRCode?: string;
   paymentAmount?: number;
+  acceptanceBased?: boolean;
   maxParticipants?: number;
   customQuestions?: CustomQuestion[];
 }
@@ -542,6 +543,7 @@ export interface EventByIdResponse {
     paymentQRCode?: string; // QR code image URL for payment
     qrCodeUrl?: string; // Alternative field name from backend (maps to paymentQRCode)
     paymentAmount?: number; // Payment amount required for event
+    acceptanceBased?: boolean;
     maxParticipants?: number;
     attendeesCount?: number;
     customQuestions?: CustomQuestion[];
