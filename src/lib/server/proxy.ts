@@ -97,13 +97,20 @@ export async function proxyRequest(
   // ── 1. Resolve auth ────────────────────────────────────────────────────────
   const proxyAuth = requireAuth ? await getProxyAuth() : null;
 
-  if (requireAuth && !proxyAuth) {
-    proxyLogger.warn({ ...logBase, error: 'No Clerk session' });
+  // Client-supplied Authorization header (backend JWT from syncWithClerk).
+  // Used as fallback when no Clerk session exists.
+  const clientAuthHeader = request.headers.get('authorization');
+
+  if (requireAuth && !proxyAuth && !clientAuthHeader) {
+    proxyLogger.warn({ ...logBase, error: 'No Clerk session and no client token' });
     return unauthorized(requestId);
   }
 
   const userId = proxyAuth?.userId ?? null;
-  const authorizationHeader = proxyAuth ? `Bearer ${proxyAuth.token}` : null;
+  // Prefer Clerk session token; fall back to the client's own JWT.
+  const authorizationHeader = proxyAuth
+    ? `Bearer ${proxyAuth.token}`
+    : clientAuthHeader;
 
   // ── 2. Rate limiting ───────────────────────────────────────────────────────
   const limiter = resolveRateLimiter(method, backendPath);
