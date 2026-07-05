@@ -1,13 +1,10 @@
 /**
  * Catch-all proxy for /api/v1/* backend routes.
  *
- * Browser calls /api/v1/<anything> → this handler → secure proxy → backend.
- * The actual backend URL is never sent to the browser.
- *
- * Authentication: Clerk session is extracted server-side. Public GET paths
- * (events list, clubs list, posts) do not require a session.
+ * In development: calls the backend directly (no proxy layer).
+ * In production:  goes through the secure proxy (Clerk auth, rate-limit, etc.).
  */
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { proxyAuthenticatedRequest, proxyPublicRequest } from '@/lib/server/proxy';
 
 /**
@@ -45,9 +42,78 @@ function isPublicPath(method: string, path: string): boolean {
   return false;
 }
 
+/**
+ * Direct fetch to backend — used in development to bypass the proxy layer.
+ * Mirrors the old pre-proxy behaviour so Clerk keys, proxy secrets, etc.
+ * are not required when running locally.
+ */
+async function directFetch(
+  request: NextRequest,
+  backendPath: string,
+): Promise<NextResponse> {
+  const base = (
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    process.env.BACKEND_BASE_URL ||
+    'https://zynvosocial-be-274792984950.asia-south1.run.app'
+  ).replace(/\/$/, '');
+
+  const upstreamUrl = new URL(backendPath, base);
+  request.nextUrl.searchParams.forEach((v, k) => upstreamUrl.searchParams.set(k, v));
+
+  const hasBody = request.method !== 'GET' && request.method !== 'HEAD';
+
+  const headers: Record<string, string> = {};
+  for (const h of ['content-type', 'accept', 'authorization', 'user-agent']) {
+    const val = request.headers.get(h);
+    if (val) headers[h] = val;
+  }
+
+  let upstream: Response;
+  try {
+    upstream = await fetch(upstreamUrl.toString(), {
+      method: request.method,
+      headers,
+      body: hasBody ? request.body : undefined,
+      // @ts-expect-error
+      duplex: 'half',
+    });
+  } catch {
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Backend unreachable. Is the backend server running?',
+        timestamp: new Date().toISOString(),
+      },
+      { status: 502 },
+    );
+  }
+
+  const responseHeaders = new Headers();
+  const safeHeaders = new Set([
+    'content-type',
+    'content-length',
+    'cache-control',
+    'etag',
+    'x-request-id',
+  ]);
+  upstream.headers.forEach((value, key) => {
+    if (safeHeaders.has(key.toLowerCase())) responseHeaders.set(key, value);
+  });
+
+  return new NextResponse(upstream.body, {
+    status: upstream.status,
+    statusText: upstream.statusText,
+    headers: responseHeaders,
+  });
+}
+
 function handler(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   return params.then(({ path }) => {
     const backendPath = '/api/v1/' + path.join('/');
+
+    if (process.env.NODE_ENV === 'development') {
+      return directFetch(request, backendPath);
+    }
 
     if (isPublicPath(request.method, backendPath)) {
       return proxyPublicRequest(request, backendPath, { cache: 'no-store' });

@@ -10,6 +10,8 @@
     "format": "prettier --write .",
     "analyze": "ANALYZE=true npm run build",
     "type-check": "tsc --noEmit",
+    "type-check:node": "node node_modules/typescript/bin/tsc --noEmit",
+    "build:node": "node node_modules/next/dist/bin/next build --webpack",
     "build:optimized": "next build && next-sitemap"
   },
   "dependencies": {

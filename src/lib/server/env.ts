@@ -20,6 +20,11 @@ const schema = z.object({
   JWT_SECRET: z.string().optional(),
 });
 
+const PLACEHOLDER_PROXY_SECRETS = new Set([
+  'change-me-generate-with-crypto-randomBytes-32-hex',
+  'change-me',
+]);
+
 function parseServerEnv() {
   const result = schema.safeParse({
     BACKEND_BASE_URL: process.env.BACKEND_BASE_URL,
@@ -35,6 +40,16 @@ function parseServerEnv() {
       .map((i) => `  ${i.path.join('.')}: ${i.message}`)
       .join('\n');
     throw new Error(`[proxy] Server environment is misconfigured:\n${issues}`);
+  }
+
+  if (PLACEHOLDER_PROXY_SECRETS.has(result.data.INTERNAL_PROXY_SECRET)) {
+    throw new Error(
+      [
+        '[proxy] Server environment is misconfigured:',
+        '  INTERNAL_PROXY_SECRET is still a placeholder.',
+        '  Set it to the same shared secret configured on the backend.',
+      ].join('\n'),
+    );
   }
 
   return result.data;
