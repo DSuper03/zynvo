@@ -433,6 +433,9 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
           eventEndDate: formData.eventEndDate,
           applicationStartDate: formData.applicationStartDate,
           applicationEndDate: formData.applicationEndDate,
+        },
+        {
+          headers: { authorization: `Bearer ${token}` },
         }
       );
       const { isValid, errors: dateErrors, warnings, existingEvents } = dateCheckRes.data;
