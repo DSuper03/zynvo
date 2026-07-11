@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Search, MapPin, Clock, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import { eventData } from '@/types/global-Interface';
@@ -103,7 +103,6 @@ const SearchFilterSkeleton = () => {
 };
 
 export default function ZynvoEventsPage() {
-  const [activeFilter, setActiveFilter] = useState('all');
   const [events, setEvents] = useState<eventData[] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -119,6 +118,15 @@ export default function ZynvoEventsPage() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
   const [fetchNonce, setFetchNonce] = useState(0);
+
+  // Search-specific state
+  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<eventData[]>([]);
+  const [searchTotal, setSearchTotal] = useState(0);
+  const [searchPage, setSearchPage] = useState(1);
+  const [searchTotalPages, setSearchTotalPages] = useState(1);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -249,6 +257,60 @@ export default function ZynvoEventsPage() {
     };
   }, [currentPage, fetchNonce]);
 
+  // Backend-powered debounced search
+  const runSearch = useCallback(async (term: string, page: number) => {
+    if (!term.trim()) {
+      setIsSearchMode(false);
+      setSearchResults([]);
+      setSearchTotal(0);
+      setSearchPage(1);
+      setSearchTotalPages(1);
+      return;
+    }
+    setIsSearchMode(true);
+    setIsSearchLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams({ q: term.trim(), page: String(page), limit: '12' });
+      const res = await axios.get<{ response: eventData[]; total: number; totalPages: number }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/search?${params}`,
+        { timeout: 10000 }
+      );
+      setSearchResults(res.data.response ?? []);
+      setSearchTotal(res.data.total ?? 0);
+      setSearchTotalPages(res.data.totalPages ?? 1);
+    } catch (err) {
+      console.error('Search error:', err);
+      setSearchResults([]);
+      setSearchTotal(0);
+    } finally {
+      setIsSearchLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!searchTerm.trim()) {
+      setIsSearchMode(false);
+      setSearchResults([]);
+      setSearchPage(1);
+      return;
+    }
+    debounceRef.current = setTimeout(() => {
+      setSearchPage(1);
+      runSearch(searchTerm, 1);
+    }, 400);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [searchTerm, runSearch]);
+
+  // Re-run search when search page changes (only if in search mode)
+  useEffect(() => {
+    if (isSearchMode && searchTerm.trim()) {
+      runSearch(searchTerm, searchPage);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchPage]);
+
   // Helper function to check if user is attending an event
   const isUserAttendingEvent = (event: eventData): boolean => {
     if (!currentUser) return false;
@@ -259,7 +321,6 @@ export default function ZynvoEventsPage() {
   const getEventsForDate = (date: Date): eventData[] => {
     if (!events) return [];
     const targetKey = toLocalDateKey(date);
-
     return events.filter((event) => {
       const startKey = dateKeyFromEventField(event.startDate);
       const endKey = dateKeyFromEventField(event.endDate);
@@ -268,29 +329,20 @@ export default function ZynvoEventsPage() {
   };
 
   /** Days that have at least one event (for calendar dots). */
-  const eventCalendarKeys = useMemo(() => {
-    const keys = new Set<string>();
-    for (const ev of events ?? []) {
-      const s = dateKeyFromEventField(ev.startDate);
-      const e = dateKeyFromEventField(ev.endDate);
-      if (s) keys.add(s);
-      if (e) keys.add(e);
-    }
-    return keys;
-  }, [events]);
+  const eventCalendarKeys = new Set<string>();
+  for (const ev of events ?? []) {
+    const s = dateKeyFromEventField(ev.startDate);
+    const e = dateKeyFromEventField(ev.endDate);
+    if (s) eventCalendarKeys.add(s);
+    if (e) eventCalendarKeys.add(e);
+  }
+  const hasEventsMatcher = (check: Date) => eventCalendarKeys.has(toLocalDateKey(check));
 
-  const hasEventsMatcher = useMemo(() => {
-    return (check: Date) => eventCalendarKeys.has(toLocalDateKey(check));
-  }, [eventCalendarKeys]);
-
-  // Replace the filteredEvents computation with name-only search
-  const filteredEvents = (events || []).filter((event) => {
-    if (!event?.EventName) return false;
-    const name = String(event.EventName).toLowerCase();
-    const query = searchTerm.trim().toLowerCase();
-    if (!query) return true;
-    return name.includes(query);
-  });
+  // Displayed events depend on whether we are in search mode or normal browse mode
+  const displayedEvents = isSearchMode ? searchResults : (events || []);
+  const displayedTotalPages = isSearchMode ? searchTotalPages : totalPages;
+  const displayedCurrentPage = isSearchMode ? searchPage : currentPage;
+  const displayedIsLoading = isSearchMode ? isSearchLoading : isLoading;
 
   const handleRetry = () => {
     setError(null);
@@ -299,10 +351,16 @@ export default function ZynvoEventsPage() {
   };
 
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
-      setCurrentPage(newPage);
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (isSearchMode) {
+      if (newPage >= 1 && newPage <= searchTotalPages && newPage !== searchPage) {
+        setSearchPage(newPage);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else {
+      if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
+        setCurrentPage(newPage);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   };
 
@@ -603,43 +661,57 @@ export default function ZynvoEventsPage() {
         {isLoading ? (
           <SearchFilterSkeleton />
         ) : (
-          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:gap-4 mb-6 md:mb-8">
-            <div className="relative w-full md:w-1/2">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+          <div className="flex flex-col space-y-3 mb-6 md:mb-8">
+            <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:gap-4">
+              <div className="relative w-full md:w-1/2">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className={`h-5 w-5 ${isSearchLoading ? 'text-yellow-400 animate-pulse' : 'text-gray-400'}`} />
+                </div>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="bg-gray-800 border border-gray-700 text-white w-full pl-10 pr-10 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all duration-200"
+                  placeholder="Search by name, club, description…"
+                />
+                {searchTerm && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchTerm('')}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors"
+                    aria-label="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-gray-800 border border-gray-700 text-white w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all duration-200"
-                placeholder="Search events..."
-              />
             </div>
-            <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row md:space-x-4">
-              {/* keep empty if no extra filters */}
-            </div>
+            {/* Search results count */}
+            {isSearchMode && !isSearchLoading && (
+              <p className="text-sm text-gray-400">
+                {searchTotal === 0
+                  ? `No results for "${searchTerm.trim()}"`
+                  : `${searchTotal} result${searchTotal !== 1 ? 's' : ''} for "${searchTerm.trim()}"`}
+              </p>
+            )}
           </div>
         )}
 
-        {/* Decorative banner strip above the events grid */}
-
         {/* Events Grid - Main Content */}
         <div className="min-h-[400px]">
-          {isLoading ? (
+          {displayedIsLoading ? (
             <EventsGridSkeleton />
-          ) : error ? (
+          ) : error && !isSearchMode ? (
             <ErrorState
               title="Could not load events"
               message={error}
               onRetry={handleRetry}
               retryLabel="Try again"
             />
-          ) : filteredEvents.length > 0 ? (
-            // Pass the filtered events to EventCard
-            <EventCard 
-              events={filteredEvents}
-              isLoading={isLoading}
+          ) : displayedEvents.length > 0 ? (
+            <EventCard
+              events={displayedEvents}
+              isLoading={displayedIsLoading}
               error={error}
               searchTerm={searchTerm}
               isUserAttendingEvent={isUserAttendingEvent}
@@ -648,17 +720,17 @@ export default function ZynvoEventsPage() {
             <EmptyState
               icon={Calendar}
               title={
-                searchTerm.trim()
+                isSearchMode
                   ? 'No events match your search'
                   : 'No events to show yet'
               }
               description={
-                searchTerm.trim()
-                  ? `Nothing matches “${searchTerm.trim()}”. Try different keywords or clear the search.`
+                isSearchMode
+                  ? `Nothing matches "${searchTerm.trim()}". Try different keywords or clear the search.`
                   : 'New campus events will appear here when organizers publish them.'
               }
             >
-              {searchTerm.trim() ? (
+              {isSearchMode ? (
                 <Button
                   type="button"
                   onClick={() => setSearchTerm('')}
@@ -672,14 +744,13 @@ export default function ZynvoEventsPage() {
         </div>
 
         {/* Pagination Controls */}
-
-        {!isLoading && !error && totalPages > 1 && (
+        {!displayedIsLoading && !error && displayedTotalPages > 1 && (
           <div className="flex flex-wrap justify-center items-center gap-2 mt-8 py-4">
             <Button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
+              onClick={() => handlePageChange(displayedCurrentPage - 1)}
+              disabled={displayedCurrentPage === 1}
               className={`px-4 py-2 rounded-lg transition-colors ${
-                currentPage === 1
+                displayedCurrentPage === 1
                   ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
                   : 'bg-gray-700 text-white hover:bg-gray-600'
               }`}
@@ -688,16 +759,16 @@ export default function ZynvoEventsPage() {
             </Button>
 
             {/* Page numbers with smart truncation */}
-            {Array.from({ length: Math.min(totalPages, 5) }, (_, idx) => {
+            {Array.from({ length: Math.min(displayedTotalPages, 5) }, (_, idx) => {
               let pageNumber;
-              if (totalPages <= 5) {
+              if (displayedTotalPages <= 5) {
                 pageNumber = idx + 1;
-              } else if (currentPage <= 3) {
+              } else if (displayedCurrentPage <= 3) {
                 pageNumber = idx + 1;
-              } else if (currentPage >= totalPages - 2) {
-                pageNumber = totalPages - 4 + idx;
+              } else if (displayedCurrentPage >= displayedTotalPages - 2) {
+                pageNumber = displayedTotalPages - 4 + idx;
               } else {
-                pageNumber = currentPage - 2 + idx;
+                pageNumber = displayedCurrentPage - 2 + idx;
               }
 
               return (
@@ -705,7 +776,7 @@ export default function ZynvoEventsPage() {
                   key={pageNumber}
                   onClick={() => handlePageChange(pageNumber)}
                   className={`px-4 py-2 rounded-lg transition-colors ${
-                    currentPage === pageNumber
+                    displayedCurrentPage === pageNumber
                       ? 'bg-yellow-500 text-black font-bold'
                       : 'bg-gray-700 text-white hover:bg-gray-600'
                   }`}
@@ -716,10 +787,10 @@ export default function ZynvoEventsPage() {
             })}
 
             <Button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
+              onClick={() => handlePageChange(displayedCurrentPage + 1)}
+              disabled={displayedCurrentPage === displayedTotalPages}
               className={`px-4 py-2 rounded-lg transition-colors ${
-                currentPage === totalPages
+                displayedCurrentPage === displayedTotalPages
                   ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
                   : 'bg-gray-700 text-white hover:bg-gray-600'
               }`}
