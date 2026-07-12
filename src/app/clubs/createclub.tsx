@@ -421,7 +421,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
                   </button>
                   
                   {isDropdownOpen && (
-                    <div className="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto scrollbar-overlay">
                       {isLoadingClubs ? (
                         <div className="px-4 py-2 text-gray-400 text-sm">Loading clubs...</div>
                       ) : existingClubs.length > 0 ? (

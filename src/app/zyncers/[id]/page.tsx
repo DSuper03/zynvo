@@ -715,7 +715,7 @@ export default function PublicUserProfile() {
                 count={posts?.length || 0}
               >
                 {posts && posts.length > 0 ? (
-                  <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
+                  <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1 scrollbar-overlay">
                     {posts.map((post, index) => (
                       <div
                         key={post.id}
@@ -776,7 +776,7 @@ export default function PublicUserProfile() {
                 count={attendedEventCount}
               >
                 {userData.events && userData.events.length > 0 ? (
-                  <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
+                  <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1 scrollbar-overlay">
                     {userData.events.map((event) => (
                       <div
                         key={event.id}

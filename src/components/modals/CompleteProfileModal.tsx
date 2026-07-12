@@ -284,7 +284,7 @@ const TagSelector = ({
       )}
 
       {/* Tag grid */}
-      <div className="max-h-52 overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 space-y-3">
+      <div className="max-h-52 overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 space-y-3 scrollbar-overlay">
         {visibleCategories.map((cat) =>
           cat.tags.length === 0 ? null : (
             <div key={cat.label}>
@@ -445,7 +445,7 @@ export default function CompleteProfileModal({
         </div>
 
         {/* Scrollable Form Content */}
-        <div className="relative flex-1 overflow-y-auto min-h-0 bg-neutral-950/50">
+        <div className="relative flex-1 overflow-y-auto min-h-0 bg-neutral-950/50 scrollbar-overlay">
           <form id="complete-profile-form" onSubmit={onSubmit} className="px-5 sm:px-6 py-5 space-y-5">
             <div>
               <label className="block text-sm font-semibold text-gray-200 mb-2">Bio</label>

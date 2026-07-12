@@ -551,7 +551,7 @@ export default function ZynvoEventsPage() {
                       {(() => {
                         const eventsForDate = getEventsForDate(selectedDate);
                         return eventsForDate.length > 0 ? (
-                          <ul className="min-h-0 max-w-full flex-1 space-y-3 overflow-x-hidden overflow-y-auto overscroll-contain pr-0.5 pb-1 [-webkit-overflow-scrolling:touch]">
+                          <ul className="min-h-0 max-w-full flex-1 space-y-3 overflow-x-hidden overflow-y-auto overscroll-contain pr-0.5 pb-1 scrollbar-overlay [-webkit-overflow-scrolling:touch]">
                             {eventsForDate.map((event) => (
                               <li key={event.id}>
                                 <div className="group max-w-full rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900/90 to-black/90 p-3 transition-colors hover:border-yellow-500/25 hover:bg-zinc-900/95 sm:p-4">

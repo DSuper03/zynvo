@@ -500,7 +500,7 @@ const TagSelector = ({
       </div>
 
       {/* Tags grid */}
-      <div className="max-h-60 overflow-y-auto bg-gray-800 rounded-lg p-3 border border-gray-700">
+      <div className="max-h-60 overflow-y-auto bg-gray-800 rounded-lg p-3 border border-gray-700 scrollbar-overlay">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {displayTags.map((tag) => (
             <Button

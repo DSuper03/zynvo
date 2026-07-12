@@ -724,7 +724,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
 
           {/* Modal Body - Form Steps */}
-          <form id="event-creation-form" onSubmit={(e) => { e.preventDefault(); if (step === 4) handleSubmit(); }} className="px-6 py-4 max-h-[60vh] overflow-y-auto scrollbar-hide">
+          <form id="event-creation-form" onSubmit={(e) => { e.preventDefault(); if (step === 4) handleSubmit(); }} className="px-6 py-4 max-h-[60vh] overflow-y-auto scrollbar-overlay">
             {/* Step 1: Basic Info */}
             {step === 1 && (
               <div className="space-y-6">

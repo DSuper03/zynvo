@@ -490,7 +490,7 @@ export default function Feed() {
 
           {/* Column 3: Event masonry sidebar */}
           <aside className="hidden lg:block">
-            <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:rgba(234,179,8,0.45)_transparent]">
+            <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto pr-1 scrollbar-thin">
               <div className="mb-4 rounded-2xl border border-yellow-500/15 bg-gradient-to-br from-yellow-500/10 via-gray-900/70 to-black/70 p-4 shadow-xl shadow-black/30">
                 <div className="flex items-start justify-between gap-3">
                   <div>
