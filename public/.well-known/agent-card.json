@@ -1,0 +1,33 @@
+{
+  "name": "Zynvo AI Assistant",
+  "description": "AI-powered campus event intelligence agent that discovers, extracts, and recommends student events from web sources for college students",
+  "url": "https://zynvosocial.com/ai",
+  "endpoints": {
+    "a2a": "https://zynvosocial.com/api/ai"
+  },
+  "capabilities": [
+    {
+      "id": "event-discovery",
+      "name": "Event Discovery",
+      "description": "Discovers college events (fests, hackathons, workshops) from campus web sources"
+    },
+    {
+      "id": "event-extraction",
+      "name": "Event Extraction",
+      "description": "Extracts structured event data (dates, venues, registration links) from unstructured web content"
+    },
+    {
+      "id": "campus-intelligence",
+      "name": "Campus Intelligence",
+      "description": "Provides intelligent insights about campus activities, trending events, and student engagement opportunities"
+    }
+  ],
+  "skills": [
+    "event-discovery",
+    "event-extraction",
+    "campus-intelligence",
+    "web-scraping",
+    "structured-data-extraction"
+  ],
+  "version": "1.0.0"
+}

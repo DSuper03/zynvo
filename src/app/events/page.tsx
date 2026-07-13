@@ -170,7 +170,7 @@ export default function ZynvoEventsPage() {
       
       try {
         const userResponse = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          `/api/v1/user/getUser`,
           {
             headers: {
               authorization: `Bearer ${token}`,
@@ -207,7 +207,7 @@ export default function ZynvoEventsPage() {
         setError(null);
 
         const response = await axios.get<apiRespEvents>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/all?page=${currentPage}`,
+          `/api/v1/events/all?page=${currentPage}`,
           {
             timeout: 10000, // 10 second timeout
             headers: {

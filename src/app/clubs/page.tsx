@@ -105,6 +105,7 @@ const categories = [
   { id: 'literary', name: 'Literature', icon: <IconBook2 size={16} /> },
   { id: 'design', name: 'Design', icon: <IconPalette size={16} /> },
 ];
+
 const ClubsPage = () => {
   const [activetype, setActivetype] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -119,9 +120,6 @@ const ClubsPage = () => {
     requirements?: string;
   } | null>(null);
   const [clubData, setData] = useState<response['resp']>();
-  const [allClubs, setAllClubs] = useState<response['resp']>([]); // Store all clubs for search
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [token, setToken] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
@@ -192,80 +190,41 @@ const ClubsPage = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-      // Reset to page 1 when search query changes
-      setCurrentPage(1);
     }, 500); // 500ms delay
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch clubs - either all pages (for search) or paginated
+  // Fetch all clubs once so search and filters run over the full list.
   useEffect(() => {
     async function call() {
       if (!token) {
         return;
       }
 
-      // If there's a search query, fetch all pages
-      if (debouncedSearchQuery.trim()) {
-        setIsLoadingAll(true);
-        try {
-          // First, get the total pages by fetching page 1
-          const firstPageResponse = await axios.get<response>(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getAll?page=1`,
-            {
-              headers: {
-                authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          const totalPagesCount = firstPageResponse.data.totalPages || 1;
-          setTotalPages(totalPagesCount);
-
-          // Fetch all pages in parallel
-          const pagePromises = Array.from({ length: totalPagesCount }, (_, i) =>
-            axios.get<response>(
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getAll?page=${i + 1}`,
-              {
-                headers: {
-                  authorization: `Bearer ${token}`,
-                },
-              }
-            )
-          );
-
-          const allResponses = await Promise.all(pagePromises);
-          
-          // Combine all clubs from all pages
-          const allClubsCombined = allResponses.flatMap((response) => response.data.resp || []);
-          
-          setAllClubs(allClubsCombined);
-          setData(allClubsCombined); // Set data for filtering
-        } catch (error) {
-          console.error('Error fetching all clubs for search:', error);
-          toast.error('Failed to load all clubs for search');
-        } finally {
-          setIsLoadingAll(false);
-        }
-      } else {
-        // No search query - use normal pagination
-        setAllClubs([]); // Clear all clubs when not searching
+      setIsLoadingAll(true);
+      try {
         const response = await axios.get<response>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getAll?page=${currentPage}`,
+          `/api/v1/clubs/getAll?limit=100`,
+          
           {
             headers: {
               authorization: `Bearer ${token}`,
             },
           }
         );
-        setData(response.data.resp);
-        setTotalPages(response.data.totalPages || 1);
+
+        setData(response.data.resp || []);
+      } catch (error) {
+        console.error('Error fetching clubs:', error);
+        toast.error('Failed to load clubs');
+      } finally {
+        setIsLoadingAll(false);
       }
     }
 
     call();
-  }, [currentPage, token, debouncedSearchQuery]);
+  }, [token]);
 
   // Categories scroll controls visibility
   useEffect(() => {
@@ -298,7 +257,7 @@ const ClubsPage = () => {
       try {
         // Get current user data
         const userResponse = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          `/api/v1/user/getUser`,
           {
             headers: {
               authorization: `Bearer ${token}`,
@@ -498,36 +457,10 @@ const ClubsPage = () => {
           </span>
         </div>
 
-        {/* Pagination Controls - Mobile View (Top) */}
-        {!debouncedSearchQuery.trim() && totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mb-6 md:hidden">
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pb-2">
-              {Array.from({ length: totalPages }, (_, idx) => (
-                <Button
-                  key={idx + 1}
-                  onClick={() => {
-                    setCurrentPage(idx + 1);
-                    // Smooth scroll to top
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className={`min-w-[40px] h-10 w-10 rounded-full transition-all duration-300 ease-in-out ${
-                    currentPage === idx + 1
-                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black font-bold shadow-lg shadow-yellow-500/30 scale-110'
-                      : 'bg-gray-700/50 text-white hover:bg-gray-600/50 hover:scale-105'
-                  }`}
-                  variant={currentPage === idx + 1 ? 'default' : 'ghost'}
-                >
-                  {idx + 1}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Clubs Grid/List */}
-        {isLoadingAll && debouncedSearchQuery.trim() ? (
+        {isLoadingAll && clubData ? (
           <div className="text-center py-12">
-            <div className="text-yellow-400 text-lg mb-2">Loading all clubs for search...</div>
+            <div className="text-yellow-400 text-lg mb-2">Refreshing clubs...</div>
             <div className="text-gray-400 text-sm">Please wait while we fetch all available clubs</div>
           </div>
         ) : clubData ? (
@@ -543,7 +476,7 @@ const ClubsPage = () => {
                       <div className="h-32 overflow-hidden relative">
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/30 transition-all duration-300"></div>
                         <Image
-                          src={club.profilePicUrl}
+                          src={club.profilePicUrl || '/default-club-image.jpg'}
                           alt={club.name}
                           layout="fill"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -764,31 +697,6 @@ const ClubsPage = () => {
           </div>
         )}
 
-        {/* Pagination Controls - Desktop View (Bottom) */}
-        {!debouncedSearchQuery.trim() && totalPages > 1 && (
-          <div className="hidden md:flex justify-center items-center gap-2 mt-8">
-            <div className="flex items-center gap-2">
-              {Array.from({ length: totalPages }, (_, idx) => (
-                <Button
-                  key={idx + 1}
-                  onClick={() => {
-                    setCurrentPage(idx + 1);
-                    // Smooth scroll to top
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className={`min-w-[44px] h-11 w-11 rounded-full transition-all duration-300 ease-in-out ${
-                    currentPage === idx + 1
-                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 text-black font-bold shadow-lg shadow-yellow-500/30 scale-110'
-                      : 'bg-gray-700/50 text-white hover:bg-gray-600/50 hover:scale-105'
-                  }`}
-                  variant={currentPage === idx + 1 ? 'default' : 'ghost'}
-                >
-                  {idx + 1}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       <NoTokenModal isOpen={isOpen} onOpenChange={setIsOpen} hasToken={hasTokenForModal} />

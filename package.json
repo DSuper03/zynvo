@@ -10,6 +10,8 @@
     "format": "prettier --write .",
     "analyze": "ANALYZE=true npm run build",
     "type-check": "tsc --noEmit",
+    "type-check:node": "node node_modules/typescript/bin/tsc --noEmit",
+    "build:node": "node node_modules/next/dist/bin/next build --webpack",
     "build:optimized": "next build && next-sitemap"
   },
   "dependencies": {
@@ -46,6 +48,7 @@
     "html-to-image": "^1.11.13",
     "imagekit": "^6.0.0",
     "jwt-decode": "^4.0.0",
+    "linkedom": "^0.18.12",
     "lucide-react": "^0.506.0",
     "maplibre-gl": "^5.24.0",
     "motion": "^12.24.7",
@@ -53,6 +56,8 @@
     "next-pwa": "^5.6.0",
     "next-themes": "^0.4.6",
     "pdfjs-dist": "^5.7.284",
+    "posthog-js": "^1.396.6",
+    "posthog-node": "^5.39.4",
     "qrcode": "^1.5.4",
     "react": "^18",
     "react-day-picker": "^9.11.1",
@@ -64,6 +69,7 @@
     "tailwind-merge": "^3.2.0",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.167.1",
+    "turndown": "^7.2.4",
     "web-vitals": "^4.2.4",
     "zod": "^4.0.17"
   },
@@ -76,6 +82,7 @@
     "@types/react": "^18.3.21",
     "@types/react-dom": "^18",
     "@types/three": "^0.176.0",
+    "@types/turndown": "^5.0.6",
     "baseline-browser-mapping": "^2.9.19",
     "cross-env": "^10.0.0",
     "eslint": "^8",

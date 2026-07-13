@@ -31,7 +31,7 @@ function VerificationContent() {
     const verifyEmail = async () => {
       try {
         const response = await axios.post<apiResponse>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/verify?vToken=${token}`
+          `/api/v1/user/verify?vToken=${token}`
         );
 
         if (response.status == 200) {
@@ -69,7 +69,7 @@ function VerificationContent() {
   const handleResendVerification = async () => {
     try {
       const resend = await axios.post<{ msg: string }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/ResendEmail?email=${email}`
+        `/api/v1/user/ResendEmail?email=${email}`
       );
       if (resend.status == 200) {
         toast.success('Verification email has been resent!');

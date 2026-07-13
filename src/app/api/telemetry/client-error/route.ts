@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { createErrorId } from '@/lib/safe-error';
+import { resolveRequestId } from '@/lib/server/request';
+import { applySecurityHeaders } from '@/lib/server/headers';
 
 type IncomingTelemetryBody = {
   kind?: unknown;
@@ -37,6 +39,9 @@ function toSafeRecord(value: unknown): Record<string, unknown> | undefined {
 
 export async function POST(request: NextRequest) {
   const telemetryId = createErrorId();
+  const requestId = resolveRequestId(request.headers.get('x-request-id'));
+  const secureHeaders = new Headers({ 'x-request-id': requestId });
+  applySecurityHeaders(secureHeaders);
 
   try {
     const body = (await request.json()) as IncomingTelemetryBody;
@@ -72,12 +77,12 @@ export async function POST(request: NextRequest) {
 
     console.error('[client-telemetry]', event);
 
-    return NextResponse.json({ ok: true, telemetryId });
+    return NextResponse.json({ ok: true, telemetryId }, { headers: secureHeaders });
   } catch (error) {
     console.error(`[${telemetryId}] Failed to ingest client telemetry`, error);
     return NextResponse.json(
       { ok: false, error: 'Failed to ingest client telemetry', telemetryId },
-      { status: 400 }
+      { status: 400, headers: secureHeaders }
     );
   }
 }

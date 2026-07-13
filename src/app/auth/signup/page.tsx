@@ -1,4 +1,5 @@
 'use client';
+import posthog from 'posthog-js';
 import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
@@ -21,8 +22,8 @@ import { signupRes } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import CollegeSearchSelect from '@/components/colleges/collegeSelect';
 import { Button } from '@/components/ui/button';
-import { useSignUp, useAuth , useSignIn, useUser} from "@clerk/nextjs";
-import { jwtDecode } from "jwt-decode";
+import { useSignUp, useAuth, useSignIn, useUser } from '@clerk/nextjs';
+import { jwtDecode } from 'jwt-decode';
 import { de } from 'date-fns/locale';
 import { getSafeErrorMessage, toSafeUserMessage } from '@/lib/safe-error';
 import { setSsoIntentBeforeOAuth } from '@/lib/ssoIntent';
@@ -33,7 +34,6 @@ import {
   peekReturnTo,
   buildAuthHref,
 } from '@/lib/authReturnTo';
- 
 
 export default function SignUp() {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -54,7 +54,7 @@ export default function SignUp() {
   });
   const [agreeToTerms, setAgree] = useState(false);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [collegeSearch, setCollegeSearch] = useState<string>('');
@@ -102,7 +102,14 @@ export default function SignUp() {
   }, [hasAppSession, router]);
 
   useEffect(() => {
-    if (!sessionLoaded || !isSignedIn || verifying || isVerifyingCode || isCreatingAccount) return;
+    if (
+      !sessionLoaded ||
+      !isSignedIn ||
+      verifying ||
+      isVerifyingCode ||
+      isCreatingAccount
+    )
+      return;
     const timeout = window.setTimeout(continueExistingSession, 900);
     return () => window.clearTimeout(timeout);
   }, [
@@ -179,9 +186,7 @@ export default function SignUp() {
     setCurrentStep(2);
   };
 
-
-
-//deprecated - use clerk method
+  //deprecated - use clerk method
   const handle_Submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsCreatingAccount(true);
@@ -194,15 +199,15 @@ export default function SignUp() {
     }
     try {
       const msg = await axios.post<signupRes>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
+        `/api/v1/user/signup`,
         formData
       );
-      
+
       if (!msg) {
         toast('Internal server error please try again later');
         return;
       }
-      
+
       if (msg.data.msg == 'account created') {
         toast('Account created, lets get you verified');
         router.push('/Verify');
@@ -215,12 +220,14 @@ export default function SignUp() {
     }
   };
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isLoaded) {
-      toast.error("Security check is still loading. Please wait a moment and try again.");
+      toast.error(
+        'Security check is still loading. Please wait a moment and try again.'
+      );
       return;
-    };
+    }
 
     if (!agreeToTerms) return;
 
@@ -240,11 +247,13 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       // 0. Pre-check: does this email already exist in our backend DB?
       try {
         const checkRes = await axios.post(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/checkUserExists`,
+          `/api/v2/user/auth/checkUserExists`,
           { email: formData.email.trim().toLowerCase() }
         );
         if (checkRes.data?.exists) {
-          toast.error('An account with this email already exists. Redirecting to sign in...');
+          toast.error(
+            'An account with this email already exists. Redirecting to sign in...'
+          );
           setIsCreatingAccount(false);
           setTimeout(
             () => router.push(buildAuthHref('/auth/signin', peekReturnTo())),
@@ -261,38 +270,43 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       await signUp.create({
         emailAddress: formData.email,
         password: formData.password,
-        firstName: formData.name.split(" ")[0],
-        lastName: formData.name.split(" ")[1] || "",
+        firstName: formData.name.split(' ')[0],
+        lastName: formData.name.split(' ')[1] || '',
       });
 
       // 2. Prepare Verification
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
 
       // 3. Switch UI
-      setVerifying(true); 
-      toast.success("Verification code sent to your email!");
-      
+      setVerifying(true);
+      toast.success('Verification code sent to your email!');
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
 
       // --- SPECIFIC ERROR HANDLING ---
-      
+
       // Check for "Pwned Password" error
-      const pwnedError = err.errors?.find((e: any) => e.code === "form_password_pwned");
-      
+      const pwnedError = err.errors?.find(
+        (e: any) => e.code === 'form_password_pwned'
+      );
+
       // Check for "Captcha" error (if div is missing)
-      const captchaError = err.errors?.find((e: any) => e.code === "captcha_invalid");
+      const captchaError = err.errors?.find(
+        (e: any) => e.code === 'captcha_invalid'
+      );
 
       if (pwnedError) {
-        toast.error("Security Alert: This password was found in a data breach. Please choose a different one.");
+        toast.error(
+          'Security Alert: This password was found in a data breach. Please choose a different one.'
+        );
         // Optional: Clear the password field
-        // setFormData(prev => ({ ...prev, password: '' })); 
+        // setFormData(prev => ({ ...prev, password: '' }));
       } else if (captchaError) {
-        toast.error("Please verify you are not a robot.");
+        toast.error('Please verify you are not a robot.');
       } else {
         // Fallback for other errors (e.g., Email already taken)
         toast.error(
-          toSafeUserMessage(err.errors?.[0]?.message, "Error creating account")
+          toSafeUserMessage(err.errors?.[0]?.message, 'Error creating account')
         );
       }
     } finally {
@@ -304,7 +318,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!isLoaded || !signUp) {
-      toast("Verification is still loading, please wait...");
+      toast('Verification is still loading, please wait...');
       return;
     }
 
@@ -313,7 +327,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
     const cleanedCode = code.replace(/\s+/g, '');
     if (!cleanedCode) {
-      toast.error("Please enter the verification code from your email.");
+      toast.error('Please enter the verification code from your email.');
       return;
     }
 
@@ -327,8 +341,10 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         code: cleanedCode,
       });
 
-      if (completeSignUp.status !== "complete") {
-        toast.error("Verification not complete. Please check the code and try again.");
+      if (completeSignUp.status !== 'complete') {
+        toast.error(
+          'Verification not complete. Please check the code and try again.'
+        );
         return;
       }
     } catch (err: any) {
@@ -337,11 +353,19 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       const clerkError = err?.errors?.[0];
       const clerkCode = clerkError?.code;
 
-      if (clerkCode === "verification_code_invalid" || clerkCode === "verification_code_expired") {
-        toast.error("Invalid or expired verification code. Please request a new one and try again.");
+      if (
+        clerkCode === 'verification_code_invalid' ||
+        clerkCode === 'verification_code_expired'
+      ) {
+        toast.error(
+          'Invalid or expired verification code. Please request a new one and try again.'
+        );
       } else {
         toast.error(
-          toSafeUserMessage(clerkError?.message, "Verification failed. Please try again.")
+          toSafeUserMessage(
+            clerkError?.message,
+            'Verification failed. Please try again.'
+          )
         );
       }
 
@@ -353,7 +377,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       // 2. Set the session active in Clerk
       await setActive({ session: completeSignUp.createdSessionId });
 
-      toast.success("Email verified! Setting up your account…");
+      toast.success('Email verified! Setting up your account…');
 
       // 3. Wait for session to propagate, then get token with retries
       let token: string | null = null;
@@ -364,7 +388,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       }
 
       if (!token) {
-        toast.error("Session setup timed out. Please sign in manually.");
+        toast.error('Session setup timed out. Please sign in manually.');
         router.push(buildAuthHref('/auth/signin', peekReturnTo()));
         return;
       }
@@ -375,12 +399,12 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       // Fallback avatar using name seed if DiceBear component didn't fire
       const avatarUrl =
         formData.avatarUrl ||
-        `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(formData.name || "user")}&size=128`;
+        `https://api.dicebear.com/6.x/lorelei/svg?seed=${encodeURIComponent(formData.name || 'user')}&size=128`;
 
       // 4. Sync with backend (send college under common key variants — some APIs only map `college` / `college_name`)
       const college = formData.collegeName.trim();
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v2/user/auth/clerkLogin`,
+        `/api/v2/user/auth/clerkLogin`,
         {
           clerkId,
           collegeName: college,
@@ -390,26 +414,33 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
           password: formData.password,
           name: formData.name,
           email: formData.email,
-          imgUrl: "",
-          phone: formData.phone || "",
+          imgUrl: '',
+          phone: formData.phone || '',
         }
       );
 
-      if (!res.data.token) throw new Error("No token returned from backend");
+      if (!res.data.token) throw new Error('No token returned from backend');
 
       // 5. Save custom JWT & redirect
       localStorage.setItem('token', res.data.token);
       sessionStorage.setItem('activeSession', 'true');
-      toast.success("Account created successfully!");
+      posthog.identify(formData.email, {
+        name: formData.name,
+        college: formData.collegeName,
+      });
+      posthog.capture('user_signed_up', { auth_method: 'email' });
+      toast.success('Account created successfully!');
       router.push(consumeBrowserPostAuthRedirect());
     } catch (err: any) {
-      console.error("Post-verification sync failed:", JSON.stringify(err, null, 2));
-      toast.error(getSafeErrorMessage(err, "Signup failed. Please try again."));
+      console.error(
+        'Post-verification sync failed:',
+        JSON.stringify(err, null, 2)
+      );
+      toast.error(getSafeErrorMessage(err, 'Signup failed. Please try again.'));
     } finally {
       setIsVerifyingCode(false);
     }
   };
-
 
   const handleGoogleVerification = async () => {
     if (sessionLoaded && isSignedIn) {
@@ -418,7 +449,9 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     }
 
     if (!authIsLoaded || !sessionLoaded || !signIn) {
-      toast.error('Security check is still loading. Please wait a moment and try again.');
+      toast.error(
+        'Security check is still loading. Please wait a moment and try again.'
+      );
       return;
     }
     try {
@@ -429,26 +462,36 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       if (rt) callbackQs.set('returnTo', rt);
       const callbackPath = `/auth/sso-callback?${callbackQs.toString()}`;
       await signIn.authenticateWithRedirect({
-        strategy: "oauth_google",
+        strategy: 'oauth_google',
         redirectUrl: `${origin}${callbackPath}`,
         redirectUrlComplete: `${origin}${callbackPath}`,
       });
     } catch (err) {
       console.error('SSO redirect error', err);
-      const clerkError = err as { errors?: { code?: string }[]; code?: string; message?: string };
+      const clerkError = err as {
+        errors?: { code?: string }[];
+        code?: string;
+        message?: string;
+      };
       const clerkCode = clerkError.errors?.[0]?.code || clerkError.code;
-      if (clerkCode === 'session_exists' || /session.*exist/i.test(clerkError.message || '')) {
+      if (
+        clerkCode === 'session_exists' ||
+        /session.*exist/i.test(clerkError.message || '')
+      ) {
         continueExistingSession();
         return;
       }
       toast.error('Failed to initiate Google sign-in');
     }
   };
-  
 
-
-
-  if (sessionLoaded && isSignedIn && !verifying && !isVerifyingCode && !isCreatingAccount) {
+  if (
+    sessionLoaded &&
+    isSignedIn &&
+    !verifying &&
+    !isVerifyingCode &&
+    !isCreatingAccount
+  ) {
     const displayName = user?.fullName || user?.firstName || 'there';
     const avatarUrl = user?.imageUrl;
 
@@ -487,30 +530,32 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   if (verifying) {
     return (
       <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center">
-         <div className="w-full max-w-md p-8 bg-gray-900 rounded-xl border border-gray-800">
-            <h2 className="text-2xl font-bold text-white mb-4">Verify Email</h2>
-            <p className="text-gray-400 mb-6">Enter the code sent to {formData.email}</p>
-            
-            <form onSubmit={handleVerification}>
-               <input
-                 type="text"
-                 value={code}
-                 onChange={(e) =>
-                   // Strip any accidental spaces; keep original casing
-                   setCode(e.target.value.replace(/\s+/g, ''))
-                 }
-                 className="w-full bg-gray-800 text-white p-3 rounded-lg mb-4 text-center text-xl tracking-widest focus:ring-2 focus:ring-yellow-500 outline-none"
-                 placeholder="######"
-               />
-               <button 
-                 type="submit"
-                 className="w-full bg-yellow-500 text-black font-bold py-3 rounded-lg hover:bg-yellow-400 disabled:opacity-60 disabled:cursor-not-allowed"
-                 disabled={isVerifyingCode}
-               >
-                 {isVerifyingCode ? "Verifying..." : "Verify & Complete"}
-               </button>
-            </form>
-         </div>
+        <div className="w-full max-w-md p-8 bg-gray-900 rounded-xl border border-gray-800">
+          <h2 className="text-2xl font-bold text-white mb-4">Verify Email</h2>
+          <p className="text-gray-400 mb-6">
+            Enter the code sent to {formData.email}
+          </p>
+
+          <form onSubmit={handleVerification}>
+            <input
+              type="text"
+              value={code}
+              onChange={(e) =>
+                // Strip any accidental spaces; keep original casing
+                setCode(e.target.value.replace(/\s+/g, ''))
+              }
+              className="w-full bg-gray-800 text-white p-3 rounded-lg mb-4 text-center text-xl tracking-widest focus:ring-2 focus:ring-yellow-500 outline-none"
+              placeholder="######"
+            />
+            <button
+              type="submit"
+              className="w-full bg-yellow-500 text-black font-bold py-3 rounded-lg hover:bg-yellow-400 disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={isVerifyingCode}
+            >
+              {isVerifyingCode ? 'Verifying...' : 'Verify & Complete'}
+            </button>
+          </form>
+        </div>
       </div>
     );
   }
@@ -703,7 +748,8 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                       htmlFor="phone"
                       className="block text-gray-300 text-sm font-medium"
                     >
-                      Phone Number <span className="text-gray-500 text-xs">(Optional)</span>
+                      Phone Number{' '}
+                      <span className="text-gray-500 text-xs">(Optional)</span>
                     </label>
                     <div className="relative">
                       <FiPhone className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
@@ -755,17 +801,12 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                         {showPassword ? <FiEyeOff /> : <FiEye />}
                       </Button>
                     </div>
-                    <p
-                      id="password-help"
-                      className="text-gray-400 text-xs"
-                    >
+                    <p id="password-help" className="text-gray-400 text-xs">
                       Password must be at least 8 characters long and include
                       uppercase, lowercase, a number and a special character.
                     </p>
                     {passwordError && (
-                      <p className="text-red-400 text-xs">
-                        {passwordError}
-                      </p>
+                      <p className="text-red-400 text-xs">{passwordError}</p>
                     )}
                   </div>
 
@@ -793,19 +834,21 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                     College/University Name
                   </label>
                   <CollegeSearchSelect
-                        colleges={[...collegesWithClubs].sort((a, b) => a.college.localeCompare(b.college))}
-                        value={formData.collegeName}
-                        onChange={(value) => {
-                          setFormData((prev) => ({ ...prev, collegeName: value }));
-                          // clear any previous college validation error
-                          if (value && value.trim()) setCollegeError('');
-                        }}
-                        placeholder="Search and select your college/university"
-                        required
+                    colleges={[...collegesWithClubs].sort((a, b) =>
+                      a.college.localeCompare(b.college)
+                    )}
+                    value={formData.collegeName}
+                    onChange={(value) => {
+                      setFormData((prev) => ({ ...prev, collegeName: value }));
+                      // clear any previous college validation error
+                      if (value && value.trim()) setCollegeError('');
+                    }}
+                    placeholder="Search and select your college/university"
+                    required
                   />
-                      {collegeError && (
-                        <p className="text-red-400 text-xs mt-1">{collegeError}</p>
-                      )}
+                  {collegeError && (
+                    <p className="text-red-400 text-xs mt-1">{collegeError}</p>
+                  )}
                 </div>
 
                 <div className="flex items-start space-x-3">
@@ -838,10 +881,12 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                     </Link>
                   </label>
                 </div>
-                      <div id="clerk-captcha" className="my-4"></div>
+                <div id="clerk-captcha" className="my-4"></div>
                 {clerkLoadTimedOut && !isLoaded && (
                   <p className="text-amber-400 text-xs mt-2">
-                    Security verification is taking longer than expected. Try disabling ad-block/VPN, switch network, or open the site without <code>www</code>.
+                    Security verification is taking longer than expected. Try
+                    disabling ad-block/VPN, switch network, or open the site
+                    without <code>www</code>.
                   </p>
                 )}
                 <div className="flex space-x-4">
@@ -858,12 +903,18 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   <motion.button
                     type="submit"
                     className={`flex-1 flex items-center justify-center py-3 px-4 rounded-lg font-medium transition duration-300 transform hover:-translate-y-1 ${
-                      isCreatingAccount || !agreeToTerms || !formData.collegeName
+                      isCreatingAccount ||
+                      !agreeToTerms ||
+                      !formData.collegeName
                         ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                         : 'bg-yellow-500 text-black hover:bg-yellow-400'
                     }`}
                     whileTap={{ scale: isCreatingAccount ? 1 : 0.98 }}
-                    disabled={!agreeToTerms || isCreatingAccount || !formData.collegeName}
+                    disabled={
+                      !agreeToTerms ||
+                      isCreatingAccount ||
+                      !formData.collegeName
+                    }
                   >
                     {isCreatingAccount ? (
                       <>

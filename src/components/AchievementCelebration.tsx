@@ -10,12 +10,14 @@ interface AchievementCelebrationProps {
   isOpen: boolean;
   onClose: () => void;
   eventName: string;
+  status : string
 }
 
 const AchievementCelebration: React.FC<AchievementCelebrationProps> = ({
   isOpen,
   onClose,
   eventName,
+  status
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -149,11 +151,11 @@ const AchievementCelebration: React.FC<AchievementCelebrationProps> = ({
                 >
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs font-medium uppercase tracking-wider mb-2">
                     <Sparkles size={12} />
-                    <span>Registration Confirmed</span>
+                    <span>Registration Complete</span>
                   </div>
                   
                   <h2 className="text-3xl font-bold text-white tracking-tight">
-                    You're In!
+                    {status === "confirmed" ? "You're In!" : status === "pending" ? "Almost There!" : "Yayyyyy!"}
                   </h2>
                   
                   <p className="text-neutral-400 text-sm leading-relaxed max-w-[260px] mx-auto">
@@ -174,7 +176,7 @@ const AchievementCelebration: React.FC<AchievementCelebrationProps> = ({
                     </div>
                     <div className="text-left">
                       <div className="text-xs text-neutral-500 uppercase tracking-wider font-medium">Ticket Status</div>
-                      <div className="text-sm text-white font-medium">Confirmed • 1 Attendee</div>
+                      <div className="text-sm text-white font-medium"> {status} • 1 Attendee</div>
                     </div>
                   </div>
                   <div className="h-8 w-[1px] bg-white/10" />

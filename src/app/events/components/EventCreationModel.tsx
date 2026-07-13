@@ -1,5 +1,6 @@
 'use client';
 
+import posthog from 'posthog-js';
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   X,
@@ -32,13 +33,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { EventFormData, CustomQuestion } from '@/types/global-Interface';
 import { Plus, Trash2, GripVertical, Settings2 } from 'lucide-react';
-import { toBase64, uploadImageToImageKit, compressImageToUnder2MB } from '@/lib/imgkit';
+import {
+  toBase64,
+  uploadImageToImageKit,
+  compressImageToUnder2MB,
+} from '@/lib/imgkit';
 import { toast } from 'sonner';
 import axios from 'axios';
 import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
 import { useRouter } from 'next/navigation';
 import AchievementUnlockModal from '@/components/AchievementUnlockModal';
+
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -53,7 +59,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [qrCodeImg, setQrCodeImg] = useState<File | null>(null);
   const [qrCodePreviewUrl, setQrCodePreviewUrl] = useState('');
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<EventFormData>({
+
+  // Added acceptanceBased to the initial state
+  const [formData, setFormData] = useState<
+    EventFormData & { acceptanceBased?: boolean }
+  >({
     eventMode: '',
     eventName: '',
     university: '',
@@ -65,6 +75,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     collegeStudentsOnly: false,
     noParticipationFee: false,
     coreTeamOnly: false,
+    acceptanceBased: false, // New Field Added Here
     eventWebsite: '',
     eventStartDate: '',
     eventEndDate: '',
@@ -81,6 +92,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     maxParticipants: '',
     customQuestions: [],
   });
+
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,7 +102,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [clubName, setClubName] = useState<string>('');
   const [eventCount, setEventCount] = useState(0);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
-  const [unlockedBadge, setUnlockedBadge] = useState<{ name: string; count: number; description: string } | null>(null);
+  const [unlockedBadge, setUnlockedBadge] = useState<{
+    name: string;
+    count: number;
+    description: string;
+  } | null>(null);
   const [closeAfterAchievement, setCloseAfterAchievement] = useState(false);
 
   // Helper function to get today's date in YYYY-MM-DD format
@@ -101,17 +117,17 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     const day = String(today.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
+
   useEffect(() => {
     const tok = localStorage.getItem('token');
     if (tok) setToken(tok);
     else {
-       toast('Login required', {
-          action: {
-            
-            label: 'Sign in',
-            onClick: () => router.push('/auth/signin'),
-          },
-        });
+      toast('Login required', {
+        action: {
+          label: 'Sign in',
+          onClick: () => router.push('/auth/signin'),
+        },
+      });
       setIsModalOpen(true);
       return;
     }
@@ -122,7 +138,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     }
   }, []);
 
-  
   // --- Custom Questions Handlers ---
   const addCustomQuestion = () => {
     if ((formData.customQuestions?.length || 0) >= 10) {
@@ -133,8 +148,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       ...prev,
       customQuestions: [
         ...(prev.customQuestions || []),
-        { id: Date.now().toString(), label: '', type: 'text', required: false, options: [] }
-      ]
+        {
+          id: Date.now().toString(),
+          label: '',
+          type: 'text',
+          required: false,
+          options: [],
+        },
+      ],
     }));
   };
 
@@ -154,7 +175,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     });
   };
 
-  const addPrebuiltQuestion = (label: string, type: 'text' | 'select' | 'url', options: string[] = []) => {
+  const addPrebuiltQuestion = (
+    label: string,
+    type: 'text' | 'select' | 'url',
+    options: string[] = []
+  ) => {
     if ((formData.customQuestions?.length || 0) >= 10) {
       toast.error('Maximum 10 custom questions allowed.');
       return;
@@ -163,8 +188,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       ...prev,
       customQuestions: [
         ...(prev.customQuestions || []),
-        { id: Date.now().toString(), label, type, required: false, options }
-      ]
+        { id: Date.now().toString(), label, type, required: false, options },
+      ],
     }));
   };
   // ---------------------------------
@@ -174,12 +199,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     const fetchUser = async () => {
       try {
         if (!token) return;
-        const res = await axios.get<{ user: { collegeName: string , clubName: string} }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
-          {
-            headers: { authorization: `Bearer ${token}` },
-          }
-        );
+        const res = await axios.get<{
+          user: { collegeName: string; clubName: string };
+        }>(`/api/v1/user/getUser`, {
+          headers: { authorization: `Bearer ${token}` },
+        });
         const collegeName = res.data?.user?.collegeName || '';
         if (collegeName) {
           setLockedUniversity(collegeName);
@@ -187,14 +211,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         }
         const clubName = res?.data?.user?.clubName || '';
         if (clubName) {
-        setClubName(clubName);
-         
+          setClubName(clubName);
         }
-        
+
         // Fetch event count for this founder
         try {
           const eventRes = await axios.get<{ count: number }>(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/founder-event-count`,
+            `/api/v1/events/founder-event-count`,
             {
               headers: { authorization: `Bearer ${token}` },
             }
@@ -211,59 +234,66 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   }, [token]);
 
   // Memoized handler for input changes
-  const handleChange = useCallback((
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev: any) => {
-      const updated = { ...prev, [name]: value };
-      
-      // Validate dates in real-time
-      const newErrors: Record<string, string> = { ...errors };
-      
-      // Validate event end date vs start date
-      if (name === 'eventStartDate' || name === 'eventEndDate') {
-        if (updated.eventStartDate && updated.eventEndDate) {
-          const startDate = new Date(updated.eventStartDate);
-          const endDate = new Date(updated.eventEndDate);
-          if (endDate < startDate) {
-            newErrors.eventEndDate = 'End date cannot be before start date';
-          } else {
-            delete newErrors.eventEndDate;
+  const handleChange = useCallback(
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >
+    ) => {
+      const { name, value } = e.target;
+      setFormData((prev: any) => {
+        const updated = { ...prev, [name]: value };
+
+        // Validate dates in real-time
+        const newErrors: Record<string, string> = { ...errors };
+
+        // Validate event end date vs start date
+        if (name === 'eventStartDate' || name === 'eventEndDate') {
+          if (updated.eventStartDate && updated.eventEndDate) {
+            const startDate = new Date(updated.eventStartDate);
+            const endDate = new Date(updated.eventEndDate);
+            if (endDate < startDate) {
+              newErrors.eventEndDate = 'End date cannot be before start date';
+            } else {
+              delete newErrors.eventEndDate;
+            }
           }
         }
-      }
-      
-      // Validate application end date vs start date
-      if (name === 'applicationStartDate' || name === 'applicationEndDate') {
-        if (updated.applicationStartDate && updated.applicationEndDate) {
-          const appStartDate = new Date(updated.applicationStartDate);
-          const appEndDate = new Date(updated.applicationEndDate);
-          if (appEndDate < appStartDate) {
-            newErrors.applicationEndDate = 'Application end date cannot be before start date';
-          } else {
-            delete newErrors.applicationEndDate;
+
+        // Validate application end date vs start date
+        if (name === 'applicationStartDate' || name === 'applicationEndDate') {
+          if (updated.applicationStartDate && updated.applicationEndDate) {
+            const appStartDate = new Date(updated.applicationStartDate);
+            const appEndDate = new Date(updated.applicationEndDate);
+            if (appEndDate < appStartDate) {
+              newErrors.applicationEndDate =
+                'Application end date cannot be before start date';
+            } else {
+              delete newErrors.applicationEndDate;
+            }
           }
         }
-      }
-      
-      // Clear error when field is edited (only if validation passes)
-      if (newErrors[name]) {
-        delete newErrors[name];
-      }
-      
-      setErrors(newErrors);
-      return updated;
-    });
-  }, [errors]);
+
+        // Clear error when field is edited (only if validation passes)
+        if (newErrors[name]) {
+          delete newErrors[name];
+        }
+
+        setErrors(newErrors);
+        return updated;
+      });
+    },
+    [errors]
+  );
 
   // Memoized handler for checkbox changes
-  const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData((prev: any) => ({ ...prev, [name]: checked }));
-  }, []);
+  const handleCheckboxChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, checked } = e.target;
+      setFormData((prev: any) => ({ ...prev, [name]: checked }));
+    },
+    []
+  );
 
   // Handle file upload with compression under 2MB
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -299,7 +329,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       if (file.size > maxBytes) {
         processed = await compressImageToUnder2MB(file);
         if (processed.size > maxBytes) {
-          toast('Could not compress QR code image under 2 MB. Try a smaller image.');
+          toast(
+            'Could not compress QR code image under 2 MB. Try a smaller image.'
+          );
           return;
         }
       }
@@ -318,7 +350,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   // Validate form based on current step
   const validateStep = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData) return false; // Add this check
+    if (!formData) return false;
 
     switch (step) {
       case 1:
@@ -333,13 +365,20 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         break;
 
       case 2:
-        // Don't repeat step 1 validations here - only validate step 2 fields
         if (!formData.maxTeamSize)
           newErrors.maxTeamSize = 'Maximum team size is required';
-        if (!formData.venue?.trim()) newErrors.venue = 'Venue is required';
+        if (formData.eventMode !== 'online') {
+          const normalizedVenue = formData.venue?.trim().toLowerCase();
+          if (!normalizedVenue) {
+            newErrors.venue = 'Venue is required';
+          } else if (normalizedVenue === 'online') {
+            newErrors.venue = 'Please enter a real event venue for offline or hybrid events';
+          }
+        }
         formData.customQuestions?.forEach((question, index) => {
           if (!question.label.trim()) {
-            newErrors[`customQuestion.${index}.label`] = 'Question label is required';
+            newErrors[`customQuestion.${index}.label`] =
+              'Question label is required';
           }
           if (
             question.type === 'select' &&
@@ -349,11 +388,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
               'Add at least one option for dropdown questions';
           }
         });
-        // Validate paid event fields
         if (formData.isPaidEvent) {
-          if (!qrCodeImg) newErrors.paymentQRCode = 'QR code is required for paid events';
-          if (!formData.paymentAmount || formData.paymentAmount <= 0) 
-            newErrors.paymentAmount = 'Payment amount is required and must be greater than 0';
+          if (!qrCodeImg)
+            newErrors.paymentQRCode = 'QR code is required for paid events';
+          if (!formData.paymentAmount || formData.paymentAmount <= 0)
+            newErrors.paymentAmount =
+              'Payment amount is required and must be greater than 0';
         }
         break;
 
@@ -362,27 +402,25 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           newErrors.eventStartDate = 'Event start date is required';
         if (!formData.eventEndDate)
           newErrors.eventEndDate = 'Event end date is required';
-        
+
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
-        // Validate start date is not in the past
+
         if (formData.eventStartDate) {
           const startDate = new Date(formData.eventStartDate);
           if (startDate < today) {
             newErrors.eventStartDate = 'Event start date cannot be in the past';
           }
         }
-        
-        // Validate application start date is not in the past
+
         if (formData.applicationStartDate) {
           const appStartDate = new Date(formData.applicationStartDate);
           if (appStartDate < today) {
-            newErrors.applicationStartDate = 'Application start date cannot be in the past';
+            newErrors.applicationStartDate =
+              'Application start date cannot be in the past';
           }
         }
-        
-        // Validate end date is not before start date
+
         if (formData.eventStartDate && formData.eventEndDate) {
           const startDate = new Date(formData.eventStartDate);
           const endDate = new Date(formData.eventEndDate);
@@ -390,16 +428,16 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
             newErrors.eventEndDate = 'End date cannot be before start date';
           }
         }
-        
-        // Validate application end date is not before application start date
+
         if (formData.applicationStartDate && formData.applicationEndDate) {
           const appStartDate = new Date(formData.applicationStartDate);
           const appEndDate = new Date(formData.applicationEndDate);
           if (appEndDate < appStartDate) {
-            newErrors.applicationEndDate = 'Application end date cannot be before start date';
+            newErrors.applicationEndDate =
+              'Application end date cannot be before start date';
           }
         }
-        
+
         if (!formData.contactEmail?.trim())
           newErrors.contactEmail = 'Contact email is required';
         if (!formData.contactPhone?.trim())
@@ -407,7 +445,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         break;
 
       case 4:
-        // Step 4 validation - Image is required
         if (!img) {
           newErrors.image = 'Event image is required';
         }
@@ -417,47 +454,94 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  // Navigate to next step
+
+  const notifyStepValidationErrors = useCallback(
+    (currentStep: number) => {
+      const stepFieldOrder: Record<number, string[]> = {
+        1: ['eventMode', 'eventName', 'university', 'description', 'eventType'],
+        2: ['maxTeamSize', 'venue', 'paymentQRCode', 'paymentAmount'],
+        3: [
+          'eventStartDate',
+          'eventEndDate',
+          'applicationStartDate',
+          'applicationEndDate',
+          'contactEmail',
+          'contactPhone',
+        ],
+        4: ['image'],
+      };
+
+      const prioritizedMessages = (stepFieldOrder[currentStep] || [])
+        .map((field) => errors[field])
+        .filter(Boolean);
+
+      const customQuestionMessages = Object.entries(errors)
+        .filter(([key]) => key.startsWith('customQuestion.'))
+        .map(([, message]) => message);
+
+      const uniqueMessages = Array.from(
+        new Set([...prioritizedMessages, ...customQuestionMessages].filter(Boolean))
+      );
+
+      if (uniqueMessages.length === 0) {
+        toast.error('Please fill in the required fields before continuing.');
+        return;
+      }
+
+      toast.error(
+        `Please fill in the required fields: ${uniqueMessages.join(', ')}`
+      );
+    },
+    [errors]
+  );
+
   const nextStep = () => {
     if (validateStep()) {
       setStep((prev) => Math.min(prev + 1, 4));
     } else {
-      console.log('Validation failed for step:', step);
-      console.log('Current errors:', errors);
+      notifyStepValidationErrors(step);
     }
   };
 
-  // Navigate to previous step
   const prevStep = () => {
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
-  // Submit the form
   const handleSubmit = async () => {
     if (!token) {
       toast('please login or signup');
       return;
     }
     if (!clubName) {
-      toast('You haven\'t created any club yet. Please create a club first.');
+      toast("You haven't created any club yet. Please create a club first.");
       return;
     }
-    if (!validateStep()) return;
+    if (!validateStep()) {
+      notifyStepValidationErrors(step);
+      return;
+    }
 
     setIsSubmitting(true);
 
-    // Server-side date conflict check
     try {
       const dateCheckRes = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/checkEventDates`,
+        `/api/v1/events/checkEventDates`,
         {
           eventStartDate: formData.eventStartDate,
           eventEndDate: formData.eventEndDate,
           applicationStartDate: formData.applicationStartDate,
           applicationEndDate: formData.applicationEndDate,
+        },
+        {
+          headers: { authorization: `Bearer ${token}` },
         }
       );
-      const { isValid, errors: dateErrors, warnings, existingEvents } = dateCheckRes.data;
+      const {
+        isValid,
+        errors: dateErrors,
+        warnings,
+        existingEvents,
+      } = dateCheckRes.data;
 
       if (!isValid && dateErrors?.length) {
         dateErrors.forEach((msg: string) => toast.error(msg));
@@ -470,12 +554,15 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       }
 
       if (existingEvents?.length) {
-        toast(`${existingEvents.length} event(s) already scheduled in this period. Double-check your dates.`, { duration: 6000 });
+        toast(
+          `${existingEvents.length} event(s) already scheduled in this period. Double-check your dates.`,
+          { duration: 6000 }
+        );
       }
     } catch {
       // Non-blocking: if the check endpoint fails, proceed with creation
     }
-  const userUniAndClub = `${lockedUniversity}-${clubName}`;
+
     let imageLink = '';
     if (!img) {
       toast('you are required to upload a poster');
@@ -492,11 +579,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           return;
         }
       }
-      imageLink = await uploadImageToImageKit(await toBase64(toUpload), toUpload.name, '/events');
+      imageLink = await uploadImageToImageKit(
+        await toBase64(toUpload),
+        toUpload.name,
+        '/events'
+      );
       toast('Image uploaded');
     }
 
-    // Handle QR code upload for paid events
     let qrCodeLink = '';
     if (formData.isPaidEvent && qrCodeImg) {
       const maxBytes = 2 * 1024 * 1024;
@@ -504,25 +594,38 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       if (qrCodeImg.size > maxBytes) {
         toUpload = await compressImageToUnder2MB(qrCodeImg);
         if (toUpload.size > maxBytes) {
-          toast('Could not compress QR code image under 2 MB. Try a smaller image.');
+          toast(
+            'Could not compress QR code image under 2 MB. Try a smaller image.'
+          );
           setIsSubmitting(false);
           return;
         }
       }
-      qrCodeLink = await uploadImageToImageKit(await toBase64(toUpload), toUpload.name, '/payment-qr');
+      qrCodeLink = await uploadImageToImageKit(
+        await toBase64(toUpload),
+        toUpload.name,
+        '/payment-qr'
+      );
       toast('Payment QR code uploaded');
     }
 
-    // Build payload - only include paid event fields if it's a paid event
     const payload: any = {
       ...formData,
       image: imageLink,
     };
 
-    if (payload.maxParticipants === '' || payload.maxParticipants === 0 || payload.maxParticipants === undefined || payload.maxParticipants === null) {
+    if (
+      payload.maxParticipants === '' ||
+      payload.maxParticipants === 0 ||
+      payload.maxParticipants === undefined ||
+      payload.maxParticipants === null
+    ) {
       payload.maxParticipants = null;
     } else {
-      payload.maxParticipants = parseInt(payload.maxParticipants.toString(), 10);
+      payload.maxParticipants = parseInt(
+        payload.maxParticipants.toString(),
+        10
+      );
     }
     payload.maxTeamSize = parseInt(payload.maxTeamSize.toString(), 10);
     payload.customQuestions = (formData.customQuestions || [])
@@ -531,7 +634,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         label: question.label.trim(),
         options:
           question.type === 'select'
-            ? (question.options || []).map((option) => option.trim()).filter(Boolean)
+            ? (question.options || [])
+                .map((option) => option.trim())
+                .filter(Boolean)
             : [],
         sortOrder: index,
       }))
@@ -540,74 +645,69 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       delete payload.customQuestions;
     }
 
-    // Map isPaidEvent to isPaid for backend
     if (formData.isPaidEvent) {
       payload.isPaid = true;
       payload.paymentQRCode = qrCodeLink;
       payload.paymentAmount = formData.paymentAmount;
     } else {
       payload.isPaid = false;
-      // For free events, ensure these are not sent or are null
       delete payload.isPaidEvent;
       delete payload.paymentQRCode;
       delete payload.paymentAmount;
     }
-    // Remove the frontend-only field
     delete payload.isPaidEvent;
 
-    // Submit with the correct image link and QR code link
     const createEvent = await axios.post<{
       msg: string;
       id: string;
-    }>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event`,
-      payload,
-      {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    }>(`/api/v1/events/event`, payload, {
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    });
 
-    if (createEvent.status === 201 || createEvent.status === 200  ) {
-      // Update event count
+    if (createEvent.status === 201 || createEvent.status === 200) {
+      posthog.capture('event_created', {
+        event_type: formData.eventType,
+        event_mode: formData.eventMode,
+        is_paid: formData.isPaidEvent,
+      });
       const previousCount = eventCount;
       const newCount = previousCount + 1;
       setEventCount(newCount);
-      
-      // Check for achievement unlocks (crossing thresholds)
+
       let badgeUnlocked = null;
       if (previousCount < 20 && newCount >= 20) {
         badgeUnlocked = {
           name: 'Community Champion',
           count: 20,
-          description: 'You\'ve created 20 events! You\'re the ultimate community champion! 🌟',
+          description:
+            "You've created 20 events! You're the ultimate community champion! 🌟",
         };
       } else if (previousCount < 10 && newCount >= 10) {
         badgeUnlocked = {
           name: 'Event Legendary',
           count: 10,
-          description: 'Wow! 10 events created! You\'re a true event legend! ⚡',
+          description: "Wow! 10 events created! You're a true event legend! ⚡",
         };
       } else if (previousCount < 5 && newCount >= 5) {
         badgeUnlocked = {
           name: 'Event Master',
           count: 5,
-          description: 'You\'ve created 5 amazing events! You\'re on fire! 🔥',
+          description: "You've created 5 amazing events! You're on fire! 🔥",
         };
       }
-      
+
       if (badgeUnlocked) {
         setUnlockedBadge(badgeUnlocked);
         setShowAchievementModal(true);
         setCloseAfterAchievement(true);
       }
-      
+
       toast('Event created successfully! Start marketing now!!!');
       setIsSubmitting(false);
-      
+
       if (!badgeUnlocked) {
-        // Close after a short delay when no achievement modal is shown
         setTimeout(() => {
           onClose();
         }, 500);
@@ -618,10 +718,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       onClose();
     }
   };
- 
+
   if (!isOpen) return null;
 
-  // Check if user has created a club
   if (!clubName) {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto bg-transparent">
@@ -631,9 +730,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
             <div className="p-8 text-center">
               <div className="text-5xl mb-4">🏢</div>
-              <h2 className="text-2xl font-bold text-white mb-3">No Club Found</h2>
+              <h2 className="text-2xl font-bold text-white mb-3">
+                No Club Found
+              </h2>
               <p className="text-gray-300 mb-6">
-                You haven't created any club yet. Please create a club first before creating an event.
+                You haven't created any club yet. Please create a club first
+                before creating an event.
               </p>
               <div className="space-y-3">
                 <Button
@@ -692,34 +794,40 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           {/* Progress Indicator */}
           <div className="px-6 pt-5 pb-2">
             <div className="flex items-center">
-              {(['Basics', 'Details', 'Timing', 'Media'] as const).map((label, i) => {
-                const stepNum = i + 1;
-                const done = step > stepNum;
-                const active = step === stepNum;
-                return (
-                  <React.Fragment key={stepNum}>
-                    <div className="flex flex-col items-center shrink-0">
-                      <div
-                        className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
-                          done
-                            ? 'bg-yellow-500 text-black'
-                            : active
-                            ? 'bg-yellow-500 text-black ring-4 ring-yellow-500/20'
-                            : 'bg-gray-800 text-gray-500'
-                        }`}
-                      >
-                        {done ? <Check className="w-4 h-4" /> : stepNum}
+              {(['Basics', 'Details', 'Timing', 'Media'] as const).map(
+                (label, i) => {
+                  const stepNum = i + 1;
+                  const done = step > stepNum;
+                  const active = step === stepNum;
+                  return (
+                    <React.Fragment key={stepNum}>
+                      <div className="flex flex-col items-center shrink-0">
+                        <div
+                          className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
+                            done
+                              ? 'bg-yellow-500 text-black'
+                              : active
+                                ? 'bg-yellow-500 text-black ring-4 ring-yellow-500/20'
+                                : 'bg-gray-800 text-gray-500'
+                          }`}
+                        >
+                          {done ? <Check className="w-4 h-4" /> : stepNum}
+                        </div>
+                        <span
+                          className={`text-xs mt-1.5 font-medium ${active ? 'text-yellow-400' : done ? 'text-gray-400' : 'text-gray-600'}`}
+                        >
+                          {label}
+                        </span>
                       </div>
-                      <span className={`text-xs mt-1.5 font-medium ${active ? 'text-yellow-400' : done ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {label}
-                      </span>
-                    </div>
-                    {i < 3 && (
-                      <div className={`flex-1 h-0.5 mx-2 mb-5 rounded-full transition-all ${step > stepNum ? 'bg-yellow-500' : 'bg-gray-800'}`} />
-                    )}
-                  </React.Fragment>
-                );
-              })}
+                      {i < 3 && (
+                        <div
+                          className={`flex-1 h-0.5 mx-2 mb-5 rounded-full transition-all ${step > stepNum ? 'bg-yellow-500' : 'bg-gray-800'}`}
+                        />
+                      )}
+                    </React.Fragment>
+                  );
+                }
+              )}
             </div>
           </div>
 
@@ -743,9 +851,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                           key={mode}
                           className={`
                             cursor-pointer border rounded-lg p-3 flex items-center justify-center
-                            ${formData.eventMode === mode.toLowerCase()
-                              ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400'
-                              : 'border-gray-700 text-gray-300 hover:border-gray-600'
+                            ${
+                              formData.eventMode === mode.toLowerCase()
+                                ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400'
+                                : 'border-gray-700 text-gray-300 hover:border-gray-600'
                             }
                           `}
                           onClick={() => {
@@ -753,13 +862,18 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                             setFormData((prev: any) => ({
                               ...prev,
                               eventMode: modeValue,
-                              // If online, set venue to "Online"
-                              venue: modeValue === 'online' ? 'Online' : prev.venue,
+                              venue:
+                                modeValue === 'online'
+                                  ? 'Online'
+                                  : prev.venue?.trim().toLowerCase() === 'online'
+                                    ? ''
+                                    : prev.venue,
                             }));
                             if (errors.eventMode) {
                               setErrors((prev) => {
                                 const newErrors = { ...prev };
                                 delete newErrors.eventMode;
+                                delete newErrors.venue;
                                 return newErrors;
                               });
                             }
@@ -798,29 +912,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       </p>
                     )}
                   </div>
-
-                { /* <div>
-                    <label
-                      htmlFor="university"
-                      className="block text-sm font-medium text-yellow-400 mb-1"
-                    >
-                      University/College* (locked to your club)
-                    </label>
-                    <input
-                      id="university"
-                      name="university"
-                      type="text"
-                      value={`${lockedUniversity}${clubName ? `-${clubName}` : ''}` || formData.university}
-                      readOnly
-                      className="w-full bg-gray-800 border border-gray-700 text-white px-4 py-2 rounded-lg opacity-80 cursor-not-allowed"
-                    />
-                    {errors.university && (
-                      <p className="mt-1 text-sm text-red-500">
-                        {errors.university}
-                      </p>
-                    )}
-                  </div>
-                  */}
 
                   <div>
                     <label
@@ -991,47 +1082,109 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
                   {/* Access & Participation toggles */}
                   <div>
-                    <p className="text-sm font-medium text-yellow-400 mb-3">Access Restrictions</p>
+                    <p className="text-sm font-medium text-yellow-400 mb-3">
+                      Access Restrictions
+                    </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {/* College students only */}
                       <button
                         type="button"
-                        onClick={() => setFormData((prev: any) => ({ ...prev, collegeStudentsOnly: !prev.collegeStudentsOnly }))}
+                        onClick={() =>
+                          setFormData((prev: any) => ({
+                            ...prev,
+                            collegeStudentsOnly: !prev.collegeStudentsOnly,
+                          }))
+                        }
                         className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
                           formData.collegeStudentsOnly
                             ? 'border-yellow-500 bg-yellow-500/10'
                             : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
                         }`}
                       >
-                        <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border ${formData.collegeStudentsOnly ? 'bg-yellow-500 border-yellow-500' : 'border-gray-600'}`}>
-                          {formData.collegeStudentsOnly && <Check className="w-3 h-3 text-black" />}
+                        <div
+                          className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border ${formData.collegeStudentsOnly ? 'bg-yellow-500 border-yellow-500' : 'border-gray-600'}`}
+                        >
+                          {formData.collegeStudentsOnly && (
+                            <Check className="w-3 h-3 text-black" />
+                          )}
                         </div>
                         <div>
-                          <p className={`text-sm font-medium ${formData.collegeStudentsOnly ? 'text-yellow-400' : 'text-gray-300'}`}>
+                          <p
+                            className={`text-sm font-medium ${formData.collegeStudentsOnly ? 'text-yellow-400' : 'text-gray-300'}`}
+                          >
                             College students only
                           </p>
-                          <p className="text-xs text-gray-500">Restrict to your college</p>
+                          <p className="text-xs text-gray-500">
+                            Restrict to your college
+                          </p>
                         </div>
                       </button>
 
                       {/* Core team only */}
                       <button
                         type="button"
-                        onClick={() => setFormData((prev: any) => ({ ...prev, coreTeamOnly: !prev.coreTeamOnly }))}
+                        onClick={() =>
+                          setFormData((prev: any) => ({
+                            ...prev,
+                            coreTeamOnly: !prev.coreTeamOnly,
+                          }))
+                        }
                         className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
                           formData.coreTeamOnly
                             ? 'border-yellow-500 bg-yellow-500/10'
                             : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
                         }`}
                       >
-                        <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border ${formData.coreTeamOnly ? 'bg-yellow-500 border-yellow-500' : 'border-gray-600'}`}>
-                          {formData.coreTeamOnly && <Check className="w-3 h-3 text-black" />}
+                        <div
+                          className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border ${formData.coreTeamOnly ? 'bg-yellow-500 border-yellow-500' : 'border-gray-600'}`}
+                        >
+                          {formData.coreTeamOnly && (
+                            <Check className="w-3 h-3 text-black" />
+                          )}
                         </div>
                         <div>
-                          <p className={`text-sm font-medium ${formData.coreTeamOnly ? 'text-yellow-400' : 'text-gray-300'}`}>
+                          <p
+                            className={`text-sm font-medium ${formData.coreTeamOnly ? 'text-yellow-400' : 'text-gray-300'}`}
+                          >
                             Core team only
                           </p>
-                          <p className="text-xs text-gray-500">Internal club members</p>
+                          <p className="text-xs text-gray-500">
+                            Internal club members
+                          </p>
+                        </div>
+                      </button>
+
+                      {/* Approval Required (Acceptance Based) */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData((prev: any) => ({
+                            ...prev,
+                            acceptanceBased: !prev.acceptanceBased,
+                          }))
+                        }
+                        className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
+                          formData.acceptanceBased
+                            ? 'border-yellow-500 bg-yellow-500/10'
+                            : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                        }`}
+                      >
+                        <div
+                          className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border ${formData.acceptanceBased ? 'bg-yellow-500 border-yellow-500' : 'border-gray-600'}`}
+                        >
+                          {formData.acceptanceBased && (
+                            <Check className="w-3 h-3 text-black" />
+                          )}
+                        </div>
+                        <div>
+                          <p
+                            className={`text-sm font-medium ${formData.acceptanceBased ? 'text-yellow-400' : 'text-gray-300'}`}
+                          >
+                            Approval Required
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Manually accept participants
+                          </p>
                         </div>
                       </button>
                     </div>
@@ -1042,7 +1195,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       htmlFor="eventWebsite"
                       className="block text-sm font-medium text-yellow-400 mb-1"
                     >
-                      {formData.eventMode === 'online' ? 'Platform Link (e.g. Google Meet, Zoom)' : 'Event Website (optional)'}
+                      {formData.eventMode === 'online'
+                        ? 'Platform Link (e.g. Google Meet, Zoom)'
+                        : 'Event Website (optional)'}
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -1082,7 +1237,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       />
                     </div>
                     <p className="mt-1 text-xs text-gray-400">
-                      Add a link to your registration form (Google Forms, Typeform, etc.)
+                      Add a link to your registration form (Google Forms,
+                      Typeform, etc.)
                     </p>
                   </div>
 
@@ -1114,16 +1270,20 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
                   {/* Fee — single Free / Paid selector */}
                   <div className="border-t border-gray-800 pt-4">
-                    <p className="text-sm font-medium text-yellow-400 mb-3">Participation Fee</p>
+                    <p className="text-sm font-medium text-yellow-400 mb-3">
+                      Participation Fee
+                    </p>
                     <div className="flex rounded-lg bg-gray-800 p-1 gap-1 mb-4">
                       <button
                         type="button"
-                        onClick={() => setFormData((prev: any) => ({
-                          ...prev,
-                          isPaidEvent: false,
-                          noParticipationFee: true,
-                          paymentAmount: 0,
-                        }))}
+                        onClick={() =>
+                          setFormData((prev: any) => ({
+                            ...prev,
+                            isPaidEvent: false,
+                            noParticipationFee: true,
+                            paymentAmount: 0,
+                          }))
+                        }
                         className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
                           !formData.isPaidEvent
                             ? 'bg-yellow-500 text-black'
@@ -1135,11 +1295,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={() => setFormData((prev: any) => ({
-                          ...prev,
-                          isPaidEvent: true,
-                          noParticipationFee: false,
-                        }))}
+                        onClick={() =>
+                          setFormData((prev: any) => ({
+                            ...prev,
+                            isPaidEvent: true,
+                            noParticipationFee: false,
+                          }))
+                        }
                         className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
                           formData.isPaidEvent
                             ? 'bg-yellow-500 text-black'
@@ -1161,7 +1323,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                             Registration Fee (₹)*
                           </label>
                           <div className="relative">
-                            <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 text-sm">₹</span>
+                            <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 text-sm">
+                              ₹
+                            </span>
                             <input
                               id="paymentAmount"
                               name="paymentAmount"
@@ -1175,7 +1339,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                             />
                           </div>
                           {errors.paymentAmount && (
-                            <p className="mt-1 text-sm text-red-500">{errors.paymentAmount}</p>
+                            <p className="mt-1 text-sm text-red-500">
+                              {errors.paymentAmount}
+                            </p>
                           )}
                         </div>
 
@@ -1201,10 +1367,15 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                                 />
                               </div>
                               <div className="flex flex-col gap-2">
-                                <p className="text-sm text-gray-300">QR code uploaded</p>
+                                <p className="text-sm text-gray-300">
+                                  QR code uploaded
+                                </p>
                                 <button
                                   type="button"
-                                  onClick={() => { setQrCodeImg(null); setQrCodePreviewUrl(''); }}
+                                  onClick={() => {
+                                    setQrCodeImg(null);
+                                    setQrCodePreviewUrl('');
+                                  }}
                                   className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1"
                                 >
                                   <X className="w-3 h-3" /> Remove
@@ -1212,16 +1383,25 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                               </div>
                             </div>
                           ) : (
-                            <label htmlFor="qrCodeUpload" className="cursor-pointer block">
+                            <label
+                              htmlFor="qrCodeUpload"
+                              className="cursor-pointer block"
+                            >
                               <div className="w-full bg-gray-900 border-2 border-dashed border-gray-700 rounded-lg p-5 hover:border-yellow-500 transition-colors flex flex-col items-center justify-center gap-1.5">
                                 <Upload className="w-7 h-7 text-gray-400" />
-                                <span className="text-sm text-gray-400">Click to upload QR code</span>
-                                <span className="text-xs text-gray-600">Max 2 MB · PNG, JPG</span>
+                                <span className="text-sm text-gray-400">
+                                  Click to upload QR code
+                                </span>
+                                <span className="text-xs text-gray-600">
+                                  Max 2 MB · PNG, JPG
+                                </span>
                               </div>
                             </label>
                           )}
                           {errors.paymentQRCode && (
-                            <p className="mt-1 text-sm text-red-500">{errors.paymentQRCode}</p>
+                            <p className="mt-1 text-sm text-red-500">
+                              {errors.paymentQRCode}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -1232,8 +1412,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                   <div className="border-t border-gray-800 pt-6 mt-6">
                     <div className="flex justify-between items-center mb-4">
                       <div>
-                        <p className="text-sm font-medium text-yellow-400">Custom Registration Questions</p>
-                        <p className="text-xs text-gray-400 mt-1">Ask participants for specific details (Max 10)</p>
+                        <p className="text-sm font-medium text-yellow-400">
+                          Custom Registration Questions
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Ask participants for specific details (Max 10)
+                        </p>
                       </div>
                       <span className="text-xs bg-gray-800 px-2 py-1 rounded text-gray-300">
                         {formData.customQuestions?.length || 0}/10 Added
@@ -1242,24 +1426,65 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
                     {/* Pre-built Questions */}
                     <div className="flex flex-wrap gap-2 mb-4">
-                      <button type="button" onClick={() => addPrebuiltQuestion('GitHub Profile URL', 'url')} className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded flex items-center gap-1 transition-colors border border-gray-700">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          addPrebuiltQuestion('GitHub Profile URL', 'url')
+                        }
+                        className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded flex items-center gap-1 transition-colors border border-gray-700"
+                      >
                         <Plus className="w-3 h-3" /> GitHub
                       </button>
-                      <button type="button" onClick={() => addPrebuiltQuestion('LinkedIn Profile', 'url')} className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded flex items-center gap-1 transition-colors border border-gray-700">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          addPrebuiltQuestion('LinkedIn Profile', 'url')
+                        }
+                        className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded flex items-center gap-1 transition-colors border border-gray-700"
+                      >
                         <Plus className="w-3 h-3" /> LinkedIn
                       </button>
-                      <button type="button" onClick={() => addPrebuiltQuestion('T-Shirt Size', 'select', ['S', 'M', 'L', 'XL', 'XXL'])} className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded flex items-center gap-1 transition-colors border border-gray-700">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          addPrebuiltQuestion('T-Shirt Size', 'select', [
+                            'S',
+                            'M',
+                            'L',
+                            'XL',
+                            'XXL',
+                          ])
+                        }
+                        className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded flex items-center gap-1 transition-colors border border-gray-700"
+                      >
                         <Plus className="w-3 h-3" /> T-Shirt Size
                       </button>
-                      <button type="button" onClick={() => addPrebuiltQuestion('Food Preference', 'select', ['Veg', 'Non-Veg', 'Vegan'])} className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded flex items-center gap-1 transition-colors border border-gray-700">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          addPrebuiltQuestion('Food Preference', 'select', [
+                            'Veg',
+                            'Non-Veg',
+                            'Vegan',
+                          ])
+                        }
+                        className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded flex items-center gap-1 transition-colors border border-gray-700"
+                      >
                         <Plus className="w-3 h-3" /> Food Pref
                       </button>
                     </div>
 
                     <div className="space-y-4 mb-4">
                       {formData.customQuestions?.map((q, idx) => (
-                        <div key={q.id || idx} className="bg-gray-800/40 border border-gray-700 p-4 rounded-lg relative group">
-                          <button type="button" onClick={() => removeCustomQuestion(idx)} className="absolute top-3 right-3 text-gray-500 hover:text-red-400 transition-colors">
+                        <div
+                          key={q.id || idx}
+                          className="bg-gray-800/40 border border-gray-700 p-4 rounded-lg relative group"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => removeCustomQuestion(idx)}
+                            className="absolute top-3 right-3 text-gray-500 hover:text-red-400 transition-colors"
+                          >
                             <Trash2 className="w-4 h-4" />
                           </button>
                           <div className="flex items-start gap-3">
@@ -1267,32 +1492,93 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                             <div className="flex-1 space-y-3">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
-                                  <label className="block text-xs font-medium text-gray-400 mb-1">Question Label*</label>
-                                  <input type="text" value={q.label} onChange={(e) => updateCustomQuestion(idx, 'label', e.target.value)} placeholder="e.g. What is your GitHub ID?" className="w-full bg-gray-900 border border-gray-700 focus:border-yellow-500 text-white px-3 py-1.5 rounded text-sm focus:outline-none" />
+                                  <label className="block text-xs font-medium text-gray-400 mb-1">
+                                    Question Label*
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={q.label}
+                                    onChange={(e) =>
+                                      updateCustomQuestion(
+                                        idx,
+                                        'label',
+                                        e.target.value
+                                      )
+                                    }
+                                    placeholder="e.g. What is your GitHub ID?"
+                                    className="w-full bg-gray-900 border border-gray-700 focus:border-yellow-500 text-white px-3 py-1.5 rounded text-sm focus:outline-none"
+                                  />
                                 </div>
                                 <div>
-                                  <label className="block text-xs font-medium text-gray-400 mb-1">Answer Type</label>
-                                  <Select value={q.type} onValueChange={(val) => updateCustomQuestion(idx, 'type', val)}>
+                                  <label className="block text-xs font-medium text-gray-400 mb-1">
+                                    Answer Type
+                                  </label>
+                                  <Select
+                                    value={q.type}
+                                    onValueChange={(val) =>
+                                      updateCustomQuestion(idx, 'type', val)
+                                    }
+                                  >
                                     <SelectTrigger className="bg-gray-900 border border-gray-700 text-white h-8 text-sm">
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent className="bg-black text-white">
-                                      <SelectItem value="text">Short Text</SelectItem>
-                                      <SelectItem value="url">URL / Link</SelectItem>
-                                      <SelectItem value="select">Dropdown Options</SelectItem>
+                                      <SelectItem value="text">
+                                        Short Text
+                                      </SelectItem>
+                                      <SelectItem value="url">
+                                        URL / Link
+                                      </SelectItem>
+                                      <SelectItem value="select">
+                                        Dropdown Options
+                                      </SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
                               </div>
                               {q.type === 'select' && (
                                 <div>
-                                  <label className="block text-xs font-medium text-gray-400 mb-1">Options (comma separated)*</label>
-                                  <input type="text" value={q.options?.join(', ')} onChange={(e) => updateCustomQuestion(idx, 'options', e.target.value.split(',').map(o => o.trim()).filter(Boolean))} placeholder="e.g. S, M, L, XL" className="w-full bg-gray-900 border border-gray-700 focus:border-yellow-500 text-white px-3 py-1.5 rounded text-sm focus:outline-none" />
+                                  <label className="block text-xs font-medium text-gray-400 mb-1">
+                                    Options (comma separated)*
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={q.options?.join(', ')}
+                                    onChange={(e) =>
+                                      updateCustomQuestion(
+                                        idx,
+                                        'options',
+                                        e.target.value
+                                          .split(',')
+                                          .map((o) => o.trim())
+                                          .filter(Boolean)
+                                      )
+                                    }
+                                    placeholder="e.g. S, M, L, XL"
+                                    className="w-full bg-gray-900 border border-gray-700 focus:border-yellow-500 text-white px-3 py-1.5 rounded text-sm focus:outline-none"
+                                  />
                                 </div>
                               )}
                               <div className="flex items-center gap-2 pt-1">
-                                <input type="checkbox" id={`req-${idx}`} checked={q.required} onChange={(e) => updateCustomQuestion(idx, 'required', e.target.checked)} className="rounded border-gray-700 bg-gray-900 text-yellow-500 focus:ring-yellow-500 focus:ring-offset-gray-900" />
-                                <label htmlFor={`req-${idx}`} className="text-xs text-gray-300 cursor-pointer">Make this question required</label>
+                                <input
+                                  type="checkbox"
+                                  id={`req-${idx}`}
+                                  checked={q.required}
+                                  onChange={(e) =>
+                                    updateCustomQuestion(
+                                      idx,
+                                      'required',
+                                      e.target.checked
+                                    )
+                                  }
+                                  className="rounded border-gray-700 bg-gray-900 text-yellow-500 focus:ring-yellow-500 focus:ring-offset-gray-900"
+                                />
+                                <label
+                                  htmlFor={`req-${idx}`}
+                                  className="text-xs text-gray-300 cursor-pointer"
+                                >
+                                  Make this question required
+                                </label>
                               </div>
                             </div>
                           </div>
@@ -1300,7 +1586,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       ))}
                     </div>
 
-                    <button type="button" onClick={addCustomQuestion} disabled={(formData.customQuestions?.length || 0) >= 10} className="w-full py-2.5 border border-dashed border-gray-600 rounded-lg text-gray-400 hover:text-yellow-400 hover:border-yellow-500 hover:bg-yellow-500/5 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button
+                      type="button"
+                      onClick={addCustomQuestion}
+                      disabled={(formData.customQuestions?.length || 0) >= 10}
+                      className="w-full py-2.5 border border-dashed border-gray-600 rounded-lg text-gray-400 hover:text-yellow-400 hover:border-yellow-500 hover:bg-yellow-500/5 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       <Plus className="w-4 h-4" /> Add Custom Question
                     </button>
                   </div>
@@ -1585,34 +1876,81 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                         {formData.eventName || 'Untitled Event'}
                       </h4>
                       {formData.tagline && (
-                        <p className="text-sm text-yellow-400/80 mt-0.5">{formData.tagline}</p>
+                        <p className="text-sm text-yellow-400/80 mt-0.5">
+                          {formData.tagline}
+                        </p>
                       )}
                       {formData.description && (
-                        <p className="text-xs text-gray-400 mt-1.5 line-clamp-2">{formData.description}</p>
+                        <p className="text-xs text-gray-400 mt-1.5 line-clamp-2">
+                          {formData.description}
+                        </p>
                       )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-px bg-gray-700">
                       {[
-                        { label: 'Mode', value: formData.eventMode ? formData.eventMode.charAt(0).toUpperCase() + formData.eventMode.slice(1) : '—' },
-                        { label: 'Type', value: formData.eventType ? formData.eventType.charAt(0).toUpperCase() + formData.eventType.slice(1) : '—' },
-                        { label: 'Team size', value: formData.maxTeamSize ? `Up to ${formData.maxTeamSize}` : '—' },
-                        { label: 'Max participants', value: formData.maxParticipants ? String(formData.maxParticipants) : 'Unlimited' },
-                        { label: 'Start date', value: formData.eventStartDate || '—' },
-                        { label: 'End date', value: formData.eventEndDate || '—' },
+                        {
+                          label: 'Mode',
+                          value: formData.eventMode
+                            ? formData.eventMode.charAt(0).toUpperCase() +
+                              formData.eventMode.slice(1)
+                            : '—',
+                        },
+                        {
+                          label: 'Type',
+                          value: formData.eventType
+                            ? formData.eventType.charAt(0).toUpperCase() +
+                              formData.eventType.slice(1)
+                            : '—',
+                        },
+                        {
+                          label: 'Team size',
+                          value: formData.maxTeamSize
+                            ? `Up to ${formData.maxTeamSize}`
+                            : '—',
+                        },
+                        {
+                          label: 'Max participants',
+                          value: formData.maxParticipants
+                            ? String(formData.maxParticipants)
+                            : 'Unlimited',
+                        },
+                        {
+                          label: 'Start date',
+                          value: formData.eventStartDate || '—',
+                        },
+                        {
+                          label: 'End date',
+                          value: formData.eventEndDate || '—',
+                        },
                         { label: 'Venue', value: formData.venue || '—' },
-                        { label: 'Fee', value: formData.isPaidEvent ? `₹${formData.paymentAmount || '?'}` : 'Free' },
-                        { label: 'Contact email', value: formData.contactEmail || '—' },
-                        { label: 'Contact phone', value: formData.contactPhone || '—' },
+                        {
+                          label: 'Fee',
+                          value: formData.isPaidEvent
+                            ? `₹${formData.paymentAmount || '?'}`
+                            : 'Free',
+                        },
+                        {
+                          label: 'Contact email',
+                          value: formData.contactEmail || '—',
+                        },
+                        {
+                          label: 'Contact phone',
+                          value: formData.contactPhone || '—',
+                        },
                       ].map(({ label, value }) => (
                         <div key={label} className="bg-gray-800/80 px-4 py-3">
-                          <p className="text-xs text-gray-500 mb-0.5">{label}</p>
+                          <p className="text-xs text-gray-500 mb-0.5">
+                            {label}
+                          </p>
                           <p className="text-sm text-white truncate">{value}</p>
                         </div>
                       ))}
                     </div>
 
-                    {(formData.collegeStudentsOnly || formData.coreTeamOnly) && (
+                    {(formData.collegeStudentsOnly ||
+                      formData.coreTeamOnly ||
+                      formData.acceptanceBased) && (
                       <div className="px-5 py-3 border-t border-gray-700 flex gap-2 flex-wrap">
                         {formData.collegeStudentsOnly && (
                           <span className="text-xs bg-yellow-500/15 text-yellow-400 border border-yellow-500/20 px-2 py-0.5 rounded-full">
@@ -1624,12 +1962,18 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                             Core team only
                           </span>
                         )}
+                        {formData.acceptanceBased && (
+                          <span className="text-xs bg-yellow-500/15 text-yellow-400 border border-yellow-500/20 px-2 py-0.5 rounded-full">
+                            Approval Required
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
 
                   <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-4 py-3 text-yellow-400 text-sm">
-                    Review all details carefully. Once submitted your event goes live immediately.
+                    Review all details carefully. Once submitted your event goes
+                    live immediately.
                   </div>
                 </div>
               </div>
@@ -1671,8 +2015,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                 type="submit"
                 form="event-creation-form"
                 disabled={isSubmitting}
-                className={`px-6 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 transition-colors ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
-                  }`}
+                className={`px-6 py-2 bg-yellow-500 text-black rounded-lg font-medium hover:bg-yellow-400 transition-colors ${
+                  isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
               >
                 {isSubmitting ? 'Creating...' : 'Create Event'}
               </Button>
@@ -1680,7 +2025,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
         </MagicCard>
       </Card>
-      
+
       {/* Achievement Unlock Modal */}
       {unlockedBadge && (
         <AchievementUnlockModal
@@ -1699,7 +2044,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           shareText={`🏆 I just unlocked the "${unlockedBadge.name}" badge on Zynvo! I've created ${unlockedBadge.count} amazing events. Join me and let's build an incredible campus community! 🎉 #Zynvo #EventCreator`}
         />
       )}
-      
+
       <NoTokenModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} />
     </div>
   );

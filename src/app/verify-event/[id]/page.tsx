@@ -18,7 +18,7 @@ export default function VerificationPage() {
       setIsLoading(true);
       try {
         const verifyUser = await axios.get<{ status: string }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/ver-event?id=${id}`
+          `/api/v1/events/ver-event?id=${id}`
         );
         setUserStatus(verifyUser.data.status);
 

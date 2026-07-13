@@ -1,5 +1,6 @@
 'use client';
 
+import posthog from 'posthog-js';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Icons } from './Icons';
@@ -28,10 +29,13 @@ const ContactSection = () => {
 
     try {
       const submit = await axios.post<{ msg: string }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/contact/contact`,
+        `/api/v1/contact/contact`,
         formState
       );
       if (submit.status == 200) {
+        posthog.capture('contact_form_submitted', {
+          subject: formState.subject,
+        });
         setSubmitStatus('success');
         setFormState({ name: '', email: '', subject: '', message: '' });
         toast(submit.data.msg);

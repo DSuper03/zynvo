@@ -1,9 +1,10 @@
+/**
+ * Add speaker hook — requests go through the same-origin proxy.
+ */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 import { getSafeErrorMessage, readSafeErrorMessageFromResponse } from '@/lib/safe-error';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 
 export type AddSpeakerPayload = {
   eventId: string;
@@ -18,16 +19,10 @@ export type AddSpeakerResponse = {
   id: number;
 };
 
-async function addSpeaker(
-  payload: AddSpeakerPayload,
-  token: string
-): Promise<AddSpeakerResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/v1/events/addSpeakers`, {
+async function addSpeaker(payload: AddSpeakerPayload): Promise<AddSpeakerResponse> {
+  const res = await fetch(`/api/v1/events/addSpeakers`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 
@@ -47,17 +42,9 @@ export const useAddSpeaker = () => {
   const queryClient = useQueryClient();
 
   return useMutation<AddSpeakerResponse, Error, AddSpeakerPayload>({
-    mutationFn: async (payload: AddSpeakerPayload): Promise<AddSpeakerResponse> => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      return addSpeaker(payload, token);
-    },
+    mutationFn: addSpeaker,
     onSuccess: (data, variables) => {
       toast.success(data.msg || 'Speaker added successfully!');
-      // Invalidate speakers query to refetch the list
       queryClient.invalidateQueries({ queryKey: ['speakers', variables.eventId] });
     },
     onError: (error: Error) => {
@@ -68,4 +55,3 @@ export const useAddSpeaker = () => {
     },
   });
 };
-

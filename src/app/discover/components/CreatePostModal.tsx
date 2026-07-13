@@ -1,4 +1,5 @@
 'use client';
+import posthog from 'posthog-js';
 import { collegesWithClubs } from '@/components/colleges/college';
 import React, { useState, useRef, useEffect } from 'react';
 import {
@@ -17,7 +18,12 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { uploadImageDirectly } from '@/lib/imgkit';
@@ -52,7 +58,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       else {
-         toast('Login required', {
+        toast('Login required', {
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),
@@ -61,7 +67,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
         return;
       }
       if (sessionStorage.getItem('activeSession') != 'true') {
-         toast('Login required', {
+        toast('Login required', {
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),
@@ -150,10 +156,14 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
     // Iteratively reduce JPEG quality until under MAX_BYTES or min quality reached
     let quality = 0.9;
-    let blob: Blob | null = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+    let blob: Blob | null = await new Promise((resolve) =>
+      canvas.toBlob(resolve, 'image/jpeg', quality)
+    );
     while (blob && blob.size > MAX_BYTES && quality > 0.4) {
       quality -= 0.1;
-      blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+      blob = await new Promise((resolve) =>
+        canvas.toBlob(resolve, 'image/jpeg', quality)
+      );
     }
 
     if (!blob) return originalFile;
@@ -169,7 +179,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
         if (tctx) {
           tctx.drawImage(canvas, 0, 0, tmp.width, tmp.height);
           quality = Math.max(quality, 0.6);
-          blob = await new Promise((resolve) => tmp.toBlob(resolve, 'image/jpeg', quality));
+          blob = await new Promise((resolve) =>
+            tmp.toBlob(resolve, 'image/jpeg', quality)
+          );
         }
       }
     }
@@ -188,14 +200,14 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   // Image upload handler
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-      const filesArray = Array.from(e.target.files);
-      const maxBytes = 2 * 1024 * 1024; // 2 MB
+    const filesArray = Array.from(e.target.files);
+    const maxBytes = 2 * 1024 * 1024; // 2 MB
 
     if (images.length + filesArray.length > 1) {
       toast('You can only upload 1 image');
-        e.target.value = '';
-        return;
-      }
+      e.target.value = '';
+      return;
+    }
 
     (async () => {
       try {
@@ -204,7 +216,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
             if (file.size > maxBytes) {
               const compressed = await compressImageToUnder2MB(file);
               if (compressed.size > maxBytes) {
-                toast('Could not compress image under 2 MB. Try a smaller image.');
+                toast(
+                  'Could not compress image under 2 MB. Try a smaller image.'
+                );
                 return null;
               }
               return compressed;
@@ -215,19 +229,21 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
         const validFiles = processed.filter((f): f is File => !!f);
         if (validFiles.length === 0) {
-        e.target.value = '';
-        return;
-      }
+          e.target.value = '';
+          return;
+        }
 
         setImages((prevImages) => [...prevImages, ...validFiles]);
-        const newPreviewUrls = validFiles.map((file) => URL.createObjectURL(file));
-      setPreviewUrls((prevUrls) => [...prevUrls, ...newPreviewUrls]);
+        const newPreviewUrls = validFiles.map((file) =>
+          URL.createObjectURL(file)
+        );
+        setPreviewUrls((prevUrls) => [...prevUrls, ...newPreviewUrls]);
       } catch {
         toast('Failed to process image. Please try again.');
       } finally {
         // Clear the input so users can select the same file again if needed
         e.target.value = '';
-    }
+      }
     })();
   };
 
@@ -235,16 +251,18 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     try {
       console.log('Starting image upload for:', img.name);
       toast('Uploading image...');
-      
+
       const link = await uploadImageDirectly(img, '/posts');
       console.log('Image uploaded successfully:', link);
-      
+
       setImageLink(link);
       toast('Image uploaded successfully!');
       return link;
     } catch (error) {
       console.error('Image upload failed:', error);
-      toast(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast(
+        `Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
@@ -282,13 +300,14 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       const submit = await axios.post<{
         msg: string;
         id: string;
-      }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/post/create`, payload, {
+      }>(`/api/v1/post/create`, payload, {
         headers: {
           authorization: `Bearer ${token}`,
         },
       });
 
       if (submit.status === 200 && submit.data.id) {
+        posthog.capture('post_created', { has_image: images.length > 0 });
         toast.success('Post created!', {
           description: 'Your post is now live on the feed.',
           action: {
@@ -302,7 +321,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
               const titleText = title || 'New Post';
-              const detail = [selectedCollege, selectedClub].filter(Boolean).join(' • ');
+              const detail = [selectedCollege, selectedClub]
+                .filter(Boolean)
+                .join(' • ');
               const bodyText = detail || 'A new post was created.';
               if (navigator.serviceWorker) {
                 const reg = await navigator.serviceWorker.getRegistration();
@@ -339,8 +360,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       }
     } catch (error: any) {
       console.error('Post creation failed:', error);
-      const maybeMsg = (error?.response?.data?.msg || error?.message || '').toString().toLowerCase();
-      const notInClub = maybeMsg.includes('not a part of any club') || maybeMsg.includes('not part of any club') || error?.response?.status === 403;
+      const maybeMsg = (error?.response?.data?.msg || error?.message || '')
+        .toString()
+        .toLowerCase();
+      const notInClub =
+        maybeMsg.includes('not a part of any club') ||
+        maybeMsg.includes('not part of any club') ||
+        error?.response?.status === 403;
       if (notInClub) {
         toast('You need to join or create a club to post.', {
           action: {
@@ -349,7 +375,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
           },
         });
       } else {
-      toast('Failed to create post. Please try again.');
+        toast('Failed to create post. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -389,8 +415,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
           <div
             className="absolute -z-10 inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             style={{
-              
-               
               padding: '1px',
               maskImage:
                 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
@@ -463,7 +487,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
             {/* Upload Controls */}
             <div className="border-t border-b border-white/5 py-3 mb-4">
               <div className="flex items-center justify-between">
-                <span className="text-neutral-400 text-sm font-medium">Add to your post</span>
+                <span className="text-neutral-400 text-sm font-medium">
+                  Add to your post
+                </span>
                 <div className="flex space-x-2">
                   <TooltipProvider>
                     <Tooltip>
@@ -519,7 +545,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   ) : (
                     <span className="text-neutral-500">Select a college</span>
                   )}
-                  <Search size={16} className="ml-2 text-neutral-500 group-hover:text-yellow-400 transition-colors" />
+                  <Search
+                    size={16}
+                    className="ml-2 text-neutral-500 group-hover:text-yellow-400 transition-colors"
+                  />
                 </Button>
               </div>
 
@@ -536,9 +565,15 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     className="w-full appearance-none bg-neutral-900/50 border border-neutral-800 hover:border-yellow-500/30 text-white px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500/20 transition-all"
                     disabled={!selectedCollege}
                   >
-                    <option value="">{settingClubs ? 'Loading clubs...' : 'Post without a club'}</option>
+                    <option value="">
+                      {settingClubs
+                        ? 'Loading clubs...'
+                        : 'Post without a club'}
+                    </option>
                     {!settingClubs && selectedCollege && clubs.length === 0 && (
-                      <option value="" disabled>No clubs associated</option>
+                      <option value="" disabled>
+                        No clubs associated
+                      </option>
                     )}
                     {!settingClubs &&
                       clubs.map((name) => (
@@ -548,8 +583,20 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                       ))}
                   </select>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-500">
-                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg
+                      width="10"
+                      height="6"
+                      viewBox="0 0 10 6"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M1 1L5 5L9 1"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </div>
                 </div>

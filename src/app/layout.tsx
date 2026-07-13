@@ -12,19 +12,8 @@ import { QueryProvider } from '@/providers/QueryProvider';
 import FloatingPWAInstall from '@/components/FloatingPWAInstall';
 import { ClerkKeyDebug } from '@/components/ClerkKeyDebug';
 import ClientTelemetryBootstrap from '@/components/ClientTelemetryBootstrap';
+import WebMcpBootstrap from '@/components/WebMcpBootstrap';
 import { ClerkProvider } from '@clerk/nextjs';
-
-const LEGACY_CLERK_FRONTEND_API_ENCODED = 'Y2xlcmsuenludm8uc29jaWFsJA';
-const ACTIVE_CLERK_FRONTEND_API_ENCODED = 'Y2xlcmsuenludm9zb2NpYWwuY29tJA';
-
-function normalizeClerkPublishableKey(key: string | undefined): string | undefined {
-  if (!key) return key;
-  if (!key.includes(LEGACY_CLERK_FRONTEND_API_ENCODED)) return key;
-  return key.replace(
-    LEGACY_CLERK_FRONTEND_API_ENCODED,
-    ACTIVE_CLERK_FRONTEND_API_ENCODED
-  );
-}
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -125,9 +114,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const publishableKey = normalizeClerkPublishableKey(
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-  );
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   
   return (
     <ClerkProvider
@@ -166,6 +153,7 @@ export default function RootLayout({
         </Script>
         <ClerkKeyDebug />
         <ClientTelemetryBootstrap />
+        <WebMcpBootstrap />
         <ErrorBoundary>
           <QueryProvider>
             <WarmupProvider>

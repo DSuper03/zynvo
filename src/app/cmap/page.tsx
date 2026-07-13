@@ -26,7 +26,7 @@ const CmapPage: React.FC = () => {
 
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`, {
+        const res = await axios.get(`/api/v1/user/getUser`, {
           headers: { authorization: `Bearer ${token}` },
         });
 

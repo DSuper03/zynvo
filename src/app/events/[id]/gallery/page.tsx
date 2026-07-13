@@ -119,7 +119,7 @@ const GalleryPage = () => {
       try {
         // Check if user is founder
         const founderRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/isFounder?id=${id}`,
+          `/api/v1/user/isFounder?id=${id}`,
           {
             headers: { authorization: `Bearer ${token}` },
           }
@@ -132,7 +132,7 @@ const GalleryPage = () => {
         // Fetch gallery items
         try {
           const galleryRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/${id}/gallery`,
+            `/api/v1/events/${id}/gallery`,
             {
               headers: { authorization: `Bearer ${token}` },
             }
@@ -177,7 +177,7 @@ const GalleryPage = () => {
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/${id}/gallery`,
+        `/api/v1/events/${id}/gallery`,
         { imageUrl: itemUrl.trim(), caption: itemTitle.trim() },
         {
           headers: { authorization: `Bearer ${token}` },
@@ -212,7 +212,7 @@ const GalleryPage = () => {
 
     try {
       await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/${id}/gallery?galleryId=${itemId}`,
+        `/api/v1/events/${id}/gallery?galleryId=${itemId}`,
         {
           headers: { authorization: `Bearer ${token}` },
         }
@@ -257,7 +257,7 @@ const GalleryPage = () => {
     setIsSavingEdit(true);
     try {
       const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/${id}/gallery?galleryId=${editingItem.id}`,
+        `/api/v1/events/${id}/gallery?galleryId=${editingItem.id}`,
         { imageUrl: editUrl.trim(), caption: editCaption.trim() },
         { headers: { authorization: `Bearer ${token}` } }
       );

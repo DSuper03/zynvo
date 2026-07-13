@@ -44,6 +44,13 @@ export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      if (path.startsWith('/auth')) {
+        setToken(null);
+        setLoading(false);
+        return;
+      }
+
       const storedToken = localStorage.getItem('token');
       const hasActiveSession = sessionStorage.getItem('activeSession') === 'true';
 
@@ -81,7 +88,7 @@ export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
           msg: string;
           data: { name: string; profileAvatar: string };
         }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getSidebarUser`,
+          `/api/v1/user/getSidebarUser`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

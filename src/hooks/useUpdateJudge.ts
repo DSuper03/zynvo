@@ -1,9 +1,10 @@
+/**
+ * Update judge hook — requests go through the same-origin proxy.
+ */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 import { getSafeErrorMessage, readSafeErrorMessageFromResponse } from '@/lib/safe-error';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 
 export type UpdateJudgePayload = {
   eventId: string;
@@ -13,14 +14,11 @@ export type UpdateJudgePayload = {
   achievement: string;
 };
 
-async function updateJudge(payload: UpdateJudgePayload, token: string) {
+async function updateJudge(payload: UpdateJudgePayload) {
   const { eventId, judgeId, name, description, achievement } = payload;
-  const res = await fetch(`${API_BASE_URL}/api/v1/events/${eventId}/judges/${judgeId}`, {
+  const res = await fetch(`/api/v1/events/${eventId}/judges/${judgeId}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, description, achievement }),
   });
 
@@ -40,18 +38,16 @@ export const useUpdateJudge = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: UpdateJudgePayload) => {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('No authentication token found');
-      return updateJudge(payload, token);
-    },
+    mutationFn: updateJudge,
     onSuccess: (data, variables) => {
       toast.success(data.msg || 'Judge updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['judges', variables.eventId] });
     },
     onError: (error: Error) => {
       logger.error('Error updating judge:', error);
-      toast.error(getSafeErrorMessage(error, 'Unable to update judge right now. Please try again.'));
+      toast.error(
+        getSafeErrorMessage(error, 'Unable to update judge right now. Please try again.')
+      );
     },
   });
 };

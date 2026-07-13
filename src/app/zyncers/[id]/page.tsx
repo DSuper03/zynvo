@@ -245,7 +245,7 @@ export default function PublicUserProfile() {
     }
 
     let cancelled = false;
-    const base = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
+    const base = ('').replace(/\/$/, '');
     if (!base) {
       setViewerUserId(null);
       return;
@@ -277,7 +277,7 @@ export default function PublicUserProfile() {
 
       try {
         const response = await axios.get<ApiResponse>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getPublicUser?id=${userId}`,
+          `/api/v1/user/getPublicUser?id=${userId}`,
           { headers: token ? { authorization: `Bearer ${token}` } : {} }
         );
 
@@ -307,7 +307,7 @@ export default function PublicUserProfile() {
           if (clubName) {
             try {
               const clubsResponse = await axios.get<any>(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getAll?page=1&limit=1000`,
+                `/api/v1/clubs/getAll?page=1&limit=1000`,
                 { headers: token ? { authorization: `Bearer ${token}` } : {} }
               );
               const clubs = clubsResponse.data?.resp || clubsResponse.data?.clubs || [];
@@ -399,7 +399,7 @@ export default function PublicUserProfile() {
     try {
       setSelectedEventId(eventId);
       const safeId = encodeURIComponent(eventId);
-      const base = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
+      const base = ('').replace(/\/$/, '');
       const url = base
         ? `${base}/api/v1/events/event-details?id=${safeId}`
         : `/api/v1/events/event-details?id=${safeId}`;

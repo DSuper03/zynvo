@@ -216,7 +216,7 @@ export default function UserSearchPage() {
           course: string | null;
         }[];
       }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getAllUsers?page=${page}`
+        `/api/v1/user/getAllUsers?page=${page}`
       );
 
       if (response.data) {
@@ -258,7 +258,7 @@ export default function UserSearchPage() {
     setIsSearching(true);
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL as string;
+      const baseUrl = '' as string;
       const url = new URL('/api/v1/user/SearchUser', baseUrl);
       url.searchParams.set('name', query);
 

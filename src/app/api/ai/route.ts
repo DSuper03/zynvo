@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { generateRequestId } from '@/lib/server/request';
+import { applySecurityHeaders } from '@/lib/server/headers';
 
 export const runtime = 'edge';
 
@@ -283,19 +285,25 @@ Output contract:
 }
 
 export async function POST(req: Request) {
+  const requestId = generateRequestId();
+
   try {
     const { prompt } = (await req.json()) as { prompt?: string };
     const q = sanitizeText(prompt);
 
     if (!q) {
-      return NextResponse.json({ error: 'Missing prompt' }, { status: 400 });
+      const h = new Headers({ 'Content-Type': 'application/json', 'x-request-id': requestId });
+      applySecurityHeaders(h);
+      return NextResponse.json({ error: 'Missing prompt' }, { status: 400, headers: h });
     }
 
     const apiKey = sanitizeText(process.env.OPENROUTER_API_KEY);
     if (!apiKey) {
+      const h = new Headers({ 'Content-Type': 'application/json', 'x-request-id': requestId });
+      applySecurityHeaders(h);
       return NextResponse.json(
         { error: 'AI event intelligence is not configured on the server.' },
-        { status: 500 }
+        { status: 500, headers: h }
       );
     }
 
@@ -470,15 +478,19 @@ export async function POST(req: Request) {
       },
     });
 
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'application/x-ndjson; charset=utf-8',
-        'Cache-Control': 'no-cache, no-transform',
-        Connection: 'keep-alive',
-      },
+    const streamHeaders = new Headers({
+      'Content-Type': 'application/x-ndjson; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'x-request-id': requestId,
     });
+    applySecurityHeaders(streamHeaders);
+
+    return new Response(stream, { headers: streamHeaders });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to generate response';
-    return NextResponse.json({ error: message }, { status: 500 });
+    const h = new Headers({ 'Content-Type': 'application/json', 'x-request-id': requestId });
+    applySecurityHeaders(h);
+    return NextResponse.json({ error: message }, { status: 500, headers: h });
   }
 }

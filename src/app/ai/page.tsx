@@ -1,5 +1,6 @@
 'use client';
 
+import posthog from 'posthog-js';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -122,6 +123,7 @@ export default function AIHome() {
     setSummary('');
     setSources([]);
     setError('');
+    posthog.capture('ai_queried');
 
     try {
       const res = await fetch('/api/ai', {
@@ -132,7 +134,9 @@ export default function AIHome() {
       });
 
       if (!res.ok) {
-        const errBody = (await res.json().catch(() => ({}))) as { error?: string };
+        const errBody = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
         throw new Error(errBody?.error || `Server error: ${res.status}`);
       }
 
@@ -233,8 +237,8 @@ export default function AIHome() {
                 Discover what is worth showing up for.
               </h1>
               <p className="mt-3 max-w-2xl text-sm text-gray-400 sm:text-base">
-                Zynvo scans campus and community web data, strips away noise, and
-                streams verified event actions directly into adaptive cards.
+                Zynvo scans campus and community web data, strips away noise,
+                and streams verified event actions directly into adaptive cards.
               </p>
             </div>
             <div className="rounded-2xl border border-yellow-400/20 bg-yellow-400/10 p-4">
@@ -338,7 +342,9 @@ export default function AIHome() {
 
               {error && (
                 <Card className="border border-red-500/30 bg-red-950/40">
-                  <CardContent className="p-4 text-sm text-red-200">{error}</CardContent>
+                  <CardContent className="p-4 text-sm text-red-200">
+                    {error}
+                  </CardContent>
                 </Card>
               )}
 
@@ -389,7 +395,9 @@ export default function AIHome() {
                             {event.title}
                           </CardTitle>
                           {event.organizer && (
-                            <p className="text-sm text-gray-400">{event.organizer}</p>
+                            <p className="text-sm text-gray-400">
+                              {event.organizer}
+                            </p>
                           )}
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -414,7 +422,10 @@ export default function AIHome() {
                                 asChild
                                 className="rounded-full bg-yellow-500 text-black hover:bg-yellow-400"
                               >
-                                <Link href={event.registrationUrl} target="_blank">
+                                <Link
+                                  href={event.registrationUrl}
+                                  target="_blank"
+                                >
                                   {event.actionLabel || 'Register'}
                                   <ExternalLink className="h-4 w-4" />
                                 </Link>
@@ -469,7 +480,9 @@ export default function AIHome() {
                     <p className="text-xs uppercase tracking-[0.3em] text-gray-500">
                       Thought Stream
                     </p>
-                    <h2 className="text-lg font-semibold">Extraction activity</h2>
+                    <h2 className="text-lg font-semibold">
+                      Extraction activity
+                    </h2>
                   </div>
                   <div className="relative">
                     <span
@@ -496,7 +509,8 @@ export default function AIHome() {
                 >
                   {thoughts.length === 0 && (
                     <div className="rounded-2xl border border-dashed border-white/10 p-4 text-sm text-gray-500">
-                      The agent will show concise, user-visible audit updates here.
+                      The agent will show concise, user-visible audit updates
+                      here.
                     </div>
                   )}
                   {thoughts.map((thought, idx) => (
@@ -510,7 +524,9 @@ export default function AIHome() {
                           Step {idx + 1}
                         </span>
                       </div>
-                      <p className="text-sm leading-relaxed text-gray-300">{thought}</p>
+                      <p className="text-sm leading-relaxed text-gray-300">
+                        {thought}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -519,10 +535,7 @@ export default function AIHome() {
           </div>
         </div>
       </div>
-      <NoTokenModal
-        isOpen={isOpen}
-        onOpenChange={setIsOpen}
-      />
+      <NoTokenModal isOpen={isOpen} onOpenChange={setIsOpen} />
     </>
   );
 }

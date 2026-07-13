@@ -1,12 +1,25 @@
 'use client';
 
+import posthog from 'posthog-js';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/legacy/image';
-import { X, Upload, Camera, Plus, Trash2, ChevronDown, Building } from 'lucide-react';
+import {
+  X,
+  Upload,
+  Camera,
+  Plus,
+  Trash2,
+  ChevronDown,
+  Building,
+} from 'lucide-react';
 import { CreateClubModalProps } from '@/types/global-Interface';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { toBase64, uploadImageToImageKit, compressImageToUnder2MB } from '@/lib/imgkit';
+import {
+  toBase64,
+  uploadImageToImageKit,
+  compressImageToUnder2MB,
+} from '@/lib/imgkit';
 import axios from 'axios';
 import { fetchClubsByCollege } from '@/app/api/hooks/useClubs';
 import { useRouter } from 'next/navigation';
@@ -30,16 +43,17 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [token, setToken] = useState('');
   const [newWing, setNewWing] = useState('');
-  
+
   // New state for club selection
   const [userCollege, setUserCollege] = useState<string>('');
   const [existingClubs, setExistingClubs] = useState<string[]>([]);
-  const [selectedClubOption, setSelectedClubOption] = useState<'existing' | 'new'>('new');
+  const [selectedClubOption, setSelectedClubOption] = useState<
+    'existing' | 'new'
+  >('new');
   const [selectedExistingClub, setSelectedExistingClub] = useState<string>('');
   const [isLoadingClubs, setIsLoadingClubs] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [typeSearch, setTypeSearch] = useState('');
-
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -70,41 +84,41 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   useEffect(() => {
     const fetchUserCollegeAndClubs = async () => {
       if (!token) return;
-      
+
       // SECURITY: Removed console.log statements that expose sensitive data
-      
+
       try {
         // Get user's college information
         const userResponse = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/getUser`,
+          `/api/v1/user/getUser`,
           {
             headers: {
               authorization: `Bearer ${token}`,
             },
           }
         );
-        
+
         const userData = (userResponse.data as any).user;
-        
+
         if (userCollege) {
           setUserCollege(userCollege);
-          
+
           // Fetch existing clubs for this college
           setIsLoadingClubs(true);
           // Test the API call directly first
           try {
-            const testUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/getClubs/${encodeURIComponent(userCollege)}`;
+            const testUrl = `/api/v1/clubs/getClubs/${encodeURIComponent(userCollege)}`;
             console.log('Testing API URL:', testUrl);
-            
+
             const testResponse = await fetch(testUrl, {
               headers: {
                 authorization: `Bearer ${token}`,
               },
             });
-            
+
             console.log('Test response status:', testResponse.status);
             console.log('Test response headers:', testResponse.headers);
-            
+
             if (testResponse.ok) {
               const testData = await testResponse.json();
               console.log('Test API response data:', testData);
@@ -116,10 +130,14 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
           } catch (testError) {
             console.error('Test API call failed:', testError);
           }
-          
-          const clubs = await fetchClubsByCollege(userCollege, undefined, token);
+
+          const clubs = await fetchClubsByCollege(
+            userCollege,
+            undefined,
+            token
+          );
           console.log('Fetched clubs:', clubs); // Debug log
-          
+
           // If no clubs found, add some sample clubs for testing
           if (clubs.length === 0) {
             console.log('No clubs found, adding sample clubs for testing');
@@ -128,21 +146,20 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
               'Robotics Club',
               'Debate Society',
               'Photography Club',
-              'Music Club'
+              'Music Club',
             ];
             setExistingClubs(sampleClubs);
           } else {
             setExistingClubs(clubs);
           }
         } else {
-          
           // Add sample clubs even if no college is found
           const sampleClubs = [
             'Computer Science Club',
             'Robotics Club',
             'Debate Society',
             'Photography Club',
-            'Music Club'
+            'Music Club',
           ];
           setExistingClubs(sampleClubs);
         }
@@ -194,13 +211,13 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate club selection
     if (selectedClubOption === 'existing' && !selectedExistingClub) {
       toast('Please select an existing club');
       return;
     }
-    
+
     if (selectedClubOption === 'new' && !clubData.name.trim()) {
       toast('Please enter a club name');
       return;
@@ -218,7 +235,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
 
     try {
       let image: string;
-      
+
       if (img) {
         const maxBytes = 2 * 1024 * 1024;
         let toUpload = img;
@@ -229,7 +246,11 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
             return;
           }
         }
-        image = await uploadImageToImageKit(await toBase64(toUpload), toUpload.name, '/clubs');
+        image = await uploadImageToImageKit(
+          await toBase64(toUpload),
+          toUpload.name,
+          '/clubs'
+        );
       } else {
         toast('please upload a logo for your club');
         return;
@@ -245,14 +266,19 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
       const upload = await axios.post<{
         msg: string;
         clubId: string;
-      }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/clubs/club`, submitData, {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      });
+      }>(
+        `/api/v1/clubs/club`,
+        submitData,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const msg = upload?.data;
       if (upload.status >= 200 && upload.status < 300) {
+        posthog.capture('club_created', { club_type: clubData.type });
         toast(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
         onClose();
       } else {
@@ -284,15 +310,15 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   const handleClubOptionChange = (option: 'existing' | 'new') => {
     setSelectedClubOption(option);
     if (option === 'existing') {
-      setClubData(prev => ({ ...prev, name: selectedExistingClub }));
+      setClubData((prev) => ({ ...prev, name: selectedExistingClub }));
     } else {
-      setClubData(prev => ({ ...prev, name: '' }));
+      setClubData((prev) => ({ ...prev, name: '' }));
     }
   };
 
   const handleExistingClubSelect = (clubName: string) => {
     setSelectedExistingClub(clubName);
-    setClubData(prev => ({ ...prev, name: clubName }));
+    setClubData((prev) => ({ ...prev, name: clubName }));
     setIsDropdownOpen(false);
   };
 
@@ -400,8 +426,6 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
                 <span className="text-yellow-400">College:</span> {userCollege}
               </div>
             )}
-            
-          
 
             {selectedClubOption === 'existing' ? (
               <div className="space-y-2">
@@ -414,16 +438,25 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none flex items-center justify-between"
                   >
-                    <span className={selectedExistingClub ? 'text-white' : 'text-gray-400'}>
-                      {selectedExistingClub || 'Select a club from your college'}
+                    <span
+                      className={
+                        selectedExistingClub ? 'text-white' : 'text-gray-400'
+                      }
+                    >
+                      {selectedExistingClub ||
+                        'Select a club from your college'}
                     </span>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                    />
                   </button>
-                  
+
                   {isDropdownOpen && (
                     <div className="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto scrollbar-overlay">
                       {isLoadingClubs ? (
-                        <div className="px-4 py-2 text-gray-400 text-sm">Loading clubs...</div>
+                        <div className="px-4 py-2 text-gray-400 text-sm">
+                          Loading clubs...
+                        </div>
                       ) : existingClubs.length > 0 ? (
                         existingClubs.map((club, index) => (
                           <button
@@ -436,7 +469,9 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
                           </button>
                         ))
                       ) : (
-                        <div className="px-4 py-2 text-gray-400 text-sm">No existing clubs found in your college</div>
+                        <div className="px-4 py-2 text-gray-400 text-sm">
+                          No existing clubs found in your college
+                        </div>
                       )}
                     </div>
                   )}
@@ -541,7 +576,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
               type="text"
               placeholder="Search for a type..."
               value={typeSearch}
-              onChange={e => {
+              onChange={(e) => {
                 const value = e.target.value;
                 setTypeSearch(value);
               }}
@@ -560,31 +595,32 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
               </option>
               {/* Filter types based on search */}
               {[
-                { label: "Open Mic", value: "open_mic"},
-                { label: "Technology", value: "tech" },
-                { label: "Quiz", value: "Quiz" },
-                { label: "Sports", value: "Sports" },
-                { label: "Debate", value: "Debate" },
-                { label: "Drama", value: "Drama" },
-                { label: "Music", value: "Music" },
-                { label: "Theatre", value: "Theatre" },
-                { label: "Art", value: "Art" },
-                { label: "Crafts", value: "Crafts" },
-                { label: "Food", value: "Food" },
-                { label: "Fashion", value: "Fashion" },
-                { label: "Photography", value: "Photography" },
-                { label: "Other", value: "Other" },
-                { label: "Cultural", value: "cultural" },
-                { label: "Business", value: "business" },
-                { label: "Social", value: "social" },
-                { label: "Literature", value: "literary" },
-                { label: "Design", value: "design" }
+                { label: 'Open Mic', value: 'open_mic' },
+                { label: 'Technology', value: 'tech' },
+                { label: 'Quiz', value: 'Quiz' },
+                { label: 'Sports', value: 'Sports' },
+                { label: 'Debate', value: 'Debate' },
+                { label: 'Drama', value: 'Drama' },
+                { label: 'Music', value: 'Music' },
+                { label: 'Theatre', value: 'Theatre' },
+                { label: 'Art', value: 'Art' },
+                { label: 'Crafts', value: 'Crafts' },
+                { label: 'Food', value: 'Food' },
+                { label: 'Fashion', value: 'Fashion' },
+                { label: 'Photography', value: 'Photography' },
+                { label: 'Other', value: 'Other' },
+                { label: 'Cultural', value: 'cultural' },
+                { label: 'Business', value: 'business' },
+                { label: 'Social', value: 'social' },
+                { label: 'Literature', value: 'literary' },
+                { label: 'Design', value: 'design' },
               ]
-                .filter(opt =>
-                  !typeSearch ||
-                  opt.label.toLowerCase().includes(typeSearch.toLowerCase())
+                .filter(
+                  (opt) =>
+                    !typeSearch ||
+                    opt.label.toLowerCase().includes(typeSearch.toLowerCase())
                 )
-                .map(opt => (
+                .map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>

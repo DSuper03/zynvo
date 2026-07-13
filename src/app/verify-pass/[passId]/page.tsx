@@ -34,7 +34,7 @@ export default function VerifyPassPage() {
       setLoading(true);
       setError(null);
       try {
-        const base = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
+        const base = ('').replace(/\/$/, '');
         const url = base
           ? `${base}${USER_DETAILS_PATH}?id=${encodeURIComponent(passId)}`
           : `${USER_DETAILS_PATH}?id=${encodeURIComponent(passId)}`;

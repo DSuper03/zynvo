@@ -7,7 +7,7 @@ const securityHeaders = [
       script-src-elem 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://challenges.cloudflare.com https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://www.gstatic.com https://va.vercel-scripts.com;
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: blob: https: http: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com https://api.qrserver.com https://img.clerk.com https://*.clerk.accounts.dev https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://*.googleusercontent.com https://ssl.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com https://s3-us-west-2.amazonaws.com https://*.tile.openstreetmap.org https://tiles.openfreemap.org https://demotiles.maplibre.org;
-      connect-src 'self' data: http://localhost:* https://backend.zynvosocial.com https://upload.imagekit.io https://zynvo-backend-ho7y.onrender.com https://zynvo-backend-1.onrender.com https://zynvo-backend.onrender.com https://zynvosocial-be-274792984950.asia-south1.run.app https://zynvo-be-31292664726.asia-south1.run.app https://*.asia-south1.run.app https://api.dicebear.com https://api.qrserver.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://www.google-analytics.com https://www.googletagmanager.com https://tiles.openfreemap.org https://demotiles.maplibre.org https://accounts.google.com https://www.googleapis.com https://oauth2.googleapis.com https://www.gstatic.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://clerk-telemetry.com;
+      connect-src 'self' data: https://upload.imagekit.io https://api.dicebear.com https://api.qrserver.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://www.google-analytics.com https://www.googletagmanager.com https://tiles.openfreemap.org https://demotiles.maplibre.org https://accounts.google.com https://www.googleapis.com https://oauth2.googleapis.com https://www.gstatic.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://clerk-telemetry.com;
       font-src 'self' data:;
       frame-src 'self' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://accounts.google.com https://challenges.cloudflare.com https://www.instagram.com https://instagram.com;
       worker-src 'self' blob:;
@@ -37,7 +37,10 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://zynvosocial-be-274792984950.asia-south1.run.app').replace(/\/$/, '');
+// BACKEND_BASE_URL is server-only and never exposed to the browser.
+// Do NOT replace this with NEXT_PUBLIC_ — that would defeat the proxy layer.
+// The frontend calls /api/v1/* and /api/v2/* which are handled by the Next.js
+// catch-all proxy routes in src/app/api/v1/[...path] and src/app/api/v2/[...path].
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -181,12 +184,26 @@ const nextConfig = {
     return config;
   },
   
+  skipTrailingSlashRedirect: true,
   async rewrites() {
     return [
       {
-        source: '/api/:path*',
-        destination: `${backendUrl}/api/:path*`,
+        source: '/ingest/static/:path*',
+        destination: 'https://us-assets.i.posthog.com/static/:path*',
       },
+      {
+        source: '/ingest/array/:path*',
+        destination: 'https://us-assets.i.posthog.com/array/:path*',
+      },
+      {
+        source: '/ingest/:path*',
+        destination: 'https://us.i.posthog.com/:path*',
+      },
+      // The generic /api/* → backend rewrite has been intentionally removed.
+      // All /api/v1/* and /api/v2/* traffic is handled by Next.js catch-all
+      // route handlers in src/app/api/v1/[...path] and src/app/api/v2/[...path].
+      // The backend URL is a server-only secret (BACKEND_BASE_URL) and is
+      // never sent to the browser.
     ];
   },
   async headers() {
@@ -211,6 +228,10 @@ const nextConfig = {
             value: 'Intelligent Social Media Platform',
           },
           ...securityHeaders,
+          {
+            key: 'Link',
+            value: '</llms.txt>; rel="llms", </sitemap.xml>; rel="sitemap", </.well-known/agent-index.json>; rel="http://dns-aid.org/rel/agent-index", </.well-known/agent-card.json>; rel="service-doc", </.well-known/api-catalog>; rel="api-catalog"',
+          },
         ],
       },
       {
