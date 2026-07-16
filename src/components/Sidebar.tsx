@@ -139,7 +139,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
           </Link>
         </div>
 
-        <nav className="relative flex-1 space-y-0.5 overflow-y-auto px-2.5 py-1">
+        <nav className="relative flex-1 space-y-0.5 overflow-y-auto px-2.5 py-1 scrollbar-thin">
           {showText && (
             <p className="px-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
               Navigate

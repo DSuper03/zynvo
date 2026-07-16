@@ -378,7 +378,7 @@ export default function NotificationDropdown() {
           {/* Notification List */}
           <div
             ref={listRef}
-            className="max-h-[360px] overflow-y-auto divide-y divide-gray-800/50"
+            className="max-h-[360px] overflow-y-auto divide-y divide-gray-800/50 scrollbar-overlay"
           >
             {filteredNotifications.length > 0 ? (
               filteredNotifications.map((notification, index) => (

@@ -2176,7 +2176,7 @@ const Eventid = () => {
               </p>
             </div>
 
-            <div className="max-h-[55vh] space-y-4 overflow-y-auto pr-1">
+            <div className="max-h-[55vh] space-y-4 overflow-y-auto pr-1 scrollbar-overlay">
               {data.customQuestions.map((question, index) => {
                 const questionId = question.id || String(index);
                 const value = customQuestionsForm[questionId] || '';

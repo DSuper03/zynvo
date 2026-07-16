@@ -4,16 +4,83 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile Optimizations */
+/* ============================================================
+   Scrollbar Design System — Zynvo
+   Three variants:
+     .scrollbar-hide    → completely invisible (horizontal pills, tabs)
+     .scrollbar-thin    → slim yellow-gold bar (sidebars, sticky panels)
+     .scrollbar-overlay → hidden until hover/focus (modals, forms, lists)
+   ============================================================ */
 @layer utilities {
-  .scrollbar-hide {
+  /* ── 1. Invisible ─────────────────────────────────────────── */
+  .scrollbar-hide,
+  .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  .scrollbar-hide::-webkit-scrollbar {
+  .scrollbar-hide::-webkit-scrollbar,
+  .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
 
+  /* ── 2. Thin yellow-gold (always visible when scrollable) ─── */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(234, 179, 8, 0.45) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 99px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(234, 179, 8, 0.40);
+    border-radius: 99px;
+    transition: background 0.2s ease;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(234, 179, 8, 0.75);
+  }
+  .scrollbar-thin::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* ── 3. Overlay — hidden until hovered / focused ─────────── */
+  .scrollbar-overlay {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.25s ease;
+  }
+  .scrollbar-overlay::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .scrollbar-overlay::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 99px;
+  }
+  .scrollbar-overlay::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 99px;
+    transition: background 0.25s ease;
+  }
+  .scrollbar-overlay:hover,
+  .scrollbar-overlay:focus-within {
+    scrollbar-color: rgba(234, 179, 8, 0.40) transparent;
+  }
+  .scrollbar-overlay:hover::-webkit-scrollbar-thumb,
+  .scrollbar-overlay:focus-within::-webkit-scrollbar-thumb {
+    background: rgba(234, 179, 8, 0.40);
+  }
+  .scrollbar-overlay:hover::-webkit-scrollbar-thumb:hover,
+  .scrollbar-overlay:focus-within::-webkit-scrollbar-thumb:hover {
+    background: rgba(234, 179, 8, 0.72);
+  }
+
+  /* ── Misc helpers ─────────────────────────────────────────── */
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -123,14 +190,6 @@
   animation: gradient 15s ease infinite;
 }
 
-/* Add this to your global CSS (e.g., styles/globals.css) */
-.scrollbar-hide {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
 
 .club-maplibre-container.maplibregl-map {
   height: 100%;
