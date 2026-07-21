@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Search, MapPin, Clock, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import { eventData } from '@/types/global-Interface';
@@ -23,7 +23,11 @@ interface apiRespEvents {
   msg: string;
   response: eventData[];
   totalPages: number;
+  total?: number;
+  page?: number;
 }
+
+const SEARCH_MAX_LENGTH = 200;
 
 /** Local calendar key YYYY-MM-DD (avoids UTC shift from toISOString). */
 function toLocalDateKey(d: Date): string {
@@ -103,12 +107,13 @@ const SearchFilterSkeleton = () => {
 };
 
 export default function ZynvoEventsPage() {
-  const [activeFilter, setActiveFilter] = useState('all');
   const [events, setEvents] = useState<eventData[] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [upcomingOnly, setUpcomingOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [userAttendedEventIds, setUserAttendedEventIds] = useState<string[]>([]);
@@ -119,6 +124,7 @@ export default function ZynvoEventsPage() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
   const [fetchNonce, setFetchNonce] = useState(0);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -154,6 +160,20 @@ export default function ZynvoEventsPage() {
       }
     }
   }, [router, pathname]);
+
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      const next = searchTerm.trim().slice(0, SEARCH_MAX_LENGTH);
+      setDebouncedSearch(next);
+      setCurrentPage(1);
+      searchDebounceRef.current = null;
+    }, 400);
+
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [searchTerm]);
 
   // Fetch user data and attended events
   useEffect(() => {
@@ -198,17 +218,22 @@ export default function ZynvoEventsPage() {
         setIsLoading(true);
         setError(null);
 
+        const params = new URLSearchParams();
+        params.set('page', String(currentPage));
+        if (debouncedSearch) params.set('q', debouncedSearch);
+        if (upcomingOnly) params.set('upcoming', 'true');
+
         const response = await axios.get<apiRespEvents>(
-          `/api/v1/events/all?page=${currentPage}`,
+          `/api/v1/events/search?${params.toString()}`,
           {
-            timeout: 10000, // 10 second timeout
+            timeout: 10000,
             headers: {
               'Content-Type': 'application/json',
             },
           }
         );
 
-        if (!isMounted) return; // Prevent state update if component is unmounted
+        if (!isMounted) return;
         if (response.data && Array.isArray(response.data.response)) {
           setEvents(response.data.response);
           setTotalPages(response.data.totalPages || 1);
@@ -247,7 +272,7 @@ export default function ZynvoEventsPage() {
     return () => {
       isMounted = false;
     };
-  }, [currentPage, fetchNonce]);
+  }, [currentPage, debouncedSearch, upcomingOnly, fetchNonce]);
 
   // Helper function to check if user is attending an event
   const isUserAttendingEvent = (event: eventData): boolean => {
@@ -283,14 +308,8 @@ export default function ZynvoEventsPage() {
     return (check: Date) => eventCalendarKeys.has(toLocalDateKey(check));
   }, [eventCalendarKeys]);
 
-  // Replace the filteredEvents computation with name-only search
-  const filteredEvents = (events || []).filter((event) => {
-    if (!event?.EventName) return false;
-    const name = String(event.EventName).toLowerCase();
-    const query = searchTerm.trim().toLowerCase();
-    if (!query) return true;
-    return name.includes(query);
-  });
+  const displayedEvents = events || [];
+  const hasActiveFilters = Boolean(debouncedSearch) || upcomingOnly;
 
   const handleRetry = () => {
     setError(null);
@@ -304,6 +323,22 @@ export default function ZynvoEventsPage() {
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value.slice(0, SEARCH_MAX_LENGTH));
+  };
+
+  const handleUpcomingToggle = () => {
+    setUpcomingOnly((prev) => !prev);
+    setCurrentPage(1);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setDebouncedSearch('');
+    setUpcomingOnly(false);
+    setCurrentPage(1);
   };
 
   return (
@@ -611,13 +646,27 @@ export default function ZynvoEventsPage() {
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                maxLength={SEARCH_MAX_LENGTH}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="bg-gray-800 border border-gray-700 text-white w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all duration-200"
-                placeholder="Search events..."
+                placeholder="Search events, clubs, descriptions..."
+                aria-label="Search events"
               />
             </div>
-            <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row md:space-x-4">
-              {/* keep empty if no extra filters */}
+            <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row md:items-center md:space-x-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleUpcomingToggle}
+                className={cn(
+                  'rounded-lg border-gray-700 bg-gray-800 text-white hover:bg-gray-700',
+                  upcomingOnly &&
+                    'border-yellow-400/60 bg-yellow-400/15 text-yellow-100 hover:bg-yellow-400/25'
+                )}
+                aria-pressed={upcomingOnly}
+              >
+                Upcoming only
+              </Button>
             </div>
           </div>
         )}
@@ -635,36 +684,36 @@ export default function ZynvoEventsPage() {
               onRetry={handleRetry}
               retryLabel="Try again"
             />
-          ) : filteredEvents.length > 0 ? (
-            // Pass the filtered events to EventCard
+          ) : displayedEvents.length > 0 ? (
             <EventCard 
-              events={filteredEvents}
+              events={displayedEvents}
               isLoading={isLoading}
               error={error}
-              searchTerm={searchTerm}
               isUserAttendingEvent={isUserAttendingEvent}
             />
           ) : (
             <EmptyState
               icon={Calendar}
               title={
-                searchTerm.trim()
+                hasActiveFilters
                   ? 'No events match your search'
                   : 'No events to show yet'
               }
               description={
-                searchTerm.trim()
-                  ? `Nothing matches “${searchTerm.trim()}”. Try different keywords or clear the search.`
+                hasActiveFilters
+                  ? debouncedSearch
+                    ? `Nothing matches “${debouncedSearch}”. Try different keywords or clear filters.`
+                    : 'No upcoming events right now. Turn off Upcoming only to browse everything.'
                   : 'New campus events will appear here when organizers publish them.'
               }
             >
-              {searchTerm.trim() ? (
+              {hasActiveFilters ? (
                 <Button
                   type="button"
-                  onClick={() => setSearchTerm('')}
+                  onClick={clearFilters}
                   className="min-h-11 bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-6 font-medium"
                 >
-                  Clear search
+                  Clear filters
                 </Button>
               ) : null}
             </EmptyState>

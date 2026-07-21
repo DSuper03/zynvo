@@ -4,7 +4,7 @@ export type AeoFaq = {
   answer: string;
 };
 
-/** Concise, citable answers for AEO / FAQ schema / landing pages */
+
 export const aeoFaqs: AeoFaq[] = [
   {
     category: 'General',

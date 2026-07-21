@@ -15,6 +15,7 @@ const PUBLIC_GET_PREFIXES = [
   '/api/v1/events/events',
   '/api/v1/events/event/',
   '/api/v1/events/all',
+  '/api/v1/events/search',
   '/api/v1/events/event-details',
   '/api/v1/events/user-details',
   '/api/v1/clubs/getAll',

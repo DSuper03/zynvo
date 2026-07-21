@@ -9,7 +9,6 @@ import { WarmupProvider } from '@/components/WarmupProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
 import { QueryProvider } from '@/providers/QueryProvider';
-import FloatingPWAInstall from '@/components/FloatingPWAInstall';
 import { ClerkKeyDebug } from '@/components/ClerkKeyDebug';
 import ClientTelemetryBootstrap from '@/components/ClientTelemetryBootstrap';
 import WebMcpBootstrap from '@/components/WebMcpBootstrap';
@@ -162,7 +161,6 @@ export default function RootLayout({
           <SpeedInsights />
           <PerformanceMonitor />
           <Toaster />
-          <FloatingPWAInstall />
         </ErrorBoundary>
       </body>
     </html>

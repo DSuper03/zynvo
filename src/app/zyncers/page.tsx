@@ -182,15 +182,18 @@ const UserCard = ({
 export default function UserSearchPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [token, setToken] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchPage, setSearchPage] = useState(1);
+  const [searchHasMore, setSearchHasMore] = useState(false);
   // PERFORMANCE: Ref to clear debounce timeout on unmount and when query changes (prevents leak + duplicate calls)
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const SEARCH_LIMIT = 20;
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -249,18 +252,21 @@ export default function UserSearchPage() {
     }
   };
 
-  const handleSearch = async (query: string) => {
+  const handleSearch = async (query: string, page = 1, append = false) => {
     if (!query.trim()) {
       setSearchResults([]);
+      setSearchPage(1);
+      setSearchHasMore(false);
       return;
     }
 
     setIsSearching(true);
 
     try {
-      const baseUrl = '' as string;
-      const url = new URL('/api/v1/user/SearchUser', baseUrl);
-      url.searchParams.set('name', query);
+      const url = new URL('/api/v1/user/SearchUser', '');
+      url.searchParams.set('name', query.trim());
+      url.searchParams.set('page', String(page));
+      url.searchParams.set('limit', String(SEARCH_LIMIT));
 
       const headers: HeadersInit = {};
       if (token) {
@@ -274,14 +280,17 @@ export default function UserSearchPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setSearchResults(data.users || []);
-      } else if (response.status === 404) {
-        setSearchResults([]);
+        const users = data.users || [];
+        setSearchResults((prev) => (append ? [...prev, ...users] : users));
+        setSearchPage(page);
+        setSearchHasMore(users.length >= SEARCH_LIMIT);
       } else {
-        setSearchResults([]);
+        if (!append) setSearchResults([]);
+        setSearchHasMore(false);
       }
     } catch (error) {
-      setSearchResults([]);
+      if (!append) setSearchResults([]);
+      setSearchHasMore(false);
     } finally {
       setIsSearching(false);
     }
@@ -290,12 +299,20 @@ export default function UserSearchPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
+    setSearchPage(1);
+    setSearchHasMore(false);
 
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     searchTimeoutRef.current = setTimeout(() => {
-      handleSearch(query);
+      handleSearch(query, 1, false);
       searchTimeoutRef.current = null;
     }, 500);
+  };
+
+  const handleSearchPageChange = (page: number) => {
+    if (isSearching || !searchQuery.trim()) return;
+    if (page < 1) return;
+    handleSearch(searchQuery, page, false);
   };
 
   // PERFORMANCE: Clear debounce timeout on unmount to avoid setState after unmount
@@ -435,6 +452,26 @@ export default function UserSearchPage() {
                     className="backdrop-blur-md bg-yellow-400 border border-yellow-400 rounded-full px-6 py-2.5 text-sm font-semibold text-gray-900 hover:bg-yellow-300 hover:border-yellow-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Show more Zyncers
+                  </button>
+                </div>
+              )}
+
+              {searchQuery.trim() && (searchPage > 1 || searchHasMore) && (
+                <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mt-16">
+                  <button
+                    onClick={() => handleSearchPageChange(searchPage - 1)}
+                    disabled={searchPage <= 1 || isSearching}
+                    className="backdrop-blur-md bg-white/5 border border-white/10 rounded-full px-5 py-2.5 text-sm font-medium text-gray-300 hover:bg-white/10 hover:border-yellow-400/30 hover:text-yellow-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+
+                  <button
+                    onClick={() => handleSearchPageChange(searchPage + 1)}
+                    disabled={!searchHasMore || isSearching}
+                    className="backdrop-blur-md bg-yellow-400 border border-yellow-400 rounded-full px-6 py-2.5 text-sm font-semibold text-gray-900 hover:bg-yellow-300 hover:border-yellow-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    More results
                   </button>
                 </div>
               )}
