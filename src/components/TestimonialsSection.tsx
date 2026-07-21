@@ -1,129 +1,87 @@
 'use client';
-import React, { useState } from 'react';
+
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import LandingHeader from './landingHeader';
 import { BackgroundElements } from './TeamSection';
+
 const TestimonialsSection = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const testimonials = [
+  const audiences = [
     {
-      id: 1,
-      name: 'John Doe',
-      testimonial:
-        'This is a great platform for learning and growth. I have learned so much and it has been a game-changer for my career.',
-      image: '/testimonials/john-doe.jpg',
-      rating: 5,
+      title: 'Students',
+      body: 'One feed to discover clubs, fests, and campus events—without relying on scattered WhatsApp forwards.',
+      href: '/for-students',
+      cta: 'Explore for students',
     },
     {
-      id: 2,
-      name: 'Jane Smith',
-      testimonial:
-        'I love the community here. Everyone is so supportive and helpful. I have made some great connections.',
-      image: '/testimonials/jane-smith.jpg',
-      rating: 4,
+      title: 'Clubs',
+      body: 'An operating system to manage members, promote events, and stay discoverable on campus.',
+      href: '/for-clubs',
+      cta: 'Explore for clubs',
     },
     {
-      id: 3,
-      name: 'Bob Johnson',
-      testimonial:
-        'Zynvo has exceeded my expectations. The platform is easy to use and the content is top-notch.',
-      image: '/testimonials/bob-johnson.jpg',
-      rating: 5,
+      title: 'Colleges',
+      body: 'Structured visibility into campus activity—clubs, events, and involvement beyond the LMS.',
+      href: '/for-colleges',
+      cta: 'Explore for colleges',
     },
   ];
 
   return (
-    <div className="relative">
+    <div className="relative min-h-screen bg-black pt-24">
       <LandingHeader />
       <BackgroundElements />
-      <div className="container mx-auto p-4">
-        <div className="relative">
-          <div className="flex justify-center">
-            {testimonials.map((_, index) => (
-              <div
-                key={index}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  activeIndex === index
-                    ? 'bg-yellow-500 scale-125'
-                    : 'bg-yellow-500/20 hover:bg-yellow-500/50'
-                }`}
-                aria-label={`View testimonial ${index + 1}`}
-              />
-            ))}
-          </div>
-
-          {/* Navigation Arrows */}
-          <div className="flex justify-between mt-8">
-            <button
-              onClick={() =>
-                setActiveIndex((prev) =>
-                  prev === 0 ? testimonials.length - 1 : prev - 1
-                )
-              }
-              className="p-2 rounded-full bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 transition-colors"
-              aria-label="Previous testimonial"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={() =>
-                setActiveIndex((prev) =>
-                  prev === testimonials.length - 1 ? 0 : prev + 1
-                )
-              }
-              className="p-2 rounded-full bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 transition-colors"
-              aria-label="Next testimonial"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-          </div>
+      <div className="container relative z-10 mx-auto px-4 py-12">
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <h1 className="mb-4 text-4xl font-bold text-white md:text-5xl">
+            Built with campus communities
+          </h1>
+          <p className="text-lg text-gray-300">
+            We are collecting verified stories from students and club organisers.
+            Until then, here is what Zynvo is built to deliver—without invented
+            ratings or placeholder quotes.
+          </p>
         </div>
 
-        {/* Stats Section */}
-        <div className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { number: '95%', label: 'Student Satisfaction' },
-            { number: '2x', label: 'Club Engagement' },
-            { number: '10k+', label: 'Event Participants' },
-          ].map((stat, index) => (
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
+          {audiences.map((item, index) => (
             <motion.div
-              key={stat.label}
+              key={item.title}
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.2 }}
-              className="text-center p-8 rounded-2xl bg-black/50 backdrop-blur-sm border border-yellow-500/20"
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="rounded-2xl border border-yellow-500/20 bg-black/50 p-8 backdrop-blur-sm"
             >
-              <h3 className="text-4xl font-bold text-yellow-500 mb-2">
-                {stat.number}
-              </h3>
-              <p className="text-gray-300">{stat.label}</p>
+              <h2 className="mb-3 text-xl font-bold text-yellow-400">
+                {item.title}
+              </h2>
+              <p className="mb-6 text-sm leading-relaxed text-gray-300">
+                {item.body}
+              </p>
+              <Link
+                href={item.href}
+                className="text-sm font-semibold text-yellow-400 hover:text-yellow-300"
+              >
+                {item.cta} →
+              </Link>
             </motion.div>
           ))}
+        </div>
+
+        <div className="mx-auto mt-16 max-w-xl rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-8 text-center">
+          <h2 className="mb-3 text-xl font-bold text-white">
+            Share your campus story
+          </h2>
+          <p className="mb-6 text-sm text-gray-300">
+            Club head or student with a real outcome on Zynvo? We want named,
+            verifiable testimonials—college, role, and what changed.
+          </p>
+          <Link
+            href="/contact"
+            className="inline-block rounded-xl bg-yellow-400 px-6 py-3 text-sm font-semibold text-black hover:bg-yellow-300"
+          >
+            Contact us
+          </Link>
         </div>
       </div>
     </div>
