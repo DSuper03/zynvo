@@ -450,6 +450,8 @@ export interface eventData {
   paymentQRCode?: string;
   paymentAmount?: number;
   maxParticipants?: number;
+  attendeesCount?: number;
+  _count?: { attendees?: number };
 }
 
 export interface respnseUseState {

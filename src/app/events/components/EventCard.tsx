@@ -202,7 +202,7 @@ export default function EventCard({
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400 text-xs md:text-sm">
-                      {event.attendees?.length || 0} attending
+                      {event.attendeesCount ?? event._count?.attendees ?? event.attendees?.length ?? 0} attending
                     </span>
                     <div className="flex items-center gap-2">
                       <motion.div
