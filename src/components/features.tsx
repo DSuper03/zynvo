@@ -60,7 +60,7 @@ const HeroSkeleton = () => {
       </div>
 
       {/* Club List - always visible */}
-      <div className=" min-h-[140px] space-y-2 overflow-y-auto pr-1">
+      <div className=" min-h-[140px] space-y-2 overflow-y-auto pr-1 scrollbar-overlay">
         {[
           { name: 'Tech Society', members: '8.2K', accent: 'bg-blue-500', icon: '💻' },
           { name: 'Dance Club', members: '4.1K', accent: 'bg-pink-500', icon: '💃' },

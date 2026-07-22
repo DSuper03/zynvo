@@ -20,7 +20,7 @@ export function ScheduleDayPicker({ days, activeDay, onDayChange, className }: P
         <CalendarDays className="h-3.5 w-3.5 text-yellow-400" />
         Event days
       </div>
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-gray-700">
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
         {days.map((day) => {
           const isActive = day.day === activeDay;
           const sessionCount = day.sessions?.length ?? 0;

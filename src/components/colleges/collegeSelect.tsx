@@ -134,7 +134,7 @@ export default function CollegeSearchSelect({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-20 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-20 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto scrollbar-overlay">
           {filteredColleges.length > 0 ? (
             filteredColleges.map((college, index) => (
               <div
