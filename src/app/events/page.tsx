@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Search, MapPin, Clock, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import { eventData } from '@/types/global-Interface';
@@ -406,37 +406,7 @@ export default function ZynvoEventsPage() {
     setCurrentPage(1);
   };
 
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value.slice(0, SEARCH_MAX_LENGTH));
-  };
-
-  const handleUpcomingToggle = () => {
-    setUpcomingOnly((prev) => !prev);
-    setCurrentPage(1);
-  };
-
-  const clearFilters = () => {
-    setSearchTerm('');
-    setDebouncedSearch('');
-    setUpcomingOnly(false);
-    setCurrentPage(1);
-  };
-
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value.slice(0, SEARCH_MAX_LENGTH));
-  };
-
-  const handleUpcomingToggle = () => {
-    setUpcomingOnly((prev) => !prev);
-    setCurrentPage(1);
-  };
-
-  const clearFilters = () => {
-    setSearchTerm('');
-    setDebouncedSearch('');
-    setUpcomingOnly(false);
-    setCurrentPage(1);
-  };
+  const hasActiveFilters = Boolean(debouncedSearch || upcomingOnly);
 
   return (
     <div className="min-h-screen  text-white">
