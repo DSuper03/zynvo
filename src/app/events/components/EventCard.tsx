@@ -1,40 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { MapPin, Calendar, Share2, Castle, House, CreditCard } from 'lucide-react';
-import { Modal, ModalTrigger } from '@/components/ui/animated-modal';
+import { Calendar, Share2, House, CreditCard } from 'lucide-react';
 import { eventData } from '@/types/global-Interface';
 import Image from 'next/legacy/image';
-import axios from 'axios';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { buildAuthHref } from '@/lib/authReturnTo';
 
-interface apiRespEvents {
-  msg: string;
-  response: eventData[];
-}
-
 interface EventCardProps {
   events?: eventData[] | null;
   isLoading?: boolean;
   error?: string | null;
-  searchTerm?: string;
   isUserAttendingEvent?: (event: eventData) => boolean;
 }
 
-export default function EventCard({ 
-  events = null, 
-  isLoading = true, 
-  error = null, 
-  searchTerm = '',
-  isUserAttendingEvent
+export default function EventCard({
+  events = null,
+  isLoading = true,
+  error = null,
+  isUserAttendingEvent,
 }: EventCardProps) {
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   const router = useRouter();
 
   const handleShare = async (eventId: string, eventName?: string) => {
@@ -58,7 +45,9 @@ export default function EventCard({
       alert('Event link copied to clipboard');
     } catch (err) {
       try {
-        await navigator.clipboard.writeText(`${eventName || 'Event'} - ID: ${eventId}`);
+        await navigator.clipboard.writeText(
+          `${eventName || 'Event'} - ID: ${eventId}`
+        );
         alert('Event ID copied to clipboard');
       } catch (copyErr) {
         console.error(copyErr);
@@ -66,27 +55,6 @@ export default function EventCard({
       }
     }
   };
-
-  // Events are now passed as props, no need to fetch them here
-
-  // Filter events based on active filter and search term
-  const filteredEvents = events?.filter((event) => {
-    const matchesSearch =
-      event.EventName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.description.toLowerCase().includes(searchTerm.toLowerCase());
-
-    if (activeFilter === 'all') return matchesSearch;
-    if (activeFilter === 'registered') {
-      // Add logic to check if user is registered for this event
-      return matchesSearch; // Placeholder - implement actual logic
-    }
-    if (activeFilter === 'upcoming') {
-      // Add logic to check if user is NOT registered for this event
-      return matchesSearch; // Placeholder - implement actual logic
-    }
-
-    return matchesSearch;
-  });
 
   const formatDate = (dateString: string | Date | undefined) => {
     if (!dateString) return 'No deadline';
@@ -98,7 +66,6 @@ export default function EventCard({
     });
   };
 
-  // Motion variants
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -113,7 +80,7 @@ export default function EventCard({
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { type: 'spring', stiffness: 260, damping: 22 },
+      transition: { type: 'spring' as const, stiffness: 260, damping: 22 },
     },
     exit: { opacity: 0, y: 10, scale: 0.98, transition: { duration: 0.15 } },
   };
@@ -165,11 +132,12 @@ export default function EventCard({
               Retry
             </button>
           </div>
-        ) : filteredEvents && filteredEvents.length > 0 ? (
+        ) : events && events.length > 0 ? (
           <AnimatePresence mode="popLayout">
-            {filteredEvents.map((event) => (
+            {events.map((event) => (
               <motion.article
                 key={event.id}
+                variants={cardVariants}
                 exit="exit"
                 layout
                 whileHover={{ y: -6 }}
@@ -182,23 +150,21 @@ export default function EventCard({
                   transition={{ type: 'spring', stiffness: 300, damping: 24 }}
                 >
                   <Image
-                    src={ event.posterUrl || '/logozynvo.jpg' }
+                    src={event.posterUrl || '/logozynvo.jpg'}
                     alt={event.description || event.EventName}
                     width={600}
                     height={300}
                     className="w-full h-48 sm:h-40 object-cover"
                     priority={false}
                   />
-                  
-                  {/* Paid Event Badge */}
+
                   {event.isPaidEvent && (
                     <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
                       <CreditCard size={14} />
                       Paid (₹{event.paymentAmount})
                     </div>
                   )}
-                  
-                  {/* subtle glow on hover */}
+
                   <motion.div
                     aria-hidden
                     className="pointer-events-none absolute inset-0 rounded-md"
@@ -239,18 +205,26 @@ export default function EventCard({
                       {event.attendees?.length || 0} attending
                     </span>
                     <div className="flex items-center gap-2">
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
                         <Button
                           variant="outline"
                           className="bg-black text-white font-bold rounded-2xl border border-yellow-400 flex items-center gap-2"
-                          onClick={() => handleShare(event.id, event.EventName)}
+                          onClick={() =>
+                            handleShare(event.id, event.EventName)
+                          }
                           aria-label="Share event"
                         >
                           <Share2 className="w-4 h-4" />
                           Share
                         </Button>
                       </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
                         <Button
                           className="bg-black text-white font-bold rounded-2xl border border-yellow-400"
                           onClick={() => router.push(`events/${event.id}`)}
@@ -260,8 +234,7 @@ export default function EventCard({
                       </motion.div>
                     </div>
                   </div>
-                  
-                  {/* Show attendance status above buttons */}
+
                   {isUserAttendingEvent && isUserAttendingEvent(event) && (
                     <div className="mt-2 text-center">
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-600 text-white">
@@ -270,18 +243,13 @@ export default function EventCard({
                     </div>
                   )}
                 </div>
-                {/* highlight ring */}
                 <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-yellow-400/0 group-hover:ring-yellow-400/25 transition" />
               </motion.article>
             ))}
           </AnimatePresence>
         ) : (
           <div className="col-span-full text-center py-10">
-            <p className="text-gray-400 text-lg">
-              {searchTerm
-                ? 'No events found matching your search'
-                : 'No events found'}
-            </p>
+            <p className="text-gray-400 text-lg">No events found</p>
           </div>
         )}
       </motion.div>

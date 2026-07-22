@@ -39,7 +39,7 @@ import {
   compressImageToUnder2MB,
 } from '@/lib/imgkit';
 import { toast } from 'sonner';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
 import { useRouter } from 'next/navigation';
@@ -116,6 +116,32 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  };
+
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
+  const mapCreateEventError = (message: string): Record<string, string> => {
+    const lower = message.toLowerCase();
+    if (lower.includes('event name')) return { eventName: message };
+    if (lower.includes('contact email') || lower.includes('email'))
+      return { contactEmail: message };
+    if (lower.includes('fee') || lower.includes('paid'))
+      return { paymentAmount: message };
+    if (lower.includes('max participant')) return { maxParticipants: message };
+    if (lower.includes('college') || lower.includes('university'))
+      return { university: message };
+    if (lower.includes('application') && lower.includes('end'))
+      return { applicationEndDate: message };
+    if (lower.includes('application'))
+      return { applicationStartDate: message };
+    if (lower.includes('end date') || (lower.includes('end') && lower.includes('start')))
+      return { eventEndDate: message };
+    if (lower.includes('start date') || lower.includes('date'))
+      return { eventStartDate: message };
+    if (lower.includes('question') || lower.includes('label'))
+      return { customQuestions: message };
+    return {};
   };
 
   useEffect(() => {
@@ -367,6 +393,21 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       case 2:
         if (!formData.maxTeamSize)
           newErrors.maxTeamSize = 'Maximum team size is required';
+        if (
+          formData.maxParticipants !== '' &&
+          formData.maxParticipants !== undefined &&
+          formData.maxParticipants !== null
+        ) {
+          const maxParticipants = Number(formData.maxParticipants);
+          if (
+            !Number.isFinite(maxParticipants) ||
+            !Number.isInteger(maxParticipants) ||
+            maxParticipants < 1
+          ) {
+            newErrors.maxParticipants =
+              'Max participants must be a positive whole number, or left blank for no limit';
+          }
+        }
         if (formData.eventMode !== 'online') {
           const normalizedVenue = formData.venue?.trim().toLowerCase();
           if (!normalizedVenue) {
@@ -393,7 +434,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
             newErrors.paymentQRCode = 'QR code is required for paid events';
           if (!formData.paymentAmount || formData.paymentAmount <= 0)
             newErrors.paymentAmount =
-              'Payment amount is required and must be greater than 0';
+              'A paid event must include a fee amount';
         }
         break;
 
@@ -438,8 +479,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           }
         }
 
-        if (!formData.contactEmail?.trim())
+        if (!formData.contactEmail?.trim()) {
           newErrors.contactEmail = 'Contact email is required';
+        } else if (!isValidEmail(formData.contactEmail)) {
+          newErrors.contactEmail = 'Enter a valid contact email';
+        }
         if (!formData.contactPhone?.trim())
           newErrors.contactPhone = 'Contact phone is required';
         break;
@@ -459,7 +503,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     (currentStep: number) => {
       const stepFieldOrder: Record<number, string[]> = {
         1: ['eventMode', 'eventName', 'university', 'description', 'eventType'],
-        2: ['maxTeamSize', 'venue', 'paymentQRCode', 'paymentAmount'],
+        2: ['maxTeamSize', 'venue', 'maxParticipants', 'paymentQRCode', 'paymentAmount'],
         3: [
           'eventStartDate',
           'eventEndDate',
@@ -524,198 +568,210 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      const dateCheckRes = await axios.post(
-        `/api/v1/events/checkEventDates`,
-        {
-          eventStartDate: formData.eventStartDate,
-          eventEndDate: formData.eventEndDate,
-          applicationStartDate: formData.applicationStartDate,
-          applicationEndDate: formData.applicationEndDate,
-        },
-        {
-          headers: { authorization: `Bearer ${token}` },
+      try {
+        const dateCheckRes = await axios.post(
+          `/api/v1/events/checkEventDates`,
+          {
+            eventStartDate: formData.eventStartDate,
+            eventEndDate: formData.eventEndDate,
+            applicationStartDate: formData.applicationStartDate,
+            applicationEndDate: formData.applicationEndDate,
+          },
+          {
+            headers: { authorization: `Bearer ${token}` },
+          }
+        );
+        const {
+          isValid,
+          errors: dateErrors,
+          warnings,
+          existingEvents,
+        } = dateCheckRes.data;
+
+        if (!isValid && dateErrors?.length) {
+          dateErrors.forEach((msg: string) => toast.error(msg));
+          return;
         }
-      );
-      const {
-        isValid,
-        errors: dateErrors,
-        warnings,
-        existingEvents,
-      } = dateCheckRes.data;
 
-      if (!isValid && dateErrors?.length) {
-        dateErrors.forEach((msg: string) => toast.error(msg));
-        setIsSubmitting(false);
+        if (warnings?.length) {
+          warnings.forEach((msg: string) => toast(msg, { duration: 5000 }));
+        }
+
+        if (existingEvents?.length) {
+          toast(
+            `${existingEvents.length} event(s) already scheduled in this period. Double-check your dates.`,
+            { duration: 6000 }
+          );
+        }
+      } catch {
+        // Non-blocking: if the check endpoint fails, proceed with creation
+      }
+
+      let imageLink = '';
+      if (!img) {
+        toast('you are required to upload a poster');
         return;
+      } else {
+        const maxBytes = 2 * 1024 * 1024;
+        let toUpload = img;
+        if (img.size > maxBytes) {
+          toUpload = await compressImageToUnder2MB(img);
+          if (toUpload.size > maxBytes) {
+            toast('Could not compress image under 2 MB. Try a smaller image.');
+            return;
+          }
+        }
+        imageLink = await uploadImageToImageKit(
+          await toBase64(toUpload),
+          toUpload.name,
+          '/events'
+        );
+        toast('Image uploaded');
       }
 
-      if (warnings?.length) {
-        warnings.forEach((msg: string) => toast(msg, { duration: 5000 }));
+      let qrCodeLink = '';
+      if (formData.isPaidEvent && qrCodeImg) {
+        const maxBytes = 2 * 1024 * 1024;
+        let toUpload = qrCodeImg;
+        if (qrCodeImg.size > maxBytes) {
+          toUpload = await compressImageToUnder2MB(qrCodeImg);
+          if (toUpload.size > maxBytes) {
+            toast(
+              'Could not compress QR code image under 2 MB. Try a smaller image.'
+            );
+            return;
+          }
+        }
+        qrCodeLink = await uploadImageToImageKit(
+          await toBase64(toUpload),
+          toUpload.name,
+          '/payment-qr'
+        );
+        toast('Payment QR code uploaded');
       }
 
-      if (existingEvents?.length) {
-        toast(
-          `${existingEvents.length} event(s) already scheduled in this period. Double-check your dates.`,
-          { duration: 6000 }
+      const payload: any = {
+        ...formData,
+        eventName: formData.eventName?.trim(),
+        university: formData.university?.trim(),
+        contactEmail: formData.contactEmail?.trim(),
+        image: imageLink,
+      };
+
+      if (
+        payload.maxParticipants === '' ||
+        payload.maxParticipants === 0 ||
+        payload.maxParticipants === undefined ||
+        payload.maxParticipants === null
+      ) {
+        payload.maxParticipants = null;
+      } else {
+        payload.maxParticipants = parseInt(
+          payload.maxParticipants.toString(),
+          10
         );
       }
-    } catch {
-      // Non-blocking: if the check endpoint fails, proceed with creation
-    }
-
-    let imageLink = '';
-    if (!img) {
-      toast('you are required to upload a poster');
-      setIsSubmitting(false);
-      return;
-    } else {
-      const maxBytes = 2 * 1024 * 1024;
-      let toUpload = img;
-      if (img.size > maxBytes) {
-        toUpload = await compressImageToUnder2MB(img);
-        if (toUpload.size > maxBytes) {
-          toast('Could not compress image under 2 MB. Try a smaller image.');
-          setIsSubmitting(false);
-          return;
-        }
+      payload.maxTeamSize = parseInt(payload.maxTeamSize.toString(), 10);
+      payload.customQuestions = (formData.customQuestions || [])
+        .map((question, index) => ({
+          ...question,
+          label: question.label.trim(),
+          options:
+            question.type === 'select'
+              ? (question.options || [])
+                  .map((option) => option.trim())
+                  .filter(Boolean)
+              : [],
+          sortOrder: index,
+        }))
+        .filter((question) => question.label);
+      if (!payload.customQuestions.length) {
+        delete payload.customQuestions;
       }
-      imageLink = await uploadImageToImageKit(
-        await toBase64(toUpload),
-        toUpload.name,
-        '/events'
-      );
-      toast('Image uploaded');
-    }
 
-    let qrCodeLink = '';
-    if (formData.isPaidEvent && qrCodeImg) {
-      const maxBytes = 2 * 1024 * 1024;
-      let toUpload = qrCodeImg;
-      if (qrCodeImg.size > maxBytes) {
-        toUpload = await compressImageToUnder2MB(qrCodeImg);
-        if (toUpload.size > maxBytes) {
-          toast(
-            'Could not compress QR code image under 2 MB. Try a smaller image.'
-          );
-          setIsSubmitting(false);
-          return;
-        }
+      if (formData.isPaidEvent) {
+        payload.isPaid = true;
+        payload.paymentQRCode = qrCodeLink;
+        payload.paymentAmount = formData.paymentAmount;
+      } else {
+        payload.isPaid = false;
+        delete payload.isPaidEvent;
+        delete payload.paymentQRCode;
+        delete payload.paymentAmount;
       }
-      qrCodeLink = await uploadImageToImageKit(
-        await toBase64(toUpload),
-        toUpload.name,
-        '/payment-qr'
-      );
-      toast('Payment QR code uploaded');
-    }
-
-    const payload: any = {
-      ...formData,
-      image: imageLink,
-    };
-
-    if (
-      payload.maxParticipants === '' ||
-      payload.maxParticipants === 0 ||
-      payload.maxParticipants === undefined ||
-      payload.maxParticipants === null
-    ) {
-      payload.maxParticipants = null;
-    } else {
-      payload.maxParticipants = parseInt(
-        payload.maxParticipants.toString(),
-        10
-      );
-    }
-    payload.maxTeamSize = parseInt(payload.maxTeamSize.toString(), 10);
-    payload.customQuestions = (formData.customQuestions || [])
-      .map((question, index) => ({
-        ...question,
-        label: question.label.trim(),
-        options:
-          question.type === 'select'
-            ? (question.options || [])
-                .map((option) => option.trim())
-                .filter(Boolean)
-            : [],
-        sortOrder: index,
-      }))
-      .filter((question) => question.label);
-    if (!payload.customQuestions.length) {
-      delete payload.customQuestions;
-    }
-
-    if (formData.isPaidEvent) {
-      payload.isPaid = true;
-      payload.paymentQRCode = qrCodeLink;
-      payload.paymentAmount = formData.paymentAmount;
-    } else {
-      payload.isPaid = false;
       delete payload.isPaidEvent;
-      delete payload.paymentQRCode;
-      delete payload.paymentAmount;
-    }
-    delete payload.isPaidEvent;
 
-    const createEvent = await axios.post<{
-      msg: string;
-      id: string;
-    }>(`/api/v1/events/event`, payload, {
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (createEvent.status === 201 || createEvent.status === 200) {
-      posthog.capture('event_created', {
-        event_type: formData.eventType,
-        event_mode: formData.eventMode,
-        is_paid: formData.isPaidEvent,
+      const createEvent = await axios.post<{
+        msg: string;
+        id: string;
+      }>(`/api/v1/events/event`, payload, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
       });
-      const previousCount = eventCount;
-      const newCount = previousCount + 1;
-      setEventCount(newCount);
 
-      let badgeUnlocked = null;
-      if (previousCount < 20 && newCount >= 20) {
-        badgeUnlocked = {
-          name: 'Community Champion',
-          count: 20,
-          description:
-            "You've created 20 events! You're the ultimate community champion! 🌟",
-        };
-      } else if (previousCount < 10 && newCount >= 10) {
-        badgeUnlocked = {
-          name: 'Event Legendary',
-          count: 10,
-          description: "Wow! 10 events created! You're a true event legend! ⚡",
-        };
-      } else if (previousCount < 5 && newCount >= 5) {
-        badgeUnlocked = {
-          name: 'Event Master',
-          count: 5,
-          description: "You've created 5 amazing events! You're on fire! 🔥",
-        };
+      if (createEvent.status === 201 || createEvent.status === 200) {
+        posthog.capture('event_created', {
+          event_type: formData.eventType,
+          event_mode: formData.eventMode,
+          is_paid: formData.isPaidEvent,
+        });
+        const previousCount = eventCount;
+        const newCount = previousCount + 1;
+        setEventCount(newCount);
+
+        let badgeUnlocked = null;
+        if (previousCount < 20 && newCount >= 20) {
+          badgeUnlocked = {
+            name: 'Community Champion',
+            count: 20,
+            description:
+              "You've created 20 events! You're the ultimate community champion! 🌟",
+          };
+        } else if (previousCount < 10 && newCount >= 10) {
+          badgeUnlocked = {
+            name: 'Event Legendary',
+            count: 10,
+            description: "Wow! 10 events created! You're a true event legend! ⚡",
+          };
+        } else if (previousCount < 5 && newCount >= 5) {
+          badgeUnlocked = {
+            name: 'Event Master',
+            count: 5,
+            description: "You've created 5 amazing events! You're on fire! 🔥",
+          };
+        }
+
+        if (badgeUnlocked) {
+          setUnlockedBadge(badgeUnlocked);
+          setShowAchievementModal(true);
+          setCloseAfterAchievement(true);
+        }
+
+        toast('Event created successfully! Start marketing now!!!');
+
+        if (!badgeUnlocked) {
+          setTimeout(() => {
+            onClose();
+          }, 500);
+        }
+      } else {
+        const message =
+          createEvent.data?.msg || 'Could not create event. Please try again.';
+        setErrors((prev) => ({ ...prev, ...mapCreateEventError(message) }));
+        toast.error(message);
       }
-
-      if (badgeUnlocked) {
-        setUnlockedBadge(badgeUnlocked);
-        setShowAchievementModal(true);
-        setCloseAfterAchievement(true);
-      }
-
-      toast('Event created successfully! Start marketing now!!!');
+    } catch (err) {
+      const message =
+        isAxiosError(err) &&
+        typeof (err.response?.data as { msg?: string } | undefined)?.msg ===
+          'string'
+          ? (err.response?.data as { msg: string }).msg
+          : 'Could not create event. Please try again.';
+      setErrors((prev) => ({ ...prev, ...mapCreateEventError(message) }));
+      toast.error(message);
+    } finally {
       setIsSubmitting(false);
-
-      if (!badgeUnlocked) {
-        setTimeout(() => {
-          onClose();
-        }, 500);
-      }
-    } else {
-      toast(createEvent.data.msg);
-      setIsSubmitting(false);
-      onClose();
     }
   };
 

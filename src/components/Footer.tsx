@@ -27,8 +27,22 @@ const instagramPosts = [
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-const productLinks = ["Features","Pricing","Event Management","Club Directory","Member Portal","Analytics Dashboard","Mobile App"];
-const resourceLinks = ["Documentation","Community Forum","Video Tutorials","Best Practices","Success Stories"];
+const productLinks = [
+  { label: "For Students", href: "/for-students" },
+  { label: "For Clubs", href: "/for-clubs" },
+  { label: "For Colleges", href: "/for-colleges" },
+  { label: "Campus Event App", href: "/campus-event-app" },
+  { label: "Club Management", href: "/club-management-software" },
+  { label: "Engagement Platform", href: "/student-engagement-platform" },
+  { label: "Events", href: "/events" },
+];
+const resourceLinks = [
+  { label: "FAQ", href: "/faq" },
+  { label: "Founders", href: "/founders" },
+  { label: "Contact", href: "/contact" },
+  { label: "Campus Stories", href: "/testimonials" },
+  { label: "Privacy", href: "/privacy" },
+];
 
 export default function FooterWithSocial() {
   const [email, setEmail] = useState("");
@@ -150,7 +164,7 @@ export default function FooterWithSocial() {
                 Zynvo
               </div>
               <p style={{ fontSize:14, color:"#78350f", lineHeight:1.65, marginBottom:18, fontWeight:600, maxWidth:340 }}>
-                Empowering college students to connect, collaborate, and create lasting memories through dynamic club and society experiences.
+                Behavioral layer for campus life — students discover, clubs operate, colleges see activity. LinkedIn for the journey before LinkedIn.
               </p>
 
               <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:24 }}>
@@ -190,9 +204,9 @@ export default function FooterWithSocial() {
               </h3>
               <ul style={{ listStyle:"none", display:"flex", flexDirection:"column", gap:6 }}>
                 {productLinks.map(item => (
-                  <li key={item}>
-                    <a href="#" className="footer-link">
-                      <ArrowRight size={13} /> {item}
+                  <li key={item.href}>
+                    <a href={item.href} className="footer-link">
+                      <ArrowRight size={13} /> {item.label}
                     </a>
                   </li>
                 ))}
@@ -206,9 +220,9 @@ export default function FooterWithSocial() {
               </h3>
               <ul style={{ listStyle:"none", display:"flex", flexDirection:"column", gap:6, marginBottom:30 }}>
                 {resourceLinks.map(item => (
-                  <li key={item}>
-                    <a href="#" className="footer-link">
-                      <ArrowRight size={13} /> {item}
+                  <li key={item.href}>
+                    <a href={item.href} className="footer-link">
+                      <ArrowRight size={13} /> {item.label}
                     </a>
                   </li>
                 ))}
@@ -236,10 +250,13 @@ export default function FooterWithSocial() {
           <div style={{ maxWidth:1060, margin:"0 auto", padding:"14px 24px", display:"flex", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", gap:12 }}>
             <p style={{ fontSize:13, color:"#78350f", fontWeight:700 }}>© 2025 Zynvosocial. All rights reserved.</p>
             <div style={{ display:"flex", gap:20 }}>
-              {["Privacy Policy","Terms of Service","Cookie Policy"].map(link => (
-                <a key={link} href="#" style={{ fontSize:13, color:"#78350f", fontWeight:700, textDecoration:"none", transition:"color 0.18s" }}
+              {[
+                { label: "Privacy Policy", href: "/privacy" },
+                { label: "Terms of Service", href: "/terms" },
+              ].map(link => (
+                <a key={link.href} href={link.href} style={{ fontSize:13, color:"#78350f", fontWeight:700, textDecoration:"none", transition:"color 0.18s" }}
                   onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = "#1a1a1a")} onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = "#78350f")}>
-                  {link}
+                  {link.label}
                 </a>
               ))}
             </div>

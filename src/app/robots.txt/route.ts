@@ -4,7 +4,7 @@ const SITE = 'https://zynvosocial.com';
 
 export async function GET() {
   const body = `# https://www.robotstxt.org/
-# Zynvo - Agentic Social Media Platform for Campus Communities
+# Zynvo — Campus Events, Clubs & Student Engagement
 
 User-agent: *
 Allow: /
@@ -22,8 +22,12 @@ Allow: /faq
 Allow: /contact
 Allow: /privacy
 Allow: /terms
-Allow: /colleges/*
-Allow: /cities/*
+Allow: /for-students
+Allow: /for-clubs
+Allow: /for-colleges
+Allow: /club-management-software
+Allow: /campus-event-app
+Allow: /student-engagement-platform
 Disallow: /admin/
 Disallow: /api/
 Disallow: /dashboard/

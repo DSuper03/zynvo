@@ -97,16 +97,15 @@ export default function Home() {
       {/* Fixed Background Image */}
 
       <title>
-        Zynvo - Intelligent Agentic Social Media Platform for Campus Communities
+        Zynvo — Campus Events, Club Management & Student Engagement
       </title>
       <meta
         name="description"
-        content="Zynvo connects college students through club and 
-        society experiences."
+        content="Zynvo is the behavioral layer for campus life: students discover events and clubs, clubs manage and promote everything they run, and colleges get structured visibility into campus activity."
       />
       <meta
         name="keywords"
-        content="agentic social media platform, intelligent campus networking, college student social platform, AI-powered university connections, smart campus community, autonomous social networking, college clubs discovery, intelligent event matching, student engagement AI, campus social intelligence, university networking platform, smart student connections"
+        content="campus events app, club management software, student engagement platform, college social network, campus community platform, college events discovery, student club management, campus social app India"
       />
       <meta
         name="robots"
@@ -114,26 +113,26 @@ export default function Home() {
       />
       <meta name="googlebot" content="index, follow" />
       <meta name="bingbot" content="index, follow" />
-      <meta name="classification" content="Agentic Social Media Platform" />
+      <meta name="classification" content="Campus Engagement Platform" />
       <meta
         name="category"
-        content="Social Media, Education Technology, AI Networking"
+        content="Education Technology, Campus Life, Student Engagement"
       />
       <meta
         name="topic"
-        content="Campus Social Networking, Student Communities, College Connections"
+        content="Campus Events, Club Management, Student Engagement"
       />
       <meta
         name="summary"
-        content="Zynvo revolutionizes campus life through intelligent social networking that autonomously connects students with relevant clubs, events, and opportunities."
+        content="Zynvo connects students, clubs, and colleges in one campus activity loop—discovery, operations, and visibility."
       />
       <meta
         name="abstract"
-        content="An agentic social media platform leveraging artificial intelligence to create meaningful connections within college and university communities."
+        content="A behavioral layer for campus life that helps students discover events and clubs, helps clubs operate and promote programmes, and gives colleges structured campus activity data."
       />
       <meta
         name="subject"
-        content="Intelligent Campus Social Networking Platform"
+        content="Campus Events and Club Management Platform"
       />
       <meta name="copyright" content="Zynvo Team" />
       <meta name="language" content="EN" />
@@ -152,22 +151,22 @@ export default function Home() {
             '@type': 'SoftwareApplication',
             name: 'Zynvo',
             description:
-              'Agentic social media platform for campus communities that intelligently connects college students with clubs, events, and opportunities',
+              'Behavioral layer for campus life: students discover events and clubs, clubs manage and promote programmes, colleges get structured visibility into campus activity.',
             url: 'https://zynvosocial.com',
             applicationCategory: 'SocialNetworkingApplication',
             operatingSystem: 'Web, iOS, Android',
             offers: {
               '@type': 'Offer',
               price: '0',
-              priceCurrency: 'USD',
+              priceCurrency: 'INR',
             },
             creator: {
               '@type': 'Organization',
-              name: 'Zynvo Team',
+              name: 'Zynvo',
               url: 'https://zynvosocial.com/founders',
             },
             keywords:
-              'agentic social media platform, intelligent campus networking, college student connections, AI-powered university platform',
+              'campus events app, club management software, student engagement platform, college social network',
             audience: {
               '@type': 'EducationalAudience',
               educationalRole: 'student',
@@ -175,6 +174,7 @@ export default function Home() {
             featureList: [
               'Club discovery and joining',
               'Campus event discovery and RSVP',
+              'Club management and announcements',
               'Student profiles (Zyncers)',
               'Campus news and announcements',
               'Leaderboard and gamified participation',
@@ -183,12 +183,6 @@ export default function Home() {
               'PWA — installable on mobile',
             ],
             screenshot: 'https://zynvosocial.com/landing%20page.png',
-            aggregateRating: {
-              '@type': 'AggregateRating',
-              ratingValue: '4.8',
-              ratingCount: '120',
-              bestRating: '5',
-            },
           }),
         }}
       />
@@ -201,11 +195,11 @@ export default function Home() {
             '@context': 'https://schema.org',
             '@type': 'Organization',
             name: 'Zynvo',
-            alternateName: 'Zynvo - Agentic Social Media Platform',
+            alternateName: 'Zynvo Social',
             url: 'https://zynvosocial.com',
             logo: 'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226',
             description:
-              'The leading agentic social media platform revolutionizing campus communities through intelligent networking and AI-powered connections',
+              'Zynvo is the behavioral layer for campus life—connecting students, clubs, and colleges in one activity loop.',
             foundingDate: '2026',
             founders: [
               {
@@ -227,11 +221,13 @@ export default function Home() {
             sameAs: [
               'https://x.com/Zynvonow',
               'https://www.linkedin.com/company/dsuper03',
+              'https://www.instagram.com/zynvo.social',
             ],
             contactPoint: {
               '@type': 'ContactPoint',
               contactType: 'customer service',
               availableLanguage: 'English',
+              url: 'https://zynvosocial.com/contact',
             },
           }),
         }}
@@ -247,7 +243,7 @@ export default function Home() {
             name: 'Zynvo',
             url: 'https://zynvosocial.com',
             description:
-              'Zynvo is a campus social network for college students in India — discover clubs, join events, and connect with your campus community.',
+              'Zynvo is a campus behavioral layer for college students in India — discover clubs, join events, and give colleges visibility into campus activity.',
             potentialAction: {
               '@type': 'SearchAction',
               target: {
@@ -274,7 +270,7 @@ export default function Home() {
                 name: 'What is Zynvo?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Zynvo is a social platform built exclusively for college campuses. It helps students discover clubs, find events, connect with peers, and stay updated on campus life — all in one place. Think of it as the social layer of your college.',
+                  text: 'Zynvo is a behavioral layer for campus life: students discover events and clubs, clubs run and promote everything they do, and colleges get structured visibility into campus activity. Think of it as LinkedIn for the journey before LinkedIn.',
                 },
               },
               {
@@ -287,26 +283,18 @@ export default function Home() {
               },
               {
                 '@type': 'Question',
-                name: 'How do I join a club on Zynvo?',
+                name: 'How do I find clubs to join in college?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Sign up at zynvosocial.com/auth/signup, then browse clubs at zynvosocial.com/discover and tap Join on any club that interests you.',
+                  text: 'On Zynvo, browse college-scoped clubs by interest, open a club profile, and join or follow so you get events and announcements in one place. Start at zynvosocial.com/discover.',
                 },
               },
               {
                 '@type': 'Question',
-                name: 'Which colleges use Zynvo?',
+                name: 'What makes Zynvo different from WhatsApp groups?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Zynvo started in West Bengal, India and is expanding to colleges across the country. Any student can sign up and invite their college community.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What makes Zynvo different from WhatsApp groups or Facebook?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Zynvo is organised around clubs and events rather than open chats. Everything is structured, searchable, and tied to your real campus identity — no noise, no spam, just your campus community.',
+                  text: 'WhatsApp is chat; Zynvo is discovery and structure. Use WhatsApp to talk—use Zynvo to find what is happening, RSVP, and follow clubs without mute-and-miss chaos.',
                 },
               },
               {
@@ -315,6 +303,14 @@ export default function Home() {
                 acceptedAnswer: {
                   '@type': 'Answer',
                   text: 'Yes. Club admins have tools to post events, send announcements, and manage their member list directly from Zynvo.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What is a student engagement platform for colleges?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'A student engagement platform helps colleges see and support campus activity—clubs, events, and participation—beyond classroom attendance. Zynvo provides that visibility layer.',
                 },
               },
               {
