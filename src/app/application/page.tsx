@@ -78,7 +78,7 @@ const DownloadPage = () => {
             </Link>
 
             <Link
-              href="https://forms.gle/YOUR_GOOGLE_FORM_LINK"
+              href="https://docs.google.com/forms/d/e/1FAIpQLSd_2lKPn4yBbwPWDahHMwukgX0tSeY-6DlzHWoU960PvoPuaw/viewform?usp=publish-editor"
               target="_blank"
               className="inline-flex items-center justify-center rounded-full border-2 border-black px-8 py-4 text-base font-semibold text-black transition hover:bg-black hover:text-yellow-300"
             >
