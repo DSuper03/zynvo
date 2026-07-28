@@ -258,16 +258,14 @@ export default function UserSearchPage() {
     setIsSearching(true);
 
     try {
-      const baseUrl = '' as string;
-      const url = new URL('/api/v1/user/SearchUser', baseUrl);
-      url.searchParams.set('name', query);
+      const searchUrl = `/api/v1/user/SearchUser?name=${encodeURIComponent(query)}`;
 
       const headers: HeadersInit = {};
       if (token) {
         headers.authorization = `Bearer ${token}`;
       }
 
-      const response = await fetch(url.toString(), {
+      const response = await fetch(searchUrl, {
         method: 'GET',
         headers,
       });
