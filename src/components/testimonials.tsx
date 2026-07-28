@@ -1,103 +1,94 @@
 'use client';
+
 import React from 'react';
 import { motion } from 'framer-motion';
-
+import Link from 'next/link';
 import Image from 'next/legacy/image';
+
 const Testimonials = () => {
   const heroRef = React.useRef(null);
+
+  const stories = [
+    {
+      title: 'For students',
+      quote:
+        'Campus updates should not live only in closed chats. Zynvo puts clubs and events in one discovery feed.',
+      href: '/for-students',
+      image: '/student1.png',
+    },
+    {
+      title: 'For clubs',
+      quote:
+        'Club ops need more than WhatsApp and spreadsheets—profiles, announcements, and event promotion in one place.',
+      href: '/for-clubs',
+      image: '/student2.png',
+    },
+    {
+      title: 'For colleges',
+      quote:
+        'Student affairs deserve structured visibility into co-curricular life—not another LMS plugin.',
+      href: '/for-colleges',
+      image: '/student3.png',
+    },
+  ];
+
   return (
     <div>
       <section
         ref={heroRef}
-        className="relative min-h-screen flex items-center justify-center py-20 md:py-32 overflow-hidden"
+        className="relative flex min-h-screen items-center justify-center overflow-hidden py-20 md:py-32"
       >
-        {/* Background Image - Fixed Correctly */}
         <div className="absolute inset-0 z-0">
           <Image
             src="https://ik.imagekit.io/lljhk5qgc/zynvo-Admin/photo_2025-05-23_20-16-08.jpg?updatedAt=1748011607137"
-            alt="Hero Background"
+            alt="Campus community"
             width={1920}
             height={1080}
             priority
             className="object-cover"
             sizes="100vw"
           />
-          {/* Overlay to improve text readability */}
-          <div className="absolute inset-0 bg-black/60"></div>
+          <div className="absolute inset-0 bg-black/60" />
         </div>
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="gradient-text">Success Stories</span>
+        <div className="container relative z-10 mx-auto px-6">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+              <span className="gradient-text">Built for the campus loop</span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              See how Zynvo transforms campus club experiences
+            <p className="mx-auto max-w-2xl text-xl text-gray-300">
+              Students discover. Clubs operate. Colleges see activity. Verified
+              testimonials coming as we collect them.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                name: 'Akash Sharma',
-                role: 'President, Tech Club',
-                university: 'IIT Delhi',
-                quote:
-                  "Zynvo helped us increase our membership by 300% in just one semester. The platform's event management tools saved us countless hours of work.",
-                image: '/student1.png',
-              },
-              {
-                name: 'import  ',
-                role: 'Member, Cultural Society',
-                university: 'Delhi University',
-                quote:
-                  'I found my passion for classical dance through Zynvo. The platform made it easy to discover events and connect with other cultural enthusiasts.',
-                image: '/student2.png',
-              },
-              {
-                name: 'Jay Verma',
-                role: 'Organizer, Debate Club',
-                university: 'BITS Pilani',
-                quote:
-                  'Coordinating with other colleges for debate competitions was a nightmare before Zynvo. Now we can seamlessly organize inter-college events.',
-                image: '/student3.png',
-              },
-            ].map((testimonial, index) => (
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {stories.map((story, index) => (
               <motion.div
-                key={index}
+                key={story.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
-                className="bg-gray-800 rounded-xl p-8 relative"
+                className="relative rounded-xl bg-gray-800 p-8"
               >
-                <div className="mb-4">
-                  {/* Quote icon */}
-                  <svg
-                    className="w-10 h-10 text-yellow-500 opacity-30 absolute top-6 right-6"
-                    fill="currentColor"
-                    viewBox="0 0 32 32"
-                  >
-                    <path d="M10 8v10c0 2.2-1.8 4-4 4s-4-1.8-4-4v-2h2v2c0 1.1.9 2 2 2s2-.9 2-2v-10h-6v10h2v-8h2zm14 0v10c0 2.2-1.8 4-4 4s-4-1.8-4-4v-2h2v2c0 1.1.9 2 2 2s2-.9 2-2v-10h-6v10h2v-8h2z"></path>
-                  </svg>
-                </div>
-                <p className="text-gray-300 mb-6">
-                  &rdquo;{testimonial.quote}&#34;
-                </p>
-                <div className="flex items-center">
+                <p className="mb-6 text-gray-300">&ldquo;{story.quote}&rdquo;</p>
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <h4 className="font-semibold text-white">{story.title}</h4>
+                    <Link
+                      href={story.href}
+                      className="text-xs text-yellow-500 hover:text-yellow-400"
+                    >
+                      Learn more →
+                    </Link>
+                  </div>
                   <Image
-                    src={testimonial.image}
-                    alt={testimonial.name}
+                    src={story.image}
+                    alt=""
                     width={48}
                     height={48}
-                    className="rounded-full border-2 border-yellow-500/20 mr-4"
+                    className="rounded-full border-2 border-yellow-500/20"
                   />
-                  <div>
-                    <h4 className="font-semibold">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-400">{testimonial.role}</p>
-                    <p className="text-xs text-yellow-500">
-                      {testimonial.university}
-                    </p>
-                  </div>
                 </div>
               </motion.div>
             ))}

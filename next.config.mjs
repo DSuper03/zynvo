@@ -290,6 +290,7 @@ const pwaConfig = withPWA({
   disable: false,        // enable PWA in all environments
   register: true,         // register the PWA service worker
   skipWaiting: true,      // skip waiting for service worker activation
+  clientsClaim: true,    // make new SW control existing clients immediately
 })(nextConfig);
 
 // Apply bundle analyzer and export

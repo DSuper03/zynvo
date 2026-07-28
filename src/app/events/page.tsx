@@ -23,7 +23,11 @@ interface apiRespEvents {
   msg: string;
   response: eventData[];
   totalPages: number;
+  total?: number;
+  page?: number;
 }
+
+const SEARCH_MAX_LENGTH = 200;
 
 /** Local calendar key YYYY-MM-DD (avoids UTC shift from toISOString). */
 function toLocalDateKey(d: Date): string {
@@ -108,6 +112,8 @@ export default function ZynvoEventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [upcomingOnly, setUpcomingOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [userAttendedEventIds, setUserAttendedEventIds] = useState<string[]>([]);
@@ -118,6 +124,7 @@ export default function ZynvoEventsPage() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
   const [fetchNonce, setFetchNonce] = useState(0);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Search-specific state
   const [isSearchMode, setIsSearchMode] = useState(false);
@@ -163,6 +170,20 @@ export default function ZynvoEventsPage() {
     }
   }, [router, pathname]);
 
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      const next = searchTerm.trim().slice(0, SEARCH_MAX_LENGTH);
+      setDebouncedSearch(next);
+      setCurrentPage(1);
+      searchDebounceRef.current = null;
+    }, 400);
+
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [searchTerm]);
+
   // Fetch user data and attended events
   useEffect(() => {
     async function fetchUserData() {
@@ -206,17 +227,22 @@ export default function ZynvoEventsPage() {
         setIsLoading(true);
         setError(null);
 
+        const params = new URLSearchParams();
+        params.set('page', String(currentPage));
+        if (debouncedSearch) params.set('q', debouncedSearch);
+        if (upcomingOnly) params.set('upcoming', 'true');
+
         const response = await axios.get<apiRespEvents>(
-          `/api/v1/events/all?page=${currentPage}`,
+          `/api/v1/events/search?${params.toString()}`,
           {
-            timeout: 10000, // 10 second timeout
+            timeout: 10000,
             headers: {
               'Content-Type': 'application/json',
             },
           }
         );
 
-        if (!isMounted) return; // Prevent state update if component is unmounted
+        if (!isMounted) return;
         if (response.data && Array.isArray(response.data.response)) {
           setEvents(response.data.response);
           setTotalPages(response.data.totalPages || 1);
@@ -255,7 +281,7 @@ export default function ZynvoEventsPage() {
     return () => {
       isMounted = false;
     };
-  }, [currentPage, fetchNonce]);
+  }, [currentPage, debouncedSearch, upcomingOnly, fetchNonce]);
 
   // Backend-powered debounced search
   const runSearch = useCallback(async (term: string, page: number) => {
@@ -363,6 +389,24 @@ export default function ZynvoEventsPage() {
       }
     }
   };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value.slice(0, SEARCH_MAX_LENGTH));
+  };
+
+  const handleUpcomingToggle = () => {
+    setUpcomingOnly((prev) => !prev);
+    setCurrentPage(1);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setDebouncedSearch('');
+    setUpcomingOnly(false);
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = Boolean(debouncedSearch || upcomingOnly);
 
   return (
     <div className="min-h-screen  text-white">
@@ -713,30 +757,31 @@ export default function ZynvoEventsPage() {
               events={displayedEvents}
               isLoading={displayedIsLoading}
               error={error}
-              searchTerm={searchTerm}
               isUserAttendingEvent={isUserAttendingEvent}
             />
           ) : (
             <EmptyState
               icon={Calendar}
               title={
-                isSearchMode
+                hasActiveFilters
                   ? 'No events match your search'
                   : 'No events to show yet'
               }
               description={
-                isSearchMode
-                  ? `Nothing matches "${searchTerm.trim()}". Try different keywords or clear the search.`
+                hasActiveFilters
+                  ? debouncedSearch
+                    ? `Nothing matches “${debouncedSearch}”. Try different keywords or clear filters.`
+                    : 'No upcoming events right now. Turn off Upcoming only to browse everything.'
                   : 'New campus events will appear here when organizers publish them.'
               }
             >
-              {isSearchMode ? (
+              {hasActiveFilters ? (
                 <Button
                   type="button"
-                  onClick={() => setSearchTerm('')}
+                  onClick={clearFilters}
                   className="min-h-11 bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-6 font-medium"
                 >
-                  Clear search
+                  Clear filters
                 </Button>
               ) : null}
             </EmptyState>

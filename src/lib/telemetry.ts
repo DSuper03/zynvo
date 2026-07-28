@@ -26,6 +26,43 @@ const DEDUPE_WINDOW_MS = 30_000;
 const recentEvents = new Map<string, number>();
 let globalListenerAttached = false;
 let listenerCleanup: (() => void) | null = null;
+let chunkReloadAttempted = false;
+const CHUNK_RELOAD_DEDUPE_MS = 60_000;
+
+function isChunkLoadFailure(message: string, errorName?: string): boolean {
+  const m = message || '';
+  return (
+    /ChunkLoadError/i.test(errorName || '') ||
+    /ChunkLoadError/i.test(m) ||
+    /Loading chunk \d+ failed/i.test(m) ||
+    // Defensive: different bundlers/framework versions may vary wording.
+    /chunk .* failed/i.test(m)
+  );
+}
+
+function maybeTriggerChunkReload(params: { message: string; errorName?: string }) {
+  if (typeof window === 'undefined') return;
+  if (!isChunkLoadFailure(params.message, params.errorName)) return;
+
+  if (chunkReloadAttempted) return;
+
+  // Deduplicate across reloads within a minute (helps avoid loops on bad deploys).
+  try {
+    const key = 'zynvo:chunk-reload-last-at';
+    const prev = sessionStorage.getItem(key);
+    const prevAt = prev ? Number(prev) : NaN;
+    const now = Date.now();
+    if (!Number.isNaN(prevAt) && now - prevAt < CHUNK_RELOAD_DEDUPE_MS) return;
+    sessionStorage.setItem(key, String(now));
+  } catch {
+    // sessionStorage might be unavailable (privacy modes); fall back to in-memory dedupe.
+  }
+
+  chunkReloadAttempted = true;
+
+  // Give the telemetry keepalive fetch a moment to dispatch.
+  setTimeout(() => window.location.reload(), 50);
+}
 
 function trimText(value: string | undefined, max: number): string | undefined {
   if (!value) return undefined;
@@ -149,6 +186,13 @@ export function initGlobalErrorTelemetry(): () => void {
 
   const onError = (event: ErrorEvent) => {
     const normalized = normalizeUnknownError(event.error ?? event.message);
+
+    // Mitigation for widespread `ChunkLoadError` (stale chunks after deploy / cache / intermittent network).
+    maybeTriggerChunkReload({
+      message: normalized.message,
+      errorName: normalized.name,
+    });
+
     void sendClientTelemetryEvent({
       kind: 'window.error',
       message: normalized.message,
@@ -165,6 +209,12 @@ export function initGlobalErrorTelemetry(): () => void {
 
   const onUnhandledRejection = (event: PromiseRejectionEvent) => {
     const normalized = normalizeUnknownError(event.reason);
+
+    maybeTriggerChunkReload({
+      message: normalized.message,
+      errorName: normalized.name,
+    });
+
     void sendClientTelemetryEvent({
       kind: 'window.unhandledrejection',
       message: normalized.message,

@@ -1,9 +1,11 @@
+import type { Metadata } from 'next';
 import TestimonialsSection from '@/components/TestimonialsSection';
 
-export const metadata = {
-  title: 'Testimonials - Zynvo',
+export const metadata: Metadata = {
+  title: 'Campus Stories & Feedback | Zynvo',
   description:
-    'See what students and clubs are saying about their experience with Zynvo',
+    'What Zynvo delivers for students, clubs, and colleges—and how to share a verified campus story.',
+  alternates: { canonical: 'https://zynvosocial.com/testimonials' },
 };
 
 export default function TestimonialsPage() {

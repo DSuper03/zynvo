@@ -9,7 +9,6 @@ import { WarmupProvider } from '@/components/WarmupProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
 import { QueryProvider } from '@/providers/QueryProvider';
-import FloatingPWAInstall from '@/components/FloatingPWAInstall';
 import { ClerkKeyDebug } from '@/components/ClerkKeyDebug';
 import ClientTelemetryBootstrap from '@/components/ClientTelemetryBootstrap';
 import WebMcpBootstrap from '@/components/WebMcpBootstrap';
@@ -30,22 +29,20 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://zynvosocial.com'),
   manifest: "/manifest.json",
   title:
-    'Zynvo -Social Media Platform for Campus Communities | Student Network',
+    'Zynvo — Campus Events, Club Management & Student Engagement',
   description:
-    'Zynvo is the leading agentic social media platform connecting college students, clubs, and societies. Discover events, join communities, compete in challenges, and build meaningful campus connections through AI-powered networking.',
+    'Zynvo is the behavioral layer for campus life: students discover events and clubs, clubs manage and promote everything they run, and colleges get structured visibility into campus activity. LinkedIn for the journey before LinkedIn.',
   keywords: [
-    'agentic social media platform',
+    'campus events app',
+    'club management software',
+    'student engagement platform',
     'college social network',
     'campus community platform',
-    'student networking app',
-    'university clubs platform',
     'college events discovery',
-    'AI-powered student connections',
-    'campus social media',
-    'student engagement platform',
+    'student club management',
+    'campus social app India',
     'college societies network',
-    'academic social platform',
-    'intelligent campus networking',
+    'campus activity platform',
   ].join(', '),
   authors: [{ name: 'Zynvo Team' }],
   creator: 'Zynvo',
@@ -53,18 +50,18 @@ export const metadata: Metadata = {
   robots: 'index, follow',
   openGraph: {
     type: 'website',
-    locale: 'en_US',
+    locale: 'en_IN',
     url: 'https://zynvosocial.com',
     siteName: 'Zynvo',
-    title: 'Zynvo - Agentic Social Media Platform for Campus Communities',
+    title: 'Zynvo — Behavioral Layer for Campus Life',
     description:
-      'The intelligent social platform revolutionizing how college students connect, discover events, join clubs, and build meaningful campus relationships through AI-powered networking.',
+      'Students discover. Clubs operate. Colleges measure. One campus loop for events, societies, and involvement before LinkedIn.',
     images: [
       {
         url: '/titlecard.png',
         width: 1200,
         height: 630,
-        alt: 'Zynvo - Agentic Social Media Platform for Students',
+        alt: 'Zynvo — Campus events, clubs, and student engagement',
       },
     ],
   },
@@ -72,13 +69,13 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@zynvo',
     creator: '@zynvo',
-    title: 'Zynvo - Agentic Social Media Platform for Campus Communities',
+    title: 'Zynvo — Campus Events, Clubs & Engagement',
     description:
-      'Join the intelligent social platform connecting college students, clubs, and societies. Discover events, build networks, and compete in challenges.',
+      'The campus behavioral layer: discover events, run clubs, and give colleges visibility into student life.',
     images: ['/landing page.png'],
   },
-  category: 'Social Media',
-  classification: 'Agentic Social Media Platform',
+  category: 'Education Technology',
+  classification: 'Campus Engagement Platform',
 
   icons: {
     icon: [
@@ -164,7 +161,6 @@ export default function RootLayout({
           <SpeedInsights />
           <PerformanceMonitor />
           <Toaster />
-          <FloatingPWAInstall />
         </ErrorBoundary>
       </body>
     </html>

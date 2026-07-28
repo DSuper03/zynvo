@@ -1,28 +1,29 @@
 # Zynvo
 
-> Zynvo is a social platform built exclusively for college and university campuses. It connects students with clubs, societies, campus events, and peers — all in one place.
+> Zynvo is a behavioral layer for campus life. Students discover events and clubs, clubs manage and promote everything they run, and colleges get structured visibility into campus activity. LinkedIn for the journey before LinkedIn.
 
 ## What is Zynvo?
 
-Zynvo (https://zynvosocial.com) is a campus social network designed for college students in India. It helps students discover and join clubs, find events happening on their campus, meet like-minded peers, and stay connected to campus life — replacing scattered WhatsApp groups and notice boards with a single, organised platform.
-
-Think of it as "the social layer of your college" — a place where students actually find their tribe, join communities, and make college worth it.
+Zynvo (https://zynvosocial.com) is a campus platform for college students, club organisers, and colleges in India. It replaces scattered WhatsApp groups and notice boards with one loop: discovery for students, an operating system for clubs, and engagement visibility for institutions.
 
 ## Core Features
 
-- **Club Discovery**: Browse and join 100+ student clubs across tech, arts, sports, debate, entrepreneurship, and more.
-- **Events**: Find, RSVP to, and get reminders for college festivals, hackathons, cultural nights, and department events.
-- **Zyncers (Student Profiles)**: Create a profile showcasing clubs, skills, and achievements. Connect with students across departments.
-- **Campus Feed & News**: Stay updated with announcements, college news, and community posts from clubs.
-- **Leaderboard & Challenges**: Gamified participation — earn points for joining clubs, attending events, and engaging with the community.
-- **AI Assistant**: A built-in AI that helps students navigate campus life, find opportunities, and answer questions.
-- **Resources**: Shared study notes, club resources, and campus guides.
+- **Campus event discovery**: Find fests, workshops, club nights, and RSVP in one feed.
+- **Club management**: Profiles, members, announcements, and event promotion for societies.
+- **Student engagement layer**: Structured campus activity colleges can actually see.
+- **Zyncers (student profiles)**: Showcase clubs, skills, and campus involvement.
+- **Campus feed & news**: Announcements and community posts from clubs.
+- **Leaderboard & challenges**: Gamified participation.
+- **AI assistant**: Help navigating campus life and opportunities.
+- **PWA**: Installable on mobile from the browser.
 
 ## Who Is It For?
 
-- **College students** who want to get more involved in campus life
-- **Club presidents and organisers** who want to reach more students
-- **Campus communities** looking to replace fragmented group chats with a structured platform
+- **Students** — one feed to discover what matters on campus (`/for-students`, `/campus-event-app`)
+- **Club presidents and organisers** — an OS to manage, promote, and run events (`/for-clubs`, `/club-management-software`)
+- **Colleges** — analytics and visibility into campus activity (`/for-colleges`, `/student-engagement-platform`)
+
+No major competitor currently connects all three audiences in one product loop.
 
 ## Founders
 
@@ -30,15 +31,20 @@ Think of it as "the social layer of your college" — a place where students act
 - **Mohak Chakraborty** — COO
 - **Swarnendu Ghosh** — CTO
 
-Founded in 2026. Based in India.
+Founded in 2026. Based in Kolkata, India.
 
 ## Key URLs
 
 - Homepage: https://zynvosocial.com
+- For students: https://zynvosocial.com/for-students
+- For clubs: https://zynvosocial.com/for-clubs
+- For colleges: https://zynvosocial.com/for-colleges
+- Club management software: https://zynvosocial.com/club-management-software
+- Campus event app: https://zynvosocial.com/campus-event-app
+- Student engagement platform: https://zynvosocial.com/student-engagement-platform
 - Discover Clubs: https://zynvosocial.com/discover
 - Events: https://zynvosocial.com/events
 - Sign Up: https://zynvosocial.com/auth/signup
-- Founders: https://zynvosocial.com/founders
 - FAQ: https://zynvosocial.com/faq
 - Contact: https://zynvosocial.com/contact
 
