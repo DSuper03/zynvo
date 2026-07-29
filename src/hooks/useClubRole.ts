@@ -5,10 +5,13 @@ export interface ClubRoleResult {
   founder : string | boolean
 }
 
-export async function checkClubRole(): Promise<any> {
+export async function checkClubRole(token?: string): Promise<any> {
   try {
+    const headers: Record<string, string> = {};
+    if (token) headers.authorization = `Bearer ${token}`;
     const res = await axios.get<ClubRoleResult>(
       `/api/v1/user/isClubAdmin`,
+      { headers },
     );
     const clubRoleData = res.data;
     if (clubRoleData.founder == "true" || clubRoleData.founder === true) {
