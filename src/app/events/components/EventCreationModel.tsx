@@ -113,12 +113,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
   useEffect(() => {
     const checkRole = async () => {
-      const role = await checkClubRole();
+      const role = await checkClubRole(token);
       toast(role.msg, { duration: 5000 });
       setClubRole(role);
     };
-    checkRole();
-  }, []);
+    if (token) checkRole();
+  }, [token]);
 
   // Helper function to get today's date in YYYY-MM-DD format
   const getTodayDateString = () => {
@@ -572,12 +572,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       return;
     }
 
-    const roleCheck = await checkClubRole();
+    const roleCheck = await checkClubRole(token);
     if (!roleCheck.authorized) {
       toast.error('Only club heads and core members can create events.');
       return;
-    } 
-
+    }
 
     if (!validateStep()) {
       notifyStepValidationErrors(step);
