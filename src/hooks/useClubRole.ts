@@ -5,7 +5,7 @@ export interface ClubRoleResult {
   founder : string | boolean
 }
 
-export async function checkClubRole(clubName: string): Promise<any> {
+export async function checkClubRole(): Promise<any> {
   try {
     const res = await axios.get<ClubRoleResult>(
       `/api/v1/user/isClubAdmin`,

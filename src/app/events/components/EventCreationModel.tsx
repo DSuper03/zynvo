@@ -1,7 +1,7 @@
 'use client';
 
 import posthog from 'posthog-js';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, use } from 'react';
 import {
   X,
   Calendar,
@@ -109,6 +109,16 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     description: string;
   } | null>(null);
   const [closeAfterAchievement, setCloseAfterAchievement] = useState(false);
+  const [clubRole, setClubRole] = useState<{ msg: string; authorized: boolean } | null>(null);
+
+  useEffect(() => {
+    const checkRole = async () => {
+      const role = await checkClubRole();
+      toast(role.msg, { duration: 5000 });
+      setClubRole(role);
+    };
+    checkRole();
+  }, []);
 
   // Helper function to get today's date in YYYY-MM-DD format
   const getTodayDateString = () => {
@@ -562,11 +572,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       return;
     }
 
-    const roleCheck = await checkClubRole(clubName);
+    const roleCheck = await checkClubRole();
     if (!roleCheck.authorized) {
       toast.error('Only club heads and core members can create events.');
       return;
-    }
+    } 
+
 
     if (!validateStep()) {
       notifyStepValidationErrors(step);
@@ -839,15 +850,27 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           />
 
           {/* Modal Header */}
-          <div className="sticky top-0 z-10 bg-gray-900 border-b border-yellow-500/30 p-4 flex justify-between items-center">
-            <h2 className="text-xl font-bold text-white">Create New Event</h2>
-            <Button
-              onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              <X size={24} />
-            </Button>
-          </div>
+              <div className="sticky top-0 z-10 bg-gray-900 border-b border-yellow-500/30">
+                <div className="p-4 flex justify-between items-center">
+                  <h2 className="text-xl font-bold text-white">Create New Event</h2>
+                  <Button
+                    onClick={onClose}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    <X size={24} />
+                  </Button>
+                </div>
+
+                <div className="px-4 pb-3">
+                  {clubRole && !clubRole.authorized && (
+                    <p className="text-sm text-red-400 font-medium">
+                      ⚠️ Only the <span className="font-semibold">Club Head</span> or any{" "}
+                      <span className="font-semibold">3 Core Members</span> can create an
+                      event. All other members can only preview the event details.
+                    </p>
+                  )}
+                </div>
+              </div>
 
           {/* Progress Indicator */}
           <div className="px-6 pt-5 pb-2">
