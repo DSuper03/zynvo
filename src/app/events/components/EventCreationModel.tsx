@@ -43,6 +43,7 @@ import axios, { isAxiosError } from 'axios';
 import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
 import { useRouter } from 'next/navigation';
+import { checkClubRole } from '@/hooks/useClubRole';
 import AchievementUnlockModal from '@/components/AchievementUnlockModal';
 
 interface CreateEventModalProps {
@@ -560,6 +561,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       toast("You haven't created any club yet. Please create a club first.");
       return;
     }
+
+    const roleCheck = await checkClubRole(clubName);
+    if (!roleCheck.authorized) {
+      toast.error('Only club heads and core members can create events.');
+      return;
+    }
+
     if (!validateStep()) {
       notifyStepValidationErrors(step);
       return;
@@ -597,12 +605,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           warnings.forEach((msg: string) => toast(msg, { duration: 5000 }));
         }
 
-        if (existingEvents?.length) {
-          toast(
-            `${existingEvents.length} event(s) already scheduled in this period. Double-check your dates.`,
-            { duration: 6000 }
-          );
-        }
       } catch {
         // Non-blocking: if the check endpoint fails, proceed with creation
       }
