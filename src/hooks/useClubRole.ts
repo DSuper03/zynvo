@@ -13,7 +13,7 @@ export async function checkClubRole(): Promise<any> {
     const clubRoleData = res.data;
     if (clubRoleData.founder == "true" || clubRoleData.founder === true) {
       return { msg: 'User is the founder of the club', authorized: true };
-    } else if (clubRoleData.founder == "false" || clubRoleData.founder === false) {
+    } else if (clubRoleData.founder !== "true" || !clubRoleData.founder) {
       return { msg: 'User is not the founder of the club', authorized: false };
     } else {
       return { msg: 'Unexpected response from server', authorized: false };
