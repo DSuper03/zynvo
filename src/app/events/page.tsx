@@ -299,7 +299,7 @@ export default function ZynvoEventsPage() {
     try {
       const params = new URLSearchParams({ q: term.trim(), page: String(page), limit: '12' });
       const res = await axios.get<{ response: eventData[]; total: number; totalPages: number }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/search?${params}`,
+        `/api/v1/events/search?${params}`,
         { timeout: 10000 }
       );
       setSearchResults(res.data.response ?? []);

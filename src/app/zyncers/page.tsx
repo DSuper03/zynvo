@@ -263,17 +263,19 @@ export default function UserSearchPage() {
     setIsSearching(true);
 
     try {
-      const url = new URL('/api/v1/user/SearchUser', '');
-      url.searchParams.set('name', query.trim());
-      url.searchParams.set('page', String(page));
-      url.searchParams.set('limit', String(SEARCH_LIMIT));
+      const params = new URLSearchParams({
+        name: query.trim(),
+        page: String(page),
+        limit: String(SEARCH_LIMIT),
+      });
+      const searchUrl = `/api/v1/user/SearchUser?${params}`;
 
       const headers: HeadersInit = {};
       if (token) {
         headers.authorization = `Bearer ${token}`;
       }
 
-      const response = await fetch(url.toString(), {
+      const response = await fetch(searchUrl, {
         method: 'GET',
         headers,
       });
