@@ -215,6 +215,7 @@ export interface JoinClubModalProps {
   clubImage: string;
   clubId: string;
   requirements?: string;
+  onSuccess?: () => void;
 }
 export enum clubType {
   Technology,
