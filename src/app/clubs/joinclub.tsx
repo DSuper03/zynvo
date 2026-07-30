@@ -19,6 +19,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
   clubImage,
   clubId,
   requirements,
+  onSuccess,
 }) => {
   const [formData, setFormData] = useState({
     motivation: '',
@@ -81,6 +82,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
           toSafeUserMessage(res.data.msg, 'Successfully joined club.')
         );
         onClose();
+        onSuccess?.();
       } else {
         toast.error(
           toSafeUserMessage(
