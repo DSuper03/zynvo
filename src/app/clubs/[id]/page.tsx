@@ -107,7 +107,6 @@ export default function ClubPage() {
   const id = param.id as string;
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'announcements' | 'events' | 'members' | 'social'>('events');
-  const [isJoined, setIsJoined] = useState(false);
   const [club, setClub] = useState<ClubTypeProps>({
     id: '',
     name: '',
@@ -332,7 +331,6 @@ useEffect(() => {
       // Check if the user's club ID matches the current club ID
       if (userData.clubId === id) {
         setUserClub(true);
-       
       }
      
       
@@ -401,9 +399,8 @@ useEffect(() => {
   }
 
   const handleJoinClick = () => {
-    if (!isJoined) {
-      setIsJoinModalOpen(true);
-    }
+    console.log('Join button clicked, usersClub:', usersClub);
+    setIsJoinModalOpen(true);
   };
 
   const handleLeaveClub = async () => {
@@ -429,7 +426,7 @@ useEffect(() => {
       );
       
       toast.success(leaveResponse.data.message || leaveResponse.data.msg || 'Successfully left the club');
-      setIsJoined(false);
+      setUserClub(false);
       
       // Refresh the page to update the UI
       setTimeout(() => {
@@ -640,9 +637,9 @@ useEffect(() => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 w-full h-full">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 w-full h-full pointer-events-auto">
       {/* Hero Section - Compact & Minimalist */}
-      <div className="relative w-full bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      <div className="relative w-full bg-gradient-to-br from-gray-900 via-black to-gray-900 pointer-events-auto">
         {/* Subtle background pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
@@ -756,21 +753,15 @@ useEffect(() => {
           </div>
 
           {/* Right: Action Buttons - Compact */}
-          <div className="flex flex-col gap-3 lg:min-w-[200px]">
-            {usersClub ? (
-              <div className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/10 border border-green-500/40 text-green-300 text-sm font-medium">
-                <UserCheck className="w-4 h-4" />
-                Hi member
-              </div>
-            ) : (
-              <Button
-                onClick={handleJoinClick}
-                className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-medium py-2.5 transition-all shadow-lg shadow-yellow-500/20"
-              >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Join Club
-              </Button>
-            )}
+          <div className="flex flex-col gap-3 lg:min-w-[200px] pointer-events-auto">
+            <Button
+              onClick={handleJoinClick}
+              className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-medium py-2.5 transition-all shadow-lg shadow-yellow-500/20 relative z-10 pointer-events-auto"
+            >
+              
+              <UserPlus className="w-4 h-4 mr-2" />
+              Join Club
+            </Button>
 
             {isAdmin && (
               <Link href={`/admin/${id}`}>
@@ -1263,7 +1254,7 @@ useEffect(() => {
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">No Members Yet</h3>
                   <p className="text-gray-400 mb-6">Be the first to join this amazing club!</p>
-                  {isJoined ? (
+                  {usersClub ? (
                     <div className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl font-semibold flex items-center justify-center">
                       <UserCheck className="w-5 h-5 mr-2" />
                       You are already joined
@@ -1431,6 +1422,7 @@ useEffect(() => {
           clubImage={club.image || '/logozynvo.jpg'}
           clubId={id}
           requirements={club.requirements}
+          onSuccess={() => setUserClub(true)}
         />
       )}
 
