@@ -145,7 +145,22 @@ const nextConfig = {
         destination: 'https://zynvosocial.com/application',
         permanent: true,
       },
-    ]
+      {
+        source: '/campus-social-media',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/ai-social-platform',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/intelligent-networking',
+        destination: '/',
+        permanent: true,
+      },
+    ];
   },
   compress: true,
   poweredByHeader: false,
@@ -278,25 +293,6 @@ const nextConfig = {
     ];
   },
 
-  async redirects() {
-    return [
-      {
-        source: '/campus-social-media',
-        destination: '/',
-        permanent: true,
-      },
-      {
-        source: '/ai-social-platform',
-        destination: '/',
-        permanent: true,
-      },
-      {
-        source: '/intelligent-networking',
-        destination: '/',
-        permanent: true,
-      },
-    ];
-  },
 };
 
 // Apply PWA configuration
