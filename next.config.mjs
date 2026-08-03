@@ -1,4 +1,5 @@
 const securityHeaders = [
+
   {
     key: 'Content-Security-Policy',
     value: `
@@ -131,7 +132,21 @@ const nextConfig = {
       transform: '@tabler/icons-react/dist/esm/icons/{{member}}',
     },
   },
-  
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'app.zynvosocial.com',
+          },
+        ],
+        destination: 'https://zynvosocial.com/application',
+        permanent: true,
+      },
+    ]
+  },
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
