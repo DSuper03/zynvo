@@ -26,6 +26,8 @@ const PUBLIC_GET_PREFIXES = [
   '/api/v1/user/getPublicUser',
   '/api/v1/user/SearchUser',
   '/api/v1/user/isClubAdmin',
+  // Account deletion confirmation link — no Clerk session (link is in email).
+  '/api/v1/user/deleteAccount/confirm',
 ];
 
 const PUBLIC_POST_PREFIXES = [
@@ -34,6 +36,7 @@ const PUBLIC_POST_PREFIXES = [
   '/api/v1/user/verify',
   '/api/v1/user/ResendEmail',
   '/api/v1/user/syncWithClerk',
+  '/api/v1/user/deleteAccount/request',
   '/api/v1/contact/contact',
   '/api/v1/contact/feedback',
 ];
