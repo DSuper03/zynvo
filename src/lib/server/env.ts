@@ -8,7 +8,7 @@ const schema = z.object({
   BACKEND_BASE_URL: z
     .string()
     .url('BACKEND_BASE_URL must be a valid URL')
-    .default('https://zynvosocial-be-274792984950.asia-south1.run.app'),
+    .default('https://zynvo-backend-606118537549.asia-south1.run.app'),
   INTERNAL_PROXY_SECRET: z
     .string()
     .min(16, 'INTERNAL_PROXY_SECRET must be at least 16 characters'),

@@ -60,7 +60,7 @@ async function directFetch(
   const base = (
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     process.env.BACKEND_BASE_URL ||
-    'https://zynvosocial-be-274792984950.asia-south1.run.app'
+    'https://zynvo-backend-606118537549.asia-south1.run.app'
   ).replace(/\/$/, '');
 
   const upstreamUrl = new URL(backendPath, base);
