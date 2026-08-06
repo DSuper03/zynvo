@@ -42,6 +42,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE}/feedback`, lastModified: now, changeFrequency: "weekly", priority: 0.5 },
     { url: `${SITE}/privacy`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
     { url: `${SITE}/terms`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${SITE}/delete-account`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
   ];
 
   const seoRecords = getAllSeo();
