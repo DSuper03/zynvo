@@ -11,6 +11,7 @@ import {
   LogOut,
   Trophy,
   MapPinned,
+  Sparkles,
 } from 'lucide-react';
 import { FaUsers } from 'react-icons/fa';
 import { useWarmup } from './WarmupProvider';
@@ -44,6 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
     // { icon: <FaBahai size={20} />, label: 'AI', href: '/ai', accent: true },
     // { icon: <MapPinCheck size={22} />, label: 'Campus Map', href: '/cmap' },
     { icon: <MapPinned size={22} />, label: 'Club Map', href: '/club-map' },
+    { icon: <Sparkles size={22} />, label: 'Brands', href: '/brands' },
     { icon: <Trophy size={22} />, label: 'Leaderboard', href: '/leaderboard' },
     { icon: <User size={22} />, label: 'Profile', href: '/dashboard' },
   ];
@@ -183,9 +185,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
                     {item.label}
                   </span>
                 )}
-                {showText && item.accent && (
-                  <span className="rounded-full bg-zinc-800 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-zinc-400">
-                    AI
+                {showText && item.label === 'Brands' && (
+                  <span className="rounded-full bg-yellow-500/20 border border-yellow-500/30 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-yellow-400">
+                    NEW
                   </span>
                 )}
               </Link>

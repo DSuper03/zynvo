@@ -103,6 +103,24 @@ const nextConfig = {
         hostname: 'img.clerk.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'logo.clearbit.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.google.com',
+        port: '',
+        pathname: '/s2/favicons',
+      },
+      {
+        protocol: 'https',
+        hostname: 'google.com',
+        port: '',
+        pathname: '/s2/favicons',
       }
     ],
   },
