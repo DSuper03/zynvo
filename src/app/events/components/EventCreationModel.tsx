@@ -586,38 +586,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      try {
-        const dateCheckRes = await axios.post(
-          `/api/v1/events/checkEventDates`,
-          {
-            eventStartDate: formData.eventStartDate,
-            eventEndDate: formData.eventEndDate,
-            applicationStartDate: formData.applicationStartDate,
-            applicationEndDate: formData.applicationEndDate,
-          },
-          {
-            headers: { authorization: `Bearer ${token}` },
-          }
-        );
-        const {
-          isValid,
-          errors: dateErrors,
-          warnings,
-          existingEvents,
-        } = dateCheckRes.data;
-
-        if (!isValid && dateErrors?.length) {
-          dateErrors.forEach((msg: string) => toast.error(msg));
-          return;
-        }
-
-        if (warnings?.length) {
-          warnings.forEach((msg: string) => toast(msg, { duration: 5000 }));
-        }
-
-      } catch {
-        // Non-blocking: if the check endpoint fails, proceed with creation
-      }
 
       let imageLink = '';
       if (!img) {
