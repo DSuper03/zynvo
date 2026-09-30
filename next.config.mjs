@@ -4,7 +4,7 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://challenges.cloudflare.com https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://www.gstatic.com https://va.vercel-scripts.com;
+      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://challenges.cloudflare.com https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://www.gstatic.com https://va.vercel-scripts.com ;
       script-src-elem 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://challenges.cloudflare.com https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://www.gstatic.com https://va.vercel-scripts.com;
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: blob: https: http: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com https://api.qrserver.com https://img.clerk.com https://*.clerk.accounts.dev https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://*.googleusercontent.com https://ssl.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com https://s3-us-west-2.amazonaws.com https://*.tile.openstreetmap.org https://tiles.openfreemap.org https://demotiles.maplibre.org;
@@ -256,6 +256,29 @@ const nextConfig = {
   },
   async headers() {
     return [
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: process.env.NODE_ENV === 'development'
+              ? 'exp://192.168.0.101:8081'
+              : 'https://zynvosocial.com',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization, X-Request-Id',
+          },
+          {
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true',
+          },
+        ],
+      },
       {
         source: '/(.*)',
         headers: [

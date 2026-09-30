@@ -14,6 +14,7 @@ import { proxyAuthenticatedRequest, proxyPublicRequest } from '@/lib/server/prox
 const PUBLIC_V2_PREFIXES = [
   '/api/v2/user/auth/checkUserExists',
   '/api/v2/user/auth/clerkLogin',
+  '/api/v2/user/auth/syncWithClerk',
 ];
 
 function isPublicV2Path(method: string, path: string): boolean {
