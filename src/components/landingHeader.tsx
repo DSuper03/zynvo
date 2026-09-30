@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/authContex';
 
@@ -30,9 +31,14 @@ const LandingHeader = () => {
         >
           <div className="flex h-16 items-center justify-between px-1 sm:px-2">
             <Link href="/" className="group inline-flex items-center gap-2.5">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-yellow-400 text-sm font-extrabold text-black shadow-[0_6px_20px_rgba(250,204,21,0.35)] transition-transform duration-200 group-hover:scale-105">
-                Z
-              </span>
+              <Image
+                src="/zynvo-new-logo.png"
+                alt="Zynvo"
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-lg object-cover shadow-[0_6px_20px_rgba(250,204,21,0.35)] transition-transform duration-200 group-hover:scale-105"
+                priority
+              />
               <span className="text-sm font-bold tracking-wide text-yellow-300 sm:text-base">Zynvo</span>
             </Link>
 

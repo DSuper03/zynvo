@@ -3,17 +3,18 @@ export default function Head() {
     <>
       <link
         rel="icon"
-        href="https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226&v=3"
+        href="/icons/icon-32x32.png"
         type="image/png"
       />
       <link
         rel="shortcut icon"
-        href="https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226&v=3"
+        href="/icons/icon-32x32.png"
         type="image/png"
       />
       <link
         rel="apple-touch-icon"
-        href="https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226&v=3"
+        href="/icons/icon-180x180.png"
+        type="image/png"
       />
     </>
   );

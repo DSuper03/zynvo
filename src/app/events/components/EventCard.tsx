@@ -150,7 +150,7 @@ export default function EventCard({
                   transition={{ type: 'spring', stiffness: 300, damping: 24 }}
                 >
                   <Image
-                    src={event.posterUrl || '/logozynvo.jpg'}
+                    src={event.posterUrl || '/zynvo-new-logo.png'}
                     alt={event.description || event.EventName}
                     width={600}
                     height={300}

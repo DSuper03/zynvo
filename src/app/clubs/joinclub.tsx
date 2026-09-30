@@ -124,7 +124,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
         <div className="flex flex-col items-center pt-6 gap-4">
           <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-yellow-500/50 shadow-lg shadow-yellow-500/20">
             <Image
-              src={clubImage || '/logozynvo.jpg'}
+              src={clubImage || '/zynvo-new-logo.png'}
               alt={clubName}
               layout="fill"
               className="w-full h-full object-cover"

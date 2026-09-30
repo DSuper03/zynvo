@@ -197,7 +197,7 @@ export default function Home() {
             name: 'Zynvo',
             alternateName: 'Zynvo Social',
             url: 'https://zynvosocial.com',
-            logo: 'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226',
+            logo: 'https://zynvosocial.com/zynvo-new-logo.png',
             description:
               'Zynvo is the behavioral layer for campus life—connecting students, clubs, and colleges in one activity loop.',
             foundingDate: '2026',

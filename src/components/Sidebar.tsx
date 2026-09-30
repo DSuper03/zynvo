@@ -29,8 +29,7 @@ type SidebarMenuItem = {
   accent?: boolean;
 };
 
-const ZYNVO_LOGO_URL =
-  'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226&v=3';
+const ZYNVO_LOGO_URL = '/zynvo-new-logo.png';
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
   const pathname = usePathname();

@@ -80,25 +80,25 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: 'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226&v=2',
+        url: '/icons/icon-32x32.png',
         type: 'image/png',
         sizes: '32x32',
       },
       {
-        url: 'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226&v=2',
+        url: '/icons/icon-192x192.png',
         type: 'image/png',
         sizes: '192x192',
       },
     ],
     shortcut: [
       {
-        url: 'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226&v=2',
+        url: '/zynvo-new-logo.png',
         type: 'image/png',
       },
     ],
     apple: [
       {
-        url: 'https://ik.imagekit.io/3toclb9et/2.png?updatedAt=1759691211226&v=2',
+        url: '/icons/icon-180x180.png',
         type: 'image/png',
         sizes: '180x180',
       },

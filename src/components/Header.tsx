@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { HeaderProps } from '@/types/global-Interface';
@@ -50,8 +51,15 @@ export function Header({
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center"
+              className="flex items-center gap-2"
             >
+              <Image
+                src="/zynvo-new-logo.png"
+                alt={logoText}
+                width={28}
+                height={28}
+                className="h-7 w-7 rounded-md object-cover"
+              />
               <span className="text-2xl font-bold text-yellow-400">
                 {logoText}
               </span>
