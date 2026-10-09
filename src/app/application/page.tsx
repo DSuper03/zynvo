@@ -53,8 +53,7 @@ const DownloadPage = () => {
               <li>• You may encounter bugs, crashes, or unfinished features.</li>
               <li>• Some functionality may change or be removed in future updates.</li>
               <li>
-                • Since the app isn't on the Play Store yet, Android may ask you
-                to allow installations from your browser or Downloads app.
+                • You can download from the Play Store or install the APK directly.
               </li>
               <li>
                 • Please report any bugs or suggestions through our feedback
@@ -70,8 +69,17 @@ const DownloadPage = () => {
             className="flex flex-col gap-4 sm:flex-row"
           >
             <Link
-              href="/downloads/zynvo-mobile.apk"
+              href="https://play.google.com/store/apps/details?id=com.zynvosocial.app&pcampaignid=web_share"
+              target="_blank"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-8 py-4 text-base font-semibold text-yellow-300 shadow-[0_10px_25px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 hover:bg-black/90"
+            >
+              Download on Play Store
+              <span className="text-lg">📱</span>
+            </Link>
+
+            <Link
+              href="/downloads/zynvo-mobile.apk"
+              className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-black bg-white px-8 py-4 text-base font-semibold text-black transition hover:bg-black hover:text-yellow-300"
             >
               Download APK
               <span className="text-lg">↓</span>
