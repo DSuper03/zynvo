@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import LandingHeader from '@/components/landingHeader';
+import { PLAY_STORE_URL, PLAY_STORE_PROMO } from '@/lib/playstore';
 import { BackgroundElements } from '@/components/TeamSection';
 import { LandingFaq } from '@/components/marketing/LandingFaq';
 import type { AeoFaq } from '@/lib/seo/aeoFaqs';
@@ -70,6 +72,26 @@ export function AudienceLanding({
               </Link>
             )}
           </div>
+        </section>
+
+        {/* Play Store promo */}
+        <section className="mx-auto max-w-3xl px-4 pb-4 sm:px-6">
+          <a
+            href={PLAY_STORE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Get Zynvo on Google Play"
+            className="group/promo block overflow-hidden rounded-3xl border border-yellow-500/30 shadow-[0_16px_40px_rgba(0,0,0,0.45)] transition hover:-translate-y-1 hover:border-yellow-400/60"
+          >
+            <Image
+              src={PLAY_STORE_PROMO.wideAlt}
+              alt="Zynvo is available on Google Play — download the app"
+              width={1440}
+              height={520}
+              className="h-auto w-full"
+              sizes="(max-width: 768px) 100vw, 768px"
+            />
+          </a>
         </section>
 
         <section className="mx-auto max-w-5xl px-4 py-12 sm:px-6">

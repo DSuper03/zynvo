@@ -56,7 +56,13 @@
     "education"
   ],
   "protocol_handlers": [],
-  "related_applications": [],
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.zynvosocial.app",
+      "url": "https://play.google.com/store/apps/details?id=com.zynvosocial.app"
+    }
+  ],
   "display_override": [],
   "share_target": null,
   "shortcuts": [],

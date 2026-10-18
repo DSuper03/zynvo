@@ -9,7 +9,9 @@ import LandingHeader from './landingHeader';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Button } from './ui/button';
-import { FaInstagramSquare } from 'react-icons/fa';
+import { FaInstagramSquare, FaGooglePlay } from 'react-icons/fa';
+import { PLAY_STORE_URL, PLAY_STORE_PROMO } from '@/lib/playstore';
+import Image from 'next/image';
 
 const ContactSection = () => {
   const [formState, setFormState] = useState({
@@ -107,6 +109,15 @@ const ContactSection = () => {
                   <FaInstagramSquare />
                   <span>Follow us on Instagram</span>
                 </div>
+                <a
+                  href={PLAY_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-4 text-gray-300 transition-colors hover:text-yellow-400"
+                >
+                  <FaGooglePlay />
+                  <span>Get the Zynvo app on Google Play</span>
+                </a>
               </div>
 
               <div className="mt-8">
@@ -115,6 +126,23 @@ const ContactSection = () => {
                 </h3>
                 <p className="text-gray-300">We are always open to help you.</p>
               </div>
+
+              <a
+                href={PLAY_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Get Zynvo on Google Play"
+                className="mt-8 block overflow-hidden rounded-2xl border border-yellow-500/30 transition hover:-translate-y-1 hover:border-yellow-400/60"
+              >
+                <Image
+                  src={PLAY_STORE_PROMO.wide}
+                  alt="Zynvo is available on Google Play — download the app"
+                  width={720}
+                  height={260}
+                  className="h-auto w-full"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </a>
             </div>
           </motion.div>
 

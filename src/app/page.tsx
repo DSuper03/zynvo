@@ -10,6 +10,8 @@ import {
 } from 'react-icons/fa';
 
 import LandingHeader from '@/components/landingHeader';
+import Image from 'next/image';
+import { PLAY_STORE_URL, PLAY_STORE_PROMO } from '@/lib/playstore';
 import { Skiper39 } from '@/components/SkipperLanding';
 import { cn } from '@/lib/utils';
 import { CanvasText } from '@/components/ui/canvas-text';
@@ -318,7 +320,7 @@ export default function Home() {
                 name: 'Does Zynvo have a mobile app?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Zynvo works as a Progressive Web App (PWA) — install it directly from your browser on Android or iOS for a native-like experience. A dedicated app is in development.',
+                  text: 'Yes. The Zynvo Android app is live on Google Play — download it at play.google.com/store/apps/details?id=com.zynvosocial.app, or visit zynvosocial.com/application for the Play Store link and direct APK. Zynvo also works as a Progressive Web App (PWA) installable from the browser on Android and iOS.',
                 },
               },
               {
@@ -373,7 +375,7 @@ export default function Home() {
         <Events />
         <OpenRolesSection />
         {/* CTA Section */}
-        <section className="flex min-h-80 items-center justify-center bg-yellow-300 p-8 text-black">
+        <section className="flex min-h-80 flex-col items-center justify-center gap-8 bg-yellow-300 p-8 text-black">
           <h2
             className={cn(
               'group relative mx-auto mt-4 max-w-2xl text-left text-4xl font-bold leading-tight tracking-tight text-balance text-neutral-900 sm:text-5xl md:text-6xl xl:text-7xl',
@@ -399,6 +401,24 @@ export default function Home() {
               animationDuration={20}
             />
           </h2>
+
+          {/* Play Store promo */}
+          <a
+            href={PLAY_STORE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Get Zynvo on Google Play"
+            className="group/promo relative mx-auto block w-full max-w-2xl overflow-hidden rounded-3xl border-2 border-black shadow-[0_16px_40px_rgba(0,0,0,0.25)] transition hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.35)]"
+          >
+            <Image
+              src={PLAY_STORE_PROMO.landscape}
+              alt="Zynvo is available on Google Play — download the app"
+              width={1200}
+              height={630}
+              className="h-auto w-full"
+              sizes="(max-width: 768px) 100vw, 672px"
+            />
+          </a>
         </section>
 
         {/* Footer */}

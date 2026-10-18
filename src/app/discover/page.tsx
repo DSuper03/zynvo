@@ -15,6 +15,7 @@ import ProfileHeaderCompact from '@/components/ProfileHeaderCompact';
 import { NotificationDropdown } from '@/components/notifications';
 import { EmptyState, ErrorState, FeedPostSkeleton } from '@/components/feedback';
 import { FeedPostCard } from '@/components/discover/FeedPostCard';
+import { PLAY_STORE_URL, PLAY_STORE_PROMO } from '@/lib/playstore';
 
 interface ApiResponse {
   msg: string;
@@ -364,10 +365,25 @@ export default function Feed() {
                   className="w-full sm:w-auto"
                 />
               </div>
-
-              {/* Tab navigation - Hidden on mobile */}
-              
             </div>
+
+            {/* Desktop top Play Store promo (prominent) */}
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Get Zynvo on Google Play"
+              className="hidden lg:block overflow-hidden rounded-2xl border border-yellow-500/25 shadow-lg shadow-black/30 transition hover:-translate-y-1 hover:border-yellow-400/50"
+            >
+              <Image
+                src={PLAY_STORE_PROMO.wide}
+                alt="Zynvo is available on Google Play — download the app"
+                width={1440}
+                height={520}
+                className="h-auto w-full"
+                sizes="(max-width: 1280px) 60vw, 800px"
+              />
+            </a>
 
             {/* Mobile event pins */}
             <div className="lg:hidden mt-2">
@@ -415,6 +431,24 @@ export default function Feed() {
                 </div>
               </div>
             </div>
+
+            {/* Mobile Play Store promo - top of feed for visibility */}
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Get Zynvo on Google Play"
+              className="lg:hidden block overflow-hidden rounded-2xl border border-yellow-500/25 shadow-lg shadow-black/30 transition hover:-translate-y-1 hover:border-yellow-400/50"
+            >
+              <Image
+                src={PLAY_STORE_PROMO.wideAlt}
+                alt="Zynvo is available on Google Play — download the app"
+                width={1440}
+                height={520}
+                className="h-auto w-full"
+                sizes="100vw"
+              />
+            </a>
 
             {/* Posts Display */}
             <div className="space-y-4 sm:space-y-6">
@@ -525,6 +559,26 @@ export default function Feed() {
                     sizes="(max-width: 1280px) 15vw, 180px"
                   />
                 ))}
+              </div>
+
+              {/* Desktop Play Store promo */}
+              <div className="sticky bottom-0 z-10 mt-4 pt-2 bg-gradient-to-t from-black/90 via-black/60 to-transparent pb-2">
+                <a
+                  href={PLAY_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Get Zynvo on Google Play"
+                  className="block overflow-hidden rounded-2xl border-2 border-yellow-400/40 bg-black/90 shadow-[0_16px_40px_rgba(0,0,0,0.5)] backdrop-blur-md transition hover:-translate-y-1 hover:border-yellow-400/60"
+                >
+                  <Image
+                    src={PLAY_STORE_PROMO.portrait}
+                    alt="Zynvo is available on Google Play — download the app"
+                    width={800}
+                    height={1000}
+                    className="h-auto w-full"
+                    sizes="(max-width: 1280px) 15vw, 240px"
+                  />
+                </a>
               </div>
             </div>
           </aside>

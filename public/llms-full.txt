@@ -121,7 +121,7 @@ A: A platform that helps colleges see and support campus activity — clubs, eve
 A: WhatsApp is chat; Zynvo is discovery and structure. Find events, RSVP, and follow clubs without mute-and-miss chaos.
 
 **Q: Is there a mobile app?**  
-A: Zynvo works as a Progressive Web App (PWA), installable from the browser. A dedicated app is in development.
+A: Yes. The Zynvo Android app is live on Google Play: https://play.google.com/store/apps/details?id=com.zynvosocial.app — or visit https://zynvosocial.com/application for the Play Store link and a direct APK. It also works as a Progressive Web App (PWA) installable from the browser.
 
 ---
 
@@ -148,6 +148,8 @@ A: Zynvo works as a Progressive Web App (PWA), installable from the browser. A d
 | Student engagement platform | https://zynvosocial.com/student-engagement-platform |
 | Sign Up | https://zynvosocial.com/auth/signup |
 | Discover Clubs | https://zynvosocial.com/discover |
+| Download the app | https://zynvosocial.com/application |
+| Google Play | https://play.google.com/store/apps/details?id=com.zynvosocial.app |
 | Events | https://zynvosocial.com/events |
 | FAQ | https://zynvosocial.com/faq |
 | Contact | https://zynvosocial.com/contact |

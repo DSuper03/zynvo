@@ -16,6 +16,7 @@ Zynvo (https://zynvosocial.com) is a campus platform for college students, club 
 - **Leaderboard & challenges**: Gamified participation.
 - **AI assistant**: Help navigating campus life and opportunities.
 - **PWA**: Installable on mobile from the browser.
+- **Android app**: Live on Google Play — [play.google.com/store/apps/details?id=com.zynvosocial.app](https://play.google.com/store/apps/details?id=com.zynvosocial.app).
 
 ## Who Is It For?
 
@@ -43,6 +44,8 @@ Founded in 2026. Based in Kolkata, India.
 - Campus event app: https://zynvosocial.com/campus-event-app
 - Student engagement platform: https://zynvosocial.com/student-engagement-platform
 - Discover Clubs: https://zynvosocial.com/discover
+- Download the app: https://zynvosocial.com/application
+- Google Play: https://play.google.com/store/apps/details?id=com.zynvosocial.app
 - Events: https://zynvosocial.com/events
 - Sign Up: https://zynvosocial.com/auth/signup
 - FAQ: https://zynvosocial.com/faq

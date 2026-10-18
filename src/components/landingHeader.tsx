@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/authContex';
+import { APP_DOWNLOAD_PATH } from '@/lib/playstore';
 
 const LandingHeader = () => {
   const { user, hardLogout, login, isLoggedIn } = useAuth();
@@ -43,8 +44,14 @@ const LandingHeader = () => {
             </Link>
 
             <div className="hidden items-center gap-2 md:flex">
-              {isLoggedIn ? (
+              {              isLoggedIn ? (
                 <>
+                  <Link
+                    href={APP_DOWNLOAD_PATH}
+                    className="rounded-xl border border-yellow-300/45 bg-yellow-400/15 px-4 py-2 text-sm font-semibold text-yellow-300 transition-colors hover:bg-yellow-400 hover:text-black"
+                  >
+                    Get App
+                  </Link>
                   <button
                     onClick={login}
                     className="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-yellow-400/40 bg-yellow-500/10 transition-all duration-200 hover:scale-105 hover:border-yellow-300"
@@ -69,6 +76,12 @@ const LandingHeader = () => {
               ) : (
                 <>
                   <Link
+                    href={APP_DOWNLOAD_PATH}
+                    className="rounded-xl border border-yellow-300/45 bg-yellow-400/15 px-4 py-2 text-sm font-semibold text-yellow-300 transition-colors hover:bg-yellow-400 hover:text-black"
+                  >
+                    Get App
+                  </Link>
+                  <Link
                     href="/auth/signin"
                     className="rounded-xl border border-white/20 bg-black/70 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-black/90"
                   >
@@ -91,6 +104,12 @@ const LandingHeader = () => {
             </div>
 
             <div className="flex items-center gap-2 md:hidden">
+              <Link
+                href={APP_DOWNLOAD_PATH}
+                className="rounded-xl border border-yellow-300/45 bg-yellow-400/15 px-3 py-2 text-xs font-semibold text-yellow-300 transition-colors hover:bg-yellow-400 hover:text-black"
+              >
+                Get App
+              </Link>
               <Link
                 href="/auth/signup"
                 className="rounded-xl border border-yellow-500/50 bg-yellow-400 px-3 py-2 text-xs font-semibold text-black transition-colors hover:bg-yellow-300"

@@ -6,6 +6,7 @@ import { Rock_Salt } from "next/font/google";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/authContex";
+import { PLAY_STORE_URL } from "@/lib/playstore";
 const rockSalt = Rock_Salt({
   subsets: ["latin"],
   weight: ["400"],
@@ -442,6 +443,15 @@ const Skiper39 = () => {
                 </Link>
               </>
             )}
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full border-2 border-black bg-black px-4 py-1 sm:px-5 sm:py-1.5 text-xs sm:text-sm font-semibold text-yellow-300 transition-all hover:-translate-y-0.5 hover:bg-black/90 sm:w-auto"
+            >
+              <span>Get it on Play Store</span>
+              <span aria-hidden>📱</span>
+            </a>
           </div>
         </div>
       </div>
@@ -474,10 +484,10 @@ const Skiper39 = () => {
         `}</style>
         <div className="scroll-container">
           <div className="scroll-item font-mono text-sm sm:text-base md:text-lg font-bold text-black tracking-wider px-4">
-            ✦ zynvosocial.com ✦ zynvosocial.com ✦ zynvosocial.com ✦ zynvosocial.com ✦ zynvosocial.com ✦
+            ✦ Now on Google Play ✦ zynvosocial.com ✦ Download the Zynvo app ✦ zynvosocial.com ✦ Now on Google Play ✦ zynvosocial.com ✦
           </div>
           <div className="scroll-item font-mono text-sm sm:text-base md:text-lg font-bold text-black tracking-wider px-4">
-            ✦ zynvosocial.com ✦ zynvosocial.com ✦ zynvosocial.com ✦ zynvosocial.com ✦ zynvosocial.com ✦
+            ✦ Now on Google Play ✦ zynvosocial.com ✦ Download the Zynvo app ✦ zynvosocial.com ✦ Now on Google Play ✦ zynvosocial.com ✦
           </div>
         </div>
       </div>

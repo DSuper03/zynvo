@@ -3,8 +3,10 @@
 import { useState } from "react";
 import {
   Twitter, Mail, MapPin, ArrowRight, Heart,
-  Instagram, ExternalLink
+  Instagram, ExternalLink, Download
 } from "lucide-react";
+import Image from "next/image";
+import { PLAY_STORE_URL, APP_DOWNLOAD_PATH, PLAY_STORE_PROMO } from "@/lib/playstore";
 
 // ─── CONFIGURE YOUR SOCIAL POSTS HERE ────────────────────────────────────────
 const instagramPosts = [
@@ -35,6 +37,7 @@ const productLinks = [
   { label: "Club Management", href: "/club-management-software" },
   { label: "Engagement Platform", href: "/student-engagement-platform" },
   { label: "Events", href: "/events" },
+  { label: "Get the App", href: APP_DOWNLOAD_PATH },
 ];
 const resourceLinks = [
   { label: "FAQ", href: "/faq" },
@@ -79,6 +82,10 @@ export default function FooterWithSocial() {
         .subscribe-btn:hover { background: #333; transform: scale(1.04); }
 
         .ig-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+
+        .playstore-promo { display: block; border-radius: 20px; overflow: hidden; border: 2px solid #1a1a1a; background: #1a1a1a; cursor: pointer; transition: transform 0.22s, box-shadow 0.22s; margin-bottom: 56px; }
+        .playstore-promo:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(26,26,26,0.35); }
+        .playstore-promo img { width: 100%; height: auto; display: block; }
         @media(max-width:700px) { .ig-grid { grid-template-columns: 1fr 1fr; } }
         @media(max-width:460px) { .ig-grid { grid-template-columns: 1fr; } }
 
@@ -106,6 +113,24 @@ export default function FooterWithSocial() {
               Stay connected — see what we're building, sharing, and celebrating.
             </p>
           </div>
+
+          {/* ── Play Store promo ── */}
+          <a
+            href={PLAY_STORE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="playstore-promo"
+            aria-label="Get Zynvo on Google Play"
+          >
+            <Image
+              src={PLAY_STORE_PROMO.wide}
+              alt="Zynvo is available on Google Play — download the app"
+              width={1440}
+              height={520}
+              className="h-auto w-full"
+              sizes="(max-width: 1060px) 100vw, 1012px"
+            />
+          </a>
 
           {/* ── Instagram ── */}
           <div style={{ marginBottom: 56 }}>
@@ -239,7 +264,24 @@ export default function FooterWithSocial() {
                 <a href="mailto:dsuper03.dev@gmail.com" className="social-icon-btn" title="Email">
                   <Mail size={17} />
                 </a>
+                <a
+                  href={PLAY_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-icon-btn"
+                  title="Get it on Google Play"
+                >
+                  <Download size={17} />
+                </a>
               </div>
+
+              <a
+                href={APP_DOWNLOAD_PATH}
+                className="footer-link"
+                style={{ marginTop: 14, fontWeight: 900, color: "#1a1a1a" }}
+              >
+                <ArrowRight size={13} /> Get the App — Download Zynvo
+              </a>
             </div>
 
           </div>

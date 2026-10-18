@@ -26,6 +26,12 @@ export const aeoFaqs: AeoFaq[] = [
   },
   {
     category: 'General',
+    question: 'Does Zynvo have a mobile app?',
+    answer:
+      'Yes. The Zynvo Android app is live on Google Play — get it at play.google.com/store/apps/details?id=com.zynvosocial.app or browse zynvosocial.com/application for the Play Store link and a direct APK download. Zynvo also works as an installable PWA in the browser on Android and iOS.',
+  },
+  {
+    category: 'General',
     question: 'How is Zynvo different from Instagram or LinkedIn?',
     answer:
       'Instagram is content and LinkedIn is careers. Zynvo is campus activity before careers: events, clubs, and involvement in the years LinkedIn does not yet capture.',

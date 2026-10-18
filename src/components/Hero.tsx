@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import React from 'react';
+import { PLAY_STORE_URL, PLAY_STORE_PROMO } from '@/lib/playstore';
 
 const Hero = () => {
   return (
@@ -57,9 +58,21 @@ const Hero = () => {
               <span className="text-lg">→</span>
             </Link>
 
-            <p className="mt-3 text-xs font-medium uppercase tracking-[0.25em] text-black/60 sm:text-[0.7rem]">
-              No noise. Just your people.
-            </p>
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-3 inline-flex items-center gap-2 rounded-full border-2 border-black bg-yellow-100 px-6 py-2.5 text-sm font-semibold text-black transition hover:-translate-y-0.5 hover:bg-black hover:text-yellow-300 sm:px-7 sm:py-3 sm:text-base"
+            >
+              <span>Get it on Play Store</span>
+              <span className="text-lg">📱</span>
+            </a>
+
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <p className="text-xs font-medium uppercase tracking-[0.25em] text-black/60 sm:text-[0.7rem]">
+                No noise. Just your people.
+              </p>
+            </div>
           </motion.div>
         </div>
 
@@ -73,6 +86,27 @@ const Hero = () => {
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
+
+          <motion.a
+            initial={{ opacity: 0, y: 18, rotate: -6 }}
+            whileInView={{ opacity: 1, y: 0, rotate: -4 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.35 }}
+            href={PLAY_STORE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Get Zynvo on Google Play"
+            className="absolute bottom-3 left-3 z-10 block w-32 overflow-hidden rounded-2xl border-2 border-black shadow-[0_16px_40px_rgba(0,0,0,0.35)] transition hover:-translate-y-1 hover:rotate-0 hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)] sm:w-40 md:bottom-6 md:left-6 md:w-48"
+          >
+            <Image
+              src={PLAY_STORE_PROMO.portrait}
+              alt="Zynvo is available on Google Play — download the app"
+              width={800}
+              height={1000}
+              className="h-auto w-full"
+              sizes="(max-width: 768px) 128px, 192px"
+            />
+          </motion.a>
         </div>
       </div>
     </section>
