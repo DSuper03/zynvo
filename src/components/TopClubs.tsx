@@ -22,6 +22,7 @@ type TopClubApiItem = {
   profilePic?: string | null;
   image?: string | null;
   logo?: string | null;
+  clubLogo?: string | null;
   type?: string | null;
   wings?: string[] | null;
   instagram?: string | null;
@@ -59,8 +60,10 @@ const DEFAULT_CLUB_IMAGE =
       </text>
     </svg>
   `);
-const BACKEND_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
-const TOP_CLUBS_CACHE_KEY = 'zynvo.topclubs.cache.v1';
+const BACKEND_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || ''
+).replace(/\/$/, '');
+const TOP_CLUBS_CACHE_KEY = 'zynvo.topclubs.cache.v2';
 
 const resolveClubImageUrl = (url?: string | null) => {
   if (!url || typeof url !== 'string') return DEFAULT_CLUB_IMAGE;
@@ -94,6 +97,7 @@ const mapApiClubToTopClub = (club: TopClubApiItem, index: number): TopClub => {
     club.profilePic ||
     club.image ||
     club.logo ||
+    club.clubLogo ||
     DEFAULT_CLUB_IMAGE;
 
   return {
