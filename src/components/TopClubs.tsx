@@ -22,6 +22,15 @@ type TopClubApiItem = {
   profilePic?: string | null;
   image?: string | null;
   logo?: string | null;
+  type?: string | null;
+  wings?: string[] | null;
+  instagram?: string | null;
+  twitter?: string | null;
+  linkedin?: string | null;
+};
+
+type PublicClubsResponse = {
+  clubs?: TopClubApiItem[];
 };
 
 type CachedTopClubsPayload = {
@@ -50,7 +59,7 @@ const DEFAULT_CLUB_IMAGE =
       </text>
     </svg>
   `);
-const BACKEND_BASE_URL = ('').replace(/\/$/, '');
+const BACKEND_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
 const TOP_CLUBS_CACHE_KEY = 'zynvo.topclubs.cache.v1';
 
 const resolveClubImageUrl = (url?: string | null) => {
@@ -126,7 +135,6 @@ const writeCachedTopClubs = (clubs: TopClub[]) => {
 export default function TopClubs() {
   const [clubs, setClubs] = useState<TopClub[]>(fallbackClubs);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [authRequiredForLogos, setAuthRequiredForLogos] = useState(false);
 
   useEffect(() => {
     const fetchClubs = async () => {
@@ -137,25 +145,16 @@ export default function TopClubs() {
       }
 
       try {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-        const hasActiveSession = typeof window !== 'undefined' ? sessionStorage.getItem('activeSession') === 'true' : false;
-        const headers =
-          token && hasActiveSession ? { authorization: `Bearer ${token}` } : undefined;
+        const response = await axios.get<PublicClubsResponse>(
+          `${BACKEND_BASE_URL}/api/v1/clubs/public?page=1&limit=12`,
+        );
 
-        const response = await axios.get<{ resp: TopClubApiItem[] }>('/api/public/top-clubs', {
-          headers,
-        });
-
-        const fetchedClubs = response.data?.resp || [];
+        const fetchedClubs = response.data?.clubs || [];
         const mappedClubs = fetchedClubs
           .map((club, index) => mapApiClubToTopClub(club, index));
-        setAuthRequiredForLogos(false);
         setClubs(mappedClubs);
         writeCachedTopClubs(mappedClubs);
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          setAuthRequiredForLogos(true);
-        }
         console.warn('Failed to load top clubs from backend, using fallback clubs.', error);
         if (cachedClubs.length === 0) {
           setClubs(fallbackClubs);
@@ -185,11 +184,6 @@ export default function TopClubs() {
           <p style={{ margin: 0, fontSize: 15, color: '#4b5563', lineHeight: 1.7 }}>
             Discover the most active clubs on Zynvo, with live photos and college names fetched directly from the backend.
           </p>
-          {authRequiredForLogos && (
-            <p style={{ marginTop: 10, fontSize: 12, fontWeight: 700, color: '#92400e' }}>
-              Official logos are restricted by backend auth right now. Sign in to unlock them.
-            </p>
-          )}
         </div>
       </div>
 
