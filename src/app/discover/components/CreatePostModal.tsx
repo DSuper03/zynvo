@@ -1,16 +1,14 @@
 'use client';
 import posthog from 'posthog-js';
-import { collegesWithClubs } from '@/components/colleges/college';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  X,
   Image as ImageIcon,
   Camera,
   Trash2,
   Send,
   Award,
   School,
-  Search,
+  X,
 } from 'lucide-react';
 import Image from 'next/legacy/image';
 import { MagicCard } from '@/components/magicui/magic-card';
@@ -27,7 +25,6 @@ import {
 import axios from 'axios';
 import { toast } from 'sonner';
 import { uploadImageDirectly } from '@/lib/imgkit';
-import { fetchClubsByCollege } from '@/app/api/hooks/useClubs';
 import { useRouter } from 'next/navigation';
 
 interface CreatePostModalProps {
@@ -42,6 +39,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   // Form state
   const [postText, setPostText] = useState('');
   const [selectedClub, setSelectedClub] = useState('');
+  const [selectedClubId, setSelectedClubId] = useState('');
   const [selectedCollege, setSelectedCollege] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
@@ -51,6 +49,8 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const [token, setToken] = useState<string | null>('');
   const [imageLink, setImageLink] = useState<string>('');
   const [title, setTitle] = useState('');
+  const [userClubs, setUserClubs] = useState<Array<{id: string, name: string, collegeName: string}>>([]);
+  const [loadingUserClubs, setLoadingUserClubs] = useState(false);
   // removed duplicate effect
   const router = useRouter();
   useEffect(() => {
@@ -78,42 +78,39 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     }
   }, []);
 
+  // Fetch user's club memberships
   useEffect(() => {
-    let cancelled = false;
-    const controller = new AbortController();
+    const fetchUserClubs = async () => {
+      if (!token) return;
 
-    async function loadClubs() {
       try {
-        if (!selectedCollege) {
-          setClubs([]);
-          return;
+        setLoadingUserClubs(true);
+        const response = await axios.get('/api/v1/user/getUser', {
+          headers: { authorization: `Bearer ${token}` },
+        });
+
+        const clubMemberships = response.data?.user?.clubMemberships || [];
+        if (clubMemberships.length > 0) {
+          const clubsData = clubMemberships.map((membership: any) => ({
+            id: membership.clubId,
+            name: membership.club.name,
+            collegeName: membership.club.collegeName,
+          }));
+          setUserClubs(clubsData);
         }
-        setSettingClubs(true);
-        setSelectedClub('');
-        const list = await fetchClubsByCollege(
-          selectedCollege,
-          controller.signal,
-          token || undefined
-        );
-        if (!cancelled) setClubs(list);
-      } catch {
-        if (!cancelled) setClubs([]);
+      } catch (error) {
+        console.error('Failed to fetch user clubs:', error);
       } finally {
-        if (!cancelled) setSettingClubs(false);
+        setLoadingUserClubs(false);
       }
-    }
-
-    loadClubs();
-    return () => {
-      cancelled = true;
-      controller.abort();
     };
-  }, [selectedCollege, token]);
 
-  // College selection modal state
-  const [isCollegeModalOpen, setIsCollegeModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const searchInputRef = useRef<HTMLInputElement>(null);
+    fetchUserClubs();
+  }, [token]);
+
+
+
+
 
   // Client-side image compressor to keep files under 2 MB
   async function compressImageToUnder2MB(originalFile: File): Promise<File> {
@@ -294,6 +291,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
         description: postText,
         collegeName: selectedCollege,
         clubName: selectedClub,
+        clubId: selectedClubId,
         image: uploadedImageUrl || imageLink || '',
       };
 
@@ -366,9 +364,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       const notInClub =
         maybeMsg.includes('not a part of any club') ||
         maybeMsg.includes('not part of any club') ||
+        maybeMsg.includes('not a member of this club') ||
         error?.response?.status === 403;
       if (notInClub) {
-        toast('You need to join or create a club to post.', {
+        toast('You need to join a club to post to it.', {
           action: {
             label: 'Explore Clubs',
             onClick: () => router.push('/clubs'),
@@ -380,26 +379,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Filter colleges based on search
-  const filteredColleges = collegesWithClubs.filter((college) =>
-    college.college.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Open college modal and focus search input
-  const openCollegeModal = () => {
-    setIsCollegeModalOpen(true);
-    setTimeout(() => {
-      searchInputRef.current?.focus();
-    }, 100);
-  };
-
-  // Select a college and close modal
-  const selectCollege = (college: string) => {
-    setSelectedCollege(college);
-    setIsCollegeModalOpen(false);
-    setSearchQuery('');
   };
 
   if (!isOpen) return null;
@@ -530,26 +509,15 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
             {/* Tag Options */}
             <div className="space-y-4">
-              {/* College Selection */}
+              {/* College Selection (Auto-filled when club is selected) */}
               <div>
                 <Label className="text-xs font-semibold text-yellow-500/80 mb-1.5 flex items-center uppercase tracking-wider">
                   <School size={14} className="mr-1.5" />
-                  Select a College
+                  College
                 </Label>
-                <Button
-                  onClick={openCollegeModal}
-                  className="w-full bg-neutral-900/50 border border-neutral-800 hover:border-yellow-500/30 text-white px-4 py-2.5 rounded-xl focus:outline-none flex justify-between items-center transition-all group"
-                >
-                  {selectedCollege ? (
-                    <span className="font-medium">{selectedCollege}</span>
-                  ) : (
-                    <span className="text-neutral-500">Select a college</span>
-                  )}
-                  <Search
-                    size={16}
-                    className="ml-2 text-neutral-500 group-hover:text-yellow-400 transition-colors"
-                  />
-                </Button>
+                <div className="w-full bg-neutral-900/50 border border-neutral-800 text-neutral-400 px-4 py-2.5 rounded-xl">
+                  {selectedCollege || 'Select a club to auto-fill college'}
+                </div>
               </div>
 
               {/* Club Selection */}
@@ -560,25 +528,35 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 </Label>
                 <div className="relative">
                   <select
-                    value={selectedClub}
-                    onChange={(e) => setSelectedClub(e.target.value)}
+                    value={selectedClubId}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setSelectedClubId(selectedId);
+                      const selectedClub = userClubs.find(c => c.id === selectedId);
+                      if (selectedClub) {
+                        setSelectedClub(selectedClub.name);
+                        setSelectedCollege(selectedClub.collegeName);
+                      } else {
+                        setSelectedClub('');
+                        setSelectedCollege('');
+                      }
+                    }}
                     className="w-full appearance-none bg-neutral-900/50 border border-neutral-800 hover:border-yellow-500/30 text-white px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500/20 transition-all"
-                    disabled={!selectedCollege}
                   >
                     <option value="">
-                      {settingClubs
-                        ? 'Loading clubs...'
+                      {loadingUserClubs
+                        ? 'Loading your clubs...'
                         : 'Post without a club'}
                     </option>
-                    {!settingClubs && selectedCollege && clubs.length === 0 && (
+                    {!loadingUserClubs && userClubs.length === 0 && (
                       <option value="" disabled>
-                        No clubs associated
+                        No clubs joined yet
                       </option>
                     )}
-                    {!settingClubs &&
-                      clubs.map((name) => (
-                        <option key={name} value={name}>
-                          {name}
+                    {!loadingUserClubs &&
+                      userClubs.map((club) => (
+                        <option key={club.id} value={club.id}>
+                          {club.name} ({club.collegeName})
                         </option>
                       ))}
                   </select>
@@ -621,70 +599,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
           </div>
         </MagicCard>
       </div>
-
-      {/* College Selection Modal */}
-      {isCollegeModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4">
-          <div className="bg-gray-900 border border-yellow-500/30 rounded-xl w-full max-w-md">
-            <div className="p-4 border-b border-yellow-500/30 flex justify-between items-center">
-              <h3 className="text-lg font-medium text-white">
-                Select a College
-              </h3>
-              <Button
-                onClick={() => {
-                  setIsCollegeModalOpen(false);
-                  setSearchQuery('');
-                }}
-                className="text-gray-400 hover:text-white"
-              >
-                <X size={20} />
-              </Button>
-            </div>
-
-            <div className="p-4">
-              <div className="relative mb-4">
-                <Search
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <Input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Search colleges..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none"
-                />
-              </div>
-
-              <div className="max-h-72 overflow-y-auto pr-1">
-                {filteredColleges.length > 0 ? (
-                  <ul className="space-y-1">
-                    {filteredColleges.map((collegeWithClubs) => (
-                      <li key={collegeWithClubs.college}>
-                        <Button
-                          onClick={() =>
-                            selectCollege(collegeWithClubs.college)
-                          }
-                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors flex items-center"
-                        >
-                          <span className="line-clamp-1">
-                            {collegeWithClubs.college}
-                          </span>
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="text-center py-8 text-gray-400">
-                    No colleges found matching your search
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

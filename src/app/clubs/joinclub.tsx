@@ -92,9 +92,12 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
         );
       }
     } catch (error: unknown) {
-      toast.error(
-        getSafeErrorMessage(error, 'Failed to join club. Please try again.')
-      );
+      const errorMsg = getSafeErrorMessage(error, 'Failed to join club. Please try again.');
+      if (errorMsg.toLowerCase().includes('already a member of this club')) {
+        toast.error('You are already a member of this club');
+      } else {
+        toast.error(errorMsg);
+      }
     }
     // console.log('Join request data:', formData);
   };
@@ -113,13 +116,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
           </Button>
         </div>
 
-        {/* Warning Banner */}
-        <div className="bg-yellow-500/10 border-l-4 border-yellow-500 px-4 py-3 mx-4 mt-4 rounded-r-lg flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
-          <p className="text-sm text-yellow-300 font-medium">
-            You can join only 1 club at a time
-          </p>
-        </div>
+
 
         <div className="flex flex-col items-center pt-6 gap-4">
           <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-yellow-500/50 shadow-lg shadow-yellow-500/20">

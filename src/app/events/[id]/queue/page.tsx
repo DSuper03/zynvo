@@ -68,15 +68,31 @@ export default function EventQueuePage() {
         const verifyAdminAndFetchQueue = async () => {
             try {
                 const token = localStorage.getItem('token');
-                
+
                 if (!token) {
                     setIsAdmin(false);
                     setIsCheckingAdmin(false);
                     return;
                 }
 
-                // 1. Check Admin Status
-                const adminRes = await fetch(`/api/v1/user/isClubAdmin`, {
+                // 1. Fetch Event Details to get clubId
+                const eventRes = await fetch(`/api/v1/events/getEvent/${eventId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const eventData = await eventRes.json();
+
+                if (!eventRes.ok || !eventData.response?.clubId) {
+                    setIsAdmin(false);
+                    setIsCheckingAdmin(false);
+                    return;
+                }
+
+                const clubId = eventData.response.clubId;
+
+                // 2. Check Admin Status with clubId
+                const adminRes = await fetch(`/api/v1/user/isClubAdmin/${clubId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -92,7 +108,7 @@ export default function EventQueuePage() {
                 setIsAdmin(true);
                 setIsCheckingAdmin(false);
 
-                // 2. Fetch Event Queue
+                // 3. Fetch Event Queue
                 setIsLoadingQueue(true);
                 const queueRes = await fetch(`/api/v1/events/eventQueue/${eventId}`, {
                     headers: {

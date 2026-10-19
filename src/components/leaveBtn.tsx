@@ -4,14 +4,19 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useState } from "react";
 
-export default function LeaveBtn({ token }: { token: string }) {
+export default function LeaveBtn({ token, clubId }: { token: string; clubId: string }) {
   const [loading, setLoading] = useState(false);
 
   const handleLeave = async () => {
+    if (!clubId) {
+      toast.error("Club ID is required");
+      return;
+    }
+
     try {
       setLoading(true);
-      const leave = await axios.put<any>(
-        `/api/v1/user/leaveClub`,
+      const leave = await axios.post<any>(
+        `/api/v1/user/leaveClub/${clubId}`,
         {},
         {
           headers: {
@@ -20,8 +25,9 @@ export default function LeaveBtn({ token }: { token: string }) {
         }
       );
       toast.success(leave.data.msg);
-    } catch (error) {
-      toast.error("Error leaving club");
+    } catch (error: any) {
+      const errorMsg = error?.response?.data?.msg || "Error leaving club";
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -32,8 +38,8 @@ export default function LeaveBtn({ token }: { token: string }) {
       <button
         onClick={handleLeave}
         disabled={loading}
-        className={`px-6 py-3 font-semibold rounded-2xl border border-yellow-500 
-        text-yellow-400 bg-black hover:bg-yellow-500 hover:text-black transition-all 
+        className={`px-6 py-3 font-semibold rounded-2xl border border-yellow-500
+        text-yellow-400 bg-black hover:bg-yellow-500 hover:text-black transition-all
         duration-300 shadow-[0_0_15px_rgba(255,215,0,0.2)] ${
           loading ? "opacity-70 cursor-not-allowed" : ""
         }`}

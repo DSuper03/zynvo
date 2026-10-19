@@ -175,6 +175,17 @@ export interface Club {
   events: Event[];
 }
 
+export interface ClubMembership {
+  clubId: string;
+  joinedAt: string;
+  club: {
+    id: string;
+    name: string;
+    collegeName: string;
+    profilePicUrl: string | null;
+  };
+}
+
 // dashboard and user info ------------------------------------------------------------------------------------------
 export interface User {
   id: string;
@@ -188,8 +199,9 @@ export interface User {
   expiryToken: number;
   ValidFor: number;
   isVerified?: boolean;
-  clubName?: string;
-  clubId?: string;
+  clubName?: string | null;
+  clubId?: string | null;
+  clubMemberships?: ClubMembership[];
   eventAttended: UserEvent[];
   club?: Club;
   CreatePost: CreatePost[];

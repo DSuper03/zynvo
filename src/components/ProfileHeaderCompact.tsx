@@ -14,6 +14,16 @@ interface UserDetails {
   college?: string | null;
   clubName?: string | null;
   year?: string | null;
+  clubMemberships?: {
+    clubId: string;
+    joinedAt: string;
+    club: {
+      id: string;
+      name: string;
+      collegeName: string;
+      profilePicUrl: string | null;
+    };
+  }[];
 }
 
 const ProfileHeaderCompact = () => {
@@ -51,9 +61,10 @@ const ProfileHeaderCompact = () => {
             collegeName: user.collegeName || user.college || undefined,
             clubName: user.clubName || undefined,
             year: user.year || undefined,
+            clubMemberships: user.clubMemberships || undefined,
           });
         } else {
-          
+
         }
       } catch (error) {
         console.error('ProfileHeaderCompact - Failed to fetch user data:', error);
@@ -146,7 +157,16 @@ const ProfileHeaderCompact = () => {
               )}
               
               <div className="flex items-center gap-2">
-                {userData.clubName && (
+                {userData.clubMemberships && userData.clubMemberships.length > 0 ? (
+                  <div className="flex items-center gap-1 text-xs text-gray-400">
+                    <Users className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                    <span className="truncate max-w-[100px]">
+                      {userData.clubMemberships.length === 1
+                        ? userData.clubMemberships[0].club.name
+                        : `${userData.clubMemberships.length} clubs`}
+                    </span>
+                  </div>
+                ) : userData.clubName && (
                   <div className="flex items-center gap-1 text-xs text-gray-400">
                     <Users className="w-3 h-3 text-purple-400 flex-shrink-0" />
                     <span className="truncate max-w-[100px]">{userData.clubName}</span>

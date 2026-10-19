@@ -64,6 +64,16 @@ export interface UserData {
   instagram: string | null;
   linkedin: string | null;
   clubId: string | null;
+  clubMemberships?: {
+    clubId: string;
+    joinedAt: string;
+    club: {
+      id: string;
+      name: string;
+      collegeName: string;
+      profilePicUrl: string | null;
+    };
+  }[];
 }
 export interface ApiResponse {
   user: {
@@ -83,6 +93,16 @@ export interface ApiResponse {
     instagram: string | null;
     linkedin: string | null;
     clubId: string | null;
+    clubMemberships?: {
+      clubId: string;
+      joinedAt: string;
+      club: {
+        id: string;
+        name: string;
+        collegeName: string;
+        profilePicUrl: string | null;
+      };
+    }[];
     eventAttended: {
       passId?: string | null;
       uniquePassId?: string | null;
@@ -778,7 +798,11 @@ export default function ZynvoDashboard() {
 
    const fetch = async() => {
      try {
-       const isfounder = await axios.get<isAdminResponse>(`/api/v1/user/isClubAdmin`
+       if (!userData || !userData.clubId) {
+         logger.info('dashboard.isClubAdmin.info', 'No club ID found');
+         return;
+       }
+       const isfounder = await axios.get<isAdminResponse>(`/api/v1/user/isClubAdmin/${userData.clubId}`
         , {
           headers : {
             authorization : `Bearer ${token}`
@@ -803,7 +827,7 @@ export default function ZynvoDashboard() {
 
    // add this in loader as well ki agar ye set nhi hai toh keep the loader on.
    fetch()
-  },[isClient])
+  },[isClient, token, navigate, userData?.clubId])
 
   const handleProfileFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -1208,13 +1232,14 @@ export default function ZynvoDashboard() {
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3">
                     <Button
                       onClick={async () => {
+                        if (!userData.clubId) {
+                          toast.error('Club ID is required');
+                          return;
+                        }
                         try {
-                          const leave = await axios.put<any>(
-                            `/api/v1/user/leaveClub`,
-                            {
-                              clubId: userData.clubId,
-                              clubname: userData.clubName,
-                            },
+                          const leave = await axios.post<any>(
+                            `/api/v1/user/leaveClub/${userData.clubId}`,
+                            {},
                             {
                               headers: {
                                 authorization: `Bearer ${token}`,

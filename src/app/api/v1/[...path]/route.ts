@@ -25,7 +25,7 @@ const PUBLIC_GET_PREFIXES = [
   '/api/v1/user/getAllUsers',
   '/api/v1/user/getPublicUser',
   '/api/v1/user/SearchUser',
-  '/api/v1/user/isClubAdmin',
+  '/api/v1/user/isClubAdmin/',
   // Account deletion confirmation link — no Clerk session (link is in email).
   '/api/v1/user/deleteAccount/confirm',
 ];

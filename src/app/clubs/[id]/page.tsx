@@ -415,8 +415,8 @@ useEffect(() => {
     }
 
     try {
-      const leaveResponse = await axios.put<{ message?: string; msg?: string }>(
-        `/api/v1/user/leaveClub`,
+      const leaveResponse = await axios.post<{ message?: string; msg?: string }>(
+        `/api/v1/user/leaveClub/${id}`,
         null,
         {
           headers: {
@@ -424,17 +424,22 @@ useEffect(() => {
           },
         }
       );
-      
+
       toast.success(leaveResponse.data.message || leaveResponse.data.msg || 'Successfully left the club');
       setUserClub(false);
-      
+
       // Refresh the page to update the UI
       setTimeout(() => {
         window.location.reload();
       }, 1000);
     } catch (error: any) {
       console.error('Error leaving club:', error);
-      toast.error(getSafeErrorMessage(error, 'Failed to leave club. Please try again.'));
+      const errorMsg = getSafeErrorMessage(error, 'Failed to leave club. Please try again.');
+      if (errorMsg.toLowerCase().includes('not a member of this club') || error?.response?.status === 403) {
+        toast.error('You are not a member of this club');
+      } else {
+        toast.error(errorMsg);
+      }
     }
   };
 

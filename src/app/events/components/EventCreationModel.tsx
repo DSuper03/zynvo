@@ -101,6 +101,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [lockedUniversity, setLockedUniversity] = useState<string>('');
   const [clubName, setClubName] = useState<string>('');
+  const [clubId, setClubId] = useState<string>('');
   const [eventCount, setEventCount] = useState(0);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
   const [unlockedBadge, setUnlockedBadge] = useState<{
@@ -113,12 +114,16 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
   useEffect(() => {
     const checkRole = async () => {
-      const role = await checkClubRole(token);
+      if (!clubId) {
+        setClubRole({ msg: 'No club selected', authorized: false });
+        return;
+      }
+      const role = await checkClubRole(token, clubId);
       toast(role.msg, { duration: 5000 });
       setClubRole(role);
     };
-    if (token) checkRole();
-  }, [token]);
+    if (token && clubId) checkRole();
+  }, [token, clubId]);
 
   // Helper function to get today's date in YYYY-MM-DD format
   const getTodayDateString = () => {
@@ -237,7 +242,21 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       try {
         if (!token) return;
         const res = await axios.get<{
-          user: { collegeName: string; clubName: string };
+          user: {
+            collegeName: string;
+            clubName: string;
+            clubId?: string;
+            clubMemberships?: Array<{
+              clubId: string;
+              joinedAt: string;
+              club: {
+                id: string;
+                name: string;
+                collegeName: string;
+                profilePicUrl: string | null;
+              };
+            }>;
+          };
         }>(`/api/v1/user/getUser`, {
           headers: { authorization: `Bearer ${token}` },
         });
@@ -246,9 +265,19 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           setLockedUniversity(collegeName);
           setFormData((prev: any) => ({ ...prev, university: collegeName }));
         }
-        const clubName = res?.data?.user?.clubName || '';
-        if (clubName) {
-          setClubName(clubName);
+        const clubMemberships = res?.data?.user?.clubMemberships || [];
+        if (clubMemberships.length > 0) {
+          setClubName(clubMemberships[0].club.name);
+          setClubId(clubMemberships[0].clubId);
+        } else {
+          const clubName = res?.data?.user?.clubName || '';
+          const clubId = res?.data?.user?.clubId || '';
+          if (clubName) {
+            setClubName(clubName);
+          }
+          if (clubId) {
+            setClubId(clubId);
+          }
         }
 
         // Fetch event count for this founder
@@ -567,12 +596,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       toast('please login or signup');
       return;
     }
-    if (!clubName) {
+    if (!clubName || !clubId) {
       toast("You haven't created any club yet. Please create a club first.");
       return;
     }
 
-    const roleCheck = await checkClubRole(token);
+    const roleCheck = await checkClubRole(token, clubId);
     if (!roleCheck.authorized) {
       toast.error('Only club heads and core members can create events.');
       return;
