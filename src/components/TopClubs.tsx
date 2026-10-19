@@ -92,20 +92,22 @@ const fallbackClubs: TopClub[] = kolkataCollegeClubs.map((club) => ({
 }));
 
 const mapApiClubToTopClub = (club: TopClubApiItem, index: number): TopClub => {
+  const name = club.name || club.clubName || 'Unnamed club';
   const imageCandidate =
     club.profilePicUrl ||
     club.profilePic ||
     club.image ||
     club.logo ||
-    club.clubLogo ||
-    DEFAULT_CLUB_IMAGE;
+    club.clubLogo;
 
   return {
     id: club.id || `club-${index}`,
-    name: club.name || club.clubName || 'Unnamed club',
+    name,
     collegeName: club.collegeName || null,
     description: club.description || null,
-    profilePicUrl: resolveClubImageUrl(imageCandidate),
+    profilePicUrl: imageCandidate
+      ? resolveClubImageUrl(imageCandidate)
+      : buildClubFallbackLogo(name),
   };
 };
 
@@ -208,7 +210,7 @@ export default function TopClubs() {
                   loading="lazy"
                   onError={(event) => {
                     event.currentTarget.onerror = null;
-                    event.currentTarget.src = DEFAULT_CLUB_IMAGE;
+                    event.currentTarget.src = buildClubFallbackLogo(club.name);
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
