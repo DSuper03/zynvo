@@ -11,6 +11,7 @@ import PerformanceMonitor from '@/components/PerformanceMonitor';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { ClerkKeyDebug } from '@/components/ClerkKeyDebug';
 import ClientTelemetryBootstrap from '@/components/ClientTelemetryBootstrap';
+import PostHogIdentifyBootstrap from '@/components/PostHogIdentifyBootstrap';
 import WebMcpBootstrap from '@/components/WebMcpBootstrap';
 import { ClerkProvider } from '@clerk/nextjs';
 
@@ -150,6 +151,7 @@ export default function RootLayout({
         </Script>
         <ClerkKeyDebug />
         <ClientTelemetryBootstrap />
+        <PostHogIdentifyBootstrap />
         <WebMcpBootstrap />
         <ErrorBoundary>
           <QueryProvider>

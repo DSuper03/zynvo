@@ -20,14 +20,13 @@ const PUBLIC_GET_PREFIXES = [
   '/api/v1/events/user-details',
   '/api/v1/clubs/getAll',
   '/api/v1/clubs/getClubs',
+  '/api/v1/clubs/public',
   '/api/v1/post/all',
   '/api/v1/post/',
   '/api/v1/user/getAllUsers',
   '/api/v1/user/getPublicUser',
   '/api/v1/user/SearchUser',
   '/api/v1/user/isClubAdmin/',
-  // Account deletion confirmation link — no Clerk session (link is in email).
-  '/api/v1/user/deleteAccount/confirm',
 ];
 
 const PUBLIC_POST_PREFIXES = [
@@ -36,7 +35,9 @@ const PUBLIC_POST_PREFIXES = [
   '/api/v1/user/verify',
   '/api/v1/user/ResendEmail',
   '/api/v1/user/syncWithClerk',
-  '/api/v1/user/deleteAccount/request',
+  // Backend enforces its own JWT via AuthMiddleware; listed here so the
+  // client's backend token is forwarded instead of the Clerk session token.
+  '/api/v1/user/deleteAccount',
   '/api/v1/contact/contact',
   '/api/v1/contact/feedback',
 ];

@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
-import { useUser, useAuth } from '@clerk/nextjs';
+import { useUser, useAuth, useClerk } from '@clerk/nextjs';
 import { toast } from 'sonner';
 import posthog from 'posthog-js';
 import { Button } from '@/components/ui/button';
 import { getSafeErrorMessage, toSafeUserMessage } from '@/lib/safe-error';
 
-type Mode = 'auth' | 'email';
+type Mode = 'auth' | 'signedOut';
 
 export default function DeleteAccountPage() {
   return (
@@ -30,9 +30,10 @@ export default function DeleteAccountPage() {
           Delete your Zynvo account
         </h1>
         <p className="mt-4 text-gray-300">
-          You can request deletion of your Zynvo account and the data
-          associated with it. After confirmation, deletion is completed within{' '}
-          <strong className="text-white">30 days</strong>.
+          You can delete your Zynvo account and the data associated with it.
+          Deletion happens{' '}
+          <strong className="text-white">immediately</strong> once you
+          confirm.
         </p>
 
         <WhatHappens />
@@ -84,96 +85,61 @@ function WhatHappens() {
 function DeleteRequestForm() {
   const router = useRouter();
   const { isLoaded: userLoaded, isSignedIn, user } = useUser();
-  const { isLoaded: authLoaded, getToken } = useAuth();
+  const { isLoaded: authLoaded } = useAuth();
+  const { signOut } = useClerk();
 
   const [mode, setMode] = useState<Mode>('auth');
-  const [email, setEmail] = useState('');
   const [reason, setReason] = useState('');
   const [confirmText, setConfirmText] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Once Clerk loads, switch to email fallback if the user is signed out.
+  // Once Clerk loads, show the signed-out help if the user is signed out.
   useEffect(() => {
     if (userLoaded && authLoaded) {
-      setMode(isSignedIn ? 'auth' : 'email');
+      setMode(isSignedIn ? 'auth' : 'signedOut');
     }
   }, [userLoaded, authLoaded, isSignedIn]);
 
-  const submitAuthenticated = async () => {
-    setSubmitting(true);
-    try {
-      const token = await getToken().catch(() => null);
-      const headers: Record<string, string> = {};
-      if (token) headers.authorization = `Bearer ${token}`;
-
-      const res = await axios.post<{ success?: boolean; msg?: string }>(
-        '/api/v1/user/deleteAccount/request',
-        {
-          confirmMethod: 'clerk',
-          reason: reason || undefined,
-        },
-        { headers }
-      );
-
-      if (res.data?.success !== false) {
-        posthog.capture('account_deletion_requested', {
-          method: 'clerk',
-        });
-        toast.success('Deletion requested. Check your email for confirmation.');
-        router.push('/delete-account/requested?method=clerk');
-        return;
-      }
-      toast.error(
-        toSafeUserMessage(res.data?.msg, 'Could not submit request.')
-      );
-    } catch (err) {
-      toast.error(
-        getSafeErrorMessage(err, 'Could not submit request. Please try again.')
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const submitEmailFallback = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) {
-      toast.error('Please enter the email address on your account.');
-      return;
-    }
+  const deleteAccount = async () => {
     if (confirmText.trim() !== 'DELETE') {
       toast.error('Please type DELETE to confirm.');
       return;
     }
+
+    // The backend verifies its own JWT (set at sign-in), not the Clerk
+    // session token.
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Your session has expired. Please sign in again.');
+      router.push('/auth/signin?returnTo=/delete-account');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await axios.post<{ success?: boolean; msg?: string }>(
-        '/api/v1/user/deleteAccount/request',
-        {
-          confirmMethod: 'email',
-          email,
-          reason: reason || undefined,
-        }
+        '/api/v1/user/deleteAccount',
+        { reason: reason || undefined },
+        { headers: { authorization: `Bearer ${token}` } }
       );
 
       if (res.data?.success !== false) {
-        posthog.capture('account_deletion_requested', {
-          method: 'email',
-        });
-        toast.success('Check your inbox for a confirmation link.');
-        router.push(
-          `/delete-account/requested?method=email&email=${encodeURIComponent(
-            email
-          )}`
-        );
+        posthog.capture('account_deleted');
+        posthog.reset();
+        localStorage.removeItem('token');
+        // The Clerk user is already deleted server-side; this just clears
+        // the local session.
+        await signOut().catch(() => {});
+        toast.success('Your account has been deleted.');
+        router.push('/');
         return;
       }
       toast.error(
-        toSafeUserMessage(res.data?.msg, 'Could not submit request.')
+        toSafeUserMessage(res.data?.msg, 'Could not delete your account.')
       );
     } catch (err) {
       toast.error(
-        getSafeErrorMessage(err, 'Could not submit request. Please try again.')
+        getSafeErrorMessage(err, 'Could not delete your account. Please try again.')
       );
     } finally {
       setSubmitting(false);
@@ -190,8 +156,8 @@ function DeleteRequestForm() {
           disabled={!userLoaded || !authLoaded}
         />
         <TabButton
-          active={mode === 'email'}
-          onClick={() => setMode('email')}
+          active={mode === 'signedOut'}
+          onClick={() => setMode('signedOut')}
           label="I can't sign in"
         />
       </div>
@@ -206,9 +172,9 @@ function DeleteRequestForm() {
                   user?.emailAddresses?.[0]?.emailAddress ||
                   'your account'}
               </strong>
-              . Click the button below and we&apos;ll send a confirmation
-              email. The account will be deleted within 30 days of
-              confirmation.
+              . Your account and its data will be deleted{' '}
+              <strong className="text-white">immediately</strong>. This
+              cannot be undone.
             </p>
           ) : (
             <p className="text-sm text-gray-300">
@@ -218,54 +184,11 @@ function DeleteRequestForm() {
               >
                 Sign in first
               </Link>{' '}
-              for the fastest path, or use the &ldquo;I can&apos;t sign in&rdquo;
-              tab to verify by email.
+              to delete your account.
             </p>
           )}
 
-          <label className="mt-6 block text-sm text-gray-300">
-            Reason (optional)
-          </label>
-          <textarea
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            rows={3}
-            placeholder="Help us improve. (Not required.)"
-            className="mt-2 w-full rounded-lg border border-gray-700 bg-black/50 p-3 text-white placeholder:text-gray-500 focus:border-yellow-400 focus:outline-none"
-          />
-
-          <Button
-            type="button"
-            disabled={!userLoaded || !isSignedIn || submitting}
-            onClick={submitAuthenticated}
-            className="mt-6 w-full bg-red-500 py-3 font-semibold text-white hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-          >
-            {submitting ? 'Requesting…' : 'Request account deletion'}
-          </Button>
-        </div>
-      ) : (
-        <form onSubmit={submitEmailFallback}>
-          <p className="text-sm text-gray-300">
-            Enter the email address on your Zynvo account. We&apos;ll send a
-            one-time confirmation link. Click the link to confirm deletion.
-          </p>
-
-          <label htmlFor="email" className="mt-6 block text-sm text-gray-300">
-            Account email
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            inputMode="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@college.edu"
-            className="mt-2 w-full rounded-lg border border-gray-700 bg-black/50 p-3 text-white placeholder:text-gray-500 focus:border-yellow-400 focus:outline-none"
-          />
-
-          <label htmlFor="reason" className="mt-5 block text-sm text-gray-300">
+          <label htmlFor="reason" className="mt-6 block text-sm text-gray-300">
             Reason (optional)
           </label>
           <textarea
@@ -286,7 +209,6 @@ function DeleteRequestForm() {
           <input
             id="confirmText"
             type="text"
-            required
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder="DELETE"
@@ -294,18 +216,49 @@ function DeleteRequestForm() {
           />
 
           <Button
-            type="submit"
-            disabled={submitting}
+            type="button"
+            disabled={
+              !userLoaded ||
+              !isSignedIn ||
+              submitting ||
+              confirmText.trim() !== 'DELETE'
+            }
+            onClick={deleteAccount}
             className="mt-6 w-full bg-red-500 py-3 font-semibold text-white hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
-            {submitting ? 'Sending link…' : 'Email me a confirmation link'}
+            {submitting ? 'Deleting…' : 'Delete my account'}
           </Button>
-
-          <p className="mt-3 text-xs text-gray-500">
-            The link is single-use and expires in 24 hours. You can request a
-            new one any time.
+        </div>
+      ) : (
+        <div className="space-y-4 text-sm text-gray-300">
+          <p>
+            To protect your account, deletion requires signing in so we know
+            the request is really from you.
           </p>
-        </form>
+          <p>
+            <strong className="text-white">Forgot your password?</strong> Use
+            &ldquo;Forgot password&rdquo; on the{' '}
+            <Link
+              href="/auth/signin?returnTo=/delete-account"
+              className="text-yellow-400 underline-offset-2 hover:underline"
+            >
+              sign-in page
+            </Link>{' '}
+            to reset it, then come back here.
+          </p>
+          <p>
+            <strong className="text-white">Lost access to your email?</strong>{' '}
+            Email{' '}
+            <a
+              href="mailto:privacy@zynvosocial.com"
+              className="text-yellow-400 underline-offset-2 hover:underline"
+            >
+              privacy@zynvosocial.com
+            </a>{' '}
+            from any address with your account details and we&apos;ll verify
+            and handle it manually.
+          </p>
+        </div>
       )}
     </section>
   );
@@ -319,8 +272,9 @@ function Faq() {
       </h2>
       <dl className="mt-6 space-y-5 text-sm">
         <QA q="How long does deletion take?">
-          Up to <strong className="text-white">30 days</strong> from the time
-          you confirm. Most deletions complete within 7 days.
+          Your account and data are deleted{' '}
+          <strong className="text-white">immediately</strong> when you
+          confirm. Backups are overwritten within 90 days.
         </QA>
         <QA q="Can I undo the deletion?">
           No. Once confirmed, deletion is permanent. If you change your mind,
@@ -331,17 +285,6 @@ function Faq() {
           Posts and comments you made on other profiles, clubs, or events will
           be removed. In limited cases (e.g. an active legal hold), we may
           retain the minimum information needed.
-        </QA>
-        <QA q="I never got the confirmation email.">
-          Check your spam folder, then try again from this page. If it still
-          doesn&apos;t arrive, contact{' '}
-          <a
-            href="mailto:hq@zynvosocial.com"
-            className="text-yellow-400 underline-offset-2 hover:underline"
-          >
-            hq@zynvosocial.com
-          </a>
-          .
         </QA>
       </dl>
     </section>
