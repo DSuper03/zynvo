@@ -4,13 +4,13 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://challenges.cloudflare.com https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://www.gstatic.com https://va.vercel-scripts.com https://us-assets.i.posthog.com ;
-      script-src-elem 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://challenges.cloudflare.com https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://www.gstatic.com https://va.vercel-scripts.com https://us-assets.i.posthog.com;
+      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://challenges.cloudflare.com https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://www.gstatic.com https://va.vercel-scripts.com https://us-assets.i.posthog.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://partner.googleadservices.com https://www.google.com https://*.adtrafficquality.google;
+      script-src-elem 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://challenges.cloudflare.com https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://www.gstatic.com https://va.vercel-scripts.com https://us-assets.i.posthog.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://partner.googleadservices.com https://www.google.com https://*.adtrafficquality.google;
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: blob: https: http: https://i.pinimg.com https://images.unsplash.com https://source.unsplash.com https://i.pravatar.cc https://ik.imagekit.io https://api.dicebear.com https://example.com https://api.qrserver.com https://img.clerk.com https://*.clerk.accounts.dev https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://*.googleusercontent.com https://ssl.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com https://s3-us-west-2.amazonaws.com https://*.tile.openstreetmap.org https://tiles.openfreemap.org https://demotiles.maplibre.org;
-      connect-src 'self' data: https://zynvo-backend-worker.anirbanghosh060.workers.dev https://upload.imagekit.io https://api.dicebear.com https://api.qrserver.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://www.google-analytics.com https://www.googletagmanager.com https://tiles.openfreemap.org https://demotiles.maplibre.org https://accounts.google.com https://www.googleapis.com https://oauth2.googleapis.com https://www.gstatic.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://clerk-telemetry.com https://us.i.posthog.com https://us-assets.i.posthog.com;
+      connect-src 'self' data: https://zynvo-backend-worker.anirbanghosh060.workers.dev https://upload.imagekit.io https://api.dicebear.com https://api.qrserver.com https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://www.google-analytics.com https://www.googletagmanager.com https://tiles.openfreemap.org https://demotiles.maplibre.org https://accounts.google.com https://www.googleapis.com https://oauth2.googleapis.com https://www.gstatic.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://clerk-telemetry.com https://us.i.posthog.com https://us-assets.i.posthog.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.adtrafficquality.google;
       font-src 'self' data:;
-      frame-src 'self' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://accounts.google.com https://challenges.cloudflare.com https://www.instagram.com https://instagram.com;
+      frame-src 'self' https://*.clerk.accounts.dev https://clerk.accounts.dev https://clerk.com https://clerk.zynvosocial.com https://clerk.zynvosocial.com https://accounts.google.com https://challenges.cloudflare.com https://www.instagram.com https://instagram.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://*.adtrafficquality.google;
       worker-src 'self' blob:;
     `
       .replace(/\s{2,}/g, ' ')
@@ -183,54 +183,6 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
-  
-  // Webpack optimizations for better bundle splitting
-  webpack: (config, { dev, isServer }) => {
-    // Optimize bundle splitting in production
-    if (!dev && !isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Framework chunk (React, Next.js)
-            framework: {
-              chunks: 'all',
-              name: 'framework',
-              test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
-              priority: 40,
-              enforce: true,
-            },
-            // UI libraries chunk
-            ui: {
-              name: 'ui',
-              chunks: 'all',
-              test: /[\\/]node_modules[\\/](@radix-ui|lucide-react|framer-motion)[\\/]/,
-              priority: 30,
-            },
-            // Vendor chunk
-            vendor: {
-              name: 'vendor',
-              chunks: 'all',
-              test: /node_modules/,
-              priority: 20,
-            },
-            // Common chunk
-            common: {
-              name: 'common',
-              minChunks: 2,
-              chunks: 'all',
-              priority: 10,
-              reuseExistingChunk: true,
-            },
-          },
-        },
-      };
-    }
-    return config;
-  },
   
   skipTrailingSlashRedirect: true,
   async rewrites() {
