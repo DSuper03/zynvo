@@ -98,7 +98,6 @@ export async function proxyRequest(
   const proxyAuth = requireAuth ? await getProxyAuth() : null;
 
   // Client-supplied Authorization header (backend JWT from syncWithClerk).
-  // Used as fallback when no Clerk session exists.
   const clientAuthHeader = request.headers.get('authorization');
 
   if (requireAuth && !proxyAuth && !clientAuthHeader) {
@@ -107,10 +106,11 @@ export async function proxyRequest(
   }
 
   const userId = proxyAuth?.userId ?? null;
-  // Prefer Clerk session token; fall back to the client's own JWT.
-  const authorizationHeader = proxyAuth
-    ? `Bearer ${proxyAuth.token}`
-    : clientAuthHeader;
+  // Prefer the client's backend JWT: the backend verifies HS256 tokens signed
+  // with JWT_SECRET and cannot validate Clerk session tokens. The Clerk session
+  // above still gates access; its token is only a last-resort fallback.
+  const authorizationHeader =
+    clientAuthHeader ?? (proxyAuth ? `Bearer ${proxyAuth.token}` : null);
 
   // ── 2. Rate limiting ───────────────────────────────────────────────────────
   const limiter = resolveRateLimiter(method, backendPath);

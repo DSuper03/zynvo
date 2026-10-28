@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ||
   process.env.BACKEND_BASE_URL ||
-  'https://zynvo-backend-606118537549.asia-south1.run.app';
+  'https://zynvo-backend-worker.anirbanghosh060.workers.dev';
 
 export async function POST(request: NextRequest) {
   try {

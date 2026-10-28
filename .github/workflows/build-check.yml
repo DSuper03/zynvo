@@ -15,7 +15,7 @@ jobs:
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2ktaW5zdGFuY2UuY2xlcmsuYWNjb3VudHMuZGV2JA
       CLERK_SECRET_KEY: sk_test_dummysecretkeyforcibuildcheck12
       INTERNAL_PROXY_SECRET: ci-build-check-secret-32chars-ok
-      BACKEND_BASE_URL: https://zynvo-backend-606118537549.asia-south1.run.app
+      BACKEND_BASE_URL: https://zynvo-backend-worker.anirbanghosh060.workers.dev
     steps:
       - name: Checkout
         uses: actions/checkout@v4

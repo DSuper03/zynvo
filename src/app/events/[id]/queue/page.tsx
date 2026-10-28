@@ -76,7 +76,7 @@ export default function EventQueuePage() {
                 }
 
                 // 1. Fetch Event Details to get clubId
-                const eventRes = await fetch(`/api/v1/events/getEvent/${eventId}`, {
+                const eventRes = await fetch(`/api/v1/events/event/${eventId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
