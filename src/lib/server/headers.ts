@@ -12,7 +12,8 @@ const FORWARD_REQUEST_HEADERS = new Set([
   'content-type',
   'accept',
   'accept-language',
-  'accept-encoding',
+  // accept-encoding is deliberately not forwarded: the browser may offer zstd,
+  // which Cloudflare honours but Node's fetch cannot decode.
   'user-agent',
   'x-request-id',
 ]);
@@ -90,10 +91,10 @@ export function applySecurityHeaders(headers: Headers): void {
  * Sensitive backend infrastructure headers are stripped.
  */
 const SAFE_RESPONSE_HEADERS = new Set([
+  // content-length / content-encoding are omitted: fetch has already
+  // decompressed the body, so the upstream values no longer apply.
   'content-type',
-  'content-length',
   'content-disposition',
-  'content-encoding',
   'cache-control',
   'etag',
   'last-modified',
