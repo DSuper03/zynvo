@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
   process.env.BACKEND_BASE_URL ||
   'https://zynvo-backend-worker.anirbanghosh060.workers.dev';
 
