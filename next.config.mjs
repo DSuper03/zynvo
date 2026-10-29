@@ -31,7 +31,6 @@ const securityHeaders = [
 ];
 
 import bundleAnalyzer from '@next/bundle-analyzer';
-import withPWA from 'next-pwa';
 import { withSentryConfig } from '@sentry/nextjs';
 
 const withBundleAnalyzer = bundleAnalyzer({
@@ -288,17 +287,8 @@ const nextConfig = {
 
 };
 
-// Apply PWA configuration
-const pwaConfig = withPWA({
-  dest: "public",         // destination directory for the PWA files
-  disable: false,        // enable PWA in all environments
-  register: true,         // register the PWA service worker
-  skipWaiting: true,      // skip waiting for service worker activation
-  clientsClaim: true,    // make new SW control existing clients immediately
-})(nextConfig);
-
 // Apply bundle analyzer and export
-const bundledConfig = withBundleAnalyzer(pwaConfig);
+const bundledConfig = withBundleAnalyzer(nextConfig);
 
 export default withSentryConfig(bundledConfig, {
   // Set SENTRY_AUTH_TOKEN in CI to upload source maps.
