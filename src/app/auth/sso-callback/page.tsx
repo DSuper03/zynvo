@@ -55,14 +55,17 @@ function buildClerkLoginCompleteBody(params: {
   avatarUrl?: string;
   college: string;
   phone: string;
+  /** Clerk session JWT; the backend verifies it before trusting email/clerkId. */
+  clerkToken: string | null;
 }) {
-  const { clerkId, email, displayName, avatarUrl, college, phone } = params;
+  const { clerkId, email, displayName, avatarUrl, college, phone, clerkToken } = params;
   // Don't send college fields when value is a placeholder — avoids overwriting real college on backend
   const isRealCollege =
     college.trim() !== '' &&
     !PLACEHOLDER_COLLEGES.has(college.trim().toLowerCase());
   return {
     clerkId,
+    clerkToken,
     email,
     name: displayName,
     username: displayName,
@@ -92,7 +95,7 @@ export default function SSOCallbackPage() {
 }
 
 function SSOCallbackContent() {
-  const { isLoaded: authLoaded, isSignedIn } = useAuth();
+  const { isLoaded: authLoaded, isSignedIn, getToken } = useAuth();
   const { user, isLoaded: userLoaded } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -188,6 +191,7 @@ function SSOCallbackContent() {
           const res = await axios.post(
             `${base}/api/v2/user/auth/clerkLogin`,
             buildClerkLoginCompleteBody({
+              clerkToken: await getToken(),
               clerkId,
               email,
               displayName: name,
@@ -258,6 +262,7 @@ function SSOCallbackContent() {
           const res = await axios.post(
             `${base}/api/v2/user/auth/clerkLogin`,
             buildClerkLoginCompleteBody({
+              clerkToken: await getToken(),
               clerkId,
               email,
               displayName: name,
@@ -399,6 +404,7 @@ function SSOCallbackContent() {
                 const res = await axios.post(
                   `${base}/api/v2/user/auth/clerkLogin`,
                   buildClerkLoginCompleteBody({
+                    clerkToken: await getToken(),
                     clerkId: clerkUserInfo.clerkId,
                     email: clerkUserInfo.email,
                     displayName: displayName.trim(),

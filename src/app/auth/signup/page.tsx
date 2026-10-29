@@ -408,6 +408,7 @@ export default function SignUp() {
         `/api/v2/user/auth/clerkLogin`,
         {
           clerkId,
+          clerkToken: token,
           collegeName: college,
           college,
           college_name: college,

@@ -112,13 +112,14 @@ export async function proxyRequest(
   const authorizationHeader =
     clientAuthHeader ?? (proxyAuth ? `Bearer ${proxyAuth.token}` : null);
 
+  const clientIp =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    request.headers.get('x-real-ip') ??
+    'anonymous';
+
   // ── 2. Rate limiting ───────────────────────────────────────────────────────
   const limiter = resolveRateLimiter(method, backendPath);
   if (limiter) {
-    const clientIp =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      request.headers.get('x-real-ip') ??
-      'anonymous';
     const identifier = userId ?? clientIp;
     const limitResult = await limiter.check(identifier);
     if (!limitResult.allowed) {
@@ -140,6 +141,7 @@ export async function proxyRequest(
     requestId,
     authorizationHeader,
     env.INTERNAL_PROXY_SECRET,
+    clientIp === 'anonymous' ? undefined : clientIp,
   );
 
   // ── 5. Prepare request body ────────────────────────────────────────────────
@@ -204,6 +206,17 @@ export async function proxyRequest(
 
   // ── 7. Handle non-2xx upstream responses ──────────────────────────────────
   if (!upstream.ok) {
+    // The browser only gets a generic message; keep the real one in the logs.
+    if (upstream.status >= 500) {
+      const detail = await upstream.clone().text().catch(() => '');
+      proxyLogger.error({
+        ...logBase,
+        userId,
+        status: upstream.status,
+        durationMs,
+        error: `Upstream ${upstream.status}: ${detail.slice(0, 300)}`,
+      });
+    }
     return normalizeUpstreamError(upstream, requestId);
   }
 
@@ -239,14 +252,21 @@ export async function proxyRequest(
   }
 
   // ── 10. JSON response ──────────────────────────────────────────────────────
+  const text = await upstream.text();
   try {
-    const json = await upstream.json();
-    return NextResponse.json(json, {
+    return NextResponse.json(JSON.parse(text), {
       status: upstream.status,
       headers: responseHeaders,
     });
   } catch {
-    proxyLogger.error({ ...logBase, userId, durationMs, error: 'Failed to parse upstream JSON' });
+    proxyLogger.error({
+      ...logBase,
+      userId,
+      durationMs,
+      error: `Failed to parse upstream JSON (${upstreamContentType}, ${
+        upstream.headers.get('content-encoding') ?? 'identity'
+      }): ${text.slice(0, 200)}`,
+    });
     return internalError(requestId);
   }
 }

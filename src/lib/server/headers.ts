@@ -45,6 +45,7 @@ export function buildUpstreamHeaders(
   requestId: string,
   authToken: string | null,
   proxySecret: string,
+  clientIp?: string,
 ): Record<string, string> {
   const out: Record<string, string> = {};
 
@@ -59,6 +60,9 @@ export function buildUpstreamHeaders(
   // Always inject
   out['x-request-id'] = requestId;
   out['x-internal-proxy-secret'] = proxySecret;
+  // The backend sees every request coming from this server's IP; it trusts
+  // this header (alongside the proxy secret) to rate-limit per real client.
+  if (clientIp) out['x-zynvo-client-ip'] = clientIp;
 
   if (authToken) {
     out['authorization'] = authToken;

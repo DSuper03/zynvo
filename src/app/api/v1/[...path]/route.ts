@@ -32,6 +32,7 @@ const PUBLIC_GET_PREFIXES = [
 const PUBLIC_POST_PREFIXES = [
   '/api/v1/user/signup',
   '/api/v1/user/forgot',
+  '/api/v1/user/reset-password/confirm',
   '/api/v1/user/verify',
   '/api/v1/user/ResendEmail',
   '/api/v1/user/syncWithClerk',
