@@ -45,11 +45,16 @@ export function useUpvote({
     setUpvotes(newUpvotes);
 
     try {
+      const token =
+        typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       const response = await fetch(
-        `/api/v1/posts/${encodeURIComponent(postId)}/upvote`,
+        `/api/v1/post/upvote/${encodeURIComponent(postId)}`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { authorization: `Bearer ${token}` } : {}),
+          },
         }
       );
 
@@ -62,6 +67,8 @@ export function useUpvote({
       if (data) {
         if (typeof data.upvoteCount === 'number') setUpvotes(data.upvoteCount);
         if (typeof data.isUpvoted === 'boolean') setIsUpvoted(data.isUpvoted);
+        else if (data.msg === 'upvote added') setIsUpvoted(true);
+        else if (data.msg === 'upvote removed') setIsUpvoted(false);
       }
     } catch (err) {
       setIsUpvoted(prevIsUpvoted);
