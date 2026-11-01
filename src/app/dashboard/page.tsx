@@ -37,6 +37,7 @@ import { getSafeErrorMessage } from '@/lib/safe-error';
 import { logger } from '@/lib/logger';
 import DiceBearAvatar from '@/components/DicebearAvatars';
 import { collegesWithClubs } from '@/components/colleges/college';
+import { identifyFromToken, resetAnalytics, setCollegeGroup, track } from '@/lib/analytics';
 
 
 interface Event {
@@ -757,6 +758,7 @@ export default function ZynvoDashboard() {
           if (axios.isAxiosError(error) && error.response?.status === 401) {
             localStorage.removeItem('token');
             sessionStorage.removeItem('activeSession');
+            resetAnalytics('session_expired');
             navigate.push('/auth/signin');
             return;
           }
@@ -819,6 +821,7 @@ export default function ZynvoDashboard() {
        if (axios.isAxiosError(error) && error.response?.status === 401) {
          localStorage.removeItem('token');
          sessionStorage.removeItem('activeSession');
+         resetAnalytics('session_expired');
          navigate.push('/auth/signin');
        }
      }
@@ -964,6 +967,20 @@ export default function ZynvoDashboard() {
     );
 
     if (update.status == 200) {
+      const filledFields = Object.entries(profileForm)
+        .filter(([k, v]) => k !== 'tags' && typeof v === 'string' && v.trim() !== '')
+        .map(([k]) => k);
+      const tagsCount = data.tags.length;
+      track('profile_updated', { fields_filled: filledFields, tags_count: tagsCount });
+      if (['bio', 'course', 'year', 'collegeName'].every((f) => filledFields.includes(f)) && tagsCount > 0) {
+        track('profile_completed');
+      }
+      identifyFromToken(null, {
+        college: profileForm.collegeName || undefined,
+        course: profileForm.course || undefined,
+        year: profileForm.year || undefined,
+      });
+      setCollegeGroup(profileForm.collegeName);
       toast(update.data.msg);
     } else {
       toast('Error on backend');
@@ -1130,6 +1147,7 @@ export default function ZynvoDashboard() {
   };
 
   const handleLogout = () => {
+    resetAnalytics('logout');
     localStorage.removeItem('token');
     sessionStorage.removeItem('activeSession');
     sessionStorage.removeItem('founder');
@@ -1246,6 +1264,7 @@ export default function ZynvoDashboard() {
                               },
                             }
                           );
+                          track('club_left', { club_id: userData.clubId, source: 'dashboard' });
                           toast.success(leave.data.message || leave.data.msg || 'Successfully left the club');
                           setTimeout(() => navigate.refresh(), 1000);
                         } catch (error: any) {

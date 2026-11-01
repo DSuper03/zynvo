@@ -4,6 +4,7 @@
  */
 import { useState, useCallback, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { track } from '@/lib/analytics';
 
 export type VoteType = 'upvote' | 'downvote' | null;
 
@@ -136,6 +137,12 @@ export function useVote({
         if (!response.ok) {
           throw new Error(data.msg || `Failed to ${voteType}`);
         }
+
+        track('post_voted', {
+          post_id: postId,
+          vote_type: voteType,
+          action: newUserVote === null ? 'removed' : prevUserVote ? 'switched' : 'added',
+        });
 
         if (data) {
           if (typeof data.upvoteCount === 'number') setUpvotes(data.upvoteCount);

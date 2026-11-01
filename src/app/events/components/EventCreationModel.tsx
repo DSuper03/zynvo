@@ -1,6 +1,6 @@
 'use client';
 
-import posthog from 'posthog-js';
+import { setClubGroup, track } from '@/lib/analytics';
 import React, { useEffect, useState, useCallback, use } from 'react';
 import {
   X,
@@ -760,7 +760,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       });
 
       if (createEvent.status === 201 || createEvent.status === 200) {
-        posthog.capture('event_created', {
+        if (clubId) setClubGroup(clubId, { name: clubName });
+        track('event_created', {
+          event_id: createEvent.data?.id ?? null,
+          club_id: clubId || null,
           event_type: formData.eventType,
           event_mode: formData.eventMode,
           is_paid: formData.isPaidEvent,
@@ -808,9 +811,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         const message =
           createEvent.data?.msg || 'Could not create event. Please try again.';
         setErrors((prev) => ({ ...prev, ...mapCreateEventError(message) }));
+        track('event_creation_failed', { status: createEvent.status, club_id: clubId || null });
         toast.error(message);
       }
     } catch (err) {
+      track('event_creation_failed', {
+        status: isAxiosError(err) ? err.response?.status ?? null : null,
+        club_id: clubId || null,
+      });
       const message =
         isAxiosError(err) &&
         typeof (err.response?.data as { msg?: string } | undefined)?.msg ===

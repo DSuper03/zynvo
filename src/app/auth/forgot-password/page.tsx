@@ -1,7 +1,7 @@
 //Deprecated - use auth.controller.new.ts for new code
 
 'use client';
-import posthog from 'posthog-js';
+import { track } from '@/lib/analytics';
 import { forgot } from '@/hooks/useForgotPassword';
 import { NextPage } from 'next';
 import { useRouter } from 'next/navigation';
@@ -43,7 +43,7 @@ const ForgotPasswordPage: NextPage = () => {
             className="w-full px-4 py-2 text-lg font-semibold text-gray-900 bg-yellow-500 rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
             onClick={async (e) => {
               e.preventDefault();
-              posthog.capture('password_reset_requested');
+              track('password_reset_requested');
               await sendMail();
               router.push('/auth/signin');
             }}

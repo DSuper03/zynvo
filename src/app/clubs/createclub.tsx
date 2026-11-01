@@ -1,6 +1,6 @@
 'use client';
 
-import posthog from 'posthog-js';
+import { setClubGroup, track } from '@/lib/analytics';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/legacy/image';
 import {
@@ -293,7 +293,12 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
 
       const msg = upload?.data;
       if (upload.status >= 200 && upload.status < 300) {
-        posthog.capture('club_created', { club_type: clubData.type });
+        setClubGroup(upload?.data?.clubId, { name: clubData.name, type: clubData.type });
+        track('club_created', {
+          club_id: upload?.data?.clubId ?? null,
+          club_type: clubData.type,
+          wings_count: Array.isArray(clubData.wings) ? clubData.wings.length : 0,
+        });
         toast(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
         onClose();
       } else {

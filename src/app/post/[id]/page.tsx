@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import TextWithLinks from '@/components/TextWithLinks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getPostCache } from '@/lib/postCache';
+import { track } from '@/lib/analytics';
 
 interface PostResponse {
   msg?: string;
@@ -69,6 +70,11 @@ export default function PostPage() {
     try {
       const postUrl = `${window.location.origin}/post/${post.id}`;
 
+      track('post_shared', {
+        post_id: post.id,
+        method: typeof navigator.share === 'function' ? 'native' : 'clipboard',
+        source: 'post_page',
+      });
       // Check if Web Share API is supported (mobile devices)
       if (navigator.share) {
         await navigator.share({

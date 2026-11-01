@@ -15,7 +15,7 @@ const PerformanceMonitor = () => {
   useEffect(() => {
     // Performance monitoring placeholder
     // Web Vitals will be enabled once properly configured
-    logger.info('Performance monitoring initialized');
+    logger.debug('Performance monitoring initialized');
     
     
     if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {

@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { buildAuthHref } from '@/lib/authReturnTo';
+import { track } from '@/lib/analytics';
 
 interface EventCardProps {
   events?: eventData[] | null;
@@ -32,6 +33,11 @@ export default function EventCard({
           ? `${window.location.origin}${eventInvitePath}`
           : eventInvitePath;
 
+      track('event_shared', {
+        event_id: eventId,
+        method: typeof navigator.share === 'function' ? 'native' : 'clipboard',
+        source: 'event_card',
+      });
       if (navigator.share) {
         await navigator.share({
           title: eventName || 'Check out this event',

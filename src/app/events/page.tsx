@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { buildAuthHref } from '@/lib/authReturnTo';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { cn } from '@/lib/utils';
+import { track } from '@/lib/analytics';
 
 
 interface apiRespEvents {
@@ -304,6 +305,12 @@ export default function ZynvoEventsPage() {
       );
       setSearchResults(res.data.response ?? []);
       setSearchTotal(res.data.total ?? 0);
+      track('search_performed', {
+        surface: 'events',
+        query: term.trim().slice(0, 100),
+        page,
+        results_count: res.data.total ?? res.data.response?.length ?? 0,
+      });
       setSearchTotalPages(res.data.totalPages ?? 1);
     } catch (err) {
       console.error('Search error:', err);

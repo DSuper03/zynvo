@@ -1,5 +1,5 @@
 'use client';
-import posthog from 'posthog-js';
+import { lengthBucket, setClubGroup, track } from '@/lib/analytics';
 import React, { useState, useEffect } from 'react';
 import {
   Image as ImageIcon,
@@ -305,7 +305,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       });
 
       if (submit.status === 200 && submit.data.id) {
-        posthog.capture('post_created', { has_image: images.length > 0 });
+        if (selectedClubId) setClubGroup(selectedClubId, { name: selectedClub, college: selectedCollege });
+        track('post_created', {
+          post_id: submit.data.id,
+          has_image: images.length > 0,
+          club_id: selectedClubId || null,
+          text_length: lengthBucket(postText),
+        });
         toast.success('Post created!', {
           description: 'Your post is now live on the feed.',
           action: {
