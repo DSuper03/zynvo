@@ -6,7 +6,7 @@ import Link from 'next/link';
 import axios from 'axios';
 import { useUser, useAuth, useClerk } from '@clerk/nextjs';
 import { toast } from 'sonner';
-import posthog from 'posthog-js';
+import { resetAnalytics, track } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
 import { getSafeErrorMessage, toSafeUserMessage } from '@/lib/safe-error';
 
@@ -124,8 +124,8 @@ function DeleteRequestForm() {
       );
 
       if (res.data?.success !== false) {
-        posthog.capture('account_deleted');
-        posthog.reset();
+        track('account_deleted', { gave_reason: Boolean(reason) });
+        resetAnalytics('account_deleted');
         localStorage.removeItem('token');
         // The Clerk user is already deleted server-side; this just clears
         // the local session.

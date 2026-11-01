@@ -1,5 +1,5 @@
 'use client';
-import posthog from 'posthog-js';
+import { identifyFromToken, setCollegeGroup, track } from '@/lib/analytics';
 import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
@@ -426,14 +426,20 @@ export default function SignUp() {
       // 5. Save custom JWT & redirect
       localStorage.setItem('token', res.data.token);
       sessionStorage.setItem('activeSession', 'true');
-      posthog.identify(formData.email, {
+      identifyFromToken(res.data.token, {
         name: formData.name,
         college: formData.collegeName,
       });
-      posthog.capture('user_signed_up', { auth_method: 'email' });
+      setCollegeGroup(formData.collegeName);
+      track('user_signed_up', { auth_method: 'email', college: formData.collegeName });
       toast.success('Account created successfully!');
       router.push(consumeBrowserPostAuthRedirect());
     } catch (err: any) {
+      track('auth_failed', {
+        auth_method: 'email',
+        stage: 'signup_sync',
+        status: err?.response?.status ?? null,
+      });
       console.error(
         'Post-verification sync failed:',
         JSON.stringify(err, null, 2)

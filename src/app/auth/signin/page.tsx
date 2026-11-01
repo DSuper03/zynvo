@@ -1,6 +1,6 @@
 'use client';
 
-import posthog from 'posthog-js';
+import { identifyFromToken, track } from '@/lib/analytics';
 import { useState, useEffect, ChangeEvent, useCallback } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
@@ -218,17 +218,24 @@ export default function SignIn() {
       if (res.data.msg === 'login success') {
         localStorage.setItem('token', res.data.token);
         sessionStorage.setItem('activeSession', 'true');
-        posthog.identify(formData.email);
-        posthog.capture('user_signed_in', { auth_method: 'email' });
+        identifyFromToken(res.data.token);
+        track('user_signed_in', { auth_method: 'email' });
         toast.success('Login successful!');
         router.push(consumeBrowserPostAuthRedirect());
         return;
       }
 
+      track('auth_failed', { auth_method: 'email', stage: 'signin', reason: 'unexpected_response' });
       toast.error(
         toSafeUserMessage(res.data.msg, 'Login failed. Please try again.')
       );
     } catch (error: any) {
+      track('auth_failed', {
+        auth_method: 'email',
+        stage: 'signin',
+        status: error?.response?.status ?? null,
+        reason: error?.response ? 'http_error' : error?.request ? 'network' : 'client',
+      });
       if (error.response) {
         const errorMsg = error.response.data?.msg || 'Login failed';
         if (error.response.status === 404) {

@@ -3,6 +3,7 @@
 import axios from "axios";
 import { toast } from "sonner";
 import { useState } from "react";
+import { track } from '@/lib/analytics';
 
 export default function LeaveBtn({ token, clubId }: { token: string; clubId: string }) {
   const [loading, setLoading] = useState(false);
@@ -24,6 +25,7 @@ export default function LeaveBtn({ token, clubId }: { token: string; clubId: str
           },
         }
       );
+      track('club_left', { club_id: clubId, source: 'leave_button' });
       toast.success(leave.data.msg);
     } catch (error: any) {
       const errorMsg = error?.response?.data?.msg || "Error leaving club";

@@ -1,6 +1,6 @@
 'use client';
 
-import posthog from 'posthog-js';
+import { identifyFromToken, setCollegeGroup, track } from '@/lib/analytics';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import {
   AuthenticateWithRedirectCallback,
@@ -217,8 +217,8 @@ function SSOCallbackContent() {
 
           // If we already know they have a real college, skip the profile fetch
           if (userHasCollege) {
-            posthog.identify(email, { name });
-            posthog.capture('user_oauth_signin', { auth_method: 'google' });
+            identifyFromToken(null, { name });
+            track('user_oauth_signin', { auth_method: 'google' });
             toast.success('Login successful!');
             router.push(consumePostAuthRedirect(searchParams));
             return;
@@ -251,8 +251,8 @@ function SSOCallbackContent() {
             return;
           }
 
-          posthog.identify(email, { name });
-          posthog.capture('user_oauth_signin', { auth_method: 'google' });
+          identifyFromToken(null, { name });
+          track('user_oauth_signin', { auth_method: 'google' });
           toast.success('Login successful!');
           router.push(consumePostAuthRedirect(searchParams));
         } else if (userExists === null) {
@@ -310,8 +310,8 @@ function SSOCallbackContent() {
             return;
           }
 
-          posthog.identify(email, { name });
-          posthog.capture('user_oauth_signin', { auth_method: 'google' });
+          identifyFromToken(null, { name });
+          track('user_oauth_signin', { auth_method: 'google' });
           toast.success('Login successful!');
           router.push(consumePostAuthRedirect(searchParams));
         } else {
@@ -330,6 +330,9 @@ function SSOCallbackContent() {
           response?: { status?: number; data?: { msg?: string } };
         };
         const status = ax.response?.status;
+        if (status !== 404) {
+          track('auth_failed', { auth_method: 'google', stage: 'sso_callback', status: status ?? null });
+        }
         if (status === 404) {
           // User not found in backend — show profile form inline for new Google signups
           // Pre-populate Google name but let them edit it
@@ -416,11 +419,12 @@ function SSOCallbackContent() {
                 if (res.data.token) {
                   localStorage.setItem('token', res.data.token);
                   sessionStorage.setItem('activeSession', 'true');
-                  posthog.identify(clerkUserInfo.email, {
+                  identifyFromToken(res.data.token, {
                     name: displayName.trim(),
                     college,
                   });
-                  posthog.capture(
+                  setCollegeGroup(college);
+                  track(
                     fromSigninIncomplete
                       ? 'user_oauth_signin'
                       : 'user_oauth_signup',
@@ -439,6 +443,11 @@ function SSOCallbackContent() {
                   throw new Error('No token received');
                 }
               } catch (err: unknown) {
+                track('auth_failed', {
+                  auth_method: 'google',
+                  stage: fromSigninIncomplete ? 'oauth_profile_completion' : 'oauth_signup',
+                  status: (err as { response?: { status?: number } })?.response?.status ?? null,
+                });
                 toast.error(
                   getSafeErrorMessage(
                     err,

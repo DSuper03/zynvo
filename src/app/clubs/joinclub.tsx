@@ -1,6 +1,6 @@
 'use client';
 
-import posthog from 'posthog-js';
+import { setClubGroup, track } from '@/lib/analytics';
 import React, { useEffect, useState } from 'react';
 import { X, Info, CheckCircle2, AlertTriangle } from 'lucide-react';
 import Image from 'next/legacy/image';
@@ -77,7 +77,8 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
         }
       );
       if (res.status == 200) {
-        posthog.capture('club_joined', { club_name: clubName });
+        setClubGroup(clubId, { name: clubName });
+        track('club_joined', { club_id: clubId, club_name: clubName });
         toast.success(
           toSafeUserMessage(res.data.msg, 'Successfully joined club.')
         );
@@ -93,6 +94,10 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
       }
     } catch (error: unknown) {
       const errorMsg = getSafeErrorMessage(error, 'Failed to join club. Please try again.');
+      track('club_join_failed', {
+        club_id: clubId,
+        already_member: errorMsg.toLowerCase().includes('already a member of this club'),
+      });
       if (errorMsg.toLowerCase().includes('already a member of this club')) {
         toast.error('You are already a member of this club');
       } else {

@@ -1,3 +1,5 @@
+import posthog from 'posthog-js';
+
 type TelemetryKind =
   | 'window.error'
   | 'window.unhandledrejection'
@@ -122,6 +124,24 @@ export async function sendClientTelemetryEvent(
 ): Promise<void> {
   if (typeof window === 'undefined') return;
   if (!shouldSendEvent(event.kind, event.message)) return;
+
+  // PostHog Logs: ties the error to the user's person profile + session replay.
+  // (Uncaught window errors are also captured as exceptions by posthog-js itself.)
+  try {
+    posthog.logger.error(event.message, {
+      kind: event.kind,
+      error_name: event.name,
+      status: event.status,
+      url: event.url,
+      method: event.method,
+      request_id: event.requestId,
+      context: event.context,
+      ...(event.metadata ?? {}),
+      pathname: window.location.pathname,
+    } as never);
+  } catch {
+    // never throw from telemetry
+  }
 
   try {
     await fetch('/api/telemetry/client-error', {

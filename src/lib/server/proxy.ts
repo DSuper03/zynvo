@@ -15,7 +15,7 @@
  *   6. Times out after PROXY_TIMEOUT ms and returns a standardized 504.
  *   7. Never leaks backend URLs, stack traces, or secrets to the browser.
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 
 import { getServerEnv } from './env';
 import { getProxyAuth } from './auth';
@@ -38,6 +38,13 @@ import {
   normalizeUpstreamError,
 } from './errors';
 import { resolveRateLimiter } from './rate-limit';
+import { captureServerEvent, flushServerTelemetry } from './posthog-telemetry';
+import {
+  AUTH_RESPONSE_PATHS,
+  distinctIdFromAuthHeader,
+  distinctIdFromJwt,
+  matchServerEvent,
+} from './server-events';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -80,6 +87,20 @@ export async function proxyRequest(
   backendPath: string,
   options: ProxyOptions = {},
 ): Promise<NextResponse> {
+  // Drain PostHog logs/events after the response is sent, before the function freezes.
+  try {
+    after(() => flushServerTelemetry());
+  } catch {
+    // `after` is unavailable outside a request scope (e.g. tests) — skip.
+  }
+  return proxyRequestInner(request, backendPath, options);
+}
+
+async function proxyRequestInner(
+  request: NextRequest,
+  backendPath: string,
+  options: ProxyOptions = {},
+): Promise<NextResponse> {
   const env = getServerEnv();
   const { requireAuth = true, cache = 'no-store', revalidateSeconds = 60 } = options;
 
@@ -99,6 +120,8 @@ export async function proxyRequest(
 
   // Client-supplied Authorization header (backend JWT from syncWithClerk).
   const clientAuthHeader = request.headers.get('authorization');
+  // Backend user id → PostHog distinct id (decoded only; trusted once the backend returns 2xx).
+  logBase.distinctId = distinctIdFromAuthHeader(clientAuthHeader);
 
   if (requireAuth && !proxyAuth && !clientAuthHeader) {
     proxyLogger.warn({ ...logBase, error: 'No Clerk session and no client token' });
@@ -220,6 +243,18 @@ export async function proxyRequest(
     return normalizeUpstreamError(upstream, requestId);
   }
 
+  // ── 7b. Server-confirmed product events ───────────────────────────────────
+  const serverEvent = matchServerEvent(method, backendPath);
+  const isAuthResponse = AUTH_RESPONSE_PATHS.test(backendPath);
+  if (serverEvent && logBase.distinctId && !isAuthResponse) {
+    captureServerEvent(logBase.distinctId, serverEvent.event, {
+      ...serverEvent.properties,
+      status: upstream.status,
+      duration_ms: durationMs,
+      request_id: requestId,
+    });
+  }
+
   // ── 8. Build response ──────────────────────────────────────────────────────
   const upstreamContentType = upstream.headers.get('content-type') ?? '';
   const safeHeaders = extractSafeResponseHeaders(upstream.headers);
@@ -254,7 +289,19 @@ export async function proxyRequest(
   // ── 10. JSON response ──────────────────────────────────────────────────────
   const text = await upstream.text();
   try {
-    return NextResponse.json(JSON.parse(text), {
+    const json = JSON.parse(text);
+    if (serverEvent && isAuthResponse) {
+      // Auth endpoints: the user is identified by the token the backend just issued.
+      const issuedId = distinctIdFromJwt(
+        typeof json?.token === 'string' ? json.token : null,
+      );
+      captureServerEvent(issuedId ?? logBase.distinctId, serverEvent.event, {
+        endpoint: backendPath,
+        status: upstream.status,
+        request_id: requestId,
+      });
+    }
+    return NextResponse.json(json, {
       status: upstream.status,
       headers: responseHeaders,
     });

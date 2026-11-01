@@ -1,6 +1,6 @@
 'use client';
 import axios from 'axios';
-import posthog from 'posthog-js';
+import { track } from '@/lib/analytics';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
@@ -46,7 +46,7 @@ function ResetPasswordForm() {
         '/api/v1/user/reset-password/confirm',
         { email, token, password }
       );
-      posthog.capture('password_reset_completed');
+      track('password_reset_completed');
       toast.success(res.data.msg || 'Password updated.');
       router.push('/auth/signin');
     } catch (error: any) {

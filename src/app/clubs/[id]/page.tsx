@@ -99,6 +99,7 @@ import ZynvoClubAnnouncement from '@/components/ZynvoClubAnnouncement';
 import NoTokenModal from '@/components/modals/remindModal';
 import { buildAuthHref } from '@/lib/authReturnTo';
 import { getSafeErrorMessage } from '@/lib/safe-error';
+import { setClubGroup, track } from '@/lib/analytics';
 
 // All dynamic content is driven by backend data; no hardcoded demo content
 
@@ -236,6 +237,17 @@ export default function ClubPage() {
         
         // Set club data
         const clubData = response.data.club;
+        setClubGroup(clubData.id, {
+          name: clubData.name,
+          college: clubData.collegeName,
+          type: clubData.type,
+          member_count: clubData.members?.length ?? 0,
+        });
+        track('club_viewed', {
+          club_id: clubData.id,
+          club_type: clubData.type || null,
+          member_count: clubData.members?.length ?? 0,
+        });
         setClub({
           id: clubData.id,
           name: clubData.name,
@@ -425,6 +437,7 @@ useEffect(() => {
         }
       );
 
+      track('club_left', { club_id: id, source: 'club_page' });
       toast.success(leaveResponse.data.message || leaveResponse.data.msg || 'Successfully left the club');
       setUserClub(false);
 
@@ -461,8 +474,13 @@ useEffect(() => {
       url: window.location.href,
     };
 
+    const canNativeShare =
+      typeof navigator.share === 'function' &&
+      typeof navigator.canShare === 'function' &&
+      navigator.canShare(shareData);
+    track('club_shared', { club_id: club.id, method: canNativeShare ? 'native' : 'clipboard', source: 'club_page' });
     // Check if Web Share API is supported
-    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+    if (canNativeShare) {
       try {
         await navigator.share(shareData);
         toast.success('Club shared successfully!');

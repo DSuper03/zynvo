@@ -1,6 +1,6 @@
 'use client';
 
-import posthog from 'posthog-js';
+import { track } from '@/lib/analytics';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Icons } from './Icons';
@@ -35,7 +35,7 @@ const ContactSection = () => {
         formState
       );
       if (submit.status == 200) {
-        posthog.capture('contact_form_submitted', {
+        track('contact_form_submitted', {
           subject: formState.subject,
         });
         setSubmitStatus('success');

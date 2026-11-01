@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { resetAnalytics } from '@/lib/analytics';
 
 interface UserData {
   name: string | null;
@@ -73,6 +74,7 @@ export const WarmupProvider: React.FC<WarmupProviderProps> = ({ children }) => {
     let isMounted = true;
 
     const clearSession = () => {
+      resetAnalytics('session_expired');
       localStorage.removeItem('token');
       sessionStorage.removeItem('activeSession');
       setToken(null);

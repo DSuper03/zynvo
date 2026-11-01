@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useClerk, useAuth as useClerkAuth } from '@clerk/nextjs';
+import { resetAnalytics } from '@/lib/analytics';
 
 interface DecodedToken {
   id?: string;
@@ -55,6 +56,7 @@ export function useAuth() {
   };
 
   const hardLogout = async () => {
+    resetAnalytics('logout');
     localStorage.removeItem('token');
     sessionStorage.removeItem('activeSession');
     setUser(null);

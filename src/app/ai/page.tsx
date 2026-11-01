@@ -1,6 +1,6 @@
 'use client';
 
-import posthog from 'posthog-js';
+import { lengthBucket, track } from '@/lib/analytics';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -123,7 +123,12 @@ export default function AIHome() {
     setSummary('');
     setSources([]);
     setError('');
-    posthog.capture('ai_queried');
+    const startedAt = performance.now();
+    let eventsFound = 0;
+    track('ai_queried', {
+      prompt_length: lengthBucket(q),
+      from_suggestion: p !== undefined,
+    });
 
     try {
       const res = await fetch('/api/ai', {
@@ -170,6 +175,7 @@ export default function AIHome() {
             }
 
             if (event.type === 'event') {
+              eventsFound += 1;
               setEvents((prev) => [...prev, event.event]);
               setStatus('Actionable event found');
             }
@@ -194,11 +200,19 @@ export default function AIHome() {
       }
 
       setStatus('Extraction complete');
+      track('ai_response_received', {
+        events_found: eventsFound,
+        duration_ms: Math.round(performance.now() - startedAt),
+      });
     } catch (e) {
       if (e instanceof DOMException && e.name === 'AbortError') {
         setStatus('Extraction stopped');
         return;
       }
+      track('ai_query_failed', {
+        duration_ms: Math.round(performance.now() - startedAt),
+        events_found: eventsFound,
+      });
 
       const rawMessage = e instanceof Error ? e.message : '';
       setError(

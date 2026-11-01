@@ -1,6 +1,6 @@
 'use client';
 
-import posthog from 'posthog-js';
+import { setClubGroup, track } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
 import {
   CustomAnswer,
@@ -519,6 +519,17 @@ const Eventid = () => {
           const eventResponse = res.data.response as any;
 
           setRawEvent(eventResponse);
+          if (eventResponse.clubId) {
+            setClubGroup(eventResponse.clubId, { name: eventResponse.clubName });
+          }
+          track('event_viewed', {
+            event_id: id,
+            club_id: eventResponse.clubId ?? null,
+            event_mode: eventResponse.EventMode || null,
+            event_type: eventResponse.EventType || null,
+            is_paid: hasPaidEvent,
+            application_status: eventResponse.applicationStatus || 'open',
+          });
           setData({
             EventName: eventResponse.EventName || '',
             description: eventResponse.description || '',
@@ -778,7 +789,12 @@ const Eventid = () => {
       console.log('Registration response status:', resp.data.approvalStatus);
 
       if (resp && resp.status === 200) {
-        posthog.capture('event_registered', { event_id: id });
+        track('event_registered', {
+          event_id: id,
+          event_mode: data.EventMode || null,
+          is_paid: Boolean(data.isPaidEvent ?? data.isPaid),
+          approval_status: resp.data.approvalStatus || null,
+        });
         console.log('Registration successful');
         setForkedUpId(resp.data.ForkedUpId);
         // Immediately mark this event as attended so WhatsApp / UI update without full reload
@@ -798,6 +814,11 @@ const Eventid = () => {
     } catch (error) {
       console.error('Registration error:', error);
       const axiosError = error as any;
+      track('event_registration_failed', {
+        event_id: id,
+        status: axiosError?.response?.status ?? null,
+        reason: axiosError?.response?.status === 403 ? 'college_mismatch' : 'error',
+      });
       if (axiosError?.response?.status === 403) {
         setRegistrationNotice(null);
         setCollegeBlockModal({ open: true, reason: 'mismatch' });
@@ -826,6 +847,7 @@ const Eventid = () => {
 
     try {
       await navigator.clipboard.writeText(eventInviteFullUrl);
+      track('event_shared', { event_id: id, method: 'clipboard', source: 'event_page_invite' });
       setCopiedInviteLink(true);
       toast.success('Event invite link copied!');
       setTimeout(() => setCopiedInviteLink(false), 2000);
