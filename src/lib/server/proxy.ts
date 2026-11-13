@@ -39,6 +39,7 @@ import {
 } from './errors';
 import { resolveRateLimiter } from './rate-limit';
 import { captureServerEvent, flushServerTelemetry } from './posthog-telemetry';
+import { reportToOps } from './ops-alerts';
 import {
   AUTH_RESPONSE_PATHS,
   distinctIdFromAuthHeader,
@@ -208,11 +209,21 @@ async function proxyRequestInner(
 
     if (err instanceof DOMException && err.name === 'AbortError') {
       proxyLogger.error({ ...logBase, userId, durationMs, timedOut: true, error: 'Upstream timeout' });
+      reportToOps({
+        key: `timeout ${method} ${backendPath}`,
+        title: `Backend timed out: ${method} ${backendPath}`,
+        detail: `No response after ${durationMs}ms (limit ${env.PROXY_TIMEOUT}ms). Users see "request timed out". requestId ${requestId}`,
+      });
       return gatewayTimeout(requestId);
     }
 
     const msg = err instanceof Error ? err.message : 'Unknown fetch error';
     proxyLogger.error({ ...logBase, userId, durationMs, error: msg });
+    reportToOps({
+      key: `unreachable ${msg}`,
+      title: 'Website cannot reach the backend',
+      detail: `${method} ${backendPath} failed after ${durationMs}ms: ${msg.slice(0, 300)}. requestId ${requestId}`,
+    });
     return badGateway(requestId);
   } finally {
     clearTimeout(timeoutId);
@@ -239,6 +250,20 @@ async function proxyRequestInner(
         durationMs,
         error: `Upstream ${upstream.status}: ${detail.slice(0, 300)}`,
       });
+      // JSON 5xx come from the worker's own code, which alerts by itself. A
+      // non-JSON 5xx is Cloudflare's error page: the worker crashed or hit a
+      // limit before its code could report anything.
+      const isJson = (upstream.headers.get('content-type') ?? '').includes('application/json');
+      if (!isJson) {
+        reportToOps({
+          key: `cf-error ${upstream.status} ${backendPath}`,
+          title: `Backend crashed (${upstream.status}): ${method} ${backendPath}`,
+          detail: `Cloudflare returned a non-JSON ${upstream.status} after ${durationMs}ms: ${detail
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .slice(0, 300)}. requestId ${requestId}`,
+        });
+      }
     }
     return normalizeUpstreamError(upstream, requestId);
   }
@@ -313,6 +338,11 @@ async function proxyRequestInner(
       error: `Failed to parse upstream JSON (${upstreamContentType}, ${
         upstream.headers.get('content-encoding') ?? 'identity'
       }): ${text.slice(0, 200)}`,
+    });
+    reportToOps({
+      key: `bad-json ${backendPath}`,
+      title: `Backend sent unreadable response: ${method} ${backendPath}`,
+      detail: `status ${upstream.status}, content-type ${upstreamContentType}. requestId ${requestId}`,
     });
     return internalError(requestId);
   }
