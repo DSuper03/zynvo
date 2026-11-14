@@ -10,6 +10,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MemberSelect from "@/components/MemberSelect";
 import CoreTeamByEmail from "@/components/admin/CoreTeamByEmail";
+import ClubLogoEditor from "@/components/admin/ClubLogoEditor";
 
 export default function ClubAdminPage() {
   const params = useParams();
@@ -201,6 +202,16 @@ export default function ClubAdminPage() {
                 >
                   Membership Criteria
                 </Button>
+              </div>
+              <div className="mb-6 pb-6 border-b border-yellow-400/20">
+                <h3 className="text-sm tracking-wide text-yellow-300/80 mb-3">Club Logo</h3>
+                <ClubLogoEditor
+                  clubId={String(clubId)}
+                  clubName={clubData.name}
+                  token={token}
+                  currentLogo={clubData.profilePicUrl}
+                  onUpdated={(url) => setClubData((prev: any) => ({ ...prev, profilePicUrl: url }))}
+                />
               </div>
               <div className="space-y-4">
                 {['instagram', 'twitter', 'linkedin'].map((social) => (

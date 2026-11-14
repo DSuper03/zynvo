@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/legacy/image';
+import ClubLogo, { clubLogoSrc } from '@/components/ClubLogo';
 import Link from 'next/link';
 import {
   CalendarDays,
@@ -257,7 +258,7 @@ export default function ClubPage() {
           profileAvatar: clubData.members?.[0]?.profileAvatar,
           founderEmail: clubData.founderEmail,
           facultyEmail: clubData.facultyEmail,
-          image: clubData.profilePicUrl || '/zynvo-new-logo.png',
+          image: clubLogoSrc(clubData.profilePicUrl, clubData.name),
           category: clubData.type || 'tech',
           requirements: (clubData as any).requirements || '',
           clubContact: (clubData as any).clubContact || '',
@@ -675,9 +676,9 @@ useEffect(() => {
             {/* Club Logo - Compact */}
             <div className="relative flex-shrink-0">
               <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-yellow-400/30 shadow-lg bg-gray-900/50 backdrop-blur-sm">
-                <Image
-                  src={club.image || '/zynvo-new-logo.png'}
-                  alt={club.name}
+                <ClubLogo
+                  src={club.image}
+                  name={club.name}
                   width={128}
                   height={128}
                   className="object-cover w-full h-full"
