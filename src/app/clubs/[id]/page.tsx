@@ -191,12 +191,6 @@ export default function ClubPage() {
       
       if (session !== 'true') {
         // Has token but no session - user needs to sign in
-        toast('Login required', {
-          action: {
-            label: 'Sign in',
-            onClick: () => router.push(signinInviteHref),
-          },
-        });
         setHasTokenForModal(true);
         setRequiresSignin(true);
         setIsAuthModalOpen(true);
@@ -211,15 +205,8 @@ export default function ClubPage() {
   }, [router, signinInviteHref]);
   useEffect(() => {
     async function call() {
-      if (!token) {
-         toast('Login required', {
-          action: {
-            label: 'Sign in',
-            onClick: () => router.push(signinInviteHref),
-          },
-        });
-        return;
-      }
+      // No token: the sign-in modal (opened above) already explains this.
+      if (!token) return;
       
       try {
         setLoading(true);
@@ -418,7 +405,7 @@ useEffect(() => {
 
   const handleLeaveClub = async () => {
     if (!token) {
-      toast('Login required', {
+      toast('Login required', { id: 'login-required',
         action: {
           label: 'Sign in',
           onClick: () => router.push(signinInviteHref),

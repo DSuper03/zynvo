@@ -61,7 +61,7 @@ const router = useRouter();
       const storedToken = localStorage.getItem('token');
       setToken(storedToken);
       if (sessionStorage.getItem('activeSession') != 'true') {
-         toast('Login required', {
+         toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),

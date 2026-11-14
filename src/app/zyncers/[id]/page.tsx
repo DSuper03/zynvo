@@ -223,7 +223,7 @@ export default function PublicUserProfile() {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       if (sessionStorage.getItem('activeSession') !== 'true') {
-        toast('Login required', {
+        toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),

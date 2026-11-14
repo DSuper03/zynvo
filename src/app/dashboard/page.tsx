@@ -638,7 +638,7 @@ export default function ZynvoDashboard() {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       else {
-         toast('Login required', {
+         toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => navigate.push('/auth/signin'),
@@ -648,7 +648,7 @@ export default function ZynvoDashboard() {
       }
 
       if (sessionStorage.getItem('activeSession') != 'true') {
-         toast('Login required', {
+         toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => navigate.push('/auth/signin'),
@@ -794,7 +794,7 @@ export default function ZynvoDashboard() {
    if(!isClient) return;
 
    if(!token || !sessionStorage.getItem('activeSession') || sessionStorage.getItem('activeSession') != "true") {
-    toast("please login")
+    toast('Login required', { id: 'login-required' });
     return;
    }
 
@@ -856,7 +856,7 @@ export default function ZynvoDashboard() {
     const profileAvatar = profileQuickForm.profileAvatar.trim();
 
     if (!token) {
-      toast('Login required', {
+      toast('Login required', { id: 'login-required',
         action: {
           label: 'Sign in',
           onClick: () => navigate.push('/auth/signin'),
@@ -897,7 +897,7 @@ export default function ZynvoDashboard() {
     const collegeName = profileQuickForm.collegeName.trim();
 
     if (!token) {
-      toast('Login required', {
+      toast('Login required', { id: 'login-required',
         action: {
           label: 'Sign in',
           onClick: () => navigate.push('/auth/signin'),
@@ -937,7 +937,7 @@ export default function ZynvoDashboard() {
   const handleProfileFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
-       toast('Login required', {
+       toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => navigate.push('/auth/signin'),

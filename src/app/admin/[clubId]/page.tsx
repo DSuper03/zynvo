@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import EventTab from "../../../components/eventTab";
 import Image from "next/image";
@@ -32,7 +32,6 @@ export default function ClubAdminPage() {
   const [isClient, setIsClient] = useState(false);
   const [token, setToken] = useState('');
   const navigate = useRouter();
-  const hasShownToast = useRef(false);
   const [openCriteriaModal, setOpenCriteriaModal] = useState<boolean>(false);
 
   useEffect(() => {
@@ -40,7 +39,7 @@ export default function ClubAdminPage() {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       else {
-        toast('Login required', {
+        toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => navigate.push('/auth/signin'),
@@ -50,7 +49,7 @@ export default function ClubAdminPage() {
       }
 
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('Login required', {
+        toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => navigate.push('/auth/signin'),
@@ -79,11 +78,6 @@ export default function ClubAdminPage() {
       setInstagramLink(fetch.data.club.instagram);
       setLinkedinLink(fetch.data.club.linkedin);
       setTwitterLink(fetch.data.club.twitter);
-      // Only show toast once, not on every fetch
-      if (!hasShownToast.current && fetch.data.msg) {
-        toast(fetch.data.msg);
-        hasShownToast.current = true;
-      }
     } catch {
       toast.error('Error fetching club data');
     } finally {
