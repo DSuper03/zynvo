@@ -123,6 +123,9 @@ export interface ApiResponse {
 interface isAdminResponse {
   msg : string;
   founder : string;
+  role?: 'founder' | 'core';
+  clubId?: string;
+  clubName?: string;
 }
 
 const sortedCollegesWithClubs = [...collegesWithClubs].sort((a, b) =>
@@ -627,6 +630,8 @@ export default function ZynvoDashboard() {
   const [viewAllEvents, setViewAllEvents] = useState(false);
   const [showAllProfileTags, setShowAllProfileTags] = useState(false);
   const [founder , setFounder] = useState<string>('false')
+  // Club the user heads or is a core member of (from GET /isClubAdmin, matched by email).
+  const [adminClub, setAdminClub] = useState<{ clubId: string; clubName?: string; role?: string } | null>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -793,44 +798,36 @@ export default function ZynvoDashboard() {
     return;
    }
 
-   if(sessionStorage.getItem('founder')) {
-    setFounder(sessionStorage.getItem('founder') as string);
-    return;
-   } 
-
+   // Founder / core-member check by email across all clubs. The old check used
+   // the legacy user.clubId plus a membership row, which many founders lack
+   // (e.g. clubs created before memberships existed, or after a transfer).
    const fetch = async() => {
      try {
-       if (!userData || !userData.clubId) {
-         logger.info('dashboard.isClubAdmin.info', 'No club ID found');
-         return;
-       }
-       const isfounder = await axios.get<isAdminResponse>(`/api/v1/user/isClubAdmin/${userData.clubId}`
-        , {
-          headers : {
-            authorization : `Bearer ${token}`
-          }
-        }
-       )
-       if(isfounder.data.founder) {
-        sessionStorage.setItem('founder', isfounder.data.founder )
-        setFounder(isfounder.data.founder);
-      } else {
-        logger.info('dashboard.isClubAdmin.info', isfounder.data.msg);
+       const res = await axios.get<isAdminResponse>(`/api/v1/user/isClubAdmin`, {
+         headers: { authorization: `Bearer ${token}` },
+       })
+       if (res.data.founder === 'true' && res.data.clubId) {
+         setFounder('true');
+         setAdminClub({ clubId: res.data.clubId, clubName: res.data.clubName, role: res.data.role });
+       } else {
+         setFounder('false');
+         setAdminClub(null);
        }
      } catch (error) {
+       setFounder('false');
+       setAdminClub(null);
        if (axios.isAxiosError(error) && error.response?.status === 401) {
          localStorage.removeItem('token');
          sessionStorage.removeItem('activeSession');
          resetAnalytics('session_expired');
          navigate.push('/auth/signin');
        }
+       // 403 = not a founder or core member of any club
      }
-     return;
    }
 
-   // add this in loader as well ki agar ye set nhi hai toh keep the loader on.
    fetch()
-  },[isClient, token, navigate, userData?.clubId])
+  },[isClient, token, navigate])
 
   const handleProfileFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -1278,16 +1275,6 @@ export default function ZynvoDashboard() {
                       Leave Club
                     </Button>
 
-                    {founder === 'true' && (
-                      <Button
-                        onClick={() => navigate.push(`/admin/${userData.clubId}`)}
-                        variant="outline"
-                        className="w-full sm:w-auto bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/50 text-blue-400 hover:text-blue-300 font-medium py-2 transition-all"
-                      >
-                        <Settings className="w-4 h-4 mr-2" />
-                        Admin Controls
-                      </Button>
-                    )}
                   </div>
                 </div>
               ) : (
@@ -1301,6 +1288,22 @@ export default function ZynvoDashboard() {
                   <p className="text-yellow-400 text-xs sm:text-sm font-medium mt-1 hover:text-yellow-300 transition-colors">
                     Join fast! →
                   </p>
+                </div>
+              )}
+              {/* Manage club — for founders and core members, independent of the legacy club badge */}
+              {adminClub && (
+                <div className="mb-4 sm:mb-5">
+                  <Button
+                    onClick={() => navigate.push(`/admin/${adminClub.clubId}`)}
+                    variant="outline"
+                    className="w-full sm:w-auto bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/50 text-blue-400 hover:text-blue-300 font-medium py-2 transition-all"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Manage {adminClub.clubName || 'club'}
+                    {adminClub.role === 'core' && (
+                      <span className="ml-2 text-[10px] uppercase tracking-wide text-blue-300/80">Core team</span>
+                    )}
+                  </Button>
                 </div>
               )}
               <p className="text-gray-100 mb-3 text-sm sm:text-base font-serif line-clamp-2 leading-relaxed">
