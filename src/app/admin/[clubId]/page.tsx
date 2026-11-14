@@ -9,6 +9,7 @@ import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MemberSelect from "@/components/MemberSelect";
+import CoreTeamByEmail from "@/components/admin/CoreTeamByEmail";
 
 export default function ClubAdminPage() {
   const params = useParams();
@@ -61,10 +62,11 @@ export default function ClubAdminPage() {
 
   useEffect(() => setIsClient(true), []);
 
-  const fetchClubData = useCallback(async () => {
+  // `silent` refetches without the full-page loading state (keeps open panels mounted).
+  const fetchClubData = useCallback(async (silent = false) => {
     if (!clubId || !isClient || !token) return;
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const fetch = await axios.get<any>(`/api/v1/clubs/${clubId}`, { 
         headers: { authorization: `Bearer ${token}` }
       });
@@ -281,6 +283,13 @@ export default function ClubAdminPage() {
               >
                 Add Core Members
               </button>
+              <div className="mt-6 pt-4 border-t border-yellow-400/20">
+                <CoreTeamByEmail
+                  clubId={String(clubId)}
+                  token={token}
+                  onChanged={() => fetchClubData(true)}
+                />
+              </div>
             </section>
 
             <section className="bg-zinc-900 border border-yellow-400/30 rounded-2xl p-6">
