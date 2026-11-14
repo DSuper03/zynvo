@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Mail, X, Loader2 } from 'lucide-react';
+import MemberSelect from '@/components/MemberSelect';
 
 type InviteStatus =
   | 'added'
@@ -60,6 +61,8 @@ export default function CoreTeamByEmail({ clubId, token, onChanged }: Props) {
   const [invites, setInvites] = useState<PendingInvite[]>([]);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
+  // People chosen from search (already on Zynvo) — added instantly on submit.
+  const [picked, setPicked] = useState<{ email: string; name?: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [results, setResults] = useState<ByEmailResult[] | null>(null);
   const [revokingId, setRevokingId] = useState<string | null>(null);
@@ -87,9 +90,24 @@ export default function CoreTeamByEmail({ clubId, token, onChanged }: Props) {
     loadInvites();
   }, [loadInvites]);
 
+  // Signed-in SearchUser matches name or email and returns email.
+  const searchPeople = useCallback(async (query: string): Promise<any[]> => {
+    if (!token || !query.trim()) return [];
+    try {
+      const res = await fetch(`/api/v1/user/SearchUser?name=${encodeURIComponent(query.trim())}`, {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return [];
+      const data = await res.json();
+      return Array.isArray(data?.users) ? data.users : [];
+    } catch {
+      return [];
+    }
+  }, [token]);
+
   if (!isHead) return null;
 
-  const emails = splitEmails(input);
+  const emails = [...new Set([...picked.map((p) => p.email.toLowerCase()), ...splitEmails(input)])];
   const tooMany = emails.length > MAX_EMAILS;
 
   const submit = async () => {
@@ -103,6 +121,7 @@ export default function CoreTeamByEmail({ clubId, token, onChanged }: Props) {
       );
       setResults(res.data.results);
       setInput('');
+      setPicked([]);
       const changed = res.data.results.some((r) => r.status === 'added' || r.status === 'invited');
       if (changed) {
         await loadInvites();
@@ -188,10 +207,51 @@ export default function CoreTeamByEmail({ clubId, token, onChanged }: Props) {
             </button>
           </div>
           <p className="text-xs text-yellow-400/70">
-            One or more emails, separated by commas or new lines (max {MAX_EMAILS}). People
-            with a Zynvo account are added right away; everyone else gets an invite that
-            expires in 14 days. The core team has 3 seats, and pending invites hold a seat.
+            People already on Zynvo are added instantly — no acceptance needed — and get a
+            notification. Anyone else gets an email invite (valid 14 days) and joins the core
+            team as soon as they sign up. The core team has 3 seats; pending invites hold a seat.
           </p>
+          <div className="space-y-2">
+            <label className="block text-xs font-medium text-yellow-300">Search people on Zynvo</label>
+            <MemberSelect
+              members={[]}
+              value=""
+              placeholder="Search by name or email"
+              onSearch={searchPeople}
+              allowCustomEmail
+              onChange={(email) => {
+                if (!email) return;
+                setPicked((prev) =>
+                  prev.some((p) => p.email.toLowerCase() === email.toLowerCase())
+                    ? prev
+                    : [...prev, { email }]
+                );
+              }}
+            />
+            {picked.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {picked.map((p) => (
+                  <span
+                    key={p.email}
+                    className="inline-flex items-center gap-1 pl-3 pr-1 py-1 rounded-full text-xs bg-yellow-400/15 text-yellow-200 border border-yellow-400/40"
+                  >
+                    <span className="break-all">{p.email}</span>
+                    <button
+                      type="button"
+                      onClick={() => setPicked((prev) => prev.filter((x) => x.email !== p.email))}
+                      className="p-0.5 rounded-full hover:bg-yellow-400/20"
+                      aria-label={`Remove ${p.email}`}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+          <label className="block text-xs font-medium text-yellow-300">
+            Or paste emails (comma or new line separated)
+          </label>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
