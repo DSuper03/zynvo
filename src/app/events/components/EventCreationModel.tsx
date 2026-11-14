@@ -43,7 +43,7 @@ import axios, { isAxiosError } from 'axios';
 import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
 import { useRouter } from 'next/navigation';
-import { checkClubRole } from '@/hooks/useClubRole';
+import { checkClubRole, type ClubRole } from '@/hooks/useClubRole';
 import AchievementUnlockModal from '@/components/AchievementUnlockModal';
 
 interface CreateEventModalProps {
@@ -110,20 +110,29 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     description: string;
   } | null>(null);
   const [closeAfterAchievement, setCloseAfterAchievement] = useState(false);
-  const [clubRole, setClubRole] = useState<{ msg: string; authorized: boolean } | null>(null);
+  const [clubRole, setClubRole] = useState<ClubRole | null>(null);
+  const [roleChecked, setRoleChecked] = useState(false);
 
+  // Checked only when the modal opens (it is mounted on the events and club
+  // pages), and the event belongs to the club the user runs — not their first
+  // membership. Silent: the banner and the submit handler explain a refusal.
   useEffect(() => {
-    const checkRole = async () => {
-      if (!clubId) {
-        setClubRole({ msg: 'No club selected', authorized: false });
-        return;
-      }
-      // Silent check: the submit handler explains a refusal when it matters.
-      const role = await checkClubRole(token, clubId);
+    if (!isOpen || !token) return;
+    let cancelled = false;
+    setRoleChecked(false);
+    checkClubRole(token).then((role) => {
+      if (cancelled) return;
       setClubRole(role);
+      setRoleChecked(true);
+      if (role.authorized && role.clubId) {
+        setClubId(role.clubId);
+        if (role.clubName) setClubName(role.clubName);
+      }
+    });
+    return () => {
+      cancelled = true;
     };
-    if (token && clubId) checkRole();
-  }, [token, clubId]);
+  }, [isOpen, token]);
 
   // Helper function to get today's date in YYYY-MM-DD format
   const getTodayDateString = () => {
@@ -240,7 +249,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        if (!token) return;
+        if (!token || !isOpen) return;
         const res = await axios.get<{
           user: {
             collegeName: string;
@@ -265,20 +274,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           setLockedUniversity(collegeName);
           setFormData((prev: any) => ({ ...prev, university: collegeName }));
         }
+        // Display fallback only; the club the user runs comes from the role check.
         const clubMemberships = res?.data?.user?.clubMemberships || [];
-        if (clubMemberships.length > 0) {
-          setClubName(clubMemberships[0].club.name);
-          setClubId(clubMemberships[0].clubId);
-        } else {
-          const clubName = res?.data?.user?.clubName || '';
-          const clubId = res?.data?.user?.clubId || '';
-          if (clubName) {
-            setClubName(clubName);
-          }
-          if (clubId) {
-            setClubId(clubId);
-          }
-        }
+        const fallbackName = clubMemberships[0]?.club?.name || res?.data?.user?.clubName || '';
+        if (fallbackName) setClubName((prev) => prev || fallbackName);
 
         // Fetch event count for this founder
         try {
@@ -297,7 +296,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       }
     };
     fetchUser();
-  }, [token]);
+  }, [token, isOpen]);
 
   // Memoized handler for input changes
   const handleChange = useCallback(
@@ -596,13 +595,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       toast('please login or signup');
       return;
     }
-    if (!clubName || !clubId) {
-      toast("You haven't created any club yet. Please create a club first.");
-      return;
-    }
-
-    const roleCheck = await checkClubRole(token, clubId);
-    if (!roleCheck.authorized) {
+    const roleCheck = await checkClubRole(token);
+    if (!roleCheck.authorized || !roleCheck.clubId) {
       toast.error('Only club heads and core members can create events.');
       return;
     }
@@ -833,6 +827,17 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   };
 
   if (!isOpen) return null;
+
+  if (!clubName && token && !roleChecked) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+        <div className="flex items-center gap-3 rounded-xl bg-gray-900 border border-gray-800 px-5 py-4 text-sm text-gray-300">
+          <span className="h-4 w-4 rounded-full border-2 border-yellow-400 border-t-transparent animate-spin" />
+          Checking your club…
+        </div>
+      </div>
+    );
+  }
 
   if (!clubName) {
     return (
