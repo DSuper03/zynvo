@@ -79,6 +79,14 @@ export default function SignUp() {
     const r = params.get('returnTo');
     if (r) persistReturnTo(r);
     else clearStoredReturnTo();
+    // Core-team invite links prefill the invited address; the invite only
+    // converts when the account is created and verified with this email.
+    const invitedEmail = params.get('email');
+    if (invitedEmail) {
+      setFormData((prev) =>
+        prev.email ? prev : { ...prev, email: invitedEmail.trim().toLowerCase() }
+      );
+    }
     setSigninHref(`/auth/signin${window.location.search}`);
     setHasAppSession(
       Boolean(
