@@ -14,6 +14,7 @@ import ClientTelemetryBootstrap from '@/components/ClientTelemetryBootstrap';
 import PostHogIdentifyBootstrap from '@/components/PostHogIdentifyBootstrap';
 import WebMcpBootstrap from '@/components/WebMcpBootstrap';
 import { ClerkProvider } from '@clerk/nextjs';
+import { SESSION_RESTORE_SCRIPT } from '@/lib/sessionRestore';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -127,6 +128,8 @@ export default function RootLayout({
     >
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Restore the login session before hydration (see lib/sessionRestore). */}
+        <script dangerouslySetInnerHTML={{ __html: SESSION_RESTORE_SCRIPT }} />
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6745473381903668"
