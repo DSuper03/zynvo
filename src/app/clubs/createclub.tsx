@@ -1,7 +1,7 @@
 'use client';
 
 import { setClubGroup, track } from '@/lib/analytics';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Image from 'next/legacy/image';
 import {
   X,
@@ -56,19 +56,22 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [typeSearch, setTypeSearch] = useState('');
 
-  const searchUsers = async (query: string): Promise<any[]> => {
+  // Stable identity so MemberSelect's debounced search isn't restarted on every render.
+  const searchUsers = useCallback(async (query: string): Promise<any[]> => {
     if (!token || !query.trim()) return [];
     try {
-      const res = await fetch(`/api/v1/user/SearchUser?search=${encodeURIComponent(query)}`, {
+      // The backend reads `name` (not `search`).
+      const res = await fetch(`/api/v1/user/SearchUser?name=${encodeURIComponent(query.trim())}`, {
         headers: { authorization: `Bearer ${token}` },
       });
       if (!res.ok) return [];
       const data = await res.json();
-      return data.users ?? data.resp ?? data ?? [];
+      const users = data?.users ?? data?.resp;
+      return Array.isArray(users) ? users : [];
     } catch {
       return [];
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -663,6 +666,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
                 onChange={(email) => setClubData((prev) => ({ ...prev, FounderEmail: email }))}
                 placeholder="Search for founder by name or email"
                 onSearch={searchUsers}
+                allowCustomEmail
               />
             </div>
 
