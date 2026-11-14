@@ -117,69 +117,19 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
         );
 
         const userData = (userResponse.data as any).user;
+        // Read the college from the response (the old code checked the still-empty
+        // `userCollege` state, so the college and its clubs never loaded).
+        const college: string = (userData?.collegeName ?? '').trim();
+        const hasCollege =
+          !!college && !['not joined', 'not_joined', 'other'].includes(college.toLowerCase());
 
-        if (userCollege) {
-          setUserCollege(userCollege);
-
-          // Fetch existing clubs for this college
+        if (hasCollege) {
+          setUserCollege(college);
           setIsLoadingClubs(true);
-          // Test the API call directly first
-          try {
-            const testUrl = `/api/v1/clubs/getClubs/${encodeURIComponent(userCollege)}`;
-            console.log('Testing API URL:', testUrl);
-
-            const testResponse = await fetch(testUrl, {
-              headers: {
-                authorization: `Bearer ${token}`,
-              },
-            });
-
-            console.log('Test response status:', testResponse.status);
-            console.log('Test response headers:', testResponse.headers);
-
-            if (testResponse.ok) {
-              const testData = await testResponse.json();
-              console.log('Test API response data:', testData);
-            } else {
-              console.log('Test API failed with status:', testResponse.status);
-              const errorText = await testResponse.text();
-              console.log('Test API error response:', errorText);
-            }
-          } catch (testError) {
-            console.error('Test API call failed:', testError);
-          }
-
-          const clubs = await fetchClubsByCollege(
-            userCollege,
-            undefined,
-            token
-          );
-          console.log('Fetched clubs:', clubs); // Debug log
-
-          // If no clubs found, add some sample clubs for testing
-          if (clubs.length === 0) {
-            console.log('No clubs found, adding sample clubs for testing');
-            const sampleClubs = [
-              'Computer Science Club',
-              'Robotics Club',
-              'Debate Society',
-              'Photography Club',
-              'Music Club',
-            ];
-            setExistingClubs(sampleClubs);
-          } else {
-            setExistingClubs(clubs);
-          }
+          const clubs = await fetchClubsByCollege(college, undefined, token);
+          setExistingClubs(clubs);
         } else {
-          // Add sample clubs even if no college is found
-          const sampleClubs = [
-            'Computer Science Club',
-            'Robotics Club',
-            'Debate Society',
-            'Photography Club',
-            'Music Club',
-          ];
-          setExistingClubs(sampleClubs);
+          setExistingClubs([]);
         }
       } catch (error) {
         console.error('Error fetching user college:', error);
