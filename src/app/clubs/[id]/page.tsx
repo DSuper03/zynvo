@@ -101,6 +101,7 @@ import NoTokenModal from '@/components/modals/remindModal';
 import { buildAuthHref } from '@/lib/authReturnTo';
 import { getSafeErrorMessage } from '@/lib/safe-error';
 import { setClubGroup, track } from '@/lib/analytics';
+import { useDataChanged } from '@/lib/dataEvents';
 
 // All dynamic content is driven by backend data; no hardcoded demo content
 
@@ -129,6 +130,9 @@ export default function ClubPage() {
   const [event, setEvent] = useState<EventType[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
+  // New event created from this page (or a club change): refetch right away.
+  const [clubReload, setClubReload] = useState(0);
+  useDataChanged(['event', 'club'], () => setClubReload((n) => n + 1));
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(true);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
@@ -314,7 +318,7 @@ export default function ClubPage() {
     if (token && id) {
       call();
     }
-  }, [id, token, router, signinInviteHref]);
+  }, [id, token, router, signinInviteHref, clubReload]);
 useEffect(() => {
   const fetchUserData = async () => {
     try {
@@ -533,7 +537,7 @@ useEffect(() => {
     };
 
     // Prefer synchronous copy (same user gesture) — Clipboard API can fail or detach from gesture.
-    let ok =
+    const ok =
       (inviteLinkInputRef.current && copyFromElement(inviteLinkInputRef.current)) ||
       copyViaOverlayTextarea();
 

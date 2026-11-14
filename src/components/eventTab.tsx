@@ -3,6 +3,8 @@
 import axios from "axios";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { notifyDataChanged } from "@/lib/dataEvents";
 
 export default function EventTab({ token, events }: { token: string; events: any[] }) {
   
@@ -13,6 +15,9 @@ export default function EventTab({ token, events }: { token: string; events: any
   const [link2, setLink2] = useState("");
   const [link3, setLink3] = useState("");
   const [openEventModal, setOpenEventModal] = useState<boolean>(false);
+  // Running action ("delete:<id>", "links") and events deleted in this session.
+  const [busy, setBusy] = useState<string | null>(null);
+  const [deletedIds, setDeletedIds] = useState<string[]>([]);
 
   // Early returns after hooks
   if (!token || !events) {
@@ -36,29 +41,40 @@ export default function EventTab({ token, events }: { token: string; events: any
   };
 
   const updateLinks = async (id: string) => {
+    if (busy) return;
+    setBusy("links");
     try {
       const res = await axios.put<any>(
         `/api/v2/admin/updateEventLinks/${id}`,
         { link1, link2, link3 },
         { headers: { authorization: `Bearer ${token}` } }
       );
-      toast(res.data.msg);
+      toast.success(res.data.msg || "Links updated");
     } catch {
-      toast.error("Error updating club links");
+      toast.error("Error updating event links");
+    } finally {
+      setBusy(null);
     }
   };
 
-  const deleteEvent = async (eventId: string) => {
+  const deleteEvent = async (eventId: string, eventName?: string) => {
+    if (busy) return;
+    if (!window.confirm(`Delete ${eventName ? `"${eventName}"` : "this event"}? This can't be undone.`)) return;
+    setBusy(`delete:${eventId}`);
     try {
       const res = await axios.post<any>(
         `/api/v2/admin/deleteEvent/${eventId}`,
         {},
         { headers: { authorization: `Bearer ${token}` } }
       );
-      toast(res.data.msg);
+      toast.success(res.data.msg || "Event deleted");
+      setDeletedIds((prev) => [...prev, eventId]);
+      notifyDataChanged("event");
       setEventId("");
     } catch {
       toast.error("Error deleting event");
+    } finally {
+      setBusy(null);
     }
   };
 
@@ -74,7 +90,7 @@ export default function EventTab({ token, events }: { token: string; events: any
         <div className="text-yellow-400 text-center mt-4">No events available.</div>
       ) : (
         <div className="space-y-4">
-          {events.map((eventItem: any) => (
+          {events.filter((e: any) => !deletedIds.includes(e.id)).map((eventItem: any) => (
             <div
               key={eventItem.id}
               className="border border-yellow-600 rounded-2xl p-4 flex items-center justify-between bg-[#0a0a0a] hover:bg-[#111] transition-all"
@@ -84,11 +100,13 @@ export default function EventTab({ token, events }: { token: string; events: any
                 <button
                   onClick={() => {
                     setEventId(eventItem.id);
-                    deleteEvent(eventItem.id);
+                    deleteEvent(eventItem.id, eventItem.EventName);
                   }}
-                  className="bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-400 transition-all"
+                  disabled={!!busy}
+                  className="bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-400 transition-all disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center gap-2"
                 >
-                  Delete
+                  {busy === `delete:${eventItem.id}` && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {busy === `delete:${eventItem.id}` ? "Deleting…" : "Delete"}
                 </button>
                 <button
                   onClick={() => EventModal(eventItem.id)}
@@ -139,9 +157,11 @@ export default function EventTab({ token, events }: { token: string; events: any
               ))}
               <button
                 onClick={() => updateLinks(eventDetails.id)}
-                className="bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-400 transition-all mt-3 w-full"
+                disabled={!!busy}
+                className="bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-400 transition-all mt-3 w-full disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
               >
-                Update Links
+                {busy === "links" && <Loader2 className="w-4 h-4 animate-spin" />}
+                {busy === "links" ? "Updating…" : "Update Links"}
               </button>
             </div>
           </div>

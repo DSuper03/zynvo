@@ -6,7 +6,7 @@ import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import EventTab from "../../../components/eventTab";
 import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MemberSelect from "@/components/MemberSelect";
 import CoreTeamByEmail from "@/components/admin/CoreTeamByEmail";
@@ -22,7 +22,6 @@ export default function ClubAdminPage() {
   const [instagram, setInstagramLink] = useState('');
   const [linkedin, setLinkedinLink] = useState('');
   const [twitter, setTwitterLink] = useState('');
-  const [removeMemberId, setRemoveMemberId] = useState('');
   const [coremember1, setCoreMember1] = useState('');
   const [coremember2, setCoreMember2] = useState('');
   const [coremember3, setCoreMember3] = useState('');
@@ -31,6 +30,19 @@ export default function ClubAdminPage() {
   const [event, setEvent] = useState<any[]>([]);
   const [isClient, setIsClient] = useState(false);
   const [token, setToken] = useState('');
+  // Which admin action is running (one at a time): disables buttons, shows a spinner.
+  const [busy, setBusy] = useState<string | null>(null);
+  const runAction = async (key: string, action: () => Promise<void>) => {
+    if (busy) return;
+    setBusy(key);
+    try {
+      await action();
+    } finally {
+      setBusy(null);
+    }
+  };
+  const spinner = (key: string) =>
+    busy === key ? <Loader2 className="w-4 h-4 animate-spin inline mr-2 align-[-2px]" /> : null;
   const navigate = useRouter();
   const [openCriteriaModal, setOpenCriteriaModal] = useState<boolean>(false);
 
@@ -124,11 +136,11 @@ export default function ClubAdminPage() {
     }
   };
 
-  const removeMember = async () => {
+  const removeMember = async (memberId: string) => {
     try {
       const res = await axios.post<any>(
         `/api/v2/admin/removeMember/${clubId}`,
-        { member: removeMemberId },
+        { member: memberId },
         { headers: { authorization: `Bearer ${token}` } }
       );
       toast(res.data.msg);
@@ -227,10 +239,11 @@ export default function ClubAdminPage() {
                   </div>
                 ))}
                 <button
-                  onClick={updateClubLinks}
-                  className="mt-3 bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg hover:bg-yellow-300 transition-all"
+                  onClick={() => runAction('links', updateClubLinks)}
+                  disabled={!!busy}
+                  className="mt-3 bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg hover:bg-yellow-300 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Update Links
+                  {spinner('links')}{busy === 'links' ? 'Updating…' : 'Update Links'}
                 </button>
               </div>
             </section>
@@ -274,19 +287,21 @@ export default function ClubAdminPage() {
                       onChange={setter}
                     />
                     <button
-                      onClick={removeCoreMembers}
-                      className="text-xs text-red-400 hover:text-red-300 w-fit"
+                      onClick={() => runAction('core-remove', removeCoreMembers)}
+                      disabled={!!busy}
+                      className="text-xs text-red-400 hover:text-red-300 w-fit disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      Remove
+                      {busy === 'core-remove' ? 'Removing…' : 'Remove'}
                     </button>
                   </div>
                 );
               })}
               <button
-                onClick={addCoreMembers}
-                className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 font-semibold"
+                onClick={() => runAction('core-add', addCoreMembers)}
+                disabled={!!busy}
+                className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Add Core Members
+                {spinner('core-add')}{busy === 'core-add' ? 'Saving…' : 'Add Core Members'}
               </button>
               <div className="mt-6 pt-4 border-t border-yellow-400/20">
                 <CoreTeamByEmail
@@ -307,10 +322,11 @@ export default function ClubAdminPage() {
                   onChange={(e) => setWings([...wings, e.target.value])}
                 />
                 <button
-                  className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 font-semibold"
-                  onClick={addWings}
+                  className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                  onClick={() => runAction('wings', addWings)}
+                  disabled={!!busy}
                 >
-                  Add
+                  {spinner('wings')}{busy === 'wings' ? 'Adding…' : 'Add'}
                 </button>
               </div>
             </section>
@@ -352,13 +368,11 @@ export default function ClubAdminPage() {
                         <p>{member.email}</p>
                       </div>
                       <button
-                        onClick={() => {
-                          setRemoveMemberId(member.id);
-                          removeMember();
-                        }}
-                        className="text-sm text-red-400 hover:text-red-300"
+                        onClick={() => runAction(`member:${member.id}`, () => removeMember(member.id))}
+                        disabled={!!busy}
+                        className="text-sm text-red-400 hover:text-red-300 disabled:opacity-60 disabled:cursor-not-allowed"
                       >
-                        Remove
+                        {busy === `member:${member.id}` ? 'Removing…' : 'Remove'}
                       </button>
                     </div>
                   ))}
@@ -375,10 +389,11 @@ export default function ClubAdminPage() {
                 onChange={(e) => setNewOwnerEmail(e.target.value)}
               />
               <button
-                onClick={transferOwnership}
-                className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 font-semibold"
+                onClick={() => runAction('transfer', transferOwnership)}
+                disabled={!!busy}
+                className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Transfer
+                {spinner('transfer')}{busy === 'transfer' ? 'Transferring…' : 'Transfer'}
               </button>
             </section>
           </div>

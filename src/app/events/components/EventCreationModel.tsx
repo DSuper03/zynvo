@@ -32,7 +32,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { EventFormData, CustomQuestion } from '@/types/global-Interface';
-import { Plus, Trash2, GripVertical, Settings2 } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Settings2, Loader2 } from 'lucide-react';
 import {
   toBase64,
   uploadImageToImageKit,
@@ -44,6 +44,7 @@ import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
 import { useRouter } from 'next/navigation';
 import { checkClubRole, type ClubRole } from '@/hooks/useClubRole';
+import { notifyDataChanged } from '@/lib/dataEvents';
 import AchievementUnlockModal from '@/components/AchievementUnlockModal';
 
 interface CreateEventModalProps {
@@ -591,22 +592,24 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
     if (!token) {
       toast('please login or signup');
       return;
     }
-    const roleCheck = await checkClubRole(token);
-    if (!roleCheck.authorized || !roleCheck.clubId) {
-      toast.error('Only club heads and core members can create events.');
-      return;
-    }
-
     if (!validateStep()) {
       notifyStepValidationErrors(step);
       return;
     }
 
+    // Busy from the first click: the role check below is a network call.
     setIsSubmitting(true);
+    const roleCheck = await checkClubRole(token);
+    if (!roleCheck.authorized || !roleCheck.clubId) {
+      toast.error('Only club heads and core members can create events.');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       try {
@@ -794,7 +797,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           setCloseAfterAchievement(true);
         }
 
-        toast('Event created successfully! Start marketing now!!!');
+        toast.success('Event created! Start marketing now 🚀');
+        // Lists on the events and club pages refetch right away.
+        notifyDataChanged('event');
+        router.refresh();
 
         if (!badgeUnlocked) {
           setTimeout(() => {
@@ -2161,7 +2167,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                   isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
                 }`}
               >
-                {isSubmitting ? 'Creating...' : 'Create Event'}
+                {isSubmitting && <Loader2 className="w-4 h-4 mr-2 inline animate-spin" />}
+                {isSubmitting ? 'Creating event…' : 'Create Event'}
               </Button>
             )}
           </div>

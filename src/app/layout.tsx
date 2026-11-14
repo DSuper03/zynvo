@@ -5,6 +5,7 @@ import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@/components/ui/sonner';
+import MutationProgress from '@/components/MutationProgress';
 import { WarmupProvider } from '@/components/WarmupProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
@@ -166,6 +167,7 @@ export default function RootLayout({
           <SpeedInsights />
           <PerformanceMonitor />
           <Toaster />
+          <MutationProgress />
         </ErrorBoundary>
       </body>
     </html>
