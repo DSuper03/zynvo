@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FiSearch, FiChevronDown } from 'react-icons/fi';
 
-const OTHER_COLLEGE = { college: 'Other', State: '' };
+const OTHER_LABEL = 'Other';
 
 interface CollegeSearchSelectProps {
   colleges: { college: string; State: string }[];
@@ -11,6 +11,46 @@ interface CollegeSearchSelectProps {
   onChange: (value: string) => void;
   placeholder?: string;
   required?: boolean;
+}
+
+type Option =
+  | { kind: 'listed'; name: string }
+  | { kind: 'community'; name: string }
+  | { kind: 'other' };
+
+const norm = (s: string) => s.replace(/\s+/g, ' ').trim().toLowerCase();
+
+/**
+ * College names other students typed via "Other" (GET /api/v1/user/colleges).
+ * Fails quietly (e.g. backend without the endpoint) — suggestions are optional.
+ */
+function useCollegeSuggestions(query: string): string[] {
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/v1/user/colleges?q=${encodeURIComponent(q)}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) return setSuggestions([]);
+        const data = await res.json();
+        setSuggestions(Array.isArray(data?.colleges) ? data.colleges : []);
+      } catch {
+        if (!controller.signal.aborted) setSuggestions([]);
+      }
+    }, 300);
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [query]);
+  return suggestions;
 }
 
 export default function CollegeSearchSelect({
@@ -31,6 +71,7 @@ export default function CollegeSearchSelect({
   const listedColleges = colleges.filter(
     (college) => college.college.toLowerCase() !== 'other'
   );
+  const listedKeys = new Set(listedColleges.map((c) => norm(c.college)));
 
   useEffect(() => {
     const trimmed = value.trim();
@@ -40,13 +81,27 @@ export default function CollegeSearchSelect({
     setIsOther(!inList);
   }, [value, colleges]);
 
-  // Filter colleges based on search term, always keep Other at the bottom
-  const filteredColleges = [
-    ...listedColleges.filter((college) =>
-      college.college.toLowerCase().includes(searchTerm.toLowerCase())
-    ),
-    OTHER_COLLEGE,
+  // Suggestions follow whatever the user is typing: the search box while the
+  // dropdown is open, otherwise the custom "Other" input.
+  const suggestions = useCollegeSuggestions(isOpen ? searchTerm : isOther ? value : '');
+  const communityColleges = suggestions.filter((name) => !listedKeys.has(norm(name)));
+
+  const listedMatches = listedColleges.filter((college) =>
+    college.college.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Listed matches, then names other students entered, then Other (always last)
+  const options: Option[] = [
+    ...listedMatches.map((c) => ({ kind: 'listed' as const, name: c.college })),
+    ...communityColleges.map((name) => ({ kind: 'community' as const, name })),
+    { kind: 'other' },
   ];
+
+  const close = () => {
+    setIsOpen(false);
+    setSearchTerm('');
+    setHighlightedIndex(-1);
+  };
 
   // Handle clicking outside to close dropdown
   useEffect(() => {
@@ -55,15 +110,29 @@ export default function CollegeSearchSelect({
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false);
-        setSearchTerm('');
-        setHighlightedIndex(-1);
+        close();
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleSelect = (option: Option) => {
+    if (option.kind === 'other') {
+      // Keep what was typed in the search box so it needn't be retyped.
+      const typed = searchTerm.replace(/\s+/g, ' ').trim();
+      setIsOther(true);
+      onChange(typed);
+      close();
+      setTimeout(() => customInputRef.current?.focus(), 0);
+      return;
+    }
+    // A name another student entered is a custom ("Other") college too.
+    setIsOther(option.kind === 'community');
+    onChange(option.name);
+    close();
+  };
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -78,49 +147,22 @@ export default function CollegeSearchSelect({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setHighlightedIndex((prev) =>
-          prev < filteredColleges.length - 1 ? prev + 1 : 0
-        );
+        setHighlightedIndex((prev) => (prev < options.length - 1 ? prev + 1 : 0));
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setHighlightedIndex((prev) =>
-          prev > 0 ? prev - 1 : filteredColleges.length - 1
-        );
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : options.length - 1));
         break;
       case 'Enter':
         e.preventDefault();
-        if (
-          highlightedIndex >= 0 &&
-          highlightedIndex < filteredColleges.length
-        ) {
-          handleSelect(filteredColleges[highlightedIndex].college);
+        if (highlightedIndex >= 0 && highlightedIndex < options.length) {
+          handleSelect(options[highlightedIndex]);
         }
         break;
       case 'Escape':
-        setIsOpen(false);
-        setSearchTerm('');
-        setHighlightedIndex(-1);
+        close();
         break;
     }
-  };
-
-  const handleSelect = (college: string) => {
-    if (college === OTHER_COLLEGE.college) {
-      setIsOther(true);
-      onChange('');
-      setIsOpen(false);
-      setSearchTerm('');
-      setHighlightedIndex(-1);
-      setTimeout(() => customInputRef.current?.focus(), 0);
-      return;
-    }
-
-    setIsOther(false);
-    onChange(college);
-    setIsOpen(false);
-    setSearchTerm('');
-    setHighlightedIndex(-1);
   };
 
   const handleInputClick = () => {
@@ -134,9 +176,16 @@ export default function CollegeSearchSelect({
   };
 
   const handleCustomBlur = () => {
-    const trimmed = value.trim();
+    const trimmed = value.replace(/\s+/g, ' ').trim();
     if (trimmed !== value) onChange(trimmed);
   };
+
+  // In the custom box: existing spellings that differ from what was typed.
+  const customSuggestions = isOther
+    ? suggestions.filter((name) => norm(name) !== norm(value)).slice(0, 5)
+    : [];
+
+  const firstCommunityIndex = listedMatches.length;
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -149,11 +198,14 @@ export default function CollegeSearchSelect({
         <input
           ref={inputRef}
           type="text"
-          value={isOpen ? searchTerm : isOther ? 'Other' : value}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={isOpen ? searchTerm : isOther ? OTHER_LABEL : value}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setHighlightedIndex(-1);
+          }}
           onKeyDown={handleKeyDown}
           className="bg-transparent text-white w-full outline-none cursor-pointer"
-          placeholder={(!isOpen && isOther ? 'Other' : value) || placeholder}
+          placeholder={(!isOpen && isOther ? OTHER_LABEL : value) || placeholder}
           readOnly={!isOpen}
           required={required && !isOther}
           autoComplete="new-password"
@@ -170,34 +222,43 @@ export default function CollegeSearchSelect({
       {/* Dropdown */}
       {isOpen && (
         <div className="absolute z-20 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto scrollbar-overlay">
-          {filteredColleges.length === 1 && (
+          {options.length === 1 && (
             <div className="px-4 py-2 text-xs text-gray-400">
-              No matches — choose Other to type your college
+              No matches — choose Other to use what you typed
             </div>
           )}
-          {filteredColleges.map((college, index) => (
-            <div
-              key={`${college.college}-${index}`}
-              className={`px-4 py-3 cursor-pointer transition-colors ${
-                college.college === OTHER_COLLEGE.college
-                  ? 'border-t border-gray-700'
-                  : ''
-              } ${
-                index === highlightedIndex
-                  ? 'bg-yellow-500 text-black'
-                  : 'text-white hover:bg-gray-700'
-              }`}
-              onClick={() => handleSelect(college.college)}
-              onMouseEnter={() => setHighlightedIndex(index)}
-            >
-              {college.college}
-              {college.college === OTHER_COLLEGE.college && (
-                <span className="block text-xs opacity-70">
-                  College not listed? Type it after selecting
-                </span>
-              )}
-            </div>
-          ))}
+          {options.map((option, index) => {
+            const label = option.kind === 'other' ? OTHER_LABEL : option.name;
+            return (
+              <React.Fragment key={`${option.kind}-${label}-${index}`}>
+                {option.kind === 'community' && index === firstCommunityIndex && (
+                  <div className="px-4 pt-3 pb-1 text-xs uppercase tracking-wide text-gray-500 border-t border-gray-700">
+                    Entered by other students
+                  </div>
+                )}
+                <div
+                  className={`px-4 py-3 cursor-pointer transition-colors ${
+                    option.kind === 'other' ? 'border-t border-gray-700' : ''
+                  } ${
+                    index === highlightedIndex
+                      ? 'bg-yellow-500 text-black'
+                      : 'text-white hover:bg-gray-700'
+                  }`}
+                  onClick={() => handleSelect(option)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
+                >
+                  {label}
+                  {option.kind === 'other' && (
+                    <span className="block text-xs opacity-70">
+                      {searchTerm.trim()
+                        ? `College not listed? Use "${searchTerm.trim()}"`
+                        : 'College not listed? Type it after selecting'}
+                    </span>
+                  )}
+                </div>
+              </React.Fragment>
+            );
+          })}
         </div>
       )}
 
@@ -216,6 +277,29 @@ export default function CollegeSearchSelect({
             minLength={2}
             maxLength={200}
           />
+          {customSuggestions.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-xs text-gray-400">
+                Other students at your college may have used one of these. Pick it so you can join their clubs:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {customSuggestions.map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    // mousedown so the input's blur doesn't swallow the click
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      onChange(name);
+                    }}
+                    className="px-3 py-1 rounded-full text-xs bg-gray-700 text-gray-100 hover:bg-yellow-500 hover:text-black transition-colors"
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <p className="text-xs text-gray-400">
             Type your full college name. Do not leave this as &quot;Other&quot;.
           </p>
