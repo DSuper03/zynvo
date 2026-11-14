@@ -62,6 +62,7 @@ import TeamSection from './components/TeamSection';
 import { getSafeErrorMessage } from '@/lib/safe-error';
 import EventEditModal from '../components/EventEditModal';
 import { useSchedule } from '@/hooks/useSchedule';
+import { eventShareUrl } from '@/lib/eventLinks';
 import {
   getScheduleStats,
   ScheduleDayPicker,
@@ -221,13 +222,11 @@ const Eventid = () => {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
-      setEventInviteFullUrl(
-        new URL(signupEventHref, window.location.origin).href
-      );
+      setEventInviteFullUrl(eventShareUrl(id as string));
     } catch {
       setEventInviteFullUrl('');
     }
-  }, [signupEventHref]);
+  }, [id]);
 
   const runCsvSync = React.useCallback(async () => {
     if (!id || !isFounder) return;
@@ -1362,8 +1361,7 @@ const Eventid = () => {
                   </p>
                 ) : (
                   <p className="mt-2 text-xs text-yellow-100/70">
-                    Share this to bring people back to this event after signup
-                    or signin.
+                    Anyone with this link can view the event and sign in to register.
                   </p>
                 )}
               </div>
