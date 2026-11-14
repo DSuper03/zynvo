@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { ChevronDown, ChevronUp, User } from 'lucide-react';
+import { checkClubRole } from '@/hooks/useClubRole';
 
 // Types based on your provided schema
 interface Question {
@@ -91,15 +92,10 @@ export default function EventQueuePage() {
 
                 const clubId = eventData.response.clubId;
 
-                // 2. Check Admin Status with clubId
-                const adminRes = await fetch(`/api/v1/user/isClubAdmin/${clubId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                const adminData = await adminRes.json();
+                // 2. Head or core member of the event's club (email-based check)
+                const role = await checkClubRole(token, clubId);
 
-                if (!adminRes.ok || !adminData.founder) {
+                if (!role.authorized) {
                     setIsAdmin(false);
                     setIsCheckingAdmin(false);
                     return;
