@@ -307,7 +307,7 @@ const Eventid = () => {
         setHasTokenForModal(true);
         if (session !== 'true') {
           // Has token but no session - user needs to sign in
-          toast('Login required', {
+          toast('Login required', { id: 'login-required',
             action: {
               label: 'Sign in',
               onClick: () => router.push(signinEventHref),

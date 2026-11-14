@@ -157,13 +157,6 @@ export default function ZynvoEventsPage() {
       
       if (session !== 'true') {
         // Has token but no session - user needs to sign in
-        toast('Login required', {
-          action: {
-            label: 'Sign in',
-            onClick: () =>
-              router.push(buildAuthHref('/auth/signin', pathname)),
-          },
-        });
         setHasTokenForModal(true);
         setIsAuthModalOpen(true);
         return;

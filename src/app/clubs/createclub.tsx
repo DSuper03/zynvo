@@ -78,7 +78,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       else {
-        toast('Login required', {
+        toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),
@@ -87,7 +87,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
         return;
       }
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('Login required', {
+        toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),
@@ -192,7 +192,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     }
 
     if (!token) {
-      toast('Login required', {
+      toast('Login required', { id: 'login-required',
         action: {
           label: 'Sign in',
           onClick: () => router.push('/auth/signin'),

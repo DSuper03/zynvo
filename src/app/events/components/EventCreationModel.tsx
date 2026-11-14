@@ -118,8 +118,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         setClubRole({ msg: 'No club selected', authorized: false });
         return;
       }
+      // Silent check: the submit handler explains a refusal when it matters.
       const role = await checkClubRole(token, clubId);
-      toast(role.msg, { duration: 5000 });
       setClubRole(role);
     };
     if (token && clubId) checkRole();
@@ -164,7 +164,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     const tok = localStorage.getItem('token');
     if (tok) setToken(tok);
     else {
-      toast('Login required', {
+      toast('Login required', { id: 'login-required',
         action: {
           label: 'Sign in',
           onClick: () => router.push('/auth/signin'),

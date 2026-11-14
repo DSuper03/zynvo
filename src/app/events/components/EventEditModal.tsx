@@ -297,7 +297,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
     const tok = localStorage.getItem('token');
     if (tok) setToken(tok);
     else {
-       toast('Login required', {
+       toast('Login required', { id: 'login-required',
           action: {
             
             label: 'Sign in',

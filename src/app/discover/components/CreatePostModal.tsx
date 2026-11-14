@@ -58,7 +58,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       else {
-        toast('Login required', {
+        toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),
@@ -67,7 +67,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
         return;
       }
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('Login required', {
+        toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),

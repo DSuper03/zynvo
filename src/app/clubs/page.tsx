@@ -173,12 +173,6 @@ const ClubsPage = () => {
       }
       if (session !== 'true') {
         // Has token but no session - user needs to sign in
-        toast('Login required', {
-          action: {
-            label: 'Sign in',
-            onClick: () => router.push('/auth/signin'),
-          },
-        });
         setHasTokenForModal(true);
         setIsOpen(true);
         return;
@@ -542,8 +536,8 @@ const ClubsPage = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             if (isUserMemberOfClub(club)) {
-                              // User is already a member - could show a modal or do nothing
-                              toast.success('You are already a member of this club!');
+                              // Already a member: open the club instead of a toast
+                              router.push(`/clubs/${club.id}`);
                             } else {
                               handleJoinClub(club);
                             }
@@ -644,8 +638,8 @@ const ClubsPage = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             if (isUserMemberOfClub(club)) {
-                              // User is already a member - could show a modal or do nothing
-                              toast.success('You are already a member of this club!');
+                              // Already a member: open the club instead of a toast
+                              router.push(`/clubs/${club.id}`);
                             } else {
                               handleJoinClub(club);
                             }
