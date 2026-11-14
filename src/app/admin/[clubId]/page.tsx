@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import MemberSelect from "@/components/MemberSelect";
 import CoreTeamByEmail from "@/components/admin/CoreTeamByEmail";
 import ClubLogoEditor from "@/components/admin/ClubLogoEditor";
+import DeleteClubSection from "@/components/admin/DeleteClubSection";
 
 export default function ClubAdminPage() {
   const params = useParams();
@@ -396,6 +397,8 @@ export default function ClubAdminPage() {
                 {spinner('transfer')}{busy === 'transfer' ? 'Transferring…' : 'Transfer'}
               </button>
             </section>
+
+            <DeleteClubSection clubId={String(clubId)} clubName={clubData.name} token={token} />
           </div>
         )}
 
