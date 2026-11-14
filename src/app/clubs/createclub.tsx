@@ -11,6 +11,7 @@ import {
   Trash2,
   ChevronDown,
   Building,
+  Loader2,
 } from 'lucide-react';
 import { CreateClubModalProps } from '@/types/global-Interface';
 import { toast } from 'sonner';
@@ -24,6 +25,7 @@ import axios from 'axios';
 import { fetchClubsByCollege } from '@/app/api/hooks/useClubs';
 import { useRouter } from 'next/navigation';
 import MemberSelect from '@/components/MemberSelect';
+import { notifyDataChanged } from '@/lib/dataEvents';
 
 const CreateClubModal: React.FC<CreateClubModalProps> = ({
   isOpen,
@@ -55,6 +57,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   const [isLoadingClubs, setIsLoadingClubs] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [typeSearch, setTypeSearch] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Stable identity so MemberSelect's debounced search isn't restarted on every render.
   const searchUsers = useCallback(async (query: string): Promise<any[]> => {
@@ -179,6 +182,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     // Validate club selection
     if (selectedClubOption === 'existing' && !selectedExistingClub) {
@@ -201,6 +205,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
       return;
     }
 
+    setIsSubmitting(true);
     try {
       let image: string;
 
@@ -252,14 +257,19 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
           club_type: clubData.type,
           wings_count: Array.isArray(clubData.wings) ? clubData.wings.length : 0,
         });
-        toast(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
+        toast.success(msg.msg || 'Club created');
+        notifyDataChanged('club');
         onClose();
+        // Take the founder straight to the new club so it's visible instantly.
+        if (upload?.data?.clubId) router.push(`/clubs/${upload.data.clubId}`);
       } else {
         toast(msg.msg);
       }
     } catch (error: any) {
       console.error('Error creating club:', error);
-      toast(error.response?.data?.msg || 'Failed to create club');
+      toast.error(error.response?.data?.msg || 'Failed to create club');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -690,9 +700,12 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
             </Button>
             <Button
               type="submit"
-              className="px-6 py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg font-medium transition-colors"
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+              className="px-6 py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center gap-2"
             >
-              Zync your Club
+              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isSubmitting ? (img ? 'Uploading logo & creating…' : 'Creating club…') : 'Zync your Club'}
             </Button>
           </div>
         </form>

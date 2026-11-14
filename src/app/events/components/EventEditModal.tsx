@@ -38,6 +38,7 @@ import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
 import { useRouter } from 'next/navigation';
 import AchievementUnlockModal from '@/components/AchievementUnlockModal';
+import { notifyDataChanged } from '@/lib/dataEvents';
 interface EventEditModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -757,7 +758,8 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
     );
 
     if (updateResult.status === 200) {
-      toast('Event updated successfully!');
+      toast.success('Event updated');
+      notifyDataChanged('event');
       setIsSubmitting(false);
       
       // Check if application date was extended

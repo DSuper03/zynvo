@@ -18,6 +18,7 @@ import { buildAuthHref } from '@/lib/authReturnTo';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { cn } from '@/lib/utils';
 import { track } from '@/lib/analytics';
+import { useDataChanged } from '@/lib/dataEvents';
 
 
 interface apiRespEvents {
@@ -125,6 +126,8 @@ export default function ZynvoEventsPage() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
   const [fetchNonce, setFetchNonce] = useState(0);
+  // A new event created anywhere (e.g. the Create Event modal) shows up right away.
+  useDataChanged('event', () => setFetchNonce((n) => n + 1));
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Search-specific state

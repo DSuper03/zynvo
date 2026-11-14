@@ -37,6 +37,7 @@ import NoTokenModal from '@/components/modals/remindModal';
 import { useRouter } from 'next/navigation';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
 import { EmptyState } from '@/components/feedback';
+import { useDataChanged } from '@/lib/dataEvents';
 
 const getTypeClasses = (rawType: string) => {
   const type = String(rawType || '').toLowerCase();
@@ -122,6 +123,9 @@ const ClubsPage = () => {
   const [clubData, setData] = useState<response['resp']>();
   const [token, setToken] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  // Refetch the list when a club is created elsewhere.
+  const [clubsReload, setClubsReload] = useState(0);
+  useDataChanged('club', () => setClubsReload((n) => n + 1));
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
   const [userJoinedClubIds, setUserJoinedClubIds] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -218,7 +222,7 @@ const ClubsPage = () => {
     }
 
     call();
-  }, [token]);
+  }, [token, clubsReload]);
 
   // Categories scroll controls visibility
   useEffect(() => {

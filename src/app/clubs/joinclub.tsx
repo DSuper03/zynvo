@@ -2,7 +2,7 @@
 
 import { setClubGroup, track } from '@/lib/analytics';
 import React, { useEffect, useState } from 'react';
-import { X, Info, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { X, Info, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
 import Image from 'next/legacy/image';
 import { JoinClubModalProps } from '@/types/global-Interface';
 import axios from 'axios';
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { getSafeErrorMessage, toSafeUserMessage } from '@/lib/safe-error';
+import { notifyDataChanged } from '@/lib/dataEvents';
 
 const JoinClubModal: React.FC<JoinClubModalProps> = ({
   isOpen,
@@ -26,6 +27,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
   });
   const [token, setToken] = useState<string | null>('');
   const [showCriteriaModal, setShowCriteriaModal] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
   const router = useRouter();
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -57,6 +59,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isJoining) return;
     if (!token) {
       toast('Login required', { id: 'login-required',
         action: {
@@ -66,6 +69,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
       });
       return;
     }
+    setIsJoining(true);
     try {
       const res = await axios.post<{ msg: string }>(
         `/api/v1/user/joinClub/${clubId}`,
@@ -82,6 +86,7 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
         toast.success(
           toSafeUserMessage(res.data.msg, 'Successfully joined club.')
         );
+        notifyDataChanged('club');
         onClose();
         onSuccess?.();
       } else {
@@ -103,8 +108,9 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
       } else {
         toast.error(errorMsg);
       }
+    } finally {
+      setIsJoining(false);
     }
-    // console.log('Join request data:', formData);
   };
 
   if (!isOpen) return null;
@@ -176,9 +182,12 @@ const JoinClubModal: React.FC<JoinClubModalProps> = ({
             </Button>
             <Button
               type="submit"
-              className="px-6 py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg font-medium transition-colors"
+              disabled={isJoining}
+              aria-busy={isJoining}
+              className="px-6 py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center gap-2"
             >
-              Zync in
+              {isJoining && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isJoining ? 'Joining…' : 'Zync in'}
             </Button>
           </div>
         </form>
