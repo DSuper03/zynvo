@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import {
   Calendar,
   BarChart2,
@@ -7,9 +7,7 @@ import {
   X,
   Menu,
   School,
-  UserCheck,
   Settings,
-  Building,
   Lock,
   LogOut,
 } from 'lucide-react';
@@ -38,6 +36,7 @@ import { logger } from '@/lib/logger';
 import DiceBearAvatar from '@/components/DicebearAvatars';
 import { collegesWithClubs } from '@/components/colleges/college';
 import { identifyFromToken, resetAnalytics, setCollegeGroup, track } from '@/lib/analytics';
+import ClubLogo from '@/components/ClubLogo';
 
 
 interface Event {
@@ -632,6 +631,45 @@ export default function ZynvoDashboard() {
   const [founder , setFounder] = useState<string>('false')
   // Club the user heads or is a core member of (from GET /isClubAdmin, matched by email).
   const [adminClub, setAdminClub] = useState<{ clubId: string; clubName?: string; role?: string } | null>(null)
+  const [leavingClubId, setLeavingClubId] = useState<string | null>(null)
+
+  // Every club the user belongs to. Joining creates a UserClubMembership row
+  // (getUser -> clubMemberships); older accounts may only have the legacy
+  // single-club pointer (clubId/clubName), so that one is merged in.
+  const myClubs = useMemo(() => {
+    if (!userData) return [] as { id: string; name: string; logo: string | null; legacy?: boolean }[];
+    const list = (userData.clubMemberships ?? [])
+      .filter((m) => m?.club?.id)
+      .map((m) => ({ id: m.club.id, name: m.club.name, logo: m.club.profilePicUrl }));
+    if (userData.clubId && !list.some((c) => c.id === userData.clubId)) {
+      list.unshift({ id: userData.clubId, name: userData.clubName || 'Your club', logo: null, legacy: true } as any);
+    }
+    return list as { id: string; name: string; logo: string | null; legacy?: boolean }[];
+  }, [userData])
+
+  const leaveClub = async (club: { id: string; name: string }) => {
+    if (!token || leavingClubId) return;
+    if (!window.confirm(`Leave ${club.name}?`)) return;
+    setLeavingClubId(club.id);
+    try {
+      await axios.post(`/api/v1/user/leaveClub/${club.id}`, {}, { headers: { authorization: `Bearer ${token}` } });
+      track('club_left', { club_id: club.id, source: 'dashboard' });
+      setUserData((prev) =>
+        prev
+          ? {
+              ...prev,
+              clubMemberships: (prev.clubMemberships ?? []).filter((m) => m.club?.id !== club.id),
+              ...(prev.clubId === club.id ? { clubId: null, clubName: null } : {}),
+            }
+          : prev
+      );
+      toast.success(`You left ${club.name}`);
+    } catch (error: any) {
+      toast.error(getSafeErrorMessage(error, 'Could not leave the club'));
+    } finally {
+      setLeavingClubId(null);
+    }
+  }
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -705,7 +743,8 @@ export default function ZynvoDashboard() {
               twitter,
               instagram,
               linkedin,
-              clubId
+              clubId,
+              clubMemberships
             } = response.data.user;
 
             const events =
@@ -732,7 +771,8 @@ export default function ZynvoDashboard() {
               twitter,
               instagram,
               linkedin,
-              clubId
+              clubId,
+              clubMemberships: clubMemberships ?? []
             });
             setId(response.data.user.id);
             setPosts(response.data.user.CreatePost);
@@ -1219,77 +1259,72 @@ export default function ZynvoDashboard() {
                 {userData.name}
               </h1>
 
-              {/* Club Section - Mobile Responsive */}
-              {userData.clubName ? (
-                <div className="mb-4 sm:mb-5">
-                  {/* Club Name Badge with Reset Password Button */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <Link href={`/clubs/${userData.clubId}`}>
-                      <div className="inline-flex items-center gap-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/50 text-yellow-400 px-4 py-2 rounded-full transition-all duration-200 hover:scale-105 cursor-pointer">
-                        <Building className="w-4 h-4 flex-shrink-0" />
-                        <p className="text-sm sm:text-base font-medium truncate max-w-[200px] sm:max-w-none">
-                          {userData.clubName}
-                        </p>
+              {/* Clubs — every club the user belongs to */}
+              <div className="mb-4 sm:mb-5">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
+                    {myClubs.length > 0 ? `Your clubs (${myClubs.length})` : 'Clubs'}
+                  </p>
+                  <Button
+                    onClick={() => navigate.push('/reset-password')}
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2 text-xs text-gray-400 hover:text-yellow-400 hover:bg-gray-800/60"
+                    aria-label="Reset Password"
+                  >
+                    <Lock className="w-3.5 h-3.5 mr-1" />
+                    Reset password
+                  </Button>
+                </div>
+
+                {myClubs.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {myClubs.map((club) => (
+                      <div
+                        key={club.id}
+                        className="group inline-flex items-center gap-2 max-w-full bg-yellow-500/15 hover:bg-yellow-500/25 border border-yellow-500/40 rounded-full pl-1 pr-1.5 py-1 transition-colors"
+                      >
+                        <Link href={`/clubs/${club.id}`} className="inline-flex items-center gap-2 min-w-0">
+                          <span className="relative w-7 h-7 rounded-full overflow-hidden bg-gray-800 shrink-0">
+                            <ClubLogo src={club.logo} name={club.name} fill className="object-cover" />
+                          </span>
+                          <span className="text-sm font-medium text-yellow-300 truncate max-w-[180px] sm:max-w-[240px]">
+                            {club.name}
+                          </span>
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => leaveClub(club)}
+                          disabled={leavingClubId === club.id}
+                          className="ml-1 rounded-full p-1 text-yellow-400/60 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-50"
+                          aria-label={`Leave ${club.name}`}
+                          title="Leave club"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
                       </div>
+                    ))}
+                    <Link
+                      href="/clubs"
+                      className="inline-flex items-center gap-1 rounded-full border border-dashed border-gray-600 px-3 py-1 text-xs text-gray-400 hover:text-yellow-400 hover:border-yellow-500/50"
+                    >
+                      + Join more
                     </Link>
-                    <Button
-                      onClick={() => navigate.push('/reset-password')}
-                      variant="ghost"
-                      size="icon"
-                      className="h-12 w-12 rounded-full bg-gray-800/50 hover:bg-gray-800 border border-neutral-300 hover:border-yellow-400/50 text-gray-400 hover:text-yellow-400 transition-all duration-200"
-                      aria-label="Reset Password"
-                    >
-                      <Lock className="w-4 h-4" />
-                    </Button>
                   </div>
-
-                  {/* Action Buttons - Stack on Mobile */}
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3">
-                    <Button
-                      onClick={async () => {
-                        if (!userData.clubId) {
-                          toast.error('Club ID is required');
-                          return;
-                        }
-                        try {
-                          const leave = await axios.post<any>(
-                            `/api/v1/user/leaveClub/${userData.clubId}`,
-                            {},
-                            {
-                              headers: {
-                                authorization: `Bearer ${token}`,
-                              },
-                            }
-                          );
-                          track('club_left', { club_id: userData.clubId, source: 'dashboard' });
-                          toast.success(leave.data.message || leave.data.msg || 'Successfully left the club');
-                          setTimeout(() => navigate.refresh(), 1000);
-                        } catch (error: any) {
-                          toast.error(getSafeErrorMessage(error, 'Error leaving club'));
-                        }
-                      }}
-                      variant="outline"
-                      className="w-full sm:w-auto bg-red-500/10 hover:bg-red-500/20 border-red-500/50 text-red-400 hover:text-red-300 font-medium py-2 transition-all"
-                    >
-                      <UserCheck className="w-4 h-4 mr-2" />
-                      Leave Club
-                    </Button>
-
+                ) : (
+                  <div
+                    className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-center cursor-pointer hover:bg-gray-700 transition-colors"
+                    onClick={() => navigate.push('/clubs')}
+                  >
+                    <p className="text-gray-300 text-sm sm:text-base">
+                      You haven't joined any club yet
+                    </p>
+                    <p className="text-yellow-400 text-xs sm:text-sm font-medium mt-1 hover:text-yellow-300 transition-colors">
+                      Join fast! →
+                    </p>
                   </div>
-                </div>
-              ) : (
-                <div 
-                  className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-center cursor-pointer hover:bg-gray-700 transition-colors mb-4"
-                  onClick={() => navigate.push('/clubs')}
-                >
-                  <p className="text-gray-300 text-sm sm:text-base">
-                    You haven't joined any club yet
-                  </p>
-                  <p className="text-yellow-400 text-xs sm:text-sm font-medium mt-1 hover:text-yellow-300 transition-colors">
-                    Join fast! →
-                  </p>
-                </div>
-              )}
+                )}
+              </div>
               {/* Manage club — for founders and core members, independent of the legacy club badge */}
               {adminClub && (
                 <div className="mb-4 sm:mb-5">
