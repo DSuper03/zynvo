@@ -33,6 +33,9 @@ const PUBLIC_POST_PREFIXES = [
   '/api/v1/user/signup',
   '/api/v1/user/forgot',
   '/api/v1/user/reset-password/confirm',
+  '/api/v1/user/reset-password/prepare',
+  // Carries a Clerk session token in the body; the backend verifies it.
+  '/api/v1/user/reset-password/clerk',
   '/api/v1/user/verify',
   '/api/v1/user/ResendEmail',
   '/api/v1/user/syncWithClerk',
