@@ -28,7 +28,9 @@ export interface ParticipantUser {
 export interface Participant {
   joinedAt: string;
   passId: string | null;
+  checkedInAt?: string | null;
   user: ParticipantUser;
+  customAnswers?: { label: string; answer: string }[];
   paymentProofUrl?: string;
 }
 

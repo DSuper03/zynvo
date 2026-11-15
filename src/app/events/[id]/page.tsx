@@ -69,6 +69,7 @@ import {
   ScheduleEmptyState,
   ScheduleSessionTimeline,
 } from './components/schedule';
+import AttendeesTable from './components/AttendeesTable';
 
 interface Speaker {
   id: number;
@@ -1981,90 +1982,10 @@ const Eventid = () => {
                 </div>
               ) : (
                 <>
-                  <div className="space-y-3">
-                    {participants.map((participant: Participant) => (
-                      <div
-                        key={`${participant.user.id}-${participant.joinedAt}`}
-                        className="bg-black border border-yellow-500/20 rounded-lg p-4 flex gap-4 hover:border-yellow-500/40 transition-colors"
-                      >
-                        <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
-                          {participant.user.profileAvatar ? (
-                            <Image
-                              src={participant.user.profileAvatar}
-                              alt={participant.user.name || 'User'}
-                              fill
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center">
-                              <span className="text-black font-bold text-sm">
-                                {participant.user.name
-                                  ? participant.user.name
-                                      .charAt(0)
-                                      .toUpperCase()
-                                  : 'U'}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-semibold text-white truncate">
-                            {participant.user.name || 'Anonymous User'}
-                          </h3>
-                          <p className="text-xs text-yellow-400 truncate">
-                            {participant.user.email}
-                          </p>
-                          {participant.user.collegeName && (
-                            <p className="text-xs text-gray-400 mt-1 truncate">
-                              {participant.user.collegeName}
-
-                              {participant.user.year &&
-                                ` • Year ${participant.user.year}`}
-                            </p>
-                          )}
-
-                          <p className="text-xs text-gray-500 mt-1 mb-2">
-                            Joined:{' '}
-                            {new Date(
-                              participant.joinedAt
-                            ).toLocaleDateString()}
-                          </p>
-
-                          {/* Display Custom Answers */}
-                          {(participant as any).customAnswers?.length > 0 && (
-                            <div className="mt-2 space-y-1 bg-gray-900/50 p-2 rounded border border-gray-800">
-                              <p className="text-xs font-semibold text-gray-400 mb-1">
-                                Registration Details:
-                              </p>
-                              {(participant as any).customAnswers.map(
-                                (ans: any, i: number) => (
-                                  <div key={i} className="flex text-xs">
-                                    <span className="text-gray-500 mr-2 min-w-[80px]">
-                                      {ans.label}:
-                                    </span>
-                                    <span className="text-gray-300 font-medium">
-                                      {ans.answer.startsWith('http') ? (
-                                        <a
-                                          href={ans.answer}
-                                          target="_blank"
-                                          rel="noreferrer"
-                                          className="text-blue-400 hover:underline"
-                                        >
-                                          {ans.answer}
-                                        </a>
-                                      ) : (
-                                        ans.answer
-                                      )}
-                                    </span>
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <AttendeesTable
+                    participants={participants}
+                    startIndex={(participantsPage - 1) * participantsLimit + 1}
+                  />
 
                   {/* Pagination */}
                   {participantsPagination &&
