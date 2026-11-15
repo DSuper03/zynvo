@@ -628,7 +628,9 @@ const Eventid = () => {
       return;
     }
 
-    if (data.eventWebsite && !hasConfirmedExternalForm) {
+    // Founders/core run the event website, so they skip that confirmation
+    // (its checkbox isn't rendered for them).
+    if (data.eventWebsite && !hasConfirmedExternalForm && !isFounder) {
       toast.error(
         'Please open the Event Website link above, complete what’s required there, then confirm and click Register.'
       );
@@ -1237,12 +1239,12 @@ const Eventid = () => {
                         disabled={
                           isRegistering ||
                           isRegistrationDisabled ||
-                          (!!data.eventWebsite && !hasConfirmedExternalForm)
+                          (!!data.eventWebsite && !hasConfirmedExternalForm && !isFounder)
                         }
                         className={`min-h-11 w-full sm:w-auto rounded-lg px-5 py-2.5 font-medium ${
                           isRegistering ||
                           isRegistrationDisabled ||
-                          (!!data.eventWebsite && !hasConfirmedExternalForm)
+                          (!!data.eventWebsite && !hasConfirmedExternalForm && !isFounder)
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : 'bg-amber-900 hover:bg-amber-950 text-yellow-200'
                         }`}
@@ -1253,7 +1255,7 @@ const Eventid = () => {
                             ? 'Event Ended'
                             : isEventFull
                               ? 'Event Full'
-                              : data.eventWebsite && !hasConfirmedExternalForm
+                              : data.eventWebsite && !hasConfirmedExternalForm && !isFounder
                                 ? 'Visit Event Website first, then Register'
                                 : 'Register Now'}
                       </Button>
