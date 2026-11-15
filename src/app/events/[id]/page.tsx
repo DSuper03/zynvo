@@ -378,20 +378,35 @@ const Eventid = () => {
   // Fetch participants for this event
   const [participantsPage, setParticipantsPage] = useState(1);
   const participantsLimit = 50;
+  // Search runs on the server across all attendees; debounce keystrokes and
+  // go back to page 1 whenever the query changes.
+  const [attendeeSearch, setAttendeeSearch] = useState('');
+  const [debouncedAttendeeSearch, setDebouncedAttendeeSearch] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedAttendeeSearch(attendeeSearch.trim());
+      setParticipantsPage(1);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [attendeeSearch]);
   const {
     data: participantsData,
     isLoading: isParticipantsLoading,
+    isFetching: isParticipantsFetching,
     error: participantsError,
   } = useParticipants({
     eventId: id,
     page: participantsPage,
     limit: participantsLimit,
+    search: debouncedAttendeeSearch,
     enabled: activeTab === 'attendees' && !!id && canViewAttendees,
     token,
   });
 
   const participants = participantsData?.data || [];
   const participantsPagination = participantsData?.pagination;
+  const participantsTotalAll =
+    participantsPagination?.totalAll ?? participantsPagination?.total ?? 0;
 
   // Check if user is founder
   useEffect(() => {
@@ -1966,74 +1981,42 @@ const Eventid = () => {
                     </p>
                   </div>
                 )
-              ) : isParticipantsLoading ? (
+              ) : isParticipantsLoading && !participantsData ? (
                 <div className="text-center py-8">
                   <p className="text-gray-400">Loading attendees...</p>
                 </div>
-              ) : participantsError ? (
+              ) : participantsError && !participantsData ? (
                 <div className="text-center py-8">
                   <p className="text-red-400">
                     Failed to load attendees. Please try again.
                   </p>
                 </div>
-              ) : participants.length === 0 ? (
+              ) : participantsTotalAll === 0 && !debouncedAttendeeSearch ? (
                 <div className="text-center py-8">
                   <p className="text-gray-400">No attendees registered yet.</p>
                 </div>
               ) : (
-                <>
-                  <AttendeesTable
-                    participants={participants}
-                    startIndex={(participantsPage - 1) * participantsLimit + 1}
-                  />
-
-                  {/* Pagination */}
-                  {participantsPagination &&
-                    participantsPagination.totalPages > 1 && (
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-800">
-                        <p className="text-sm text-gray-400">
-                          Showing {participants.length} of{' '}
-                          {participantsPagination.total} attendees
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            onClick={() =>
-                              setParticipantsPage((p) => Math.max(1, p - 1))
-                            }
-                            disabled={participantsPage === 1}
-                            variant="outline"
-                            size="sm"
-                            className="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 disabled:opacity-50"
-                          >
-                            Previous
-                          </Button>
-                          <span className="text-sm text-gray-400">
-                            Page {participantsPagination.page} of{' '}
-                            {participantsPagination.totalPages}
-                          </span>
-                          <Button
-                            onClick={() =>
-                              setParticipantsPage((p) =>
-                                Math.min(
-                                  participantsPagination.totalPages,
-                                  p + 1
-                                )
-                              )
-                            }
-                            disabled={
-                              participantsPage >=
-                              participantsPagination.totalPages
-                            }
-                            variant="outline"
-                            size="sm"
-                            className="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 disabled:opacity-50"
-                          >
-                            Next
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                </>
+                <AttendeesTable
+                  participants={participants}
+                  isPaid={participantsData?.isPaid ?? !!data.isPaidEvent}
+                  questions={participantsData?.questions}
+                  search={attendeeSearch}
+                  onSearchChange={setAttendeeSearch}
+                  page={participantsPage}
+                  limit={participantsLimit}
+                  totalPages={participantsPagination?.totalPages ?? 1}
+                  total={participantsPagination?.total ?? participants.length}
+                  totalAll={participantsTotalAll}
+                  onPageChange={(p) =>
+                    setParticipantsPage(
+                      Math.min(
+                        Math.max(1, p),
+                        participantsPagination?.totalPages ?? 1
+                      )
+                    )
+                  }
+                  isFetching={isParticipantsFetching}
+                />
               )}
             </div>
           )}
