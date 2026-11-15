@@ -186,6 +186,9 @@ const Eventid = () => {
   const updateJudgeMutation = useUpdateJudge();
   const deleteJudgeMutation = useDeleteJudge();
   const [isFounder, setIsFounder] = useState(false);
+  // Zynvo staff get the attendee tools (list, sync, CSV) on every event; the
+  // backend participants route already allows them.
+  const canViewAttendees = isFounder || isAdminEmail(currentUser?.email);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [userDataLoaded, setUserDataLoaded] = useState(false);
   const [activeDay, setActiveDay] = useState(1);
@@ -229,7 +232,7 @@ const Eventid = () => {
   }, [id]);
 
   const runCsvSync = React.useCallback(async () => {
-    if (!id || !isFounder) return;
+    if (!id || !canViewAttendees) return;
     setCsvSyncInProgress(true);
     const currentLastSince = csvLastSinceRef.current;
     const currentEtag = csvEtagRef.current;
@@ -284,10 +287,10 @@ const Eventid = () => {
     } finally {
       setCsvSyncInProgress(false);
     }
-  }, [id, isFounder, token, queryClient]);
+  }, [id, canViewAttendees, token, queryClient]);
 
   useEffect(() => {
-    if (activeTab !== 'attendees' || !isFounder || !id) return;
+    if (activeTab !== 'attendees' || !canViewAttendees || !id) return;
     const intervalMs = Math.max(15000, Math.min(60000, syncBackoffMs || 30000));
     const initial = setTimeout(runCsvSync, 300);
     const poll = setInterval(runCsvSync, intervalMs);
@@ -295,7 +298,7 @@ const Eventid = () => {
       clearTimeout(initial);
       clearInterval(poll);
     };
-  }, [activeTab, isFounder, id, syncBackoffMs, runCsvSync]);
+  }, [activeTab, canViewAttendees, id, syncBackoffMs, runCsvSync]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -368,10 +371,6 @@ const Eventid = () => {
 
   const judges = judgesData?.data || [];
 
-  const canViewAttendees = useMemo(
-    () => isFounder || isAdminEmail(currentUser?.email),
-    [isFounder, currentUser?.email]
-  );
 
   const isResolvingAttendeeAccess = signedin && !isFounder && !userDataLoaded;
 
@@ -1910,7 +1909,7 @@ const Eventid = () => {
                       </span>
                     )}
                   </h2>
-                  {isFounder && (
+                  {canViewAttendees && (
                     <div className="flex items-center gap-2">
                       <Button
                         onClick={() => {
@@ -1942,7 +1941,7 @@ const Eventid = () => {
                     </div>
                   )}
                 </div>
-                {isFounder && (
+                {canViewAttendees && (
                   <p className="text-gray-500 text-sm">
                     Last updated at{' '}
                     {lastCsvUpdatedAt
