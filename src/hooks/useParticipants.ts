@@ -7,7 +7,7 @@
  * bypasses Clerk entirely, so callers MUST forward that token when they have
  * one — otherwise these endpoints return 401.
  */
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { getSafeErrorMessage } from '@/lib/safe-error';
@@ -31,17 +31,28 @@ export interface Participant {
   checkedInAt?: string | null;
   user: ParticipantUser;
   customAnswers?: { label: string; answer: string }[];
+  /** Paid events only. */
+  paymentStatus?: string | null;
+  /** Paid events only. */
+  paymentScreenshotUrl?: string | null;
   paymentProofUrl?: string;
 }
 
 export interface ParticipantsResponse {
   msg: string;
   data: Participant[];
+  /** Whether the event is paid; payment fields are only sent when true. */
+  isPaid?: boolean;
+  /** Custom registration question labels, in their configured order. */
+  questions?: string[];
   pagination: {
     page: number;
     limit: number;
+    /** Matching attendees (after `search`). */
     total: number;
     totalPages: number;
+    /** All attendees of the event, ignoring `search`. */
+    totalAll?: number;
   };
 }
 
@@ -49,6 +60,8 @@ export interface UseParticipantsOptions {
   eventId: string;
   page?: number;
   limit?: number;
+  /** Searches every attendee server-side (name, email, college, answers…). */
+  search?: string;
   enabled?: boolean;
   /** Legacy backend JWT. Forwarded as a bearer token when present. */
   token?: string | null;
@@ -63,11 +76,13 @@ async function fetchParticipants(
   eventId: string,
   page: number = 1,
   limit: number = 50,
-  token?: string | null
+  token?: string | null,
+  search: string = ''
 ): Promise<ParticipantsResponse> {
+  const q = search.trim();
   const response = await axios.get<ParticipantsResponse>(
     `${API_BASE}/v1/events/participants/${eventId}`,
-    { params: { page, limit }, headers: authHeaders(token) }
+    { params: { page, limit, ...(q ? { q } : {}) }, headers: authHeaders(token) }
   );
   return response.data;
 }
@@ -76,15 +91,20 @@ export function useParticipants({
   eventId,
   page = 1,
   limit = 50,
+  search = '',
   enabled = true,
   token,
 }: UseParticipantsOptions) {
+  const q = search.trim();
   return useQuery<ParticipantsResponse, Error>({
-    queryKey: ['participants', eventId, page, limit],
-    queryFn: () => fetchParticipants(eventId, page, limit, token),
+    // Prefix ['participants', eventId] is what CSV sync invalidates.
+    queryKey: ['participants', eventId, page, limit, q],
+    queryFn: () => fetchParticipants(eventId, page, limit, token, q),
     enabled: enabled && !!eventId,
     staleTime: 30000,
     retry: 2,
+    // Keep the current rows on screen while the next page / search loads.
+    placeholderData: keepPreviousData,
   });
 }
 
