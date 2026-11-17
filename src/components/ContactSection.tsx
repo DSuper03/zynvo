@@ -95,7 +95,7 @@ const ContactSection = () => {
               <div className="space-y-6">
                 <div className="flex items-center space-x-4 text-gray-300">
                   <Icons.Email />
-                  <span>dsuper03.dev@gmail.com</span>
+                  <span>zynvosocial@gmail.com</span>
                 </div>
                 <div className="flex items-center space-x-4 text-gray-300">
                   <Icons.Discord />

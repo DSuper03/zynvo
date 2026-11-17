@@ -195,7 +195,7 @@ export default function FooterWithSocial() {
               <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:24 }}>
                 <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                   <Mail size={15} color="#92400e" />
-                  <span style={{ fontSize:13.5, color:"#78350f", fontWeight:700 }}>dsuper03.dev@gmail.com</span>
+                  <span style={{ fontSize:13.5, color:"#78350f", fontWeight:700 }}>zynvosocial@gmail.com</span>
                 </div>
                 <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                   <MapPin size={15} color="#92400e" />
@@ -261,7 +261,7 @@ export default function FooterWithSocial() {
                 <a href="https://www.instagram.com/zynvo.social/" target="_blank" rel="noopener noreferrer" className="social-icon-btn" title="Instagram">
                   <Instagram size={17} />
                 </a>
-                <a href="mailto:dsuper03.dev@gmail.com" className="social-icon-btn" title="Email">
+                <a href="mailto:zynvosocial@gmail.com" className="social-icon-btn" title="Email">
                   <Mail size={17} />
                 </a>
                 <a
