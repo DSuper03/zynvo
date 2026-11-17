@@ -24,7 +24,7 @@ export function useNews() {
       setError(null);
       try {
         console.log('Fetching news from API...');
-        const res = await fetch('https://zynvo-scrapper.vercel.app/news', {
+        const res = await fetch('/api/news', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

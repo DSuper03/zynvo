@@ -69,7 +69,7 @@ const CampusReminderModal = () => {
   };
 
   const handleEmailClick = () => {
-    window.location.href = 'mailto:dsuper03.dev@gmail.com?subject=Campus Location Request&body=Hi, I would like to add my campus location to Zynvo.';
+    window.location.href = 'mailto:zynvosocial@gmail.com?subject=Campus Location Request&body=Hi, I would like to add my campus location to Zynvo.';
     handleClose();
   };
 
@@ -193,7 +193,7 @@ const CampusReminderModal = () => {
                 transition={{ delay: 0.6 }}
                 className="text-center text-xs text-gray-500"
               >
-                📧 Contact: <span className="text-yellow-400">dsuper03.dev@gmail.com</span>
+                📧 Contact: <span className="text-yellow-400">zynvosocial@gmail.com</span>
               </motion.p>
             </div>
           </motion.div>
