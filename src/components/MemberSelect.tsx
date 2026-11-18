@@ -44,16 +44,21 @@ export default function MemberSelect({
       ? placeholder
       : value;
 
-  // Only people with an email can be chosen (the value is an email).
-  const displayMembers = (onSearch ? results : members).filter((m: any) => !!m?.email);
-
   const q = query.trim().toLowerCase();
+  // With onSearch, typing searches everyone on the server; until then the
+  // local `members` list is shown (e.g. the club's members).
+  const serverSearch = !!onSearch && q.length > 0;
+
+  // Only people with an email can be chosen (the value is an email).
+  const displayMembers = (serverSearch ? results : members).filter((m: any) => !!m?.email);
+
   // Server search already matched the query; filter only local lists.
-  const filtered = onSearch
+  const filtered = serverSearch
     ? displayMembers
     : displayMembers.filter(
         (m: any) => m.name?.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q)
       );
+  const emptyText = onSearch && !q ? 'Type a name or email to search' : 'No people found';
 
   const customEmail =
     allowCustomEmail &&
@@ -139,7 +144,7 @@ export default function MemberSelect({
               <div className="p-3 text-sm text-yellow-400/50 text-center">Searching...</div>
             ) : filtered.length === 0 ? (
               customEmail ? null : (
-                <div className="p-3 text-sm text-yellow-400/50 text-center">No members found</div>
+                <div className="p-3 text-sm text-yellow-400/50 text-center">{emptyText}</div>
               )
             ) : (
               filtered.map((member: any) => (

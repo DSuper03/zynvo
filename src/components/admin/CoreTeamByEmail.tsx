@@ -1,35 +1,21 @@
 'use client';
 
 import axios from 'axios';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Mail, X, Loader2 } from 'lucide-react';
+import { UserPlus, X, Loader2 } from 'lucide-react';
 import MemberSelect from '@/components/MemberSelect';
 
-type InviteStatus =
-  | 'added'
-  | 'invited'
-  | 'already_member'
-  | 'already_invited'
-  | 'team_full'
-  | 'invalid';
+type AddStatus = 'added' | 'already_member' | 'not_found' | 'team_full' | 'invalid';
 
-type ByEmailResult = { email: string; status: InviteStatus };
-
-type PendingInvite = {
-  id: string;
-  email: string;
-  expiresAt: string;
-  createdAt: string;
-};
+type AddResult = { email: string; status: AddStatus };
 
 const MAX_EMAILS = 20;
 
-const STATUS_STYLE: Record<InviteStatus, { label: string; className: string }> = {
+const STATUS_STYLE: Record<AddStatus, { label: string; className: string }> = {
   added: { label: 'Added', className: 'bg-green-500/15 text-green-300 border-green-500/40' },
-  invited: { label: 'Invited', className: 'bg-blue-500/15 text-blue-300 border-blue-500/40' },
-  already_member: { label: 'Already a member', className: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/40' },
-  already_invited: { label: 'Already invited', className: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/40' },
+  already_member: { label: 'Already on core team', className: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/40' },
+  not_found: { label: 'Not on Zynvo yet', className: 'bg-orange-500/15 text-orange-300 border-orange-500/40' },
   team_full: { label: 'Core team full', className: 'bg-orange-500/15 text-orange-300 border-orange-500/40' },
   invalid: { label: 'Invalid email', className: 'bg-red-500/15 text-red-300 border-red-500/40' },
 };
@@ -52,43 +38,42 @@ interface Props {
 }
 
 /**
- * "Add by email" + pending invites for the Core Team section. Renders nothing
- * unless the caller is the club head (the server answers 403 otherwise; the
- * same check guards the add/revoke endpoints).
+ * Adds people to the core team directly — by search (name or email) or by
+ * pasting emails. Anyone with a Zynvo account is added instantly; there are no
+ * invites. Renders nothing unless the caller is the club head (the server
+ * answers 403 otherwise; the same check guards the add endpoint).
  */
 export default function CoreTeamByEmail({ clubId, token, onChanged }: Props) {
   const [isHead, setIsHead] = useState(false);
-  const [invites, setInvites] = useState<PendingInvite[]>([]);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
-  // People chosen from search (already on Zynvo) — added instantly on submit.
+  // People chosen from search (already on Zynvo).
   const [picked, setPicked] = useState<{ email: string; name?: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [results, setResults] = useState<ByEmailResult[] | null>(null);
-  const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [results, setResults] = useState<AddResult[] | null>(null);
+  // The parent passes a new function each render; a ref keeps checkHead stable.
+  const onChangedRef = useRef(onChanged);
+  onChangedRef.current = onChanged;
 
-  const auth = { headers: { authorization: `Bearer ${token}` } };
-
-  const loadInvites = useCallback(async () => {
+  // Head check. The same call settles invites left from the old invite flow
+  // (people with an account are added), so refresh the slots if any were.
+  const checkHead = useCallback(async () => {
     if (!clubId || !token) return;
     try {
-      const res = await axios.get<{ invites: PendingInvite[] }>(
-        `/api/v1/clubs/${clubId}/core-invites`,
-        { headers: { authorization: `Bearer ${token}` } }
-      );
+      const res = await axios.get<{ added?: number }>(`/api/v1/clubs/${clubId}/core-invites`, {
+        headers: { authorization: `Bearer ${token}` },
+      });
       setIsHead(true);
-      setInvites(res.data.invites ?? []);
-    } catch (err: any) {
-      // 403 = not the head; 404 = backend without this feature yet. Stay hidden.
-      const status = err?.response?.status;
-      if (status !== 403 && status !== 404) toast.error('Could not load pending invites');
+      if ((res.data?.added ?? 0) > 0) onChangedRef.current?.();
+    } catch {
+      // 403 = not the head. Stay hidden.
       setIsHead(false);
     }
   }, [clubId, token]);
 
   useEffect(() => {
-    loadInvites();
-  }, [loadInvites]);
+    checkHead();
+  }, [checkHead]);
 
   // Signed-in SearchUser matches name or email and returns email.
   const searchPeople = useCallback(async (query: string): Promise<any[]> => {
@@ -114,17 +99,18 @@ export default function CoreTeamByEmail({ clubId, token, onChanged }: Props) {
     if (emails.length === 0 || tooMany) return;
     setSubmitting(true);
     try {
-      const res = await axios.post<{ results: ByEmailResult[] }>(
+      const res = await axios.post<{ results: AddResult[] }>(
         `/api/v1/clubs/${clubId}/core-members/by-email`,
         { emails },
-        auth
+        { headers: { authorization: `Bearer ${token}` } }
       );
-      setResults(res.data.results);
+      const list = res.data.results ?? [];
+      setResults(list);
       setInput('');
       setPicked([]);
-      const changed = res.data.results.some((r) => r.status === 'added' || r.status === 'invited');
-      if (changed) {
-        await loadInvites();
+      const added = list.filter((r) => r.status === 'added').length;
+      if (added > 0) {
+        toast.success(`${added} ${added === 1 ? 'person' : 'people'} added to the core team`);
         onChanged?.();
       }
     } catch (err: any) {
@@ -136,50 +122,8 @@ export default function CoreTeamByEmail({ clubId, token, onChanged }: Props) {
     }
   };
 
-  const revoke = async (invite: PendingInvite) => {
-    setRevokingId(invite.id);
-    try {
-      await axios.delete(`/api/v1/clubs/${clubId}/core-invites/${invite.id}`, auth);
-      setInvites((prev) => prev.filter((i) => i.id !== invite.id));
-      toast.success(`Invite to ${invite.email} revoked`);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.msg ?? 'Could not revoke invite');
-      loadInvites();
-    } finally {
-      setRevokingId(null);
-    }
-  };
-
   return (
     <div className="space-y-4">
-      {invites.length > 0 && (
-        <div className="space-y-2">
-          {invites.map((invite) => (
-            <div
-              key={invite.id}
-              className="flex flex-wrap items-center justify-between gap-2 border-b border-yellow-400/20 pb-3"
-            >
-              <div className="flex flex-wrap items-center gap-2 min-w-0">
-                <span className="text-yellow-200 break-all">{invite.email}</span>
-                <span className="px-2 py-0.5 rounded-full text-xs font-semibold border bg-yellow-500/10 text-yellow-300 border-yellow-500/40">
-                  Pending
-                </span>
-                <span className="text-xs text-yellow-400/60">
-                  expires {new Date(invite.expiresAt).toLocaleDateString()}
-                </span>
-              </div>
-              <button
-                onClick={() => revoke(invite)}
-                disabled={revokingId === invite.id}
-                className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
-              >
-                {revokingId === invite.id ? 'Revoking…' : 'Revoke'}
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
       {!open ? (
         <button
           onClick={() => {
@@ -188,13 +132,13 @@ export default function CoreTeamByEmail({ clubId, token, onChanged }: Props) {
           }}
           className="inline-flex items-center gap-2 border border-yellow-400/60 text-yellow-300 px-4 py-2 rounded-lg hover:bg-yellow-400/10 font-semibold"
         >
-          <Mail className="w-4 h-4" />
-          Add by email
+          <UserPlus className="w-4 h-4" />
+          Add people to core team
         </button>
       ) : (
         <div className="bg-black border border-yellow-400/30 rounded-xl p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-yellow-300">Add core members by email</h3>
+            <h3 className="font-semibold text-yellow-300">Add core members</h3>
             <button
               onClick={() => {
                 setOpen(false);
@@ -207,9 +151,9 @@ export default function CoreTeamByEmail({ clubId, token, onChanged }: Props) {
             </button>
           </div>
           <p className="text-xs text-yellow-400/70">
-            People already on Zynvo are added instantly — no acceptance needed — and get a
-            notification. Anyone else gets an email invite (valid 14 days) and joins the core
-            team as soon as they sign up. The core team has 3 seats; pending invites hold a seat.
+            Anyone with a Zynvo account is added to the core team right away and gets a
+            notification. People who aren&apos;t on Zynvo yet need to sign up first. The core
+            team has 3 seats.
           </p>
           <div className="space-y-2">
             <label className="block text-xs font-medium text-yellow-300">Search people on Zynvo</label>
@@ -255,13 +199,13 @@ export default function CoreTeamByEmail({ clubId, token, onChanged }: Props) {
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            rows={4}
+            rows={3}
             placeholder={'alex@college.edu\nsam@college.edu'}
             className="w-full bg-zinc-950 text-yellow-300 border border-yellow-500/40 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-yellow-400/60"
           />
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className={`text-xs ${tooMany ? 'text-red-400' : 'text-yellow-400/60'}`}>
-              {emails.length} email{emails.length === 1 ? '' : 's'}
+              {emails.length} {emails.length === 1 ? 'person' : 'people'}
               {tooMany ? ` — max ${MAX_EMAILS}` : ''}
             </span>
             <button

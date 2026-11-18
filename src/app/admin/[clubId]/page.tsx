@@ -119,10 +119,31 @@ export default function ClubAdminPage() {
         { headers: { authorization: `Bearer ${token}` } }
       );
       toast(res.data.msg);
-    } catch {
-      toast.error('Error adding core members');
+      await fetchClubData(true);
+    } catch (err: any) {
+      const missing: string[] | undefined = err?.response?.data?.missingMembers;
+      toast.error(
+        missing?.length
+          ? `Not on Zynvo yet: ${missing.join(', ')}`
+          : err?.response?.data?.msg ?? 'Error adding core members'
+      );
     }
   };
+
+  // Search everyone on Zynvo (signed-in search returns emails), not just club members.
+  const searchPeople = useCallback(async (query: string): Promise<any[]> => {
+    if (!token || !query.trim()) return [];
+    try {
+      const res = await fetch(`/api/v1/user/SearchUser?name=${encodeURIComponent(query.trim())}`, {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return [];
+      const data = await res.json();
+      return Array.isArray(data?.users) ? data.users : [];
+    } catch {
+      return [];
+    }
+  }, [token]);
 
   const addWings = async () => {
     try {
@@ -163,18 +184,24 @@ export default function ClubAdminPage() {
     }
   };
 
-  const removeCoreMembers = async () => {
+  // Removes only the member in this slot (it used to send all three slots and
+  // remove the whole core team).
+  const removeCoreMember = async (email: string) => {
     try {
       const res = await axios.post<any>(
         `/api/v2/admin/removeCoremembers/${clubId}`,
-        { coremember1, coremember2, coremember3 },
+        { coremember1: email },
         { headers: { authorization: `Bearer ${token}` } }
       );
       toast(res.data.msg);
-    } catch {
-      toast.error('Error removing core members');
+      await fetchClubData(true);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.msg ?? 'Error removing core member');
     }
   };
+
+  const slotEmail = (v: unknown): string =>
+    typeof v === 'string' && v.trim() && v.trim().toLowerCase() !== 'none' ? v.trim() : '';
 
   useEffect(() => {
     if (!isClient || !token || !clubId) return;
@@ -274,26 +301,30 @@ export default function ClubAdminPage() {
               {[1, 2, 3].map((num) => {
                 const currentValue = num === 1 ? coremember1 : num === 2 ? coremember2 : coremember3;
                 const setter = num === 1 ? setCoreMember1 : num === 2 ? setCoreMember2 : setCoreMember3;
+                const saved = slotEmail(clubData[`coremember${num}`]);
+                const busyKey = `core-remove:${num}`;
                 return (
                   <div key={num} className="flex flex-col gap-2 border-b border-yellow-400/20 pb-4 mb-4">
                     <span>
                       Core Member {num}:{" "}
-                      <span className="text-yellow-200">
-                        {clubData[`coremember${num}`] ?? '—'}
-                      </span>
+                      <span className="text-yellow-200">{saved || '—'}</span>
                     </span>
                     <MemberSelect
                       members={clubData.members ?? []}
-                      value={currentValue ?? ''}
+                      value={slotEmail(currentValue)}
                       onChange={setter}
+                      onSearch={searchPeople}
+                      placeholder="Search anyone on Zynvo"
                     />
-                    <button
-                      onClick={() => runAction('core-remove', removeCoreMembers)}
-                      disabled={!!busy}
-                      className="text-xs text-red-400 hover:text-red-300 w-fit disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                      {busy === 'core-remove' ? 'Removing…' : 'Remove'}
-                    </button>
+                    {saved && (
+                      <button
+                        onClick={() => runAction(busyKey, () => removeCoreMember(saved))}
+                        disabled={!!busy}
+                        className="text-xs text-red-400 hover:text-red-300 w-fit disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {busy === busyKey ? 'Removing…' : 'Remove'}
+                      </button>
+                    )}
                   </div>
                 );
               })}
