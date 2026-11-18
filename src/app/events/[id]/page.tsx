@@ -1200,6 +1200,9 @@ const Eventid = () => {
                 </div>
               )}
 
+              {data.coreTeamOnly && (
+                <p className="text-sm text-amber-300">Registration is limited to the hosting club’s founder and core team.</p>
+              )}
               {/* Action Buttons — stack on narrow screens */}
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2">
                 {isFounder && (
