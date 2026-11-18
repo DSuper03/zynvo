@@ -21,11 +21,18 @@ const backendBase = () =>
 
 /** Public event fields for link previews; null if unavailable (never blocks the page for long). */
 async function fetchEventPreview(id: string): Promise<EventPreview | null> {
+  const url = `${backendBase()}/api/v1/events/event/${encodeURIComponent(id)}`;
+  const load = () => fetch(url, { next: { revalidate: 300 }, signal: AbortSignal.timeout(3000) });
   try {
-    const res = await fetch(`${backendBase()}/api/v1/events/event/${encodeURIComponent(id)}`, {
-      next: { revalidate: 300 },
-      signal: AbortSignal.timeout(3000),
-    });
+    let res: Response;
+    try {
+      res = await load();
+    } catch (err: any) {
+      // A reused connection the backend already closed ("fetch failed: other
+      // side closed") fails instantly; one retry fixes it. Timeouts don't retry.
+      if (err?.name === 'TimeoutError' || err?.name === 'AbortError') return null;
+      res = await load();
+    }
     if (!res.ok) return null;
     const data = await res.json();
     return (data?.response as EventPreview) ?? null;

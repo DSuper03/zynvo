@@ -27,7 +27,15 @@ const PUBLIC_GET_PREFIXES = [
   '/api/v1/user/getPublicUser',
   '/api/v1/user/SearchUser',
   '/api/v1/user/isClubAdmin/',
+  // Public on the backend; signed-out visitors (e.g. from Instagram links)
+  // got 401s here: no event schedule/speakers, no college suggestions at signup.
+  '/api/v1/events/schedule/',
+  '/api/v1/events/getSpeakers',
+  '/api/v1/user/colleges',
 ];
+
+/** Public GETs with an id in the middle of the path: event gallery and judges. */
+const PUBLIC_GET_PATTERNS = [/^\/api\/v1\/events\/[^/]+\/(gallery|judges)$/];
 
 const PUBLIC_POST_PREFIXES = [
   '/api/v1/user/signup',
@@ -72,7 +80,10 @@ function edgeCacheSeconds(request: NextRequest, path: string): number | null {
 
 function isPublicPath(method: string, path: string): boolean {
   if (method === 'GET') {
-    return PUBLIC_GET_PREFIXES.some((prefix) => path.startsWith(prefix));
+    return (
+      PUBLIC_GET_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
+      PUBLIC_GET_PATTERNS.some((re) => re.test(path))
+    );
   }
   if (method === 'POST') {
     return PUBLIC_POST_PREFIXES.some((prefix) => path.startsWith(prefix));

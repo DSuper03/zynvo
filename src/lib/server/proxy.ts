@@ -47,6 +47,21 @@ import {
   matchServerEvent,
 } from './server-events';
 
+// ─── Retry helpers ────────────────────────────────────────────────────────────
+
+const isIdempotent = (method: string) => method === 'GET' || method === 'HEAD';
+
+const errorText = (err: unknown): string => {
+  const e = err as { message?: string; cause?: { code?: string; message?: string } } | null;
+  return [e?.message, e?.cause?.code, e?.cause?.message].filter(Boolean).join(' / ');
+};
+
+/** Network-level failure before any response (not a timeout, not an HTTP error). */
+const isDroppedConnection = (err: unknown): boolean => {
+  if (err instanceof DOMException && err.name === 'AbortError') return false;
+  return /fetch failed|other side closed|UND_ERR_SOCKET|ECONNRESET|ETIMEDOUT|EPIPE|socket hang up/i.test(errorText(err));
+};
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface ProxyOptions {
@@ -194,8 +209,8 @@ async function proxyRequestInner(
 
   let upstream: Response;
 
-  try {
-    upstream = await fetch(upstreamUrl, {
+  const send = () =>
+    fetch(upstreamUrl, {
       method,
       headers: upstreamHeaders,
       body: bodyInit,
@@ -203,6 +218,18 @@ async function proxyRequestInner(
       // @ts-expect-error — Next.js 15 fetch does not expose duplex in typings
       duplex: 'half',
     });
+
+  try {
+    try {
+      upstream = await send();
+    } catch (first: unknown) {
+      // A reused keep-alive connection the backend had already closed fails
+      // with "fetch failed: other side closed" before anything is sent back.
+      // Reads are safe to repeat, so retry those once; writes never are.
+      if (!isIdempotent(method) || !isDroppedConnection(first)) throw first;
+      proxyLogger.warn({ ...logBase, userId, error: `retrying after dropped connection: ${errorText(first)}` });
+      upstream = await send();
+    }
   } catch (err: unknown) {
     clearTimeout(timeoutId);
     const durationMs = Date.now() - startMs;

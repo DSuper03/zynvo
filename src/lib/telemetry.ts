@@ -207,6 +207,10 @@ export function initGlobalErrorTelemetry(): () => void {
   const onError = (event: ErrorEvent) => {
     const normalized = normalizeUnknownError(event.error ?? event.message);
 
+    // In-app browsers (Instagram, Facebook) inject their own scripts
+    // (iabjs://…) that throw on their own, e.g. "Java object is gone". Not ours.
+    if (/^iabjs:/i.test(event.filename ?? '') || /iabjs:\/\//i.test(normalized.stack ?? '')) return;
+
     // Mitigation for widespread `ChunkLoadError` (stale chunks after deploy / cache / intermittent network).
     maybeTriggerChunkReload({
       message: normalized.message,
