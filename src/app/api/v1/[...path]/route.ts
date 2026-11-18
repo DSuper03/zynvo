@@ -46,6 +46,30 @@ const PUBLIC_POST_PREFIXES = [
   '/api/v1/contact/feedback',
 ];
 
+/**
+ * Public, non-personalised GETs that Vercel's edge may cache (seconds).
+ * Repeat visits are then served without reaching the backend worker.
+ * Stale copies are served for twice as long while one refresh runs.
+ * Never add routes whose answer depends on the caller (posts, users,
+ * tickets/passes): the edge cache does not vary by viewer.
+ */
+const EDGE_CACHE_SECONDS: [prefix: string, seconds: number][] = [
+  ['/api/v1/events/all', 60],
+  ['/api/v1/events/event/', 60],
+  ['/api/v1/events/search', 30],
+  ['/api/v1/clubs/getAll', 120],
+  ['/api/v1/clubs/public', 120],
+  ['/api/v1/clubs/getClubs', 120],
+];
+
+function edgeCacheSeconds(request: NextRequest, path: string): number | null {
+  if (request.method !== 'GET') return null;
+  // Signed-in requests stay uncached: keeps personal data out of shared caches
+  // even if a route later starts tailoring its answer.
+  if (request.headers.get('authorization')) return null;
+  return EDGE_CACHE_SECONDS.find(([prefix]) => path.startsWith(prefix))?.[1] ?? null;
+}
+
 function isPublicPath(method: string, path: string): boolean {
   if (method === 'GET') {
     return PUBLIC_GET_PREFIXES.some((prefix) => path.startsWith(prefix));
@@ -130,7 +154,12 @@ async function handler(request: NextRequest, { params }: { params: Promise<{ pat
     }
 
     if (isPublicPath(request.method, backendPath)) {
-      return await proxyPublicRequest(request, backendPath, { cache: 'no-store' });
+      const seconds = edgeCacheSeconds(request, backendPath);
+      return await proxyPublicRequest(
+        request,
+        backendPath,
+        seconds ? { cache: 'revalidate', revalidateSeconds: seconds } : { cache: 'no-store' },
+      );
     }
 
     return await proxyAuthenticatedRequest(request, backendPath);
