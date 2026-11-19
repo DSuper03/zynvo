@@ -5,6 +5,7 @@ import {
   flushServerTelemetry,
 } from '@/lib/server/posthog-telemetry';
 import { distinctIdFromJwt } from '@/lib/server/server-events';
+import { fetchWithRetry } from '@/lib/server/backend-fetch';
 
 const BACKEND_URL =
   process.env.BACKEND_BASE_URL ||
@@ -17,11 +18,25 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
 
-    const upstream = await fetch(`${BACKEND_URL}/api/v1/user/syncWithClerk`, {
+    // Without these the backend rate-limits every website login together
+    // under this server's IP; with them it counts per visitor, like the
+    // other proxied routes (see src/lib/server/headers.ts).
+    const clientIp =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      request.headers.get('x-real-ip') ??
+      undefined;
+    const proxySecret = process.env.INTERNAL_PROXY_SECRET;
+
+    // Signing in only verifies credentials, so repeating it after a dropped
+    // connection is safe. (Stale keep-alive connections fail with
+    // "fetch failed / other side closed" before any response.)
+    const upstream = await fetchWithRetry(`${BACKEND_URL}/api/v1/user/syncWithClerk`, {
       method: 'POST',
       headers: {
         'content-type': request.headers.get('content-type') || 'application/json',
         accept: 'application/json',
+        ...(proxySecret ? { 'x-internal-proxy-secret': proxySecret } : {}),
+        ...(proxySecret && clientIp ? { 'x-zynvo-client-ip': clientIp } : {}),
       },
       body,
     });

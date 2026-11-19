@@ -40,6 +40,7 @@ import {
 import { resolveRateLimiter } from './rate-limit';
 import { captureServerEvent, flushServerTelemetry } from './posthog-telemetry';
 import { reportToOps } from './ops-alerts';
+import { errorText, isDroppedConnection } from './backend-fetch';
 import {
   AUTH_RESPONSE_PATHS,
   distinctIdFromAuthHeader,
@@ -50,17 +51,6 @@ import {
 // ─── Retry helpers ────────────────────────────────────────────────────────────
 
 const isIdempotent = (method: string) => method === 'GET' || method === 'HEAD';
-
-const errorText = (err: unknown): string => {
-  const e = err as { message?: string; cause?: { code?: string; message?: string } } | null;
-  return [e?.message, e?.cause?.code, e?.cause?.message].filter(Boolean).join(' / ');
-};
-
-/** Network-level failure before any response (not a timeout, not an HTTP error). */
-const isDroppedConnection = (err: unknown): boolean => {
-  if (err instanceof DOMException && err.name === 'AbortError') return false;
-  return /fetch failed|other side closed|UND_ERR_SOCKET|ECONNRESET|ETIMEDOUT|EPIPE|socket hang up/i.test(errorText(err));
-};
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
