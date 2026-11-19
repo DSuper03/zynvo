@@ -22,6 +22,7 @@ import { FaUserGraduate } from 'react-icons/fa';
 import TextWithLinks from '@/components/TextWithLinks';
 import { UserBadgesDisplay } from '@/components/UserBadgesDisplay';
 import { getSafeErrorMessage } from '@/lib/safe-error';
+import { formatEventDate } from '@/lib/formatEventDate';
 
 interface Event {
   EventName: string;
@@ -801,11 +802,7 @@ export default function PublicUserProfile() {
                                 {event.EventName}
                               </h4>
                               <p className="text-xs text-gray-500 mt-0.5">
-                                {new Date(event.startDate).toLocaleDateString('default', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                })}
+                                {formatEventDate(event.startDate)}
                               </p>
                               {isOwnProfile && (
                                 <div className="flex flex-wrap gap-2 mt-1.5">
