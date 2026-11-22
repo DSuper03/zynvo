@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Leaderboard request and contract tests
+        run: npm run test:leaderboard
+
       - name: Type check
         run: npm run type-check
 
