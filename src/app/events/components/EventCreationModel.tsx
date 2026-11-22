@@ -1,6 +1,6 @@
 'use client';
 
-import posthog from 'posthog-js';
+import { setClubGroup, track } from '@/lib/analytics';
 import React, { useEffect, useState, useCallback, use } from 'react';
 import {
   X,
@@ -32,7 +32,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { EventFormData, CustomQuestion } from '@/types/global-Interface';
-import { Plus, Trash2, GripVertical, Settings2 } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Settings2, Loader2 } from 'lucide-react';
 import {
   toBase64,
   uploadImageToImageKit,
@@ -43,7 +43,8 @@ import axios, { isAxiosError } from 'axios';
 import NoTokenModal from '@/components/modals/remindModal';
 import { collegesWithClubs } from '@/components/colleges/college';
 import { useRouter } from 'next/navigation';
-import { checkClubRole } from '@/hooks/useClubRole';
+import { checkClubRole, type ClubRole } from '@/hooks/useClubRole';
+import { notifyDataChanged } from '@/lib/dataEvents';
 import AchievementUnlockModal from '@/components/AchievementUnlockModal';
 
 interface CreateEventModalProps {
@@ -110,20 +111,29 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     description: string;
   } | null>(null);
   const [closeAfterAchievement, setCloseAfterAchievement] = useState(false);
-  const [clubRole, setClubRole] = useState<{ msg: string; authorized: boolean } | null>(null);
+  const [clubRole, setClubRole] = useState<ClubRole | null>(null);
+  const [roleChecked, setRoleChecked] = useState(false);
 
+  // Checked only when the modal opens (it is mounted on the events and club
+  // pages), and the event belongs to the club the user runs — not their first
+  // membership. Silent: the banner and the submit handler explain a refusal.
   useEffect(() => {
-    const checkRole = async () => {
-      if (!clubId) {
-        setClubRole({ msg: 'No club selected', authorized: false });
-        return;
-      }
-      const role = await checkClubRole(token, clubId);
-      toast(role.msg, { duration: 5000 });
+    if (!isOpen || !token) return;
+    let cancelled = false;
+    setRoleChecked(false);
+    checkClubRole(token).then((role) => {
+      if (cancelled) return;
       setClubRole(role);
+      setRoleChecked(true);
+      if (role.authorized && role.clubId) {
+        setClubId(role.clubId);
+        if (role.clubName) setClubName(role.clubName);
+      }
+    });
+    return () => {
+      cancelled = true;
     };
-    if (token && clubId) checkRole();
-  }, [token, clubId]);
+  }, [isOpen, token]);
 
   // Helper function to get today's date in YYYY-MM-DD format
   const getTodayDateString = () => {
@@ -164,7 +174,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     const tok = localStorage.getItem('token');
     if (tok) setToken(tok);
     else {
-      toast('Login required', {
+      toast('Login required', { id: 'login-required',
         action: {
           label: 'Sign in',
           onClick: () => router.push('/auth/signin'),
@@ -240,7 +250,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        if (!token) return;
+        if (!token || !isOpen) return;
         const res = await axios.get<{
           user: {
             collegeName: string;
@@ -265,20 +275,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           setLockedUniversity(collegeName);
           setFormData((prev: any) => ({ ...prev, university: collegeName }));
         }
+        // Display fallback only; the club the user runs comes from the role check.
         const clubMemberships = res?.data?.user?.clubMemberships || [];
-        if (clubMemberships.length > 0) {
-          setClubName(clubMemberships[0].club.name);
-          setClubId(clubMemberships[0].clubId);
-        } else {
-          const clubName = res?.data?.user?.clubName || '';
-          const clubId = res?.data?.user?.clubId || '';
-          if (clubName) {
-            setClubName(clubName);
-          }
-          if (clubId) {
-            setClubId(clubId);
-          }
-        }
+        const fallbackName = clubMemberships[0]?.club?.name || res?.data?.user?.clubName || '';
+        if (fallbackName) setClubName((prev) => prev || fallbackName);
 
         // Fetch event count for this founder
         try {
@@ -297,7 +297,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       }
     };
     fetchUser();
-  }, [token]);
+  }, [token, isOpen]);
 
   // Memoized handler for input changes
   const handleChange = useCallback(
@@ -592,27 +592,24 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
     if (!token) {
       toast('please login or signup');
       return;
     }
-    if (!clubName || !clubId) {
-      toast("You haven't created any club yet. Please create a club first.");
-      return;
-    }
-
-    const roleCheck = await checkClubRole(token, clubId);
-    if (!roleCheck.authorized) {
-      toast.error('Only club heads and core members can create events.');
-      return;
-    }
-
     if (!validateStep()) {
       notifyStepValidationErrors(step);
       return;
     }
 
+    // Busy from the first click: the role check below is a network call.
     setIsSubmitting(true);
+    const roleCheck = await checkClubRole(token);
+    if (!roleCheck.authorized || !roleCheck.clubId) {
+      toast.error('Only club heads and core members can create events.');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       try {
@@ -760,7 +757,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       });
 
       if (createEvent.status === 201 || createEvent.status === 200) {
-        posthog.capture('event_created', {
+        if (clubId) setClubGroup(clubId, { name: clubName });
+        track('event_created', {
+          event_id: createEvent.data?.id ?? null,
+          club_id: clubId || null,
           event_type: formData.eventType,
           event_mode: formData.eventMode,
           is_paid: formData.isPaidEvent,
@@ -797,7 +797,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           setCloseAfterAchievement(true);
         }
 
-        toast('Event created successfully! Start marketing now!!!');
+        toast.success('Event created! Start marketing now 🚀');
+        // Lists on the events and club pages refetch right away.
+        notifyDataChanged('event');
+        router.refresh();
 
         if (!badgeUnlocked) {
           setTimeout(() => {
@@ -808,9 +811,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         const message =
           createEvent.data?.msg || 'Could not create event. Please try again.';
         setErrors((prev) => ({ ...prev, ...mapCreateEventError(message) }));
+        track('event_creation_failed', { status: createEvent.status, club_id: clubId || null });
         toast.error(message);
       }
     } catch (err) {
+      track('event_creation_failed', {
+        status: isAxiosError(err) ? err.response?.status ?? null : null,
+        club_id: clubId || null,
+      });
       const message =
         isAxiosError(err) &&
         typeof (err.response?.data as { msg?: string } | undefined)?.msg ===
@@ -825,6 +833,17 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   };
 
   if (!isOpen) return null;
+
+  if (!clubName && token && !roleChecked) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+        <div className="flex items-center gap-3 rounded-xl bg-gray-900 border border-gray-800 px-5 py-4 text-sm text-gray-300">
+          <span className="h-4 w-4 rounded-full border-2 border-yellow-400 border-t-transparent animate-spin" />
+          Checking your club…
+        </div>
+      </div>
+    );
+  }
 
   if (!clubName) {
     return (
@@ -2148,7 +2167,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                   isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
                 }`}
               >
-                {isSubmitting ? 'Creating...' : 'Create Event'}
+                {isSubmitting && <Loader2 className="w-4 h-4 mr-2 inline animate-spin" />}
+                {isSubmitting ? 'Creating event…' : 'Create Event'}
               </Button>
             )}
           </div>

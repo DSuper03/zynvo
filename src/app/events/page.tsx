@@ -17,6 +17,8 @@ import { toast } from 'sonner';
 import { buildAuthHref } from '@/lib/authReturnTo';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { cn } from '@/lib/utils';
+import { track } from '@/lib/analytics';
+import { useDataChanged } from '@/lib/dataEvents';
 
 
 interface apiRespEvents {
@@ -124,6 +126,8 @@ export default function ZynvoEventsPage() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
   const [fetchNonce, setFetchNonce] = useState(0);
+  // A new event created anywhere (e.g. the Create Event modal) shows up right away.
+  useDataChanged('event', () => setFetchNonce((n) => n + 1));
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Search-specific state
@@ -156,13 +160,6 @@ export default function ZynvoEventsPage() {
       
       if (session !== 'true') {
         // Has token but no session - user needs to sign in
-        toast('Login required', {
-          action: {
-            label: 'Sign in',
-            onClick: () =>
-              router.push(buildAuthHref('/auth/signin', pathname)),
-          },
-        });
         setHasTokenForModal(true);
         setIsAuthModalOpen(true);
         return;
@@ -304,6 +301,12 @@ export default function ZynvoEventsPage() {
       );
       setSearchResults(res.data.response ?? []);
       setSearchTotal(res.data.total ?? 0);
+      track('search_performed', {
+        surface: 'events',
+        query: term.trim().slice(0, 100),
+        page,
+        results_count: res.data.total ?? res.data.response?.length ?? 0,
+      });
       setSearchTotalPages(res.data.totalPages ?? 1);
     } catch (err) {
       console.error('Search error:', err);

@@ -1,7 +1,7 @@
 'use client';
 
-import posthog from 'posthog-js';
-import React, { useEffect, useState } from 'react';
+import { setClubGroup, track } from '@/lib/analytics';
+import React, { useCallback, useEffect, useState } from 'react';
 import Image from 'next/legacy/image';
 import {
   X,
@@ -11,6 +11,7 @@ import {
   Trash2,
   ChevronDown,
   Building,
+  Loader2,
 } from 'lucide-react';
 import { CreateClubModalProps } from '@/types/global-Interface';
 import { toast } from 'sonner';
@@ -24,6 +25,7 @@ import axios from 'axios';
 import { fetchClubsByCollege } from '@/app/api/hooks/useClubs';
 import { useRouter } from 'next/navigation';
 import MemberSelect from '@/components/MemberSelect';
+import { notifyDataChanged } from '@/lib/dataEvents';
 
 const CreateClubModal: React.FC<CreateClubModalProps> = ({
   isOpen,
@@ -55,27 +57,31 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
   const [isLoadingClubs, setIsLoadingClubs] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [typeSearch, setTypeSearch] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const searchUsers = async (query: string): Promise<any[]> => {
+  // Stable identity so MemberSelect's debounced search isn't restarted on every render.
+  const searchUsers = useCallback(async (query: string): Promise<any[]> => {
     if (!token || !query.trim()) return [];
     try {
-      const res = await fetch(`/api/v1/user/SearchUser?search=${encodeURIComponent(query)}`, {
+      // The backend reads `name` (not `search`).
+      const res = await fetch(`/api/v1/user/SearchUser?name=${encodeURIComponent(query.trim())}`, {
         headers: { authorization: `Bearer ${token}` },
       });
       if (!res.ok) return [];
       const data = await res.json();
-      return data.users ?? data.resp ?? data ?? [];
+      const users = data?.users ?? data?.resp;
+      return Array.isArray(users) ? users : [];
     } catch {
       return [];
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       else {
-        toast('Login required', {
+        toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),
@@ -84,7 +90,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
         return;
       }
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('Login required', {
+        toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),
@@ -114,69 +120,19 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
         );
 
         const userData = (userResponse.data as any).user;
+        // Read the college from the response (the old code checked the still-empty
+        // `userCollege` state, so the college and its clubs never loaded).
+        const college: string = (userData?.collegeName ?? '').trim();
+        const hasCollege =
+          !!college && !['not joined', 'not_joined', 'other'].includes(college.toLowerCase());
 
-        if (userCollege) {
-          setUserCollege(userCollege);
-
-          // Fetch existing clubs for this college
+        if (hasCollege) {
+          setUserCollege(college);
           setIsLoadingClubs(true);
-          // Test the API call directly first
-          try {
-            const testUrl = `/api/v1/clubs/getClubs/${encodeURIComponent(userCollege)}`;
-            console.log('Testing API URL:', testUrl);
-
-            const testResponse = await fetch(testUrl, {
-              headers: {
-                authorization: `Bearer ${token}`,
-              },
-            });
-
-            console.log('Test response status:', testResponse.status);
-            console.log('Test response headers:', testResponse.headers);
-
-            if (testResponse.ok) {
-              const testData = await testResponse.json();
-              console.log('Test API response data:', testData);
-            } else {
-              console.log('Test API failed with status:', testResponse.status);
-              const errorText = await testResponse.text();
-              console.log('Test API error response:', errorText);
-            }
-          } catch (testError) {
-            console.error('Test API call failed:', testError);
-          }
-
-          const clubs = await fetchClubsByCollege(
-            userCollege,
-            undefined,
-            token
-          );
-          console.log('Fetched clubs:', clubs); // Debug log
-
-          // If no clubs found, add some sample clubs for testing
-          if (clubs.length === 0) {
-            console.log('No clubs found, adding sample clubs for testing');
-            const sampleClubs = [
-              'Computer Science Club',
-              'Robotics Club',
-              'Debate Society',
-              'Photography Club',
-              'Music Club',
-            ];
-            setExistingClubs(sampleClubs);
-          } else {
-            setExistingClubs(clubs);
-          }
+          const clubs = await fetchClubsByCollege(college, undefined, token);
+          setExistingClubs(clubs);
         } else {
-          // Add sample clubs even if no college is found
-          const sampleClubs = [
-            'Computer Science Club',
-            'Robotics Club',
-            'Debate Society',
-            'Photography Club',
-            'Music Club',
-          ];
-          setExistingClubs(sampleClubs);
+          setExistingClubs([]);
         }
       } catch (error) {
         console.error('Error fetching user college:', error);
@@ -226,6 +182,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     // Validate club selection
     if (selectedClubOption === 'existing' && !selectedExistingClub) {
@@ -239,7 +196,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
     }
 
     if (!token) {
-      toast('Login required', {
+      toast('Login required', { id: 'login-required',
         action: {
           label: 'Sign in',
           onClick: () => router.push('/auth/signin'),
@@ -248,6 +205,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
       return;
     }
 
+    setIsSubmitting(true);
     try {
       let image: string;
 
@@ -293,15 +251,25 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
 
       const msg = upload?.data;
       if (upload.status >= 200 && upload.status < 300) {
-        posthog.capture('club_created', { club_type: clubData.type });
-        toast(`${msg.msg} and your clubID : ${upload?.data.clubId}`);
+        setClubGroup(upload?.data?.clubId, { name: clubData.name, type: clubData.type });
+        track('club_created', {
+          club_id: upload?.data?.clubId ?? null,
+          club_type: clubData.type,
+          wings_count: Array.isArray(clubData.wings) ? clubData.wings.length : 0,
+        });
+        toast.success(msg.msg || 'Club created');
+        notifyDataChanged('club');
         onClose();
+        // Take the founder straight to the new club so it's visible instantly.
+        if (upload?.data?.clubId) router.push(`/clubs/${upload.data.clubId}`);
       } else {
         toast(msg.msg);
       }
     } catch (error: any) {
       console.error('Error creating club:', error);
-      toast(error.response?.data?.msg || 'Failed to create club');
+      toast.error(error.response?.data?.msg || 'Failed to create club');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -658,6 +626,7 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
                 onChange={(email) => setClubData((prev) => ({ ...prev, FounderEmail: email }))}
                 placeholder="Search for founder by name or email"
                 onSearch={searchUsers}
+                allowCustomEmail
               />
             </div>
 
@@ -731,9 +700,12 @@ const CreateClubModal: React.FC<CreateClubModalProps> = ({
             </Button>
             <Button
               type="submit"
-              className="px-6 py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg font-medium transition-colors"
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+              className="px-6 py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center gap-2"
             >
-              Zync your Club
+              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isSubmitting ? (img ? 'Uploading logo & creating…' : 'Creating club…') : 'Zync your Club'}
             </Button>
           </div>
         </form>

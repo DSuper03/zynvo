@@ -1,6 +1,6 @@
 'use client';
 
-import posthog from 'posthog-js';
+import { identifyFromToken, setCollegeGroup, track } from '@/lib/analytics';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import {
   AuthenticateWithRedirectCallback,
@@ -55,14 +55,17 @@ function buildClerkLoginCompleteBody(params: {
   avatarUrl?: string;
   college: string;
   phone: string;
+  /** Clerk session JWT; the backend verifies it before trusting email/clerkId. */
+  clerkToken: string | null;
 }) {
-  const { clerkId, email, displayName, avatarUrl, college, phone } = params;
+  const { clerkId, email, displayName, avatarUrl, college, phone, clerkToken } = params;
   // Don't send college fields when value is a placeholder — avoids overwriting real college on backend
   const isRealCollege =
     college.trim() !== '' &&
     !PLACEHOLDER_COLLEGES.has(college.trim().toLowerCase());
   return {
     clerkId,
+    clerkToken,
     email,
     name: displayName,
     username: displayName,
@@ -92,7 +95,7 @@ export default function SSOCallbackPage() {
 }
 
 function SSOCallbackContent() {
-  const { isLoaded: authLoaded, isSignedIn } = useAuth();
+  const { isLoaded: authLoaded, isSignedIn, getToken } = useAuth();
   const { user, isLoaded: userLoaded } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -188,6 +191,7 @@ function SSOCallbackContent() {
           const res = await axios.post(
             `${base}/api/v2/user/auth/clerkLogin`,
             buildClerkLoginCompleteBody({
+              clerkToken: await getToken(),
               clerkId,
               email,
               displayName: name,
@@ -213,8 +217,8 @@ function SSOCallbackContent() {
 
           // If we already know they have a real college, skip the profile fetch
           if (userHasCollege) {
-            posthog.identify(email, { name });
-            posthog.capture('user_oauth_signin', { auth_method: 'google' });
+            identifyFromToken(null, { name });
+            track('user_oauth_signin', { auth_method: 'google' });
             toast.success('Login successful!');
             router.push(consumePostAuthRedirect(searchParams));
             return;
@@ -247,8 +251,8 @@ function SSOCallbackContent() {
             return;
           }
 
-          posthog.identify(email, { name });
-          posthog.capture('user_oauth_signin', { auth_method: 'google' });
+          identifyFromToken(null, { name });
+          track('user_oauth_signin', { auth_method: 'google' });
           toast.success('Login successful!');
           router.push(consumePostAuthRedirect(searchParams));
         } else if (userExists === null) {
@@ -258,6 +262,7 @@ function SSOCallbackContent() {
           const res = await axios.post(
             `${base}/api/v2/user/auth/clerkLogin`,
             buildClerkLoginCompleteBody({
+              clerkToken: await getToken(),
               clerkId,
               email,
               displayName: name,
@@ -305,8 +310,8 @@ function SSOCallbackContent() {
             return;
           }
 
-          posthog.identify(email, { name });
-          posthog.capture('user_oauth_signin', { auth_method: 'google' });
+          identifyFromToken(null, { name });
+          track('user_oauth_signin', { auth_method: 'google' });
           toast.success('Login successful!');
           router.push(consumePostAuthRedirect(searchParams));
         } else {
@@ -325,6 +330,9 @@ function SSOCallbackContent() {
           response?: { status?: number; data?: { msg?: string } };
         };
         const status = ax.response?.status;
+        if (status !== 404) {
+          track('auth_failed', { auth_method: 'google', stage: 'sso_callback', status: status ?? null });
+        }
         if (status === 404) {
           // User not found in backend — show profile form inline for new Google signups
           // Pre-populate Google name but let them edit it
@@ -399,6 +407,7 @@ function SSOCallbackContent() {
                 const res = await axios.post(
                   `${base}/api/v2/user/auth/clerkLogin`,
                   buildClerkLoginCompleteBody({
+                    clerkToken: await getToken(),
                     clerkId: clerkUserInfo.clerkId,
                     email: clerkUserInfo.email,
                     displayName: displayName.trim(),
@@ -410,11 +419,12 @@ function SSOCallbackContent() {
                 if (res.data.token) {
                   localStorage.setItem('token', res.data.token);
                   sessionStorage.setItem('activeSession', 'true');
-                  posthog.identify(clerkUserInfo.email, {
+                  identifyFromToken(res.data.token, {
                     name: displayName.trim(),
                     college,
                   });
-                  posthog.capture(
+                  setCollegeGroup(college);
+                  track(
                     fromSigninIncomplete
                       ? 'user_oauth_signin'
                       : 'user_oauth_signup',
@@ -433,6 +443,11 @@ function SSOCallbackContent() {
                   throw new Error('No token received');
                 }
               } catch (err: unknown) {
+                track('auth_failed', {
+                  auth_method: 'google',
+                  stage: fromSigninIncomplete ? 'oauth_profile_completion' : 'oauth_signup',
+                  status: (err as { response?: { status?: number } })?.response?.status ?? null,
+                });
                 toast.error(
                   getSafeErrorMessage(
                     err,

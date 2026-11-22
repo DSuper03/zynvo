@@ -27,7 +27,7 @@ import Link from 'next/link';
 import CreateClubModal from './createclub';
 import JoinClubModal from './joinclub';
 import axios from 'axios';
-import Image from 'next/legacy/image';
+import ClubLogo, { clubLogoSrc } from '@/components/ClubLogo';
 import { response } from '@/types/global-Interface';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -37,6 +37,7 @@ import NoTokenModal from '@/components/modals/remindModal';
 import { useRouter } from 'next/navigation';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
 import { EmptyState } from '@/components/feedback';
+import { useDataChanged } from '@/lib/dataEvents';
 
 const getTypeClasses = (rawType: string) => {
   const type = String(rawType || '').toLowerCase();
@@ -122,6 +123,9 @@ const ClubsPage = () => {
   const [clubData, setData] = useState<response['resp']>();
   const [token, setToken] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  // Refetch the list when a club is created elsewhere.
+  const [clubsReload, setClubsReload] = useState(0);
+  useDataChanged('club', () => setClubsReload((n) => n + 1));
   const [hasTokenForModal, setHasTokenForModal] = useState(false);
   const [userJoinedClubIds, setUserJoinedClubIds] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -173,12 +177,6 @@ const ClubsPage = () => {
       }
       if (session !== 'true') {
         // Has token but no session - user needs to sign in
-        toast('Login required', {
-          action: {
-            label: 'Sign in',
-            onClick: () => router.push('/auth/signin'),
-          },
-        });
         setHasTokenForModal(true);
         setIsOpen(true);
         return;
@@ -224,7 +222,7 @@ const ClubsPage = () => {
     }
 
     call();
-  }, [token]);
+  }, [token, clubsReload]);
 
   // Categories scroll controls visibility
   useEffect(() => {
@@ -281,7 +279,7 @@ const ClubsPage = () => {
   const handleJoinClub = (club: response['resp'][0]) => {
     setSelectedClub({
       name: club.name,
-      image: club.profilePicUrl || '/default-club-image.jpg',
+      image: clubLogoSrc(club.profilePicUrl, club.name),
       id: club.id,
       requirements: club.requirements || undefined,
     });
@@ -475,12 +473,11 @@ const ClubsPage = () => {
                     <Link href={`/clubs/${club.id}`} className="flex-1 cursor-pointer">
                       <div className="h-32 overflow-hidden relative">
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/30 transition-all duration-300"></div>
-                        <Image
-                          src={club.profilePicUrl || '/default-club-image.jpg'}
-                          alt={club.name}
-                          layout="fill"
+                        <ClubLogo
+                          src={club.profilePicUrl}
+                          name={club.name}
+                          fill
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          priority={false}
                         />
                         {/* Member count overlay */}
                         <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center z-20">
@@ -543,8 +540,8 @@ const ClubsPage = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             if (isUserMemberOfClub(club)) {
-                              // User is already a member - could show a modal or do nothing
-                              toast.success('You are already a member of this club!');
+                              // Already a member: open the club instead of a toast
+                              router.push(`/clubs/${club.id}`);
                             } else {
                               handleJoinClub(club);
                             }
@@ -571,12 +568,9 @@ const ClubsPage = () => {
                       >
                         <div className="w-full xs:w-24 sm:w-32 md:w-40 h-32 xs:h-24 sm:h-32 md:h-32 overflow-hidden relative flex-shrink-0">
                           <div className="absolute inset-0 bg-gradient-to-t xs:bg-gradient-to-r from-black/50 to-transparent z-10 group-hover:from-black/30 transition-all duration-300"></div>
-                          <Image
-                            src={
-                              club.profilePicUrl ||
-                              '/default-club-image.jpg'
-                            }
-                            alt={club.name}
+                          <ClubLogo
+                            src={club.profilePicUrl}
+                            name={club.name}
                             width={200}
                             height={200}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -648,8 +642,8 @@ const ClubsPage = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             if (isUserMemberOfClub(club)) {
-                              // User is already a member - could show a modal or do nothing
-                              toast.success('You are already a member of this club!');
+                              // Already a member: open the club instead of a toast
+                              router.push(`/clubs/${club.id}`);
                             } else {
                               handleJoinClub(club);
                             }

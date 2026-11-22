@@ -22,6 +22,7 @@ import { FaUserGraduate } from 'react-icons/fa';
 import TextWithLinks from '@/components/TextWithLinks';
 import { UserBadgesDisplay } from '@/components/UserBadgesDisplay';
 import { getSafeErrorMessage } from '@/lib/safe-error';
+import { formatEventDate } from '@/lib/formatEventDate';
 
 interface Event {
   EventName: string;
@@ -47,6 +48,8 @@ export interface UserData {
   instagram: string | null;
   linkedin: string | null;
 }
+
+type ProfileClub = { id: string | null; name: string; logo: string | null };
 
 export interface ApiResponse {
   msg: string;
@@ -211,7 +214,8 @@ export default function PublicUserProfile() {
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [ticketData, setTicketData] = useState<any>({});
-  const [clubId, setClubId] = useState<string | null>(null);
+  // Every club this person belongs to (UserClubMembership + legacy clubName).
+  const [clubs, setClubs] = useState<ProfileClub[]>([]);
   const [isFounder, setIsFounder] = useState(false);
   const [isMember, setIsMember] = useState(false);
   /** Logged-in user's id (from getUser); used so only the profile owner can open tickets. */
@@ -223,7 +227,7 @@ export default function PublicUserProfile() {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       if (sessionStorage.getItem('activeSession') !== 'true') {
-        toast('Login required', {
+        toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => router.push('/auth/signin'),
@@ -304,32 +308,32 @@ export default function PublicUserProfile() {
 
           setPosts(response.data.user.CreatePost);
 
-          if (clubName) {
-            try {
-              const clubsResponse = await axios.get<any>(
-                `/api/v1/clubs/getAll?page=1&limit=1000`,
-                { headers: token ? { authorization: `Bearer ${token}` } : {} }
-              );
-              const clubs = clubsResponse.data?.resp || clubsResponse.data?.clubs || [];
-              const matchingClub = clubs.find(
-                (club: any) => club.name?.toLowerCase() === clubName.toLowerCase()
-              );
-              if (matchingClub?.id) {
-                setClubId(matchingClub.id);
-                if (matchingClub.founderEmail && email) {
-                  const isUserFounder =
-                    email.toLowerCase() === matchingClub.founderEmail.toLowerCase();
-                  setIsFounder(isUserFounder);
-                  setIsMember(!isUserFounder);
-                } else {
-                  setIsMember(true);
-                }
-              } else {
-                setIsMember(true);
-              }
-            } catch {
-              setIsMember(true);
-            }
+          const memberships: any[] = (response.data.user as any).clubMemberships ?? [];
+          const list: ProfileClub[] = memberships
+            .filter((m) => m?.club?.id)
+            .map((m) => ({ id: m.club.id, name: m.club.name, logo: m.club.profilePicUrl ?? null }));
+          const legacy = clubName?.trim();
+          if (legacy && !list.some((c) => c.name.toLowerCase() === legacy.toLowerCase())) {
+            list.unshift({ id: null, name: legacy, logo: null });
+          }
+          setClubs(list);
+          setIsMember(list.length > 0);
+
+          // Founder badge: check only this person's clubs (not every club on Zynvo).
+          const withId = list.filter((c) => c.id).slice(0, 5);
+          if (email && withId.length > 0) {
+            const founderOf = await Promise.all(
+              withId.map((c) =>
+                axios
+                  .get<any>(`/api/v1/clubs/${c.id}`)
+                  .then((r) => String(r.data?.club?.founderEmail ?? '').toLowerCase() === email.toLowerCase())
+                  .catch(() => false)
+              )
+            );
+            const founder = founderOf.some(Boolean);
+            setIsFounder(founder);
+            // A founder also counts as a member only if they're in another club too.
+            setIsMember(founder ? list.length > 1 : list.length > 0);
           }
         } else {
           setIsNotFound(true);
@@ -565,22 +569,28 @@ export default function PublicUserProfile() {
                 )}
               </div>
 
-              {/* Club badge */}
-              {userData.clubName?.trim() && (
-                <div className="mb-1">
-                  {clubId ? (
-                    <Link
-                      href={`/clubs/${clubId}`}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 hover:border-yellow-500/50 text-yellow-400 transition-all text-xs font-semibold group"
-                    >
-                      <FaUserGraduate className="w-3 h-3 group-hover:scale-110 transition-transform" />
-                      {userData.clubName.trim()}
-                    </Link>
-                  ) : (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-semibold">
-                      <FaUserGraduate className="w-3 h-3" />
-                      {userData.clubName.trim()}
-                    </div>
+              {/* Club badges — every club this person belongs to */}
+              {clubs.length > 0 && (
+                <div className="mb-1 flex flex-wrap justify-center gap-1.5">
+                  {clubs.map((club) =>
+                    club.id ? (
+                      <Link
+                        key={club.id}
+                        href={`/clubs/${club.id}`}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 hover:border-yellow-500/50 text-yellow-400 transition-all text-xs font-semibold group"
+                      >
+                        <FaUserGraduate className="w-3 h-3 group-hover:scale-110 transition-transform" />
+                        {club.name}
+                      </Link>
+                    ) : (
+                      <div
+                        key={`legacy-${club.name}`}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-semibold"
+                      >
+                        <FaUserGraduate className="w-3 h-3" />
+                        {club.name}
+                      </div>
+                    )
                   )}
                 </div>
               )}
@@ -701,7 +711,7 @@ export default function PublicUserProfile() {
                 isFounder={isFounder}
                 isMember={isMember}
                 attendedEventCount={attendedEventCount}
-                clubName={userData.clubName || ''}
+                clubName={clubs.map((c) => c.name).join(', ') || userData.clubName || ''}
                 userName={userData.name || 'User'}
               />
             </SectionCard>
@@ -792,11 +802,7 @@ export default function PublicUserProfile() {
                                 {event.EventName}
                               </h4>
                               <p className="text-xs text-gray-500 mt-0.5">
-                                {new Date(event.startDate).toLocaleDateString('default', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                })}
+                                {formatEventDate(event.startDate)}
                               </p>
                               {isOwnProfile && (
                                 <div className="flex flex-wrap gap-2 mt-1.5">

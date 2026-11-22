@@ -7,7 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { buildAuthHref } from '@/lib/authReturnTo';
+import { track } from '@/lib/analytics';
+import { eventShareUrl } from '@/lib/eventLinks';
 
 interface EventCardProps {
   events?: eventData[] | null;
@@ -26,12 +27,13 @@ export default function EventCard({
 
   const handleShare = async (eventId: string, eventName?: string) => {
     try {
-      const eventInvitePath = buildAuthHref('/auth/signup', `/events/${eventId}`);
-      const shareUrl =
-        typeof window !== 'undefined'
-          ? `${window.location.origin}${eventInvitePath}`
-          : eventInvitePath;
+      const shareUrl = eventShareUrl(eventId);
 
+      track('event_shared', {
+        event_id: eventId,
+        method: typeof navigator.share === 'function' ? 'native' : 'clipboard',
+        source: 'event_card',
+      });
       if (navigator.share) {
         await navigator.share({
           title: eventName || 'Check out this event',

@@ -15,7 +15,7 @@
  *   6. Times out after PROXY_TIMEOUT ms and returns a standardized 504.
  *   7. Never leaks backend URLs, stack traces, or secrets to the browser.
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 
 import { getServerEnv } from './env';
 import { getProxyAuth } from './auth';
@@ -38,6 +38,19 @@ import {
   normalizeUpstreamError,
 } from './errors';
 import { resolveRateLimiter } from './rate-limit';
+import { captureServerEvent, flushServerTelemetry } from './posthog-telemetry';
+import { reportToOps } from './ops-alerts';
+import { errorText, isDroppedConnection } from './backend-fetch';
+import {
+  AUTH_RESPONSE_PATHS,
+  distinctIdFromAuthHeader,
+  distinctIdFromJwt,
+  matchServerEvent,
+} from './server-events';
+
+// ─── Retry helpers ────────────────────────────────────────────────────────────
+
+const isIdempotent = (method: string) => method === 'GET' || method === 'HEAD';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -80,6 +93,20 @@ export async function proxyRequest(
   backendPath: string,
   options: ProxyOptions = {},
 ): Promise<NextResponse> {
+  // Drain PostHog logs/events after the response is sent, before the function freezes.
+  try {
+    after(() => flushServerTelemetry());
+  } catch {
+    // `after` is unavailable outside a request scope (e.g. tests) — skip.
+  }
+  return proxyRequestInner(request, backendPath, options);
+}
+
+async function proxyRequestInner(
+  request: NextRequest,
+  backendPath: string,
+  options: ProxyOptions = {},
+): Promise<NextResponse> {
   const env = getServerEnv();
   const { requireAuth = true, cache = 'no-store', revalidateSeconds = 60 } = options;
 
@@ -99,6 +126,8 @@ export async function proxyRequest(
 
   // Client-supplied Authorization header (backend JWT from syncWithClerk).
   const clientAuthHeader = request.headers.get('authorization');
+  // Backend user id → PostHog distinct id (decoded only; trusted once the backend returns 2xx).
+  logBase.distinctId = distinctIdFromAuthHeader(clientAuthHeader);
 
   if (requireAuth && !proxyAuth && !clientAuthHeader) {
     proxyLogger.warn({ ...logBase, error: 'No Clerk session and no client token' });
@@ -112,13 +141,14 @@ export async function proxyRequest(
   const authorizationHeader =
     clientAuthHeader ?? (proxyAuth ? `Bearer ${proxyAuth.token}` : null);
 
+  const clientIp =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    request.headers.get('x-real-ip') ??
+    'anonymous';
+
   // ── 2. Rate limiting ───────────────────────────────────────────────────────
   const limiter = resolveRateLimiter(method, backendPath);
   if (limiter) {
-    const clientIp =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      request.headers.get('x-real-ip') ??
-      'anonymous';
     const identifier = userId ?? clientIp;
     const limitResult = await limiter.check(identifier);
     if (!limitResult.allowed) {
@@ -140,6 +170,7 @@ export async function proxyRequest(
     requestId,
     authorizationHeader,
     env.INTERNAL_PROXY_SECRET,
+    clientIp === 'anonymous' ? undefined : clientIp,
   );
 
   // ── 5. Prepare request body ────────────────────────────────────────────────
@@ -168,8 +199,8 @@ export async function proxyRequest(
 
   let upstream: Response;
 
-  try {
-    upstream = await fetch(upstreamUrl, {
+  const send = () =>
+    fetch(upstreamUrl, {
       method,
       headers: upstreamHeaders,
       body: bodyInit,
@@ -177,17 +208,39 @@ export async function proxyRequest(
       // @ts-expect-error — Next.js 15 fetch does not expose duplex in typings
       duplex: 'half',
     });
+
+  try {
+    try {
+      upstream = await send();
+    } catch (first: unknown) {
+      // A reused keep-alive connection the backend had already closed fails
+      // with "fetch failed: other side closed" before anything is sent back.
+      // Reads are safe to repeat, so retry those once; writes never are.
+      if (!isIdempotent(method) || !isDroppedConnection(first)) throw first;
+      proxyLogger.warn({ ...logBase, userId, error: `retrying after dropped connection: ${errorText(first)}` });
+      upstream = await send();
+    }
   } catch (err: unknown) {
     clearTimeout(timeoutId);
     const durationMs = Date.now() - startMs;
 
     if (err instanceof DOMException && err.name === 'AbortError') {
       proxyLogger.error({ ...logBase, userId, durationMs, timedOut: true, error: 'Upstream timeout' });
+      reportToOps({
+        key: `timeout ${method} ${backendPath}`,
+        title: `Backend timed out: ${method} ${backendPath}`,
+        detail: `No response after ${durationMs}ms (limit ${env.PROXY_TIMEOUT}ms). Users see "request timed out". requestId ${requestId}`,
+      });
       return gatewayTimeout(requestId);
     }
 
     const msg = err instanceof Error ? err.message : 'Unknown fetch error';
     proxyLogger.error({ ...logBase, userId, durationMs, error: msg });
+    reportToOps({
+      key: `unreachable ${msg}`,
+      title: 'Website cannot reach the backend',
+      detail: `${method} ${backendPath} failed after ${durationMs}ms: ${msg.slice(0, 300)}. requestId ${requestId}`,
+    });
     return badGateway(requestId);
   } finally {
     clearTimeout(timeoutId);
@@ -204,7 +257,44 @@ export async function proxyRequest(
 
   // ── 7. Handle non-2xx upstream responses ──────────────────────────────────
   if (!upstream.ok) {
+    // The browser only gets a generic message; keep the real one in the logs.
+    if (upstream.status >= 500) {
+      const detail = await upstream.clone().text().catch(() => '');
+      proxyLogger.error({
+        ...logBase,
+        userId,
+        status: upstream.status,
+        durationMs,
+        error: `Upstream ${upstream.status}: ${detail.slice(0, 300)}`,
+      });
+      // JSON 5xx come from the worker's own code, which alerts by itself. A
+      // non-JSON 5xx is Cloudflare's error page: the worker crashed or hit a
+      // limit before its code could report anything.
+      const isJson = (upstream.headers.get('content-type') ?? '').includes('application/json');
+      if (!isJson) {
+        reportToOps({
+          key: `cf-error ${upstream.status} ${backendPath}`,
+          title: `Backend crashed (${upstream.status}): ${method} ${backendPath}`,
+          detail: `Cloudflare returned a non-JSON ${upstream.status} after ${durationMs}ms: ${detail
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .slice(0, 300)}. requestId ${requestId}`,
+        });
+      }
+    }
     return normalizeUpstreamError(upstream, requestId);
+  }
+
+  // ── 7b. Server-confirmed product events ───────────────────────────────────
+  const serverEvent = matchServerEvent(method, backendPath);
+  const isAuthResponse = AUTH_RESPONSE_PATHS.test(backendPath);
+  if (serverEvent && logBase.distinctId && !isAuthResponse) {
+    captureServerEvent(logBase.distinctId, serverEvent.event, {
+      ...serverEvent.properties,
+      status: upstream.status,
+      duration_ms: durationMs,
+      request_id: requestId,
+    });
   }
 
   // ── 8. Build response ──────────────────────────────────────────────────────
@@ -239,14 +329,38 @@ export async function proxyRequest(
   }
 
   // ── 10. JSON response ──────────────────────────────────────────────────────
+  const text = await upstream.text();
   try {
-    const json = await upstream.json();
+    const json = JSON.parse(text);
+    if (serverEvent && isAuthResponse) {
+      // Auth endpoints: the user is identified by the token the backend just issued.
+      const issuedId = distinctIdFromJwt(
+        typeof json?.token === 'string' ? json.token : null,
+      );
+      captureServerEvent(issuedId ?? logBase.distinctId, serverEvent.event, {
+        endpoint: backendPath,
+        status: upstream.status,
+        request_id: requestId,
+      });
+    }
     return NextResponse.json(json, {
       status: upstream.status,
       headers: responseHeaders,
     });
   } catch {
-    proxyLogger.error({ ...logBase, userId, durationMs, error: 'Failed to parse upstream JSON' });
+    proxyLogger.error({
+      ...logBase,
+      userId,
+      durationMs,
+      error: `Failed to parse upstream JSON (${upstreamContentType}, ${
+        upstream.headers.get('content-encoding') ?? 'identity'
+      }): ${text.slice(0, 200)}`,
+    });
+    reportToOps({
+      key: `bad-json ${backendPath}`,
+      title: `Backend sent unreadable response: ${method} ${backendPath}`,
+      detail: `status ${upstream.status}, content-type ${upstreamContentType}. requestId ${requestId}`,
+    });
     return internalError(requestId);
   }
 }

@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useClerk, useAuth as useClerkAuth } from '@clerk/nextjs';
+import { resetAnalytics } from '@/lib/analytics';
 
 interface DecodedToken {
   id?: string;
@@ -49,12 +50,13 @@ export function useAuth() {
     loadUser();
   }, [loadUser]);
 
-  const softLogout = () => {
-    sessionStorage.removeItem('activeSession');
-    setUser(null);
-  };
+  // Kept for compatibility. A session is restored from the stored token on
+  // every page load (lib/sessionRestore), so clearing only the session flag
+  // no longer logs anyone out — this is now a full logout.
+  const softLogout = () => hardLogout();
 
   const hardLogout = async () => {
+    resetAnalytics('logout');
     localStorage.removeItem('token');
     sessionStorage.removeItem('activeSession');
     setUser(null);

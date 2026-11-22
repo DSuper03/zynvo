@@ -2,13 +2,16 @@
 
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import EventTab from "../../../components/eventTab";
 import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MemberSelect from "@/components/MemberSelect";
+import CoreTeamByEmail from "@/components/admin/CoreTeamByEmail";
+import ClubLogoEditor from "@/components/admin/ClubLogoEditor";
+import DeleteClubSection from "@/components/admin/DeleteClubSection";
 
 export default function ClubAdminPage() {
   const params = useParams();
@@ -20,7 +23,6 @@ export default function ClubAdminPage() {
   const [instagram, setInstagramLink] = useState('');
   const [linkedin, setLinkedinLink] = useState('');
   const [twitter, setTwitterLink] = useState('');
-  const [removeMemberId, setRemoveMemberId] = useState('');
   const [coremember1, setCoreMember1] = useState('');
   const [coremember2, setCoreMember2] = useState('');
   const [coremember3, setCoreMember3] = useState('');
@@ -29,8 +31,20 @@ export default function ClubAdminPage() {
   const [event, setEvent] = useState<any[]>([]);
   const [isClient, setIsClient] = useState(false);
   const [token, setToken] = useState('');
+  // Which admin action is running (one at a time): disables buttons, shows a spinner.
+  const [busy, setBusy] = useState<string | null>(null);
+  const runAction = async (key: string, action: () => Promise<void>) => {
+    if (busy) return;
+    setBusy(key);
+    try {
+      await action();
+    } finally {
+      setBusy(null);
+    }
+  };
+  const spinner = (key: string) =>
+    busy === key ? <Loader2 className="w-4 h-4 animate-spin inline mr-2 align-[-2px]" /> : null;
   const navigate = useRouter();
-  const hasShownToast = useRef(false);
   const [openCriteriaModal, setOpenCriteriaModal] = useState<boolean>(false);
 
   useEffect(() => {
@@ -38,7 +52,7 @@ export default function ClubAdminPage() {
       const tok = localStorage.getItem('token');
       if (tok) setToken(tok);
       else {
-        toast('Login required', {
+        toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => navigate.push('/auth/signin'),
@@ -48,7 +62,7 @@ export default function ClubAdminPage() {
       }
 
       if (sessionStorage.getItem('activeSession') != 'true') {
-        toast('Login required', {
+        toast('Login required', { id: 'login-required',
           action: {
             label: 'Sign in',
             onClick: () => navigate.push('/auth/signin'),
@@ -61,10 +75,11 @@ export default function ClubAdminPage() {
 
   useEffect(() => setIsClient(true), []);
 
-  const fetchClubData = useCallback(async () => {
+  // `silent` refetches without the full-page loading state (keeps open panels mounted).
+  const fetchClubData = useCallback(async (silent = false) => {
     if (!clubId || !isClient || !token) return;
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const fetch = await axios.get<any>(`/api/v1/clubs/${clubId}`, { 
         headers: { authorization: `Bearer ${token}` }
       });
@@ -76,11 +91,6 @@ export default function ClubAdminPage() {
       setInstagramLink(fetch.data.club.instagram);
       setLinkedinLink(fetch.data.club.linkedin);
       setTwitterLink(fetch.data.club.twitter);
-      // Only show toast once, not on every fetch
-      if (!hasShownToast.current && fetch.data.msg) {
-        toast(fetch.data.msg);
-        hasShownToast.current = true;
-      }
     } catch {
       toast.error('Error fetching club data');
     } finally {
@@ -109,10 +119,31 @@ export default function ClubAdminPage() {
         { headers: { authorization: `Bearer ${token}` } }
       );
       toast(res.data.msg);
-    } catch {
-      toast.error('Error adding core members');
+      await fetchClubData(true);
+    } catch (err: any) {
+      const missing: string[] | undefined = err?.response?.data?.missingMembers;
+      toast.error(
+        missing?.length
+          ? `Not on Zynvo yet: ${missing.join(', ')}`
+          : err?.response?.data?.msg ?? 'Error adding core members'
+      );
     }
   };
+
+  // Search everyone on Zynvo (signed-in search returns emails), not just club members.
+  const searchPeople = useCallback(async (query: string): Promise<any[]> => {
+    if (!token || !query.trim()) return [];
+    try {
+      const res = await fetch(`/api/v1/user/SearchUser?name=${encodeURIComponent(query.trim())}`, {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return [];
+      const data = await res.json();
+      return Array.isArray(data?.users) ? data.users : [];
+    } catch {
+      return [];
+    }
+  }, [token]);
 
   const addWings = async () => {
     try {
@@ -127,11 +158,11 @@ export default function ClubAdminPage() {
     }
   };
 
-  const removeMember = async () => {
+  const removeMember = async (memberId: string) => {
     try {
       const res = await axios.post<any>(
         `/api/v2/admin/removeMember/${clubId}`,
-        { member: removeMemberId },
+        { member: memberId },
         { headers: { authorization: `Bearer ${token}` } }
       );
       toast(res.data.msg);
@@ -153,18 +184,24 @@ export default function ClubAdminPage() {
     }
   };
 
-  const removeCoreMembers = async () => {
+  // Removes only the member in this slot (it used to send all three slots and
+  // remove the whole core team).
+  const removeCoreMember = async (email: string) => {
     try {
       const res = await axios.post<any>(
         `/api/v2/admin/removeCoremembers/${clubId}`,
-        { coremember1, coremember2, coremember3 },
+        { coremember1: email },
         { headers: { authorization: `Bearer ${token}` } }
       );
       toast(res.data.msg);
-    } catch {
-      toast.error('Error removing core members');
+      await fetchClubData(true);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.msg ?? 'Error removing core member');
     }
   };
+
+  const slotEmail = (v: unknown): string =>
+    typeof v === 'string' && v.trim() && v.trim().toLowerCase() !== 'none' ? v.trim() : '';
 
   useEffect(() => {
     if (!isClient || !token || !clubId) return;
@@ -200,6 +237,16 @@ export default function ClubAdminPage() {
                   Membership Criteria
                 </Button>
               </div>
+              <div className="mb-6 pb-6 border-b border-yellow-400/20">
+                <h3 className="text-sm tracking-wide text-yellow-300/80 mb-3">Club Logo</h3>
+                <ClubLogoEditor
+                  clubId={String(clubId)}
+                  clubName={clubData.name}
+                  token={token}
+                  currentLogo={clubData.profilePicUrl}
+                  onUpdated={(url) => setClubData((prev: any) => ({ ...prev, profilePicUrl: url }))}
+                />
+              </div>
               <div className="space-y-4">
                 {['instagram', 'twitter', 'linkedin'].map((social) => (
                   <div key={social}>
@@ -220,10 +267,11 @@ export default function ClubAdminPage() {
                   </div>
                 ))}
                 <button
-                  onClick={updateClubLinks}
-                  className="mt-3 bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg hover:bg-yellow-300 transition-all"
+                  onClick={() => runAction('links', updateClubLinks)}
+                  disabled={!!busy}
+                  className="mt-3 bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg hover:bg-yellow-300 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Update Links
+                  {spinner('links')}{busy === 'links' ? 'Updating…' : 'Update Links'}
                 </button>
               </div>
             </section>
@@ -253,34 +301,47 @@ export default function ClubAdminPage() {
               {[1, 2, 3].map((num) => {
                 const currentValue = num === 1 ? coremember1 : num === 2 ? coremember2 : coremember3;
                 const setter = num === 1 ? setCoreMember1 : num === 2 ? setCoreMember2 : setCoreMember3;
+                const saved = slotEmail(clubData[`coremember${num}`]);
+                const busyKey = `core-remove:${num}`;
                 return (
                   <div key={num} className="flex flex-col gap-2 border-b border-yellow-400/20 pb-4 mb-4">
                     <span>
                       Core Member {num}:{" "}
-                      <span className="text-yellow-200">
-                        {clubData[`coremember${num}`] ?? '—'}
-                      </span>
+                      <span className="text-yellow-200">{saved || '—'}</span>
                     </span>
                     <MemberSelect
                       members={clubData.members ?? []}
-                      value={currentValue ?? ''}
+                      value={slotEmail(currentValue)}
                       onChange={setter}
+                      onSearch={searchPeople}
+                      placeholder="Search anyone on Zynvo"
                     />
-                    <button
-                      onClick={removeCoreMembers}
-                      className="text-xs text-red-400 hover:text-red-300 w-fit"
-                    >
-                      Remove
-                    </button>
+                    {saved && (
+                      <button
+                        onClick={() => runAction(busyKey, () => removeCoreMember(saved))}
+                        disabled={!!busy}
+                        className="text-xs text-red-400 hover:text-red-300 w-fit disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {busy === busyKey ? 'Removing…' : 'Remove'}
+                      </button>
+                    )}
                   </div>
                 );
               })}
               <button
-                onClick={addCoreMembers}
-                className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 font-semibold"
+                onClick={() => runAction('core-add', addCoreMembers)}
+                disabled={!!busy}
+                className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Add Core Members
+                {spinner('core-add')}{busy === 'core-add' ? 'Saving…' : 'Add Core Members'}
               </button>
+              <div className="mt-6 pt-4 border-t border-yellow-400/20">
+                <CoreTeamByEmail
+                  clubId={String(clubId)}
+                  token={token}
+                  onChanged={() => fetchClubData(true)}
+                />
+              </div>
             </section>
 
             <section className="bg-zinc-900 border border-yellow-400/30 rounded-2xl p-6">
@@ -293,10 +354,11 @@ export default function ClubAdminPage() {
                   onChange={(e) => setWings([...wings, e.target.value])}
                 />
                 <button
-                  className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 font-semibold"
-                  onClick={addWings}
+                  className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                  onClick={() => runAction('wings', addWings)}
+                  disabled={!!busy}
                 >
-                  Add
+                  {spinner('wings')}{busy === 'wings' ? 'Adding…' : 'Add'}
                 </button>
               </div>
             </section>
@@ -338,13 +400,11 @@ export default function ClubAdminPage() {
                         <p>{member.email}</p>
                       </div>
                       <button
-                        onClick={() => {
-                          setRemoveMemberId(member.id);
-                          removeMember();
-                        }}
-                        className="text-sm text-red-400 hover:text-red-300"
+                        onClick={() => runAction(`member:${member.id}`, () => removeMember(member.id))}
+                        disabled={!!busy}
+                        className="text-sm text-red-400 hover:text-red-300 disabled:opacity-60 disabled:cursor-not-allowed"
                       >
-                        Remove
+                        {busy === `member:${member.id}` ? 'Removing…' : 'Remove'}
                       </button>
                     </div>
                   ))}
@@ -361,12 +421,15 @@ export default function ClubAdminPage() {
                 onChange={(e) => setNewOwnerEmail(e.target.value)}
               />
               <button
-                onClick={transferOwnership}
-                className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 font-semibold"
+                onClick={() => runAction('transfer', transferOwnership)}
+                disabled={!!busy}
+                className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Transfer
+                {spinner('transfer')}{busy === 'transfer' ? 'Transferring…' : 'Transfer'}
               </button>
             </section>
+
+            <DeleteClubSection clubId={String(clubId)} clubName={clubData.name} token={token} />
           </div>
         )}
 

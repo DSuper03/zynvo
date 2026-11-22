@@ -5,6 +5,7 @@ import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@/components/ui/sonner';
+import MutationProgress from '@/components/MutationProgress';
 import { WarmupProvider } from '@/components/WarmupProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
@@ -14,6 +15,7 @@ import ClientTelemetryBootstrap from '@/components/ClientTelemetryBootstrap';
 import PostHogIdentifyBootstrap from '@/components/PostHogIdentifyBootstrap';
 import WebMcpBootstrap from '@/components/WebMcpBootstrap';
 import { ClerkProvider } from '@clerk/nextjs';
+import { SESSION_RESTORE_SCRIPT } from '@/lib/sessionRestore';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -127,6 +129,8 @@ export default function RootLayout({
     >
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Restore the login session before hydration (see lib/sessionRestore). */}
+        <script dangerouslySetInnerHTML={{ __html: SESSION_RESTORE_SCRIPT }} />
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6745473381903668"
@@ -163,6 +167,7 @@ export default function RootLayout({
           <SpeedInsights />
           <PerformanceMonitor />
           <Toaster />
+          <MutationProgress />
         </ErrorBoundary>
       </body>
     </html>

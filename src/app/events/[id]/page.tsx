@@ -1,6 +1,6 @@
 'use client';
 
-import posthog from 'posthog-js';
+import { setClubGroup, track } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
 import {
   CustomAnswer,
@@ -62,12 +62,14 @@ import TeamSection from './components/TeamSection';
 import { getSafeErrorMessage } from '@/lib/safe-error';
 import EventEditModal from '../components/EventEditModal';
 import { useSchedule } from '@/hooks/useSchedule';
+import { eventShareUrl } from '@/lib/eventLinks';
 import {
   getScheduleStats,
   ScheduleDayPicker,
   ScheduleEmptyState,
   ScheduleSessionTimeline,
 } from './components/schedule';
+import AttendeesTable from './components/AttendeesTable';
 
 interface Speaker {
   id: number;
@@ -185,6 +187,9 @@ const Eventid = () => {
   const updateJudgeMutation = useUpdateJudge();
   const deleteJudgeMutation = useDeleteJudge();
   const [isFounder, setIsFounder] = useState(false);
+  // Zynvo staff get the attendee tools (list, sync, CSV) on every event; the
+  // backend participants route already allows them.
+  const canViewAttendees = isFounder || isAdminEmail(currentUser?.email);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [userDataLoaded, setUserDataLoaded] = useState(false);
   const [activeDay, setActiveDay] = useState(1);
@@ -221,16 +226,14 @@ const Eventid = () => {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
-      setEventInviteFullUrl(
-        new URL(signupEventHref, window.location.origin).href
-      );
+      setEventInviteFullUrl(eventShareUrl(id as string));
     } catch {
       setEventInviteFullUrl('');
     }
-  }, [signupEventHref]);
+  }, [id]);
 
   const runCsvSync = React.useCallback(async () => {
-    if (!id || !isFounder) return;
+    if (!id || !canViewAttendees) return;
     setCsvSyncInProgress(true);
     const currentLastSince = csvLastSinceRef.current;
     const currentEtag = csvEtagRef.current;
@@ -285,10 +288,10 @@ const Eventid = () => {
     } finally {
       setCsvSyncInProgress(false);
     }
-  }, [id, isFounder, token, queryClient]);
+  }, [id, canViewAttendees, token, queryClient]);
 
   useEffect(() => {
-    if (activeTab !== 'attendees' || !isFounder || !id) return;
+    if (activeTab !== 'attendees' || !canViewAttendees || !id) return;
     const intervalMs = Math.max(15000, Math.min(60000, syncBackoffMs || 30000));
     const initial = setTimeout(runCsvSync, 300);
     const poll = setInterval(runCsvSync, intervalMs);
@@ -296,7 +299,7 @@ const Eventid = () => {
       clearTimeout(initial);
       clearInterval(poll);
     };
-  }, [activeTab, isFounder, id, syncBackoffMs, runCsvSync]);
+  }, [activeTab, canViewAttendees, id, syncBackoffMs, runCsvSync]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -308,7 +311,7 @@ const Eventid = () => {
         setHasTokenForModal(true);
         if (session !== 'true') {
           // Has token but no session - user needs to sign in
-          toast('Login required', {
+          toast('Login required', { id: 'login-required',
             action: {
               label: 'Sign in',
               onClick: () => router.push(signinEventHref),
@@ -369,30 +372,41 @@ const Eventid = () => {
 
   const judges = judgesData?.data || [];
 
-  const canViewAttendees = useMemo(
-    () => isFounder || isAdminEmail(currentUser?.email),
-    [isFounder, currentUser?.email]
-  );
 
   const isResolvingAttendeeAccess = signedin && !isFounder && !userDataLoaded;
 
   // Fetch participants for this event
   const [participantsPage, setParticipantsPage] = useState(1);
   const participantsLimit = 50;
+  // Search runs on the server across all attendees; debounce keystrokes and
+  // go back to page 1 whenever the query changes.
+  const [attendeeSearch, setAttendeeSearch] = useState('');
+  const [debouncedAttendeeSearch, setDebouncedAttendeeSearch] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedAttendeeSearch(attendeeSearch.trim());
+      setParticipantsPage(1);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [attendeeSearch]);
   const {
     data: participantsData,
     isLoading: isParticipantsLoading,
+    isFetching: isParticipantsFetching,
     error: participantsError,
   } = useParticipants({
     eventId: id,
     page: participantsPage,
     limit: participantsLimit,
+    search: debouncedAttendeeSearch,
     enabled: activeTab === 'attendees' && !!id && canViewAttendees,
     token,
   });
 
   const participants = participantsData?.data || [];
   const participantsPagination = participantsData?.pagination;
+  const participantsTotalAll =
+    participantsPagination?.totalAll ?? participantsPagination?.total ?? 0;
 
   // Check if user is founder
   useEffect(() => {
@@ -519,6 +533,17 @@ const Eventid = () => {
           const eventResponse = res.data.response as any;
 
           setRawEvent(eventResponse);
+          if (eventResponse.clubId) {
+            setClubGroup(eventResponse.clubId, { name: eventResponse.clubName });
+          }
+          track('event_viewed', {
+            event_id: id,
+            club_id: eventResponse.clubId ?? null,
+            event_mode: eventResponse.EventMode || null,
+            event_type: eventResponse.EventType || null,
+            is_paid: hasPaidEvent,
+            application_status: eventResponse.applicationStatus || 'open',
+          });
           setData({
             EventName: eventResponse.EventName || '',
             description: eventResponse.description || '',
@@ -618,7 +643,9 @@ const Eventid = () => {
       return;
     }
 
-    if (data.eventWebsite && !hasConfirmedExternalForm) {
+    // Founders/core run the event website, so they skip that confirmation
+    // (its checkbox isn't rendered for them).
+    if (data.eventWebsite && !hasConfirmedExternalForm && !isFounder) {
       toast.error(
         'Please open the Event Website link above, complete what’s required there, then confirm and click Register.'
       );
@@ -778,7 +805,12 @@ const Eventid = () => {
       console.log('Registration response status:', resp.data.approvalStatus);
 
       if (resp && resp.status === 200) {
-        posthog.capture('event_registered', { event_id: id });
+        track('event_registered', {
+          event_id: id,
+          event_mode: data.EventMode || null,
+          is_paid: Boolean(data.isPaidEvent ?? data.isPaid),
+          approval_status: resp.data.approvalStatus || null,
+        });
         console.log('Registration successful');
         setForkedUpId(resp.data.ForkedUpId);
         // Immediately mark this event as attended so WhatsApp / UI update without full reload
@@ -798,6 +830,11 @@ const Eventid = () => {
     } catch (error) {
       console.error('Registration error:', error);
       const axiosError = error as any;
+      track('event_registration_failed', {
+        event_id: id,
+        status: axiosError?.response?.status ?? null,
+        reason: axiosError?.response?.status === 403 ? 'college_mismatch' : 'error',
+      });
       if (axiosError?.response?.status === 403) {
         setRegistrationNotice(null);
         setCollegeBlockModal({ open: true, reason: 'mismatch' });
@@ -826,6 +863,7 @@ const Eventid = () => {
 
     try {
       await navigator.clipboard.writeText(eventInviteFullUrl);
+      track('event_shared', { event_id: id, method: 'clipboard', source: 'event_page_invite' });
       setCopiedInviteLink(true);
       toast.success('Event invite link copied!');
       setTimeout(() => setCopiedInviteLink(false), 2000);
@@ -1162,6 +1200,9 @@ const Eventid = () => {
                 </div>
               )}
 
+              {data.coreTeamOnly && (
+                <p className="text-sm text-amber-300">Registration is limited to the hosting club’s founder and core team.</p>
+              )}
               {/* Action Buttons — stack on narrow screens */}
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2">
                 {isFounder && (
@@ -1216,12 +1257,12 @@ const Eventid = () => {
                         disabled={
                           isRegistering ||
                           isRegistrationDisabled ||
-                          (!!data.eventWebsite && !hasConfirmedExternalForm)
+                          (!!data.eventWebsite && !hasConfirmedExternalForm && !isFounder)
                         }
                         className={`min-h-11 w-full sm:w-auto rounded-lg px-5 py-2.5 font-medium ${
                           isRegistering ||
                           isRegistrationDisabled ||
-                          (!!data.eventWebsite && !hasConfirmedExternalForm)
+                          (!!data.eventWebsite && !hasConfirmedExternalForm && !isFounder)
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : 'bg-amber-900 hover:bg-amber-950 text-yellow-200'
                         }`}
@@ -1232,7 +1273,7 @@ const Eventid = () => {
                             ? 'Event Ended'
                             : isEventFull
                               ? 'Event Full'
-                              : data.eventWebsite && !hasConfirmedExternalForm
+                              : data.eventWebsite && !hasConfirmedExternalForm && !isFounder
                                 ? 'Visit Event Website first, then Register'
                                 : 'Register Now'}
                       </Button>
@@ -1340,8 +1381,7 @@ const Eventid = () => {
                   </p>
                 ) : (
                   <p className="mt-2 text-xs text-yellow-100/70">
-                    Share this to bring people back to this event after signup
-                    or signin.
+                    Anyone with this link can view the event and sign in to register.
                   </p>
                 )}
               </div>
@@ -1890,7 +1930,7 @@ const Eventid = () => {
                       </span>
                     )}
                   </h2>
-                  {isFounder && (
+                  {canViewAttendees && (
                     <div className="flex items-center gap-2">
                       <Button
                         onClick={() => {
@@ -1922,7 +1962,7 @@ const Eventid = () => {
                     </div>
                   )}
                 </div>
-                {isFounder && (
+                {canViewAttendees && (
                   <p className="text-gray-500 text-sm">
                     Last updated at{' '}
                     {lastCsvUpdatedAt
@@ -1944,154 +1984,42 @@ const Eventid = () => {
                     </p>
                   </div>
                 )
-              ) : isParticipantsLoading ? (
+              ) : isParticipantsLoading && !participantsData ? (
                 <div className="text-center py-8">
                   <p className="text-gray-400">Loading attendees...</p>
                 </div>
-              ) : participantsError ? (
+              ) : participantsError && !participantsData ? (
                 <div className="text-center py-8">
                   <p className="text-red-400">
                     Failed to load attendees. Please try again.
                   </p>
                 </div>
-              ) : participants.length === 0 ? (
+              ) : participantsTotalAll === 0 && !debouncedAttendeeSearch ? (
                 <div className="text-center py-8">
                   <p className="text-gray-400">No attendees registered yet.</p>
                 </div>
               ) : (
-                <>
-                  <div className="space-y-3">
-                    {participants.map((participant: Participant) => (
-                      <div
-                        key={`${participant.user.id}-${participant.joinedAt}`}
-                        className="bg-black border border-yellow-500/20 rounded-lg p-4 flex gap-4 hover:border-yellow-500/40 transition-colors"
-                      >
-                        <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
-                          {participant.user.profileAvatar ? (
-                            <Image
-                              src={participant.user.profileAvatar}
-                              alt={participant.user.name || 'User'}
-                              fill
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center">
-                              <span className="text-black font-bold text-sm">
-                                {participant.user.name
-                                  ? participant.user.name
-                                      .charAt(0)
-                                      .toUpperCase()
-                                  : 'U'}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-semibold text-white truncate">
-                            {participant.user.name || 'Anonymous User'}
-                          </h3>
-                          <p className="text-xs text-yellow-400 truncate">
-                            {participant.user.email}
-                          </p>
-                          {participant.user.collegeName && (
-                            <p className="text-xs text-gray-400 mt-1 truncate">
-                              {participant.user.collegeName}
-
-                              {participant.user.year &&
-                                ` • Year ${participant.user.year}`}
-                            </p>
-                          )}
-
-                          <p className="text-xs text-gray-500 mt-1 mb-2">
-                            Joined:{' '}
-                            {new Date(
-                              participant.joinedAt
-                            ).toLocaleDateString()}
-                          </p>
-
-                          {/* Display Custom Answers */}
-                          {(participant as any).customAnswers?.length > 0 && (
-                            <div className="mt-2 space-y-1 bg-gray-900/50 p-2 rounded border border-gray-800">
-                              <p className="text-xs font-semibold text-gray-400 mb-1">
-                                Registration Details:
-                              </p>
-                              {(participant as any).customAnswers.map(
-                                (ans: any, i: number) => (
-                                  <div key={i} className="flex text-xs">
-                                    <span className="text-gray-500 mr-2 min-w-[80px]">
-                                      {ans.label}:
-                                    </span>
-                                    <span className="text-gray-300 font-medium">
-                                      {ans.answer.startsWith('http') ? (
-                                        <a
-                                          href={ans.answer}
-                                          target="_blank"
-                                          rel="noreferrer"
-                                          className="text-blue-400 hover:underline"
-                                        >
-                                          {ans.answer}
-                                        </a>
-                                      ) : (
-                                        ans.answer
-                                      )}
-                                    </span>
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Pagination */}
-                  {participantsPagination &&
-                    participantsPagination.totalPages > 1 && (
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-800">
-                        <p className="text-sm text-gray-400">
-                          Showing {participants.length} of{' '}
-                          {participantsPagination.total} attendees
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            onClick={() =>
-                              setParticipantsPage((p) => Math.max(1, p - 1))
-                            }
-                            disabled={participantsPage === 1}
-                            variant="outline"
-                            size="sm"
-                            className="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 disabled:opacity-50"
-                          >
-                            Previous
-                          </Button>
-                          <span className="text-sm text-gray-400">
-                            Page {participantsPagination.page} of{' '}
-                            {participantsPagination.totalPages}
-                          </span>
-                          <Button
-                            onClick={() =>
-                              setParticipantsPage((p) =>
-                                Math.min(
-                                  participantsPagination.totalPages,
-                                  p + 1
-                                )
-                              )
-                            }
-                            disabled={
-                              participantsPage >=
-                              participantsPagination.totalPages
-                            }
-                            variant="outline"
-                            size="sm"
-                            className="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 disabled:opacity-50"
-                          >
-                            Next
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                </>
+                <AttendeesTable
+                  participants={participants}
+                  isPaid={participantsData?.isPaid ?? !!data.isPaidEvent}
+                  questions={participantsData?.questions}
+                  search={attendeeSearch}
+                  onSearchChange={setAttendeeSearch}
+                  page={participantsPage}
+                  limit={participantsLimit}
+                  totalPages={participantsPagination?.totalPages ?? 1}
+                  total={participantsPagination?.total ?? participants.length}
+                  totalAll={participantsTotalAll}
+                  onPageChange={(p) =>
+                    setParticipantsPage(
+                      Math.min(
+                        Math.max(1, p),
+                        participantsPagination?.totalPages ?? 1
+                      )
+                    )
+                  }
+                  isFetching={isParticipantsFetching}
+                />
               )}
             </div>
           )}

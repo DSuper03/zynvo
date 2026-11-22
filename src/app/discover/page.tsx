@@ -16,6 +16,7 @@ import { NotificationDropdown } from '@/components/notifications';
 import { EmptyState, ErrorState, FeedPostSkeleton } from '@/components/feedback';
 import { FeedPostCard } from '@/components/discover/FeedPostCard';
 import { PLAY_STORE_URL, PLAY_STORE_PROMO } from '@/lib/playstore';
+import { track } from '@/lib/analytics';
 
 interface ApiResponse {
   msg: string;
@@ -223,6 +224,11 @@ export default function Feed() {
     try {
       const postUrl = `${window.location.origin}/post/${postId}`;
 
+      track('post_shared', {
+        post_id: postId,
+        method: typeof navigator.share === 'function' ? 'native' : 'clipboard',
+        source: 'discover_feed',
+      });
       // Check if Web Share API is supported (mobile devices)
       if (navigator.share) {
         await navigator.share({

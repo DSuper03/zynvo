@@ -16,6 +16,7 @@ import {
 import { FaUsers } from 'react-icons/fa';
 import { useWarmup } from './WarmupProvider';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/authContex';
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -34,6 +35,7 @@ const ZYNVO_LOGO_URL = '/zynvo-new-logo.png';
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
   const pathname = usePathname();
   const { userData, loading } = useWarmup();
+  const { hardLogout } = useAuth();
   const { name, profileAvatar: profile } = userData;
 
   const menuItems: SidebarMenuItem[] = [
@@ -205,8 +207,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onClose }) => {
                 !isOpen && 'justify-center px-0'
               )}
               onClick={() => {
-                sessionStorage.removeItem('activeSession');
+                // Real logout: the session is now restored from the stored
+                // token on every visit, so the token must go too.
                 sessionStorage.removeItem('founder');
+                void hardLogout();
                 onClose?.();
               }}
             >

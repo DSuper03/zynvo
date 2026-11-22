@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/legacy/image';
+import ClubLogo, { clubLogoSrc } from '@/components/ClubLogo';
 import Link from 'next/link';
 import {
   CalendarDays,
@@ -99,6 +100,8 @@ import ZynvoClubAnnouncement from '@/components/ZynvoClubAnnouncement';
 import NoTokenModal from '@/components/modals/remindModal';
 import { buildAuthHref } from '@/lib/authReturnTo';
 import { getSafeErrorMessage } from '@/lib/safe-error';
+import { setClubGroup, track } from '@/lib/analytics';
+import { useDataChanged } from '@/lib/dataEvents';
 
 // All dynamic content is driven by backend data; no hardcoded demo content
 
@@ -127,6 +130,9 @@ export default function ClubPage() {
   const [event, setEvent] = useState<EventType[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
+  // New event created from this page (or a club change): refetch right away.
+  const [clubReload, setClubReload] = useState(0);
+  useDataChanged(['event', 'club'], () => setClubReload((n) => n + 1));
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(true);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
@@ -189,12 +195,6 @@ export default function ClubPage() {
       
       if (session !== 'true') {
         // Has token but no session - user needs to sign in
-        toast('Login required', {
-          action: {
-            label: 'Sign in',
-            onClick: () => router.push(signinInviteHref),
-          },
-        });
         setHasTokenForModal(true);
         setRequiresSignin(true);
         setIsAuthModalOpen(true);
@@ -209,15 +209,8 @@ export default function ClubPage() {
   }, [router, signinInviteHref]);
   useEffect(() => {
     async function call() {
-      if (!token) {
-         toast('Login required', {
-          action: {
-            label: 'Sign in',
-            onClick: () => router.push(signinInviteHref),
-          },
-        });
-        return;
-      }
+      // No token: the sign-in modal (opened above) already explains this.
+      if (!token) return;
       
       try {
         setLoading(true);
@@ -236,6 +229,17 @@ export default function ClubPage() {
         
         // Set club data
         const clubData = response.data.club;
+        setClubGroup(clubData.id, {
+          name: clubData.name,
+          college: clubData.collegeName,
+          type: clubData.type,
+          member_count: clubData.members?.length ?? 0,
+        });
+        track('club_viewed', {
+          club_id: clubData.id,
+          club_type: clubData.type || null,
+          member_count: clubData.members?.length ?? 0,
+        });
         setClub({
           id: clubData.id,
           name: clubData.name,
@@ -245,7 +249,7 @@ export default function ClubPage() {
           profileAvatar: clubData.members?.[0]?.profileAvatar,
           founderEmail: clubData.founderEmail,
           facultyEmail: clubData.facultyEmail,
-          image: clubData.profilePicUrl || '/zynvo-new-logo.png',
+          image: clubLogoSrc(clubData.profilePicUrl, clubData.name),
           category: clubData.type || 'tech',
           requirements: (clubData as any).requirements || '',
           clubContact: (clubData as any).clubContact || '',
@@ -314,7 +318,7 @@ export default function ClubPage() {
     if (token && id) {
       call();
     }
-  }, [id, token, router, signinInviteHref]);
+  }, [id, token, router, signinInviteHref, clubReload]);
 useEffect(() => {
   const fetchUserData = async () => {
     try {
@@ -405,7 +409,7 @@ useEffect(() => {
 
   const handleLeaveClub = async () => {
     if (!token) {
-      toast('Login required', {
+      toast('Login required', { id: 'login-required',
         action: {
           label: 'Sign in',
           onClick: () => router.push(signinInviteHref),
@@ -425,6 +429,7 @@ useEffect(() => {
         }
       );
 
+      track('club_left', { club_id: id, source: 'club_page' });
       toast.success(leaveResponse.data.message || leaveResponse.data.msg || 'Successfully left the club');
       setUserClub(false);
 
@@ -461,8 +466,13 @@ useEffect(() => {
       url: window.location.href,
     };
 
+    const canNativeShare =
+      typeof navigator.share === 'function' &&
+      typeof navigator.canShare === 'function' &&
+      navigator.canShare(shareData);
+    track('club_shared', { club_id: club.id, method: canNativeShare ? 'native' : 'clipboard', source: 'club_page' });
     // Check if Web Share API is supported
-    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+    if (canNativeShare) {
       try {
         await navigator.share(shareData);
         toast.success('Club shared successfully!');
@@ -527,7 +537,7 @@ useEffect(() => {
     };
 
     // Prefer synchronous copy (same user gesture) — Clipboard API can fail or detach from gesture.
-    let ok =
+    const ok =
       (inviteLinkInputRef.current && copyFromElement(inviteLinkInputRef.current)) ||
       copyViaOverlayTextarea();
 
@@ -657,9 +667,9 @@ useEffect(() => {
             {/* Club Logo - Compact */}
             <div className="relative flex-shrink-0">
               <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-yellow-400/30 shadow-lg bg-gray-900/50 backdrop-blur-sm">
-                <Image
-                  src={club.image || '/zynvo-new-logo.png'}
-                  alt={club.name}
+                <ClubLogo
+                  src={club.image}
+                  name={club.name}
                   width={128}
                   height={128}
                   className="object-cover w-full h-full"
