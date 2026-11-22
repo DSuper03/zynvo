@@ -36,48 +36,8 @@ export default function Home() {
   const heroRef = useRef(null);
   const [discoverPosts, setDiscoverPosts] =
     useState<DiscoverPostPreview[]>([]);
-  // PERFORMANCE: Store timeout IDs so we can clear on unmount and avoid leaks + setState after unmount
-  const floatingTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-
-  useEffect(() => {
-    const createFloatingElement = () => {
-      const element = document.createElement('div');
-      element.classList.add('floating-element');
-
-      element.style.left = `${Math.random() * 100}vw`;
-      element.style.top = `${Math.random() * 100}vh`;
-      element.style.width = `${Math.random() * 100 + 50}px`;
-      element.style.height = `${Math.random() * 100 + 50}px`;
-      element.style.opacity = `${Math.random() * 0.3 + 0.2}`;
-
-      const container = document.querySelector('.background-animation');
-      if (container) {
-        container.appendChild(element);
-      }
-
-      const duration = Math.random() * 50 + 30;
-      element.style.animation = `float ${duration}s infinite linear`;
-
-      const timeoutId = setTimeout(() => {
-        if (element.parentNode) {
-          element.parentNode.removeChild(element);
-        }
-      }, duration * 1000);
-      floatingTimeoutsRef.current.push(timeoutId);
-    };
-
-    for (let i = 0; i < 5; i++) {
-      createFloatingElement();
-    }
-
-    const interval = setInterval(createFloatingElement, 5000);
-
-    return () => {
-      clearInterval(interval);
-      floatingTimeoutsRef.current.forEach((id) => clearTimeout(id));
-      floatingTimeoutsRef.current = [];
-    };
-  }, []);
+  // The old floating-element timer had no mounted container (.background-animation
+  // is not in this page), so it only leaked timers. Removed.
 
   useEffect(() => {
     const loadDiscoverPosts = async () => {

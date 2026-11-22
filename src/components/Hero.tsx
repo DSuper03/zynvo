@@ -82,6 +82,7 @@ const Hero = () => {
               src="/posters/openpeeps.png"
               alt="Illustrated crowd of students"
               fill
+              priority
               className="object-cover object-center"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
