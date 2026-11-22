@@ -35,7 +35,7 @@ const PUBLIC_GET_PREFIXES = [
 ];
 
 /** Public GETs with an id in the middle of the path: event gallery and judges. */
-const PUBLIC_GET_PATTERNS = [/^\/api\/v1\/events\/[^/]+\/(gallery|judges)$/];
+const PUBLIC_GET_PATTERNS = [/^\/api\/v1\/leaderboard\/?$/, /^\/api\/v1\/events\/[^/]+\/(gallery|judges)$/];
 
 const PUBLIC_POST_PREFIXES = [
   '/api/v1/user/signup',
@@ -142,6 +142,8 @@ async function directFetch(
     'content-length',
     'cache-control',
     'etag',
+    'retry-after',
+    'retry-after',
     'x-request-id',
   ]);
   upstream.headers.forEach((value, key) => {

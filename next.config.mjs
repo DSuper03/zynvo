@@ -32,6 +32,7 @@ const securityHeaders = [
 
 import bundleAnalyzer from '@next/bundle-analyzer';
 import withPWA from 'next-pwa';
+import defaultRuntimeCaching from 'next-pwa/cache.js';
 import { withSentryConfig } from '@sentry/nextjs';
 
 const withBundleAnalyzer = bundleAnalyzer({
@@ -128,6 +129,9 @@ const nextConfig = {
   reactStrictMode: true,
   // ESLint is configured via next lint / eslint config (not in next.config in Next 15+)
   experimental: {
+    // Keep production builds within CI and developer-machine memory limits.
+    cpus: 2,
+    webpackMemoryOptimizations: true,
     // optimizeCss requires critters package - disabled for now
     optimizeCss: false,
     externalDir: true,
@@ -290,6 +294,11 @@ const nextConfig = {
 
 // Apply PWA configuration
 const pwaConfig = withPWA({
+  // Rankings must never fall back to an offline service-worker cache.
+  runtimeCaching: [
+    { urlPattern: ({ url }) => /^\/api\/v1\/leaderboard\/?$/.test(url.pathname), handler: 'NetworkOnly', method: 'GET' },
+    ...defaultRuntimeCaching,
+  ],
   dest: "public",         // destination directory for the PWA files
   disable: false,        // enable PWA in all environments
   register: true,         // register the PWA service worker
