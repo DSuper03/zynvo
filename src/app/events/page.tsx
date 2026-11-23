@@ -18,6 +18,8 @@ import { buildAuthHref } from '@/lib/authReturnTo';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { cn } from '@/lib/utils';
 import { track } from '@/lib/analytics';
+import { normalizeTag } from '@/lib/eventTags';
+import EventTagChips from '@/components/EventTagChips';
 import { useDataChanged } from '@/lib/dataEvents';
 import { descriptionToPlainText } from '@/lib/richDescription';
 
@@ -117,6 +119,10 @@ export default function ZynvoEventsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [upcomingOnly, setUpcomingOnly] = useState(false);
+  // Filter by one tag (set by clicking a tag, or opening /events?tag=hackathon)
+  const [activeTag, setActiveTag] = useState('');
+  const [popularTags, setPopularTags] = useState<{ tag: string; count: number }[]>([]);
+  const tagUrlSynced = useRef(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [userAttendedEventIds, setUserAttendedEventIds] = useState<string[]>([]);
@@ -217,6 +223,47 @@ export default function ZynvoEventsPage() {
     }
   }, [token]);
 
+  // Open straight to a tag from a link like /events?tag=hackathon
+  useEffect(() => {
+    const fromUrl = normalizeTag(
+      new URLSearchParams(window.location.search).get('tag') ?? ''
+    );
+    if (fromUrl) setActiveTag(fromUrl);
+  }, []);
+
+  // Keep the address bar in step with the filter so it can be shared
+  useEffect(() => {
+    if (!tagUrlSynced.current) {
+      tagUrlSynced.current = true;
+      return;
+    }
+    const url = activeTag ? `/events?tag=${encodeURIComponent(activeTag)}` : '/events';
+    window.history.replaceState(null, '', url);
+  }, [activeTag]);
+
+  // Most used tags, shown as quick filters. Fine if this fails (no tags yet).
+  useEffect(() => {
+    let cancelled = false;
+    axios
+      .get<{ tags?: { tag: string; count: number }[] }>('/api/v1/events/tags', {
+        params: { limit: 10 },
+        timeout: 8000,
+      })
+      .then((res) => {
+        if (!cancelled) setPopularTags(res.data?.tags ?? []);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const selectTag = useCallback((tag: string) => {
+    setActiveTag((prev) => (prev === tag ? '' : tag));
+    setCurrentPage(1);
+    setSearchPage(1);
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -229,6 +276,7 @@ export default function ZynvoEventsPage() {
         params.set('page', String(currentPage));
         if (debouncedSearch) params.set('q', debouncedSearch);
         if (upcomingOnly) params.set('upcoming', 'true');
+        if (activeTag) params.set('tag', activeTag);
 
         const response = await axios.get<apiRespEvents>(
           `/api/v1/events/search?${params.toString()}`,
@@ -279,10 +327,10 @@ export default function ZynvoEventsPage() {
     return () => {
       isMounted = false;
     };
-  }, [currentPage, debouncedSearch, upcomingOnly, fetchNonce]);
+  }, [currentPage, debouncedSearch, upcomingOnly, fetchNonce, activeTag]);
 
   // Backend-powered debounced search
-  const runSearch = useCallback(async (term: string, page: number) => {
+  const runSearch = useCallback(async (term: string, page: number, tag = '') => {
     if (!term.trim()) {
       setIsSearchMode(false);
       setSearchResults([]);
@@ -296,6 +344,7 @@ export default function ZynvoEventsPage() {
     setError(null);
     try {
       const params = new URLSearchParams({ q: term.trim(), page: String(page), limit: '12' });
+      if (tag) params.set('tag', tag);
       const res = await axios.get<{ response: eventData[]; total: number; totalPages: number }>(
         `/api/v1/events/search?${params}`,
         { timeout: 10000 }
@@ -328,15 +377,15 @@ export default function ZynvoEventsPage() {
     }
     debounceRef.current = setTimeout(() => {
       setSearchPage(1);
-      runSearch(searchTerm, 1);
+      runSearch(searchTerm, 1, activeTag);
     }, 400);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [searchTerm, runSearch]);
+  }, [searchTerm, runSearch, activeTag]);
 
   // Re-run search when search page changes (only if in search mode)
   useEffect(() => {
     if (isSearchMode && searchTerm.trim()) {
-      runSearch(searchTerm, searchPage);
+      runSearch(searchTerm, searchPage, activeTag);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchPage]);
@@ -734,6 +783,25 @@ export default function ZynvoEventsPage() {
                 )}
               </div>
             </div>
+            {/* Tag filter: the active tag, or the most used tags to pick from */}
+            {(activeTag || popularTags.length > 0) && (
+              <div className="flex flex-wrap items-center gap-2" aria-label="Filter by tag">
+                {activeTag && (
+                  <button
+                    type="button"
+                    onClick={() => selectTag(activeTag)}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-yellow-400 px-3 py-1 text-xs font-semibold text-black hover:bg-yellow-300"
+                    aria-label={`Clear tag filter ${activeTag}`}
+                  >
+                    #{activeTag} <span aria-hidden>✕</span>
+                  </button>
+                )}
+                <EventTagChips
+                  tags={popularTags.map((t) => t.tag).filter((t) => t !== activeTag)}
+                  onTagClick={selectTag}
+                />
+              </div>
+            )}
             {/* Search results count */}
             {isSearchMode && !isSearchLoading && (
               <p className="text-sm text-gray-400">
@@ -762,6 +830,8 @@ export default function ZynvoEventsPage() {
               isLoading={displayedIsLoading}
               error={error}
               isUserAttendingEvent={isUserAttendingEvent}
+              onTagClick={selectTag}
+              activeTag={activeTag}
             />
           ) : (
             <EmptyState

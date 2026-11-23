@@ -23,6 +23,7 @@ import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-b
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import RichTextEditor from '@/components/RichTextEditor';
+import TagInput from '@/components/TagInput';
 import { descriptionToPlainText } from '@/lib/richDescription';
 import {
   Select,
@@ -95,6 +96,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     paymentAmount: 0,
     maxParticipants: '',
     customQuestions: [],
+    tags: [],
   });
 
   const router = useRouter();
@@ -1135,6 +1137,23 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                         {errors.eventType}
                       </p>
                     )}
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="event-tags"
+                      className="block text-sm font-medium text-yellow-400 mb-1"
+                    >
+                      Tags{' '}
+                      <span className="font-normal text-gray-500">(optional)</span>
+                    </label>
+                    <TagInput
+                      id="event-tags"
+                      value={formData.tags || []}
+                      onChange={(tags) =>
+                        setFormData((prev: any) => ({ ...prev, tags }))
+                      }
+                    />
                   </div>
                 </div>
               </div>

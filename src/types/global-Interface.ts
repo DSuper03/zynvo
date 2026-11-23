@@ -56,6 +56,7 @@ export interface EventFormData {
   paymentAmount?: number; // Payment amount required for event
   maxParticipants?: number | ''; // Max participation limit (optional)
   customQuestions?: CustomQuestion[];
+  tags?: string[]; // short labels, max 5 (see lib/eventTags)
 }
 
 // this is used in clubs/id/page.tsx where events of colleges are listed
@@ -447,6 +448,7 @@ export interface Attendee {
 // all-events response ,  saare venets show krne wala page
 export interface eventData {
   attendees: Attendee[];
+  tags?: string[];
   description: string;
   id: string;
   clubName: string;

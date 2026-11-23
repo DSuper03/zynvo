@@ -22,6 +22,8 @@ import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-b
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import RichTextEditor from '@/components/RichTextEditor';
+import TagInput from '@/components/TagInput';
+import { readTags } from '@/lib/eventTags';
 import { descriptionToPlainText } from '@/lib/richDescription';
 import {
   Select,
@@ -82,6 +84,7 @@ const EMPTY_EVENT_FORM: EventFormData = {
   paymentAmount: 0,
   maxParticipants: '',
   customQuestions: [],
+  tags: [],
 };
 
 const EVENT_TYPE_VALUES = [
@@ -210,6 +213,7 @@ function mapEventToFormData(source: any): {
       customQuestions: Array.isArray(source.customQuestions)
         ? source.customQuestions
         : [],
+      tags: readTags(source.tags),
     },
     posterUrl,
     qrUrl,
@@ -253,6 +257,8 @@ function mergeEventForm(
     // The form already starts from the saved questions, so an empty list here
     // means the organiser removed them all.
     customQuestions: current.customQuestions ?? original.customQuestions,
+    // The form starts from the saved tags, so an empty list means "removed all".
+    tags: current.tags ?? original.tags,
   };
 }
 
@@ -1087,6 +1093,23 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
                         {errors.eventType}
                       </p>
                     )}
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="event-tags"
+                      className="block text-sm font-medium text-yellow-400 mb-1"
+                    >
+                      Tags{' '}
+                      <span className="font-normal text-gray-500">(optional)</span>
+                    </label>
+                    <TagInput
+                      id="event-tags"
+                      value={formData.tags || []}
+                      onChange={(tags) =>
+                        setFormData((prev: any) => ({ ...prev, tags }))
+                      }
+                    />
                   </div>
                 </div>
               </div>
