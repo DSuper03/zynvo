@@ -33,6 +33,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { EventFormData } from '@/types/global-Interface';
+import CustomQuestionsEditor from '@/components/CustomQuestionsEditor';
+import {
+  normalizeQuestions,
+  questionsChanged,
+  validateQuestions,
+} from '@/lib/customQuestions';
 import { toBase64, uploadImageToImageKit, compressImageToUnder2MB } from '@/lib/imgkit';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -244,10 +250,9 @@ function mergeEventForm(
     form: current.form,
     whatsappLink: current.whatsappLink,
     paymentQRCode: current.paymentQRCode || original.paymentQRCode,
-    customQuestions:
-      current.customQuestions && current.customQuestions.length > 0
-        ? current.customQuestions
-        : original.customQuestions,
+    // The form already starts from the saved questions, so an empty list here
+    // means the organiser removed them all.
+    customQuestions: current.customQuestions ?? original.customQuestions,
   };
 }
 
@@ -263,6 +268,8 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
   const [qrCodeImg, setQrCodeImg] = useState<File | null>(null);
   const [qrCodePreviewUrl, setQrCodePreviewUrl] = useState('');
   const [step, setStep] = useState(1);
+  // Organiser accepted that changing questions clears existing answers
+  const [ackQuestionReset, setAckQuestionReset] = useState(false);
   const [formData, setFormData] = useState<EventFormData>(EMPTY_EVENT_FORM);
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -321,6 +328,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
     if (!isOpen) return;
 
     setStep(1);
+    setAckQuestionReset(false);
     setImg(null);
     setQrCodeImg(null);
     setErrors({});
@@ -510,6 +518,24 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
     }
   };
 
+  // People who already registered (their answers are tied to the questions)
+  const registrationCount =
+    Number(eventData?._count?.attendees ?? eventData?.attendeesCount ?? 0) || 0;
+
+  const questionsChangedNow =
+    Boolean(originalFormData) &&
+    questionsChanged(formData.customQuestions, originalFormData?.customQuestions);
+
+  /** First problem with the registration questions, or null. */
+  const questionsProblem = (): string | null => {
+    const invalid = validateQuestions(formData.customQuestions);
+    if (invalid) return invalid;
+    if (registrationCount > 0 && questionsChangedNow && !ackQuestionReset) {
+      return 'Please confirm that the answers already collected will be cleared.';
+    }
+    return null;
+  };
+
   // Validate form based on current step
   const validateStep = () => {
     const newErrors: Record<string, string> = {};
@@ -532,6 +558,10 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
         if (!formData.maxTeamSize)
           newErrors.maxTeamSize = 'Maximum team size is required';
         if (!formData.venue?.trim()) newErrors.venue = 'Venue is required';
+        {
+          const problem = questionsProblem();
+          if (problem) newErrors.customQuestions = problem;
+        }
         // Validate paid event fields
         if (formData.isPaidEvent) {
           if (!qrCodeImg && !qrCodePreviewUrl) {
@@ -625,6 +655,13 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
       return;
     }
     if (!validateStep()) return;
+    const questionIssue = questionsProblem();
+    if (questionIssue) {
+      setErrors((prev) => ({ ...prev, customQuestions: questionIssue }));
+      setStep(2);
+      toast.error(questionIssue);
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -730,6 +767,14 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
       link3: mergedForm.whatsappLink,
     };
     if (imageLink) payload.image = imageLink;
+
+    // The server replaces the whole question list (and the answers tied to it)
+    // whenever customQuestions is sent, so only send it when it really changed.
+    if (originalFormData && questionsChanged(mergedForm.customQuestions, originalFormData.customQuestions)) {
+      payload.customQuestions = normalizeQuestions(mergedForm.customQuestions);
+    } else {
+      delete payload.customQuestions;
+    }
 
     if (payload.maxParticipants === '' || payload.maxParticipants === 0 || payload.maxParticipants === undefined || payload.maxParticipants === null) {
       payload.maxParticipants = null;
@@ -1448,6 +1493,24 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
                     )}
                   </div>
                 </div>
+
+                <CustomQuestionsEditor
+                  questions={formData.customQuestions || []}
+                  onChange={(customQuestions) => {
+                    setFormData((prev: any) => ({ ...prev, customQuestions }));
+                    setAckQuestionReset(false);
+                    setErrors((prev) => {
+                      if (!prev.customQuestions) return prev;
+                      const { customQuestions: _drop, ...rest } = prev;
+                      return rest;
+                    });
+                  }}
+                  registrationCount={registrationCount}
+                  changed={questionsChangedNow}
+                  acknowledged={ackQuestionReset}
+                  onAcknowledgeChange={setAckQuestionReset}
+                  error={errors.customQuestions}
+                />
               </div>
             )}
 
