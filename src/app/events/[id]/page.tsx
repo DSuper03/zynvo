@@ -61,6 +61,7 @@ import { isAdminEmail } from '@/lib/zynvoStaff';
 import { ErrorState, EventDetailSkeleton } from '@/components/feedback';
 import TeamSection from './components/TeamSection';
 import RichDescription from '@/components/RichDescription';
+import EventTagChips from '@/components/EventTagChips';
 import { descriptionToPlainText } from '@/lib/richDescription';
 import EventTicketPanel from '@/components/EventTicketPanel';
 import { getSafeErrorMessage } from '@/lib/safe-error';
@@ -1119,6 +1120,7 @@ const Eventid = () => {
                 <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-white leading-[1.15] tracking-tight">
                   {data.EventName || 'Event Title'}
                 </h1>
+                <EventTagChips tags={rawEvent?.tags} className="mt-3" />
               </div>
 
               {/* Event Meta Chips */}
