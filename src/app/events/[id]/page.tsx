@@ -18,6 +18,7 @@ import {
   MapPin,
   Globe,
   CheckSquare,
+  ScanLine,
   Square,
   AlarmClock,
   Phone,
@@ -1216,6 +1217,13 @@ const Eventid = () => {
                         Approval Queue
                       </Button>
                     )}
+                    <Button
+                      onClick={() => router.push(`/events/${id}/check-in`)}
+                      className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto flex items-center justify-center gap-2"
+                    >
+                      <ScanLine className="w-4 h-4" />
+                      Scan Check-in
+                    </Button>
                     <Button
                       onClick={() => setIsEditModalOpen(true)}
                       className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
