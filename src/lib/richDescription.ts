@@ -3,7 +3,9 @@
  * markup, so they stay readable anywhere that doesn't render them (the app,
  * emails, search results) and old plain descriptions keep working unchanged.
  *
- *   **bold**   *italic*   [link text](https://example.com)
+ *   **bold**   *italic*   __underline__   ~~strikethrough~~
+ *   [link text](https://example.com)
+ *   [text]{red}  [text]{lg}  [text]{red lg}   colour and/or size
  *   ## Heading
  *   - list item
  *   ::center / ::right / ::left   at the start of a paragraph = alignment
@@ -16,10 +18,28 @@
 
 export type Align = 'left' | 'center' | 'right';
 
+/** Fixed palettes only, so a description can never inject arbitrary CSS. */
+export const COLORS = [
+  'yellow',
+  'orange',
+  'red',
+  'pink',
+  'purple',
+  'blue',
+  'green',
+  'gray',
+] as const;
+export const SIZES = ['sm', 'lg', 'xl'] as const;
+export type Color = (typeof COLORS)[number];
+export type Size = (typeof SIZES)[number];
+
 export type Inline =
   | { t: 'text'; v: string }
   | { t: 'bold'; c: Inline[] }
   | { t: 'italic'; c: Inline[] }
+  | { t: 'underline'; c: Inline[] }
+  | { t: 'strike'; c: Inline[] }
+  | { t: 'span'; color?: Color; size?: Size; c: Inline[] }
   | { t: 'link'; href: string; c: Inline[] };
 
 export type Block =
@@ -28,16 +48,28 @@ export type Block =
   | { t: 'ul'; items: Inline[][] }
   | { t: 'space' };
 
-// bold (closing ** must not be followed by another *, so "**a *b***" nests),
-// italic, and links (the URL may contain one level of balanced parentheses).
+// Capture groups: 1 bold (closing ** must not be followed by another *, so
+// "**a *b***" nests), 2 underline, 3 strikethrough, 4 italic, 5-6 link (the URL
+// may contain one level of balanced parentheses), 7-8 [text]{colour size} span.
 const INLINE_RE =
-  /\*\*([\s\S]+?)\*\*(?!\*)|\*([^*\n]+?)\*|\[([^\]\n]+)\]\(((?:[^()\s]|\([^()\s]*\))+)\)/;
+  /\*\*([\s\S]+?)\*\*(?!\*)|__([\s\S]+?)__|~~([\s\S]+?)~~|\*([^*\n]+?)\*|\[([^\]\n]+)\]\(((?:[^()\s]|\([^()\s]*\))+)\)|\[([^\]\n]+)\]\{([a-z ]+)\}/;
 const ALIGN_RE = /^::(left|center|right)[ \t]+/;
 
 /** Only web and mail links are allowed; anything else is shown as plain text. */
 export function safeHref(raw: string): string | null {
   const href = raw.trim();
   return /^(https?:\/\/|mailto:)/i.test(href) ? href : null;
+}
+
+/** Unknown words are ignored, so a bad span just shows its text. */
+export function parseSpanAttrs(raw: string): { color?: Color; size?: Size } {
+  let color: Color | undefined;
+  let size: Size | undefined;
+  for (const word of raw.split(/\s+/)) {
+    if ((COLORS as readonly string[]).includes(word)) color = word as Color;
+    else if ((SIZES as readonly string[]).includes(word)) size = word as Size;
+  }
+  return { color, size };
 }
 
 export function parseInline(text: string): Inline[] {
@@ -53,13 +85,24 @@ export function parseInline(text: string): Inline[] {
     if (m[1] !== undefined) {
       out.push({ t: 'bold', c: parseInline(m[1]) });
     } else if (m[2] !== undefined) {
-      out.push({ t: 'italic', c: parseInline(m[2]) });
-    } else {
-      const href = safeHref(m[4]);
+      out.push({ t: 'underline', c: parseInline(m[2]) });
+    } else if (m[3] !== undefined) {
+      out.push({ t: 'strike', c: parseInline(m[3]) });
+    } else if (m[4] !== undefined) {
+      out.push({ t: 'italic', c: parseInline(m[4]) });
+    } else if (m[5] !== undefined) {
+      const href = safeHref(m[6]);
       out.push(
         href
-          ? { t: 'link', href, c: parseInline(m[3]) }
-          : { t: 'text', v: m[3] }
+          ? { t: 'link', href, c: parseInline(m[5]) }
+          : { t: 'text', v: m[5] }
+      );
+    } else {
+      const { color, size } = parseSpanAttrs(m[8]);
+      out.push(
+        color || size
+          ? { t: 'span', color, size, c: parseInline(m[7]) }
+          : { t: 'text', v: m[7] }
       );
     }
     rest = rest.slice(m.index + m[0].length);
@@ -238,4 +281,46 @@ export function insertSpacer(value: string, end: number): EditResult {
   const next = value.slice(0, at) + insert + value.slice(at);
   const caret = at + insert.length;
   return { value: next, selectionStart: caret, selectionEnd: caret };
+}
+
+const SPAN_AROUND_RE = /^\]\{([a-z ]+)\}/;
+
+/**
+ * Set the colour or size of the selection. If the selection already sits
+ * inside a [text]{...} span its attributes are updated (null clears one);
+ * otherwise the selection is wrapped in a new span.
+ */
+export function applySpan(
+  value: string,
+  start: number,
+  end: number,
+  kind: 'color' | 'size',
+  next: string | null
+): EditResult {
+  const after = SPAN_AROUND_RE.exec(value.slice(end));
+  if (value[start - 1] === '[' && after) {
+    const merged = { ...parseSpanAttrs(after[1]), [kind]: next ?? undefined };
+    const words = [merged.color, merged.size].filter(Boolean).join(' ');
+    const selected = value.slice(start, end);
+    if (!words) {
+      // No colour or size left: drop the span, keep the text.
+      return {
+        value: value.slice(0, start - 1) + selected + value.slice(end + after[0].length),
+        selectionStart: start - 1,
+        selectionEnd: end - 1,
+      };
+    }
+    return {
+      value: value.slice(0, end) + `]{${words}}` + value.slice(end + after[0].length),
+      selectionStart: start,
+      selectionEnd: end,
+    };
+  }
+  if (!next) return { value, selectionStart: start, selectionEnd: end };
+  const label = value.slice(start, end) || 'text';
+  return {
+    value: value.slice(0, start) + `[${label}]{${next}}` + value.slice(end),
+    selectionStart: start + 1,
+    selectionEnd: start + 1 + label.length,
+  };
 }

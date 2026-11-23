@@ -99,3 +99,74 @@ test('insertSpacer adds a ::space paragraph after the current one', () => {
   assert.equal(r.value, 'one\n\n::space\n\ntwo');
   assert.equal(lib.insertSpacer('only', 4).value, 'only\n\n::space');
 });
+
+test('underline and strikethrough parse and nest with bold', () => {
+  const [p] = lib.parseDescription('__under__ ~~gone~~ **b __both__**');
+  const kinds = p.lines[0].map((n) => n.t);
+  assert.deepEqual(kinds, ['underline', 'text', 'strike', 'text', 'bold']);
+  assert.equal(p.lines[0][4].c[1].t, 'underline');
+});
+
+test('colour and size spans parse from a fixed palette only', () => {
+  const [p] = lib.parseDescription('[hot]{red} [big]{xl} [both]{blue lg}');
+  const spans = p.lines[0].filter((n) => n.t === 'span');
+  assert.deepEqual(spans.map((s) => [s.color, s.size]), [
+    ['red', undefined],
+    [undefined, 'xl'],
+    ['blue', 'lg'],
+  ]);
+});
+
+test('unknown or hostile span attributes are ignored and the text is kept', () => {
+  // Letters-only words that aren't in the palette: span dropped, text kept.
+  for (const attrs of ['javascript', 'url', 'notacolour']) {
+    const [p] = lib.parseDescription(`[text]{${attrs}}`);
+    assert.deepEqual(p.lines[0], [{ t: 'text', v: 'text' }], attrs);
+  }
+  // Anything with other characters (CSS-like) is not a span at all: shown
+  // literally, never styled.
+  for (const raw of ['[text]{color:red}', '[text]{red;x}', '[text]{red"onload=1}']) {
+    const [p] = lib.parseDescription(raw);
+    assert.ok(p.lines[0].every((n) => n.t === 'text'), raw);
+  }
+  // A real word mixed with junk keeps only the allowed one.
+  const [q] = lib.parseDescription('[x]{red javascript}');
+  assert.equal(q.lines[0][0].color, 'red');
+});
+
+test('spans can hold bold, and links are not mistaken for spans', () => {
+  const [p] = lib.parseDescription('[**loud**]{red} [site](https://a.com)');
+  assert.equal(p.lines[0][0].t, 'span');
+  assert.equal(p.lines[0][0].c[0].t, 'bold');
+  assert.equal(p.lines[0][2].t, 'link');
+});
+
+test('plain text drops underline, strike and span markers', () => {
+  assert.equal(
+    lib.descriptionToPlainText('__a__ ~~b~~ [c]{red lg} d'),
+    'a b c d'
+  );
+});
+
+test('applySpan wraps, updates, merges and clears', () => {
+  const made = lib.applySpan('say hi now', 4, 6, 'color', 'red');
+  assert.equal(made.value, 'say [hi]{red} now');
+  // selection stays on "hi", so a second change updates the same span
+  const sized = lib.applySpan(made.value, made.selectionStart, made.selectionEnd, 'size', 'lg');
+  assert.equal(sized.value, 'say [hi]{red lg} now');
+  const recoloured = lib.applySpan(sized.value, sized.selectionStart, sized.selectionEnd, 'color', 'blue');
+  assert.equal(recoloured.value, 'say [hi]{blue lg} now');
+  const noColor = lib.applySpan(recoloured.value, recoloured.selectionStart, recoloured.selectionEnd, 'color', null);
+  assert.equal(noColor.value, 'say [hi]{lg} now');
+  const cleared = lib.applySpan(noColor.value, noColor.selectionStart, noColor.selectionEnd, 'size', null);
+  assert.equal(cleared.value, 'say hi now');
+  // clearing with nothing to clear is a no-op
+  assert.equal(lib.applySpan('plain', 0, 5, 'color', null).value, 'plain');
+});
+
+test('toggleWrap works for underline and strikethrough markers', () => {
+  const u = lib.toggleWrap('make this', 5, 9, '__');
+  assert.equal(u.value, 'make __this__');
+  assert.equal(lib.toggleWrap(u.value, u.selectionStart, u.selectionEnd, '__').value, 'make this');
+  assert.equal(lib.toggleWrap('x', 0, 1, '~~').value, '~~x~~');
+});

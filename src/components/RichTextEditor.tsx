@@ -11,17 +11,42 @@ import {
   Link2,
   List,
   MoveVertical,
+  Palette,
+  Strikethrough,
+  Type,
+  Underline,
 } from 'lucide-react';
 import RichDescription from '@/components/RichDescription';
 import {
+  applySpan,
+  COLORS,
   insertLink,
   insertSpacer,
   setAlignment,
+  SIZES,
   toggleLinePrefix,
   toggleWrap,
   type Align,
+  type Color,
   type EditResult,
+  type Size,
 } from '@/lib/richDescription';
+
+const SWATCH_CLASS: Record<Color, string> = {
+  yellow: 'bg-yellow-300',
+  orange: 'bg-orange-400',
+  red: 'bg-red-400',
+  pink: 'bg-pink-400',
+  purple: 'bg-purple-400',
+  blue: 'bg-blue-400',
+  green: 'bg-green-400',
+  gray: 'bg-gray-400',
+};
+const SIZE_LABEL: Record<Size, string> = {
+  sm: 'Small',
+  lg: 'Large',
+  xl: 'Extra large',
+};
 
 interface RichTextEditorProps {
   id?: string;
@@ -53,6 +78,8 @@ export default function RichTextEditor({
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('https://');
   const [linkError, setLinkError] = useState(false);
+  // Which picker row (text size / colour) is open under the toolbar.
+  const [picker, setPicker] = useState<'size' | 'color' | null>(null);
   // The selection when "Link" was pressed (the URL input steals focus).
   const linkRange = useRef<[number, number]>([0, 0]);
 
@@ -66,6 +93,11 @@ export default function RichTextEditor({
       el.focus();
       el.setSelectionRange(result.selectionStart, result.selectionEnd);
     });
+  };
+
+  const setSpan = (kind: 'color' | 'size', next: string | null) => {
+    apply((s, e) => applySpan(value, s, e, kind, next));
+    setPicker(null);
   };
 
   const align = (a: Align) =>
@@ -105,6 +137,9 @@ export default function RichTextEditor({
     } else if (key === 'i') {
       event.preventDefault();
       apply((s, e) => toggleWrap(value, s, e, '*'));
+    } else if (key === 'u') {
+      event.preventDefault();
+      apply((s, e) => toggleWrap(value, s, e, '__'));
     } else if (key === 'k') {
       event.preventDefault();
       openLink();
@@ -125,6 +160,26 @@ export default function RichTextEditor({
       label: 'Italic (Ctrl+I)',
       icon: <Italic className="h-4 w-4" />,
       run: () => apply((s, e) => toggleWrap(value, s, e, '*')),
+    },
+    {
+      label: 'Underline (Ctrl+U)',
+      icon: <Underline className="h-4 w-4" />,
+      run: () => apply((s, e) => toggleWrap(value, s, e, '__')),
+    },
+    {
+      label: 'Strikethrough',
+      icon: <Strikethrough className="h-4 w-4" />,
+      run: () => apply((s, e) => toggleWrap(value, s, e, '~~')),
+    },
+    {
+      label: 'Text size',
+      icon: <Type className="h-4 w-4" />,
+      run: () => setPicker((p) => (p === 'size' ? null : 'size')),
+    },
+    {
+      label: 'Text colour',
+      icon: <Palette className="h-4 w-4" />,
+      run: () => setPicker((p) => (p === 'color' ? null : 'color')),
     },
     {
       label: 'Link (Ctrl+K)',
@@ -200,6 +255,64 @@ export default function RichTextEditor({
           ))}
         </div>
       </div>
+
+      {picker === 'size' && mode === 'write' && (
+        <div
+          role="group"
+          aria-label="Text size"
+          className="flex flex-wrap items-center gap-1.5 border-b border-gray-700 bg-gray-900/40 px-3 py-2 text-xs"
+        >
+          <span className="mr-1 text-gray-400">Selected text:</span>
+          {SIZES.map((size) => (
+            <button
+              key={size}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setSpan('size', size)}
+              className="rounded-md border border-gray-600 px-2.5 py-1 text-gray-200 hover:border-yellow-500 hover:text-yellow-300"
+            >
+              {SIZE_LABEL[size]}
+            </button>
+          ))}
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setSpan('size', null)}
+            className="rounded-md px-2.5 py-1 text-gray-400 hover:bg-gray-700"
+          >
+            Normal
+          </button>
+        </div>
+      )}
+
+      {picker === 'color' && mode === 'write' && (
+        <div
+          role="group"
+          aria-label="Text colour"
+          className="flex flex-wrap items-center gap-2 border-b border-gray-700 bg-gray-900/40 px-3 py-2 text-xs"
+        >
+          <span className="mr-1 text-gray-400">Selected text:</span>
+          {COLORS.map((color) => (
+            <button
+              key={color}
+              type="button"
+              title={color}
+              aria-label={`Colour ${color}`}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setSpan('color', color)}
+              className={`h-6 w-6 rounded-full border-2 border-gray-900 ring-1 ring-gray-600 hover:ring-yellow-400 ${SWATCH_CLASS[color]}`}
+            />
+          ))}
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setSpan('color', null)}
+            className="rounded-md px-2.5 py-1 text-gray-400 hover:bg-gray-700"
+          >
+            Default
+          </button>
+        </div>
+      )}
 
       {linkOpen && mode === 'write' && (
         <div className="flex flex-wrap items-center gap-2 border-b border-gray-700 bg-gray-900/40 px-3 py-2">
