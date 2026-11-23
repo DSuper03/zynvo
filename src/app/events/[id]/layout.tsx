@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import EventLayoutShell from './EventLayoutShell';
+import { descriptionToPlainText } from '@/lib/richDescription';
 
 const SITE_URL = 'https://zynvosocial.com';
 const DEFAULT_IMAGE = `${SITE_URL}/zynvo-new-logo.png`;
@@ -76,7 +77,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   const when = formatDate(event.startDate);
   const where = usable(event.Venue) || usable(event.EventMode);
-  const summary = usable(event.tagline) || usable(event.description) || 'Register on Zynvo.';
+  const summary = usable(event.tagline) || usable(descriptionToPlainText(event.description || '')) || 'Register on Zynvo.';
   const description = clip([[when, where].filter(Boolean).join(' · '), summary].filter(Boolean).join(' — '), 200);
 
   const poster = usable(event.posterUrl);

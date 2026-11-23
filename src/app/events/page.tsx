@@ -19,6 +19,7 @@ import { EmptyState, ErrorState } from '@/components/feedback';
 import { cn } from '@/lib/utils';
 import { track } from '@/lib/analytics';
 import { useDataChanged } from '@/lib/dataEvents';
+import { descriptionToPlainText } from '@/lib/richDescription';
 
 
 interface apiRespEvents {
@@ -617,7 +618,7 @@ export default function ZynvoEventsPage() {
                                       </h4>
                                       {event.description ? (
                                         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-zinc-400">
-                                          {event.description}
+                                          {descriptionToPlainText(event.description)}
                                         </p>
                                       ) : null}
                                       <div className="mt-3 flex max-w-full flex-wrap gap-2">
