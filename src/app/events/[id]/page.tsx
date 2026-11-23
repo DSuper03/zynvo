@@ -59,6 +59,8 @@ import { buildAuthHref } from '@/lib/authReturnTo';
 import { isAdminEmail } from '@/lib/zynvoStaff';
 import { ErrorState, EventDetailSkeleton } from '@/components/feedback';
 import TeamSection from './components/TeamSection';
+import RichDescription from '@/components/RichDescription';
+import { descriptionToPlainText } from '@/lib/richDescription';
 import EventTicketPanel from '@/components/EventTicketPanel';
 import { getSafeErrorMessage } from '@/lib/safe-error';
 import EventEditModal from '../components/EventEditModal';
@@ -1018,7 +1020,7 @@ const Eventid = () => {
     const params = new URLSearchParams({
       action: 'TEMPLATE',
       text: data.EventName || 'Event',
-      details: data.description || '',
+      details: descriptionToPlainText(data.description || ''),
       location: displayLocation,
     });
     if (start && end) {
@@ -1065,7 +1067,7 @@ const Eventid = () => {
         eventName={data.EventName}
         collegeName={data.university}
         eventType={data.EventMode}
-        description={data.description}
+        description={descriptionToPlainText(data.description || '')}
         startDate={data.startDate}
         endDate={data.endDate}
         eventMode={data.EventMode}
@@ -1556,10 +1558,15 @@ const Eventid = () => {
               <h2 className="text-xl font-bold text-yellow-400 mb-4">
                 About This Event
               </h2>
-              <p className="text-gray-300 leading-relaxed mb-6">
-                {data.description ||
-                  'Event description will be available soon...'}
-              </p>
+              <RichDescription
+                text={data.description}
+                className="mb-6 text-gray-300"
+                empty={
+                  <p className="mb-6 text-gray-300 leading-relaxed">
+                    Event description will be available soon...
+                  </p>
+                }
+              />
 
               {/* Paid Event Details - Only for Event Founders */}
               {isFounder && data.isPaidEvent && (

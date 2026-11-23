@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { track } from '@/lib/analytics';
 import { eventShareUrl } from '@/lib/eventLinks';
+import { descriptionToPlainText } from '@/lib/richDescription';
 
 interface EventCardProps {
   events?: eventData[] | null;
@@ -153,7 +154,7 @@ export default function EventCard({
                 >
                   <Image
                     src={event.posterUrl || '/zynvo-new-logo.png'}
-                    alt={event.description || event.EventName}
+                    alt={descriptionToPlainText(event.description || '') || event.EventName}
                     width={600}
                     height={300}
                     className="w-full h-48 sm:h-40 object-cover"
@@ -183,7 +184,7 @@ export default function EventCard({
                     {event.EventName}
                   </h3>
                   <p className="text-sm text-gray-400 mb-4 line-clamp-2">
-                    {event.description || 'No description available'}
+                    {descriptionToPlainText(event.description || '') || 'No description available'}
                   </p>
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center text-gray-300 text-sm">

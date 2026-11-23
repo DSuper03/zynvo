@@ -22,6 +22,8 @@ import { Card } from '@/components/ui/card';
 import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/RichTextEditor';
+import { descriptionToPlainText } from '@/lib/richDescription';
 import {
   Select,
   SelectContent,
@@ -1074,13 +1076,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                     >
                       Description*
                     </label>
-                    <Textarea
+                    <RichTextEditor
                       id="description"
-                      name="description"
-                      rows={4}
                       value={formData.description}
-                      onChange={handleChange}
-                      className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
+                      onChange={(value) =>
+                        setFormData((prev: any) => ({ ...prev, description: value }))
+                      }
+                      invalid={!!errors.description}
+                      rows={6}
                       placeholder="Describe your event"
                     />
                     {errors.description && (
@@ -2018,7 +2021,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       )}
                       {formData.description && (
                         <p className="text-xs text-gray-400 mt-1.5 line-clamp-2">
-                          {formData.description}
+                          {descriptionToPlainText(formData.description)}
                         </p>
                       )}
                     </div>
