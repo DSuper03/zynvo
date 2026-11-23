@@ -18,6 +18,11 @@ interface EventTicketPanelProps {
   attendeeName?: string;
   attendeeCollege?: string;
   attendeeAvatar?: string;
+  /**
+   * When an organiser scanned this pass. null = not scanned yet,
+   * undefined = the server didn't say (show no check-in state).
+   */
+  checkedInAt?: string | null;
 }
 
 /**
@@ -35,7 +40,14 @@ export default function EventTicketPanel({
   attendeeName,
   attendeeCollege,
   attendeeAvatar,
+  checkedInAt,
 }: EventTicketPanelProps) {
+  const checkInState: 'awaiting' | 'checked_in' | undefined = checkedInAt
+    ? 'checked_in'
+    : checkedInAt === null
+      ? 'awaiting'
+      : undefined;
+  const checkedInTime = checkedInAt ? new Date(checkedInAt) : null;
   const badgeRef = useRef<HTMLDivElement>(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const [isQrGenerating, setIsQrGenerating] = useState(true);
@@ -124,8 +136,17 @@ export default function EventTicketPanel({
           {isDownloading ? 'Saving…' : 'Download'}
         </button>
       </div>
-      <p className="mb-3 text-xs text-gray-400">
-        Show this QR code at the venue to check in.
+      <p
+        aria-live="polite"
+        className={`mb-3 text-xs ${checkInState === 'checked_in' ? 'text-emerald-300' : 'text-gray-400'}`}
+      >
+        {checkInState === 'checked_in'
+          ? `You're checked in${
+              checkedInTime && !Number.isNaN(checkedInTime.getTime())
+                ? ` (${checkedInTime.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })})`
+                : ''
+            }. Enjoy the event!`
+          : 'Show this QR code at the venue to check in.'}
       </p>
       <div ref={badgeRef}>
         <EventBadgeCard
@@ -139,6 +160,7 @@ export default function EventTicketPanel({
           status={status}
           attendeeName={attendeeName}
           attendeeCollege={attendeeCollege}
+          checkInState={checkInState}
         />
       </div>
     </section>

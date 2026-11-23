@@ -894,6 +894,15 @@ const Eventid = () => {
     );
     return mine?.uniquePassId ?? mine?.passId ?? null;
   })();
+  // null = not scanned yet; undefined = the server didn't return the field
+  const myCheckedInAt: string | null | undefined = (() => {
+    if (!id || !Array.isArray(currentUser?.eventAttended)) return undefined;
+    const mine = currentUser.eventAttended.find(
+      (a: any) => String(a?.event?.id ?? '') === String(id)
+    );
+    if (!mine || !('checkedInAt' in mine)) return undefined;
+    return mine.checkedInAt ?? null;
+  })();
   const formatDateRange = (start?: string, end?: string) => {
     if (!start && !end) return 'TBD';
     const s = start ? new Date(start) : null;
@@ -928,6 +937,23 @@ const Eventid = () => {
     graceEnd.setDate(graceEnd.getDate() + 1);
     return new Date() > graceEnd;
   }, [data.endDate]);
+
+  // While the ticket shows "awaiting", re-read the user every 15 s (and when the
+  // tab comes back into view) so "Checked in" appears after an organiser scans it.
+  useEffect(() => {
+    if (!token || !myPassId || myCheckedInAt !== null || isEventEnded) return;
+    const refresh = () => {
+      if (document.visibilityState === 'visible') {
+        setUserRefreshNonce((n) => n + 1);
+      }
+    };
+    const timer = setInterval(refresh, 15000);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, [token, myPassId, myCheckedInAt, isEventEnded]);
 
   const normalizedUserCollege = useMemo(
     () => (currentUser?.collegeName || '').trim().toLowerCase(),
@@ -1433,6 +1459,7 @@ const Eventid = () => {
                   attendeeName={currentUser?.name || undefined}
                   attendeeCollege={currentUser?.collegeName || undefined}
                   attendeeAvatar={currentUser?.profileAvatar || undefined}
+                  checkedInAt={myCheckedInAt}
                 />
               )}
 
