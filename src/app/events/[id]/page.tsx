@@ -59,6 +59,7 @@ import { buildAuthHref } from '@/lib/authReturnTo';
 import { isAdminEmail } from '@/lib/zynvoStaff';
 import { ErrorState, EventDetailSkeleton } from '@/components/feedback';
 import TeamSection from './components/TeamSection';
+import EventTicketPanel from '@/components/EventTicketPanel';
 import { getSafeErrorMessage } from '@/lib/safe-error';
 import EventEditModal from '../components/EventEditModal';
 import { useSchedule } from '@/hooks/useSchedule';
@@ -192,6 +193,8 @@ const Eventid = () => {
   const canViewAttendees = isFounder || isAdminEmail(currentUser?.email);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [userDataLoaded, setUserDataLoaded] = useState(false);
+  // Bumped after registering so the new pass id is fetched without a reload.
+  const [userRefreshNonce, setUserRefreshNonce] = useState(0);
   const [activeDay, setActiveDay] = useState(1);
   const [eventInviteFullUrl, setEventInviteFullUrl] = useState('');
   const [copiedInviteLink, setCopiedInviteLink] = useState(false);
@@ -453,7 +456,8 @@ const Eventid = () => {
     }
 
     async function fetchUserData() {
-      setUserDataLoaded(false);
+      // Only block the UI on the first load, not on the post-registration refresh.
+      if (userRefreshNonce === 0) setUserDataLoaded(false);
 
       try {
         const userResponse = await axios.get(
@@ -485,7 +489,7 @@ const Eventid = () => {
     }
 
     fetchUserData();
-  }, [token]);
+  }, [token, userRefreshNonce]);
 
   useEffect(() => {
     if (!id) return;
@@ -813,6 +817,8 @@ const Eventid = () => {
         });
         console.log('Registration successful');
         setForkedUpId(resp.data.ForkedUpId);
+        // Re-read the user so their new pass id shows up in the ticket panel
+        setUserRefreshNonce((n) => n + 1);
         // Immediately mark this event as attended so WhatsApp / UI update without full reload
         const sid = String(id);
         setUserAttendedEventIds((prev) =>
@@ -880,6 +886,14 @@ const Eventid = () => {
     const sid = String(id);
     return userAttendedEventIds.some((eid) => String(eid) === sid);
   };
+  // The signed-in student's pass for this event (same source as the dashboard)
+  const myPassId: string | null = (() => {
+    if (!id || !Array.isArray(currentUser?.eventAttended)) return null;
+    const mine = currentUser.eventAttended.find(
+      (a: any) => String(a?.event?.id ?? '') === String(id)
+    );
+    return mine?.uniquePassId ?? mine?.passId ?? null;
+  })();
   const formatDateRange = (start?: string, end?: string) => {
     if (!start && !end) return 'TBD';
     const s = start ? new Date(start) : null;
@@ -1405,6 +1419,21 @@ const Eventid = () => {
                     .
                   </p>
                 </div>
+              )}
+
+              {/* Ticket — only for registered students who have a pass */}
+              {signedin && isUserAttendingEvent() && myPassId && (
+                <EventTicketPanel
+                  eventName={data.EventName}
+                  startDate={data.startDate}
+                  endDate={data.endDate}
+                  clubName={rawEvent?.clubName || ''}
+                  collegeName={data.university || currentUser?.collegeName || ''}
+                  passId={String(myPassId)}
+                  attendeeName={currentUser?.name || undefined}
+                  attendeeCollege={currentUser?.collegeName || undefined}
+                  attendeeAvatar={currentUser?.profileAvatar || undefined}
+                />
               )}
 
               {/* WhatsApp — hero left column, aligned with poster row */}
