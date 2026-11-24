@@ -183,6 +183,24 @@ const UserCard = ({
   );
 };
 
+const discoveryPrompts = [
+  {
+    label: 'Find a co-founder',
+    title: 'Who would you build your first startup with?',
+    examples: ['Riya sketches app ideas in the margins of her notes.', 'Kabir wants to build a better campus bus tracker.', 'Meera is figuring out how to sell her first batch of stickers.'],
+  },
+  {
+    label: 'Find a hackathon teammate',
+    title: 'Who would you want on your team at 2 AM?',
+    examples: ['Ishaan volunteers to do the demo, even at 2 AM.', 'Sana turns rough sketches into clickable prototypes.', 'Arjun brings a spare charger to every hackathon.'],
+  },
+  {
+    label: 'Meet anime fans',
+    title: 'Who on campus shares your taste in anime?',
+    examples: ['Anurima likes Death Note and still thinks L had it figured out.', 'Dev has a One Piece theory for every lunch break.', 'Tara makes a case for watching Haikyu!! before every college match.'],
+  },
+];
+
 export default function UserSearchPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
@@ -191,7 +209,7 @@ export default function UserSearchPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [token, setToken] = useState('');
-  const [discoveryTitle, setDiscoveryTitle] = useState('');
+  const [discovery, setDiscovery] = useState<{ title: string; example: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchPage, setSearchPage] = useState(1);
@@ -376,12 +394,11 @@ export default function UserSearchPage() {
           <section aria-labelledby="campus-discovery" className="mb-8 text-center">
             <h2 id="campus-discovery" className="mb-3 font-semibold">Who would you like to meet?</h2>
             <div className="flex flex-wrap justify-center gap-2">
-              {[
-                ['Find a co-founder', 'Who would you build your first startup with?'],
-                ['Find a hackathon teammate', 'Who would you want on your team at 2 AM?'],
-                ['Meet anime fans', 'Who on campus shares your taste in anime?'],
-              ].map(([label, title]) => (
-                <button key={label} type="button" aria-haspopup="dialog" onClick={() => setDiscoveryTitle(title)}
+              {discoveryPrompts.map(({ label, title, examples }) => (
+                <button key={label} type="button" aria-haspopup="dialog" onClick={() => {
+                  const example = examples[Math.floor(Math.random() * examples.length)];
+                  setDiscovery({ title, example });
+                }}
                   className="flex items-center gap-2 rounded-full border border-yellow-400/30 px-4 py-2 text-sm text-yellow-300 hover:bg-yellow-400/10">
                   <UsersRound aria-hidden className="h-4 w-4" /> {label}
                 </button>
@@ -521,19 +538,23 @@ export default function UserSearchPage() {
         </div>
       </div>
 
-      {discoveryTitle && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" onClick={() => setDiscoveryTitle('')}>
+      {discovery && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" onClick={() => setDiscovery(null)}>
           <section role="dialog" aria-modal="true" aria-labelledby="mobile-discovery-title" className="relative w-full max-w-md rounded-3xl border border-yellow-400/20 bg-gray-950 p-7 shadow-2xl" onClick={(event) => event.stopPropagation()}>
-            <button type="button" aria-label="Close" onClick={() => setDiscoveryTitle('')} className="absolute right-4 top-4 rounded-full p-2 text-gray-400 hover:bg-white/10 hover:text-white">
+            <button type="button" aria-label="Close" onClick={() => setDiscovery(null)} className="absolute right-4 top-4 rounded-full p-2 text-gray-400 hover:bg-white/10 hover:text-white">
               <X className="h-5 w-5" />
             </button>
             <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-400/10 text-yellow-300">
               <Smartphone className="h-7 w-7" />
             </div>
-            <h2 id="mobile-discovery-title" className="text-2xl font-bold text-white">{discoveryTitle}</h2>
+            <h2 id="mobile-discovery-title" className="text-2xl font-bold text-white">{discovery.title}</h2>
+            <div className="mt-4 rounded-xl bg-white/5 p-4">
+              <p className="text-xs text-gray-400">Fictional profile example</p>
+              <p className="mt-1 text-white">{discovery.example}</p>
+            </div>
             <p className="mt-3 text-sm leading-6 text-gray-300">Start with your campus community on Zynvo for Android. Add your interests to your profile so other students can see what you enjoy.</p>
             <a href={discoveryStoreUrl('zyncers')} target="_blank" rel="noopener noreferrer" className="mt-6 block rounded-xl bg-yellow-400 px-5 py-3 text-center font-bold text-gray-950 transition hover:bg-yellow-300">Get it on Google Play</a>
-            <button type="button" onClick={() => setDiscoveryTitle('')} className="mt-3 w-full rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-gray-300 hover:bg-white/5">Maybe later</button>
+            <button type="button" onClick={() => setDiscovery(null)} className="mt-3 w-full rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-gray-300 hover:bg-white/5">Maybe later</button>
           </section>
         </div>
       )}
