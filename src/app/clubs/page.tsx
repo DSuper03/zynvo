@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
+import { discoveryStoreUrl } from '@/lib/playstore';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Search,
@@ -658,15 +659,26 @@ const ClubsPage = () => {
               </div>
             )
           ) : (
-            <EmptyState
-              icon={Users}
-              title="No clubs found"
-              description={
-                debouncedSearchQuery.trim()
-                  ? `Nothing matches “${debouncedSearchQuery.trim()}”. Try different keywords or clear the search.`
-                  : 'Try adjusting your search or filters, or check back later for new clubs.'
-              }
-            />
+            <>
+              <EmptyState
+                icon={Users}
+                title="No clubs found"
+                description={
+                  debouncedSearchQuery.trim()
+                    ? `Nothing matches “${debouncedSearchQuery.trim()}”. Try different keywords or clear the search.`
+                    : 'Try adjusting your search or filters, or check back later for new clubs.'
+                }
+              />
+              {debouncedSearchQuery.trim() && (
+                <aside className="mx-auto mt-4 max-w-md rounded-xl border border-yellow-400/20 p-5 text-center">
+                  <h3 className="font-semibold text-white">Your next club could start with two people.</h3>
+                  <p className="mt-2 text-sm text-gray-300">Put your interests on your profile and introduce yourself to other students on Zynvo.</p>
+                  <a href={discoveryStoreUrl('club_search')} className="mt-4 inline-block rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black">
+                    Get Zynvo on Google Play
+                  </a>
+                </aside>
+              )}
+            </>
           )
         ) : (
           <div className="grid grid-cols-1 xs:grid-cols-2 responsive-grid gap-4">

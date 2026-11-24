@@ -1208,6 +1208,14 @@ export default function ZynvoDashboard() {
     <div className="min-h-screen h-full bg-black text-gray-100 top-3 ">
       {/* Main Content */}
       <main className="max-w-4xl mx-auto pt-12 sm:pt-16 md:pt-20 pb-10 px-4 sm:px-6">
+        {userData && !userData.tags?.some((tag) => tag.trim()) && (
+          <aside className="mb-5 rounded-2xl border border-yellow-400/30 bg-yellow-400/5 p-4">
+            <h2 className="font-semibold text-white">Complete your profile</h2>
+            <p className="mt-1 text-sm text-gray-300">Into startups, anime or late-night hackathons? Add interest tags so people visiting your profile can find common ground.</p>
+            <button type="button" onClick={() => setShowProfileModal(true)} className="mt-3 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black">Add my interests</button>
+          </aside>
+        )}
+
         {/* Dashboard Header - Mobile Responsive */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3 sm:gap-4">
           <div className="flex flex-wrap justify-end gap-2 sm:gap-3 w-full sm:w-auto self-end sm:self-auto">
