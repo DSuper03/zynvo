@@ -187,17 +187,56 @@ const discoveryPrompts = [
   {
     label: 'Find a co-founder',
     title: 'Who would you build your first startup with?',
-    examples: ['Riya sketches app ideas in the margins of her notes.', 'Kabir wants to build a better campus bus tracker.', 'Meera is figuring out how to sell her first batch of stickers.'],
+    examples: [
+      "Riya sketches app ideas in the margins of her notes.",
+      "Kabir wants to build a better campus bus tracker.",
+      "Meera is figuring out how to sell her first batch of stickers.",
+      "Aditi sold out of handmade bookmarks at the college fest.",
+      "Faiz keeps a list of things his hostel floor borrows but never owns.",
+      "Nandini wants to turn leftover canteen food into discounted dinner boxes.",
+      "Rohan built a prototype and needs someone who likes talking to customers.",
+      "Zoya designs tote bags and wants to try a pop-up stall.",
+      "Atharv tracks the cost of every cup at his student coffee stand.",
+      "Ira is looking for a partner to run a textbook exchange.",
+      "Neil gets his best product feedback in the queue for chai.",
+      "Lavanya has three paying customers for her custom lab coat patches.",
+    ],
   },
   {
     label: 'Find a hackathon teammate',
     title: 'Who would you want on your team at 2 AM?',
-    examples: ['Ishaan volunteers to do the demo, even at 2 AM.', 'Sana turns rough sketches into clickable prototypes.', 'Arjun brings a spare charger to every hackathon.'],
+    examples: [
+      "Ishaan volunteers to do the demo, even at 2 AM.",
+      "Sana turns rough sketches into clickable prototypes.",
+      "Arjun brings a spare charger to every hackathon.",
+      "Pranav can explain an API with a sketch on a paper cup.",
+      "Diya draws mascots while the team waits for the build.",
+      "Harsh loves finding the one input that breaks the demo.",
+      "Noor always asks who the project is actually for.",
+      "Kunal has an Arduino kit and a box of oddly specific sensors.",
+      "Ananya rehearses the pitch with a stopwatch between lectures.",
+      "Soham makes tiny browser games and wants to build one in a weekend.",
+      "Pihu writes the README while everyone still remembers how setup works.",
+      "Adil is joining his first hackathon and wants a beginner-friendly team.",
+    ],
   },
   {
     label: 'Meet anime fans',
     title: 'Who on campus shares your taste in anime?',
-    examples: ['Anurima likes Death Note and still thinks L had it figured out.', 'Dev has a One Piece theory for every lunch break.', 'Tara makes a case for watching Haikyu!! before every college match.'],
+    examples: [
+      "Anurima likes Death Note and still thinks L had it figured out.",
+      "Dev has a One Piece theory for every lunch break.",
+      "Tara makes a case for watching Haikyu!! before every college match.",
+      "Mishti knows the Spy x Family theme on ukulele.",
+      "Vivek brings a sketchbook to lunch to draw manga panels.",
+      "Sneha is saving the last episode of Frieren for a rainy evening.",
+      "Om learned to make ramen after watching Naruto.",
+      "Farah wants a movie night devoted entirely to Studio Ghibli food scenes.",
+      "Yash has a strong opinion on every JoJo opening.",
+      "Anika traded volleyball tips for a Haikyu!! recommendation.",
+      "Rehan is slowly getting his roommate into Mob Psycho 100.",
+      "Kavya sews her own cosplay props between lab sessions.",
+    ],
   },
 ];
 
@@ -209,6 +248,23 @@ export default function UserSearchPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [token, setToken] = useState('');
+  const remainingProfiles = useRef(new Map<string, string[]>());
+  const lastProfiles = useRef(new Map<string, string>());
+
+  function openDiscovery(title: string, examples: string[]) {
+    let remaining = remainingProfiles.current.get(title) ?? [];
+    if (!remaining.length) {
+      remaining = [...examples];
+      remainingProfiles.current.set(title, remaining);
+    }
+    const previous = lastProfiles.current.get(title);
+    const choices = remaining.length > 1 ? remaining.filter(line => line !== previous) : remaining;
+    const example = choices[Math.floor(Math.random() * choices.length)];
+    remaining.splice(remaining.indexOf(example), 1);
+    lastProfiles.current.set(title, example);
+    setDiscovery({ title, example });
+  }
+
   const [discovery, setDiscovery] = useState<{ title: string; example: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -395,10 +451,7 @@ export default function UserSearchPage() {
             <h2 id="campus-discovery" className="mb-3 font-semibold">Who would you like to meet?</h2>
             <div className="flex flex-wrap justify-center gap-2">
               {discoveryPrompts.map(({ label, title, examples }) => (
-                <button key={label} type="button" aria-haspopup="dialog" onClick={() => {
-                  const example = examples[Math.floor(Math.random() * examples.length)];
-                  setDiscovery({ title, example });
-                }}
+                <button key={label} type="button" aria-haspopup="dialog" onClick={() => openDiscovery(title, examples)}
                   className="flex items-center gap-2 rounded-full border border-yellow-400/30 px-4 py-2 text-sm text-yellow-300 hover:bg-yellow-400/10">
                   <UsersRound aria-hidden className="h-4 w-4" /> {label}
                 </button>
