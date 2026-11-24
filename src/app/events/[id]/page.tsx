@@ -9,6 +9,7 @@ import {
   respnseUseState,
 } from '@/types/global-Interface';
 import axios, { isAxiosError } from 'axios';
+import { PLAY_STORE_URL } from '@/lib/playstore';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -1577,6 +1578,21 @@ const Eventid = () => {
                   </p>
                 }
               />
+
+              <aside className="mb-6 rounded-xl border border-yellow-400/20 bg-yellow-400/5 p-4">
+                <h3 className="font-semibold text-white">
+                  {eventTeamSize > 1 ? 'Who would you team up with?' : 'Meet someone before you go'}
+                </h3>
+                <p className="mt-1 text-sm text-gray-300">
+                  Explore student profiles and find a shared interest to start a conversation.
+                </p>
+                <a
+                  href={PLAY_STORE_URL + '&referrer=' + encodeURIComponent('utm_source=zynvo_web&utm_medium=event_overview&utm_campaign=campus_discovery')}
+                  className="mt-3 inline-block rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300"
+                >
+                  Get Zynvo on Google Play
+                </a>
+              </aside>
 
               {/* Paid Event Details - Only for Event Founders */}
               {isFounder && data.isPaidEvent && (
