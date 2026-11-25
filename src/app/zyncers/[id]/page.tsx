@@ -1,5 +1,5 @@
 'use client';
-import { PLAY_STORE_URL } from '@/lib/playstore';
+import { discoveryStoreUrl, PLAY_STORE_URL } from '@/lib/playstore';
 import { useEffect, useState, useRef } from 'react';
 import {
   Calendar,
@@ -698,6 +698,16 @@ export default function PublicUserProfile() {
                   <SkillTag key={idx} skill={tag} onClick={() => handleSkillClick(tag)} />
                 ))}
               </div>
+            )}
+
+            {!isOwnProfile && (
+              <aside className="mb-4 rounded-xl border border-yellow-400/20 bg-yellow-400/5 p-4">
+                <h2 className="font-semibold text-white">Find more people you have something in common with</h2>
+                <p className="mt-1 text-sm text-gray-300">Add your interests and explore student profiles on Zynvo for Android.</p>
+                <a data-app-download="public_profile" href={discoveryStoreUrl('public_profile')} className="mt-3 inline-block rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300">
+                  Get Zynvo on Google Play
+                </a>
+              </aside>
             )}
 
             {/* Social links */}

@@ -8,7 +8,9 @@ export type DiscoveryPlacement =
   | 'event_recap'
   | 'club_recruitment'
   | 'discover_today'
-  | 'discover_drop_sample';
+  | 'discover_drop_sample'
+  | 'home'
+  | 'public_profile';
 
 export function discoveryStoreUrl(source: DiscoveryPlacement) {
   const url = new URL(PLAY_STORE_URL);
