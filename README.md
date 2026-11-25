@@ -95,3 +95,5 @@ Project Link: [https://github.com/your-org/zynvo](https://github.com/your-org/zy
 ---
 
 ### 🌟 Built with passion for college communities worldwide
+
+Demo PR opened via Capy.
