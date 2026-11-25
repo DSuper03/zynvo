@@ -327,7 +327,7 @@ export default function Home() {
               <h2 id="home-campus-discovery" className="text-xl font-bold">Who on campus shares your interests?</h2>
               <p className="mt-1 text-sm text-gray-300">Find a hackathon teammate, talk anime, or meet someone to build with.</p>
             </div>
-            <a href={discoveryStoreUrl('home')} className="rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300">
+            <a data-app-download="home" href={discoveryStoreUrl('home')} className="rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300">
               Get Zynvo on Google Play
             </a>
           </div>
