@@ -74,3 +74,10 @@ Use these for KPIs; use the client events for funnels and UX context.
 
 - [ ] Upload source maps to PostHog error tracking (needs a personal API key in CI) so `$exception` stack traces de-minify.
 - [ ] Worker-side logs from `zynvo-backend-worker` (backend change, pending approval).
+
+## App download funnel
+
+- app_download_cta_viewed fires when at least half of a Google Play link enters the viewport, once per rendered link.
+- app_download_clicked fires when the link is activated, including keyboard and middle-click. Both events carry placement and store. New unlabelled links to the Zynvo Play listing use unlabeled_play_store_link.
+- In Product Analytics, save a Trends insight for app_download_clicked broken down by placement. Save a second insight as a Funnel from app_download_cta_viewed to app_download_clicked, with a 30-minute window and placement held constant across steps. These are store outbound clicks. Compare installs separately using Google Play reporting.
+- After deploying, check Live Events with a test click and filter by the expected placement before interpreting the funnel.

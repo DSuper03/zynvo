@@ -1609,6 +1609,7 @@ const Eventid = () => {
                     <p className="mt-1 text-sm text-gray-200">Nisha wants to try a campus event for the first time. She would go if someone else was new too.</p>
                     <p className="mt-3 text-sm text-gray-300">Explore student profiles and find a shared interest to start a conversation.</p>
                     <a
+                      data-app-download="event_overview"
                       href={PLAY_STORE_URL + '&referrer=' + encodeURIComponent('utm_source=zynvo_web&utm_medium=event_overview&utm_campaign=campus_discovery')}
                       className="mt-3 inline-block rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300"
                     >

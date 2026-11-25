@@ -375,6 +375,7 @@ export default function Home() {
 
           {/* Play Store promo */}
           <a
+            data-app-download="home_banner"
             href={PLAY_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"

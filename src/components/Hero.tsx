@@ -59,6 +59,7 @@ const Hero = () => {
             </Link>
 
             <a
+              data-app-download="home_hero_button"
               href={PLAY_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"
@@ -93,6 +94,7 @@ const Hero = () => {
             whileInView={{ opacity: 1, y: 0, rotate: -4 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, ease: 'easeOut', delay: 0.35 }}
+            data-app-download="home_hero_image"
             href={PLAY_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"

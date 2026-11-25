@@ -116,6 +116,7 @@ export default function FooterWithSocial() {
 
           {/* ── Play Store promo ── */}
           <a
+            data-app-download="footer_banner"
             href={PLAY_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
@@ -265,6 +266,7 @@ export default function FooterWithSocial() {
                   <Mail size={17} />
                 </a>
                 <a
+                  data-app-download="footer_link"
                   href={PLAY_STORE_URL}
                   target="_blank"
                   rel="noopener noreferrer"

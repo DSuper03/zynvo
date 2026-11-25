@@ -681,6 +681,7 @@ export default function PublicUserProfile() {
                         Copy opener
                       </button>
                       <a
+                        data-app-download="profile_opener"
                         href={PLAY_STORE_URL + '&referrer=' + encodeURIComponent('utm_source=zynvo_web&utm_medium=profile_opener&utm_campaign=campus_discovery')}
                         className="rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black"
                       >

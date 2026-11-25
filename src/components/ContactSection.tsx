@@ -110,6 +110,7 @@ const ContactSection = () => {
                   <span>Follow us on Instagram</span>
                 </div>
                 <a
+                  data-app-download="contact_banner"
                   href={PLAY_STORE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -128,6 +129,7 @@ const ContactSection = () => {
               </div>
 
               <a
+                data-app-download="contact_button"
                 href={PLAY_STORE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
