@@ -11,7 +11,7 @@ import {
 
 import LandingHeader from '@/components/landingHeader';
 import Image from 'next/image';
-import { PLAY_STORE_URL, PLAY_STORE_PROMO } from '@/lib/playstore';
+import { PLAY_STORE_URL, PLAY_STORE_PROMO, discoveryStoreUrl } from '@/lib/playstore';
 import { Skiper39 } from '@/components/SkipperLanding';
 import { cn } from '@/lib/utils';
 import { CanvasText } from '@/components/ui/canvas-text';
@@ -321,6 +321,17 @@ export default function Home() {
         </section>
         <TopClubs />
         <Hero />
+        <section className="mx-auto my-8 max-w-5xl px-6" aria-labelledby="home-campus-discovery">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-yellow-400/30 bg-neutral-950 p-6 text-white">
+            <div>
+              <h2 id="home-campus-discovery" className="text-xl font-bold">Who on campus shares your interests?</h2>
+              <p className="mt-1 text-sm text-gray-300">Find a hackathon teammate, talk anime, or meet someone to build with.</p>
+            </div>
+            <a href={discoveryStoreUrl('home')} className="rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300">
+              Get Zynvo on Google Play
+            </a>
+          </div>
+        </section>
         {/*     
         <ZynvoDashboard /> */}
         <Features discoverPosts={discoverPosts} />
