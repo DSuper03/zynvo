@@ -1,4 +1,5 @@
 'use client';
+import DiscoverCampusPreviews from '@/components/DiscoverCampusPreviews';
 import axios from 'axios';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -372,6 +373,8 @@ export default function Feed() {
                 />
               </div>
             </div>
+
+            <DiscoverCampusPreviews />
 
             {/* Desktop top Play Store promo (prominent) */}
             <a
