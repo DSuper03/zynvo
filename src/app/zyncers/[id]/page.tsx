@@ -1,4 +1,5 @@
 'use client';
+import { PLAY_STORE_URL } from '@/lib/playstore';
 import { useEffect, useState, useRef } from 'react';
 import {
   Calendar,
@@ -352,6 +353,14 @@ export default function PublicUserProfile() {
     fetchUserData();
   }, [isClient, userId, token]);
 
+  const [showConversationStarter, setShowConversationStarter] = useState(false);
+  const publicInterests = userData?.tags?.map((tag) => tag.trim()).filter(Boolean) ?? [];
+  const firstInterest = publicInterests[0];
+  const conversationStarter = publicInterests.some((tag) => /death\s*note/i.test(tag))
+    ? 'If you were L, when would you have figured it out?'
+    : firstInterest
+      ? `I saw ?${firstInterest}? on your profile. What got you into it?`
+      : 'What is one campus event you would recommend to someone who has never been?';
   const isOwnProfile = Boolean(viewerUserId && viewerUserId === userId);
 
   useEffect(() => {
@@ -643,6 +652,46 @@ export default function PublicUserProfile() {
             </div>
 
             {/* Skill tags */}
+            {!isOwnProfile && (
+              <section className="mb-4 rounded-xl border border-gray-700 p-4">
+                <button
+                  type="button"
+                  aria-expanded={showConversationStarter}
+                  onClick={() => setShowConversationStarter((shown) => !shown)}
+                  className="text-sm font-semibold text-yellow-300"
+                >
+                  How do I start a conversation?
+                </button>
+                {showConversationStarter && (
+                  <div className="mt-3 space-y-3">
+                    <p className="text-sm text-gray-200">{conversationStarter}</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(conversationStarter);
+                            toast.success('Conversation starter copied');
+                          } catch {
+                            toast.error('Could not copy. Select the text to copy it.');
+                          }
+                        }}
+                        className="rounded-full border border-white/20 px-4 py-2 text-sm text-white"
+                      >
+                        Copy opener
+                      </button>
+                      <a
+                        href={PLAY_STORE_URL + '&referrer=' + encodeURIComponent('utm_source=zynvo_web&utm_medium=profile_opener&utm_campaign=campus_discovery')}
+                        className="rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black"
+                      >
+                        Get Zynvo on Google Play
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </section>
+            )}
+
             {userData.tags && userData.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {userData.tags.map((tag, idx) => (
