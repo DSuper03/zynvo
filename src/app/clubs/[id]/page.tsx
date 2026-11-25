@@ -1,5 +1,6 @@
 'use client';
 
+import CampusPreviewPlayLink from '@/components/CampusPreviewPlayLink';
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/legacy/image';
 import ClubLogo, { clubLogoSrc } from '@/components/ClubLogo';
@@ -61,6 +62,8 @@ import {
   EventType,
 } from '@/types/global-Interface';
 
+type ClubAnnouncement = { id: string; Title: string; Description: string };
+
 interface ClubApiResponse {
   msg: string;
   club: {
@@ -75,6 +78,7 @@ interface ClubApiResponse {
     facultyEmail: string;
     profilePicUrl: string;
     wings: string;
+    announcements?: ClubAnnouncement[];
     members: {
       id: string;
       name: string;
@@ -127,6 +131,7 @@ export default function ClubPage() {
     requirements: '',
     wings: '',
   });
+  const [recruitmentNotice, setRecruitmentNotice] = useState<ClubAnnouncement>();
   const [event, setEvent] = useState<EventType[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
@@ -240,6 +245,9 @@ export default function ClubPage() {
           club_type: clubData.type || null,
           member_count: clubData.members?.length ?? 0,
         });
+        setRecruitmentNotice(clubData.announcements?.find(({ Title }) =>
+          /\b(auditions?|recruitment|tryouts?|applications?)\b/i.test(Title)
+        ));
         setClub({
           id: clubData.id,
           name: clubData.name,
@@ -969,6 +977,18 @@ useEffect(() => {
         {/* Tab Content */}
         <div className="space-y-4 sm:space-y-6 md:space-y-8">
           {/* Events Tab */}
+          {recruitmentNotice && activeTab === 'events' && (
+            <details className="mb-5 rounded-xl border border-yellow-400/20 bg-neutral-950 p-4 text-white">
+              <summary className="cursor-pointer font-semibold text-yellow-300">Curious about joining this club?</summary>
+              <div className="mt-3 space-y-2">
+                <h3 className="font-semibold">{recruitmentNotice.Title}</h3>
+                <p className="whitespace-pre-line break-words text-sm text-gray-300">{recruitmentNotice.Description}</p>
+                <p className="text-sm text-gray-300">You can also browse club announcements in the Android app.</p>
+                <CampusPreviewPlayLink placement="club_recruitment" />
+              </div>
+            </details>
+          )}
+
           {activeTab === 'events' && (
             <div className="space-y-4 sm:space-y-6">
               {/* Events Header - Responsive Design */}

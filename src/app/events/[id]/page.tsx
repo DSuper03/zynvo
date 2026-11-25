@@ -1,5 +1,6 @@
 'use client';
 
+import EventRecapPreview from '@/components/EventRecapPreview';
 import { setClubGroup, track } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
 import {
@@ -1580,44 +1581,48 @@ const Eventid = () => {
                 }
               />
 
-              <aside className="mb-6 rounded-xl border border-yellow-400/20 bg-yellow-400/5 p-4">
-                <h3 className="font-semibold text-white">
-                  {eventTeamSize > 1 ? 'Who would you team up with?' : 'Meet someone before you go'}
-                </h3>
-                <p className="mt-1 text-sm text-gray-300">
-                  Explore student profiles and find a shared interest to start a conversation.
-                </p>
-                <button
-                  type="button"
-                  aria-haspopup="dialog"
-                  onClick={() => eventPreviewRef.current?.showModal()}
-                  className="mt-3 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300"
-                >
-                  Find someone to go with
-                </button>
-                <dialog
-                  ref={eventPreviewRef}
-                  aria-labelledby="event-preview-title"
-                  className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-yellow-400/20 bg-neutral-950 p-6 text-white backdrop:bg-black/75"
-                >
-                  <h3 id="event-preview-title" className="text-xl font-semibold">Find someone to go with</h3>
-                  <p className="mt-3 text-xs text-gray-400">Fictional profile example</p>
-                  <p className="mt-1 text-sm text-gray-200">Nisha wants to try a campus event for the first time. She would go if someone else was new too.</p>
-                  <p className="mt-3 text-sm text-gray-300">Explore student profiles and find a shared interest to start a conversation.</p>
-                  <a
-                    data-app-download="event_overview"
-                    href={PLAY_STORE_URL + '&referrer=' + encodeURIComponent('utm_source=zynvo_web&utm_medium=event_overview&utm_campaign=campus_discovery')}
-                    className="mt-3 inline-block rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300"
+              {isEventEnded ? (
+                <EventRecapPreview eventId={id} />
+              ) : (
+                <aside className="mb-6 rounded-xl border border-yellow-400/20 bg-yellow-400/5 p-4">
+                  <h3 className="font-semibold text-white">
+                    {eventTeamSize > 1 ? 'Who would you team up with?' : 'Meet someone before you go'}
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-300">
+                    Explore student profiles and find a shared interest to start a conversation.
+                  </p>
+                  <button
+                    type="button"
+                    aria-haspopup="dialog"
+                    onClick={() => eventPreviewRef.current?.showModal()}
+                    className="mt-3 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300"
                   >
-                    Get Zynvo on Google Play
-                  </a>
-                  <form method="dialog" className="mt-3">
-                    <button className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold hover:bg-white/10">
-                      Back to event
-                    </button>
-                  </form>
-                </dialog>
-              </aside>
+                    Find someone to go with
+                  </button>
+                  <dialog
+                    ref={eventPreviewRef}
+                    aria-labelledby="event-preview-title"
+                    className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-yellow-400/20 bg-neutral-950 p-6 text-white backdrop:bg-black/75"
+                  >
+                    <h3 id="event-preview-title" className="text-xl font-semibold">Find someone to go with</h3>
+                    <p className="mt-3 text-xs text-gray-400">Fictional profile example</p>
+                    <p className="mt-1 text-sm text-gray-200">Nisha wants to try a campus event for the first time. She would go if someone else was new too.</p>
+                    <p className="mt-3 text-sm text-gray-300">Explore student profiles and find a shared interest to start a conversation.</p>
+                    <a
+                      data-app-download="event_overview"
+                      href={PLAY_STORE_URL + '&referrer=' + encodeURIComponent('utm_source=zynvo_web&utm_medium=event_overview&utm_campaign=campus_discovery')}
+                      className="mt-3 inline-block rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300"
+                    >
+                      Get Zynvo on Google Play
+                    </a>
+                    <form method="dialog" className="mt-3">
+                      <button className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold hover:bg-white/10">
+                        Back to event
+                      </button>
+                    </form>
+                  </dialog>
+                </aside>
+              )}
 
               {/* Paid Event Details - Only for Event Founders */}
               {isFounder && data.isPaidEvent && (
