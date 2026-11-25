@@ -444,6 +444,7 @@ const Skiper39 = () => {
               </>
             )}
             <a
+              data-app-download="skipper_landing"
               href={PLAY_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"

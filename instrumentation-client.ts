@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
 import posthog from 'posthog-js';
+import { startAppDownloadAnalytics } from './src/lib/app-download-analytics';
 
 // Query params that must never reach PostHog (reset tokens, OAuth codes, emails in links).
 const SENSITIVE_PARAMS = ['token', 'code', 'state', 'email', 'otp', 'oobCode', '__clerk_ticket', '__clerk_db_jwt'];
@@ -64,6 +65,7 @@ if (process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN) {
       return event;
     },
   });
+  startAppDownloadAnalytics();
 }
 
 Sentry.init({

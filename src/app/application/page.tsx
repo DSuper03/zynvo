@@ -44,6 +44,7 @@ const DownloadPage = () => {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
+            data-app-download="application_hero"
             href={PLAY_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
@@ -93,6 +94,7 @@ const DownloadPage = () => {
           >
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link
+                data-app-download="application_button"
                 href={PLAY_STORE_URL}
                 target="_blank"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-8 py-4 text-base font-semibold text-yellow-300 shadow-[0_10px_25px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 hover:bg-black/90"
@@ -119,6 +121,7 @@ const DownloadPage = () => {
             </div>
 
             <a
+              data-app-download="application_image"
               href={PLAY_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"

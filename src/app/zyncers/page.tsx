@@ -609,7 +609,7 @@ export default function UserSearchPage() {
               </button>
             </div>
             <p className="mt-3 text-sm leading-6 text-gray-300">Start with your campus community on Zynvo for Android. Add your interests to your profile so other students can see what you enjoy.</p>
-            <a href={discoveryStoreUrl('zyncers')} target="_blank" rel="noopener noreferrer" className="mt-6 block rounded-xl bg-yellow-400 px-5 py-3 text-center font-bold text-gray-950 transition hover:bg-yellow-300">Get it on Google Play</a>
+            <a data-app-download="zyncers" href={discoveryStoreUrl('zyncers')} target="_blank" rel="noopener noreferrer" className="mt-6 block rounded-xl bg-yellow-400 px-5 py-3 text-center font-bold text-gray-950 transition hover:bg-yellow-300">Get it on Google Play</a>
             <button type="button" onClick={() => setDiscovery(null)} className="mt-3 w-full rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-gray-300 hover:bg-white/5">Maybe later</button>
           </section>
         </div>
