@@ -203,6 +203,7 @@ const Eventid = () => {
   const [activeDay, setActiveDay] = useState(1);
   const [eventInviteFullUrl, setEventInviteFullUrl] = useState('');
   const [copiedInviteLink, setCopiedInviteLink] = useState(false);
+  const eventPreviewRef = useRef<HTMLDialogElement>(null);
   const inviteLinkInputRef = useRef<HTMLInputElement>(null);
   const { data: schedule = [] } = useSchedule(id, token);
   const { totalSessions } = getScheduleStats(schedule);
@@ -1586,12 +1587,35 @@ const Eventid = () => {
                 <p className="mt-1 text-sm text-gray-300">
                   Explore student profiles and find a shared interest to start a conversation.
                 </p>
-                <a
-                  href={PLAY_STORE_URL + '&referrer=' + encodeURIComponent('utm_source=zynvo_web&utm_medium=event_overview&utm_campaign=campus_discovery')}
-                  className="mt-3 inline-block rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300"
+                <button
+                  type="button"
+                  aria-haspopup="dialog"
+                  onClick={() => eventPreviewRef.current?.showModal()}
+                  className="mt-3 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300"
                 >
-                  Get Zynvo on Google Play
-                </a>
+                  Find someone to go with
+                </button>
+                <dialog
+                  ref={eventPreviewRef}
+                  aria-labelledby="event-preview-title"
+                  className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-yellow-400/20 bg-neutral-950 p-6 text-white backdrop:bg-black/75"
+                >
+                  <h3 id="event-preview-title" className="text-xl font-semibold">Find someone to go with</h3>
+                  <p className="mt-3 text-xs text-gray-400">Fictional profile example</p>
+                  <p className="mt-1 text-sm text-gray-200">Nisha wants to try a campus event for the first time. She would go if someone else was new too.</p>
+                  <p className="mt-3 text-sm text-gray-300">Explore student profiles and find a shared interest to start a conversation.</p>
+                  <a
+                    href={PLAY_STORE_URL + '&referrer=' + encodeURIComponent('utm_source=zynvo_web&utm_medium=event_overview&utm_campaign=campus_discovery')}
+                    className="mt-3 inline-block rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300"
+                  >
+                    Get Zynvo on Google Play
+                  </a>
+                  <form method="dialog" className="mt-3">
+                    <button className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold hover:bg-white/10">
+                      Back to event
+                    </button>
+                  </form>
+                </dialog>
               </aside>
 
               {/* Paid Event Details - Only for Event Founders */}

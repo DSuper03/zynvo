@@ -262,10 +262,10 @@ export default function UserSearchPage() {
     const example = choices[Math.floor(Math.random() * choices.length)];
     remaining.splice(remaining.indexOf(example), 1);
     lastProfiles.current.set(title, example);
-    setDiscovery({ title, example });
+    setDiscovery({ title, example, examples });
   }
 
-  const [discovery, setDiscovery] = useState<{ title: string; example: string } | null>(null);
+  const [discovery, setDiscovery] = useState<{ title: string; example: string; examples: string[] } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchPage, setSearchPage] = useState(1);
@@ -603,7 +603,10 @@ export default function UserSearchPage() {
             <h2 id="mobile-discovery-title" className="text-2xl font-bold text-white">{discovery.title}</h2>
             <div className="mt-4 rounded-xl bg-white/5 p-4">
               <p className="text-xs text-gray-400">Fictional profile example</p>
-              <p className="mt-1 text-white">{discovery.example}</p>
+              <p aria-live="polite" className="mt-1 text-white">{discovery.example}</p>
+              <button type="button" onClick={() => openDiscovery(discovery.title, discovery.examples)} className="mt-3 text-sm font-semibold text-yellow-300 underline underline-offset-4">
+                Show another example
+              </button>
             </div>
             <p className="mt-3 text-sm leading-6 text-gray-300">Start with your campus community on Zynvo for Android. Add your interests to your profile so other students can see what you enjoy.</p>
             <a href={discoveryStoreUrl('zyncers')} target="_blank" rel="noopener noreferrer" className="mt-6 block rounded-xl bg-yellow-400 px-5 py-3 text-center font-bold text-gray-950 transition hover:bg-yellow-300">Get it on Google Play</a>
