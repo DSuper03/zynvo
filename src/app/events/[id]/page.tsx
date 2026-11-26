@@ -1624,21 +1624,6 @@ const Eventid = () => {
                 </aside>
               )}
 
-              <aside className="mb-6 rounded-xl border border-yellow-400/20 bg-yellow-400/5 p-4">
-                <h3 className="font-semibold text-white">
-                  {eventTeamSize > 1 ? 'Who would you team up with?' : 'Meet someone before you go'}
-                </h3>
-                <p className="mt-1 text-sm text-gray-300">
-                  Explore student profiles and find a shared interest to start a conversation.
-                </p>
-                <a
-                  href={PLAY_STORE_URL + '&referrer=' + encodeURIComponent('utm_source=zynvo_web&utm_medium=event_overview&utm_campaign=campus_discovery')}
-                  className="mt-3 inline-block rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300"
-                >
-                  Get Zynvo on Google Play
-                </a>
-              </aside>
-
               {/* Paid Event Details - Only for Event Founders */}
               {isFounder && data.isPaidEvent && (
                 <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">

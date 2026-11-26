@@ -155,17 +155,19 @@ export default function RootLayout({
         <Script id="retire-service-worker" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.getRegistrations().then((registrations) =>
-                Promise.all(registrations.filter((registration) => {
+              (async () => {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                const retired = registrations.filter((registration) => {
                   const worker = registration.active || registration.waiting || registration.installing;
                   return worker && new URL(worker.scriptURL).pathname === '/sw.js';
-                }).map((registration) => registration.unregister()))
-              ).catch(() => {});
-            }
-            if ('caches' in window) {
-              caches.keys().then((names) => Promise.all(
-                names.filter((name) => name.startsWith('workbox-')).map((name) => caches.delete(name))
-              )).catch(() => {});
+                });
+                if (!retired.length) return;
+                await Promise.all(retired.map((registration) => registration.unregister()));
+                if ('caches' in window) {
+                  const names = await caches.keys();
+                  await Promise.all(names.map((name) => caches.delete(name)));
+                }
+              })().catch(() => {});
             }
           `}
         </Script>
