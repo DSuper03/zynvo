@@ -58,6 +58,7 @@ const Hero = () => {
             </Link>
 
             <a
+              data-app-download="home_hero_button"
               href={PLAY_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"
@@ -86,6 +87,7 @@ const Hero = () => {
               src="/posters/openpeeps.png"
               alt="Illustrated crowd of students"
               fill
+              priority
               className="object-cover object-center"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
@@ -96,6 +98,7 @@ const Hero = () => {
             whileInView={{ opacity: 1, y: 0, rotate: -4 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, ease: 'easeOut', delay: 0.35 }}
+            data-app-download="home_hero_image"
             href={PLAY_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"

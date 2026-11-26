@@ -1,5 +1,6 @@
 'use client';
 
+import EventRecapPreview from '@/components/EventRecapPreview';
 import { setClubGroup, track } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,6 +20,7 @@ import {
   MapPin,
   Globe,
   CheckSquare,
+  ScanLine,
   Square,
   AlarmClock,
   Phone,
@@ -60,6 +62,10 @@ import { buildAuthHref } from '@/lib/authReturnTo';
 import { isAdminEmail } from '@/lib/zynvoStaff';
 import { ErrorState, EventDetailSkeleton } from '@/components/feedback';
 import TeamSection from './components/TeamSection';
+import RichDescription from '@/components/RichDescription';
+import EventTagChips from '@/components/EventTagChips';
+import { descriptionToPlainText } from '@/lib/richDescription';
+import EventTicketPanel from '@/components/EventTicketPanel';
 import { getSafeErrorMessage } from '@/lib/safe-error';
 import EventEditModal from '../components/EventEditModal';
 import { useSchedule } from '@/hooks/useSchedule';
@@ -193,9 +199,12 @@ const Eventid = () => {
   const canViewAttendees = isFounder || isAdminEmail(currentUser?.email);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [userDataLoaded, setUserDataLoaded] = useState(false);
+  // Bumped after registering so the new pass id is fetched without a reload.
+  const [userRefreshNonce, setUserRefreshNonce] = useState(0);
   const [activeDay, setActiveDay] = useState(1);
   const [eventInviteFullUrl, setEventInviteFullUrl] = useState('');
   const [copiedInviteLink, setCopiedInviteLink] = useState(false);
+  const eventPreviewRef = useRef<HTMLDialogElement>(null);
   const inviteLinkInputRef = useRef<HTMLInputElement>(null);
   const { data: schedule = [] } = useSchedule(id, token);
   const { totalSessions } = getScheduleStats(schedule);
@@ -454,7 +463,8 @@ const Eventid = () => {
     }
 
     async function fetchUserData() {
-      setUserDataLoaded(false);
+      // Only block the UI on the first load, not on the post-registration refresh.
+      if (userRefreshNonce === 0) setUserDataLoaded(false);
 
       try {
         const userResponse = await axios.get(
@@ -486,7 +496,7 @@ const Eventid = () => {
     }
 
     fetchUserData();
-  }, [token]);
+  }, [token, userRefreshNonce]);
 
   useEffect(() => {
     if (!id) return;
@@ -814,6 +824,8 @@ const Eventid = () => {
         });
         console.log('Registration successful');
         setForkedUpId(resp.data.ForkedUpId);
+        // Re-read the user so their new pass id shows up in the ticket panel
+        setUserRefreshNonce((n) => n + 1);
         // Immediately mark this event as attended so WhatsApp / UI update without full reload
         const sid = String(id);
         setUserAttendedEventIds((prev) =>
@@ -881,6 +893,23 @@ const Eventid = () => {
     const sid = String(id);
     return userAttendedEventIds.some((eid) => String(eid) === sid);
   };
+  // The signed-in student's pass for this event (same source as the dashboard)
+  const myPassId: string | null = (() => {
+    if (!id || !Array.isArray(currentUser?.eventAttended)) return null;
+    const mine = currentUser.eventAttended.find(
+      (a: any) => String(a?.event?.id ?? '') === String(id)
+    );
+    return mine?.uniquePassId ?? mine?.passId ?? null;
+  })();
+  // null = not scanned yet; undefined = the server didn't return the field
+  const myCheckedInAt: string | null | undefined = (() => {
+    if (!id || !Array.isArray(currentUser?.eventAttended)) return undefined;
+    const mine = currentUser.eventAttended.find(
+      (a: any) => String(a?.event?.id ?? '') === String(id)
+    );
+    if (!mine || !('checkedInAt' in mine)) return undefined;
+    return mine.checkedInAt ?? null;
+  })();
   const formatDateRange = (start?: string, end?: string) => {
     if (!start && !end) return 'TBD';
     const s = start ? new Date(start) : null;
@@ -915,6 +944,23 @@ const Eventid = () => {
     graceEnd.setDate(graceEnd.getDate() + 1);
     return new Date() > graceEnd;
   }, [data.endDate]);
+
+  // While the ticket shows "awaiting", re-read the user every 15 s (and when the
+  // tab comes back into view) so "Checked in" appears after an organiser scans it.
+  useEffect(() => {
+    if (!token || !myPassId || myCheckedInAt !== null || isEventEnded) return;
+    const refresh = () => {
+      if (document.visibilityState === 'visible') {
+        setUserRefreshNonce((n) => n + 1);
+      }
+    };
+    const timer = setInterval(refresh, 15000);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, [token, myPassId, myCheckedInAt, isEventEnded]);
 
   const normalizedUserCollege = useMemo(
     () => (currentUser?.collegeName || '').trim().toLowerCase(),
@@ -979,7 +1025,7 @@ const Eventid = () => {
     const params = new URLSearchParams({
       action: 'TEMPLATE',
       text: data.EventName || 'Event',
-      details: data.description || '',
+      details: descriptionToPlainText(data.description || ''),
       location: displayLocation,
     });
     if (start && end) {
@@ -1026,7 +1072,7 @@ const Eventid = () => {
         eventName={data.EventName}
         collegeName={data.university}
         eventType={data.EventMode}
-        description={data.description}
+        description={descriptionToPlainText(data.description || '')}
         startDate={data.startDate}
         endDate={data.endDate}
         eventMode={data.EventMode}
@@ -1077,6 +1123,7 @@ const Eventid = () => {
                 <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-white leading-[1.15] tracking-tight">
                   {data.EventName || 'Event Title'}
                 </h1>
+                <EventTagChips tags={rawEvent?.tags} className="mt-3" />
               </div>
 
               {/* Event Meta Chips */}
@@ -1217,6 +1264,13 @@ const Eventid = () => {
                         Approval Queue
                       </Button>
                     )}
+                    <Button
+                      onClick={() => router.push(`/events/${id}/check-in`)}
+                      className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto flex items-center justify-center gap-2"
+                    >
+                      <ScanLine className="w-4 h-4" />
+                      Scan Check-in
+                    </Button>
                     <Button
                       onClick={() => setIsEditModalOpen(true)}
                       className="min-h-11 rounded-lg px-5 py-2.5 font-medium bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
@@ -1408,6 +1462,22 @@ const Eventid = () => {
                 </div>
               )}
 
+              {/* Ticket — only for registered students who have a pass */}
+              {signedin && isUserAttendingEvent() && myPassId && (
+                <EventTicketPanel
+                  eventName={data.EventName}
+                  startDate={data.startDate}
+                  endDate={data.endDate}
+                  clubName={rawEvent?.clubName || ''}
+                  collegeName={data.university || currentUser?.collegeName || ''}
+                  passId={String(myPassId)}
+                  attendeeName={currentUser?.name || undefined}
+                  attendeeCollege={currentUser?.collegeName || undefined}
+                  attendeeAvatar={currentUser?.profileAvatar || undefined}
+                  checkedInAt={myCheckedInAt}
+                />
+              )}
+
               {/* WhatsApp — hero left column, aligned with poster row */}
               {data.whatsappLink && isUserAttendingEvent() && (
                 <div className="mt-4 p-4 bg-gray-900/80 border border-gray-800 rounded-lg">
@@ -1501,10 +1571,58 @@ const Eventid = () => {
               <h2 className="text-xl font-bold text-yellow-400 mb-4">
                 About This Event
               </h2>
-              <p className="text-gray-300 leading-relaxed mb-6">
-                {data.description ||
-                  'Event description will be available soon...'}
-              </p>
+              <RichDescription
+                text={data.description}
+                className="mb-6 text-gray-300"
+                empty={
+                  <p className="mb-6 text-gray-300 leading-relaxed">
+                    Event description will be available soon...
+                  </p>
+                }
+              />
+
+              {isEventEnded ? (
+                <EventRecapPreview eventId={id} />
+              ) : (
+                <aside className="mb-6 rounded-xl border border-yellow-400/20 bg-yellow-400/5 p-4">
+                  <h3 className="font-semibold text-white">
+                    {eventTeamSize > 1 ? 'Who would you team up with?' : 'Meet someone before you go'}
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-300">
+                    Explore student profiles and find a shared interest to start a conversation.
+                  </p>
+                  <button
+                    type="button"
+                    aria-haspopup="dialog"
+                    onClick={() => eventPreviewRef.current?.showModal()}
+                    className="mt-3 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300"
+                  >
+                    Find someone to go with
+                  </button>
+                  <dialog
+                    ref={eventPreviewRef}
+                    aria-labelledby="event-preview-title"
+                    className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-yellow-400/20 bg-neutral-950 p-6 text-white backdrop:bg-black/75"
+                  >
+                    <h3 id="event-preview-title" className="text-xl font-semibold">Find someone to go with</h3>
+                    <p className="mt-3 text-xs text-gray-400">Fictional profile example</p>
+                    <p className="mt-1 text-sm text-gray-200">Nisha wants to try a campus event for the first time. She would go if someone else was new too.</p>
+                    <p className="mt-3 text-sm text-gray-300">Explore student profiles and find a shared interest to start a conversation.</p>
+                    <a
+                      data-app-download="event_overview"
+                      href={PLAY_STORE_URL + '&referrer=' + encodeURIComponent('utm_source=zynvo_web&utm_medium=event_overview&utm_campaign=campus_discovery')}
+                      className="mt-3 inline-block rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300"
+                    >
+                      Get Zynvo on Google Play
+                    </a>
+                    <form method="dialog" className="mt-3">
+                      <button className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold hover:bg-white/10">
+                        Back to event
+                      </button>
+                    </form>
+                  </dialog>
+                </aside>
+              )}
 
               <aside className="mb-6 rounded-xl border border-yellow-400/20 bg-yellow-400/5 p-4">
                 <h3 className="font-semibold text-white">

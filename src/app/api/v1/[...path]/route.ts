@@ -16,6 +16,7 @@ const PUBLIC_GET_PREFIXES = [
   '/api/v1/events/event/',
   '/api/v1/events/all',
   '/api/v1/events/search',
+  '/api/v1/events/tags',
   '/api/v1/events/event-details',
   '/api/v1/events/user-details',
   '/api/v1/clubs/getAll',
@@ -66,6 +67,7 @@ const EDGE_CACHE_SECONDS: [prefix: string, seconds: number][] = [
   ['/api/v1/events/all', 60],
   ['/api/v1/events/event/', 60],
   ['/api/v1/events/search', 30],
+  ['/api/v1/events/tags', 300],
   ['/api/v1/clubs/getAll', 120],
   ['/api/v1/clubs/public', 120],
   ['/api/v1/clubs/getClubs', 120],
@@ -143,6 +145,8 @@ async function directFetch(
     'content-length',
     'cache-control',
     'etag',
+    'retry-after',
+    'retry-after',
     'x-request-id',
   ]);
   upstream.headers.forEach((value, key) => {

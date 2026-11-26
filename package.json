@@ -12,7 +12,9 @@
     "type-check": "tsc --noEmit",
     "type-check:node": "node node_modules/typescript/bin/tsc --noEmit",
     "build:node": "node node_modules/next/dist/bin/next build --webpack",
-    "build:optimized": "next build && next-sitemap"
+    "build:optimized": "next build && next-sitemap",
+    "test": "node --test test/*.test.cjs",
+    "test:leaderboard": "node --test test/leaderboard.test.cjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.10",
@@ -51,6 +53,7 @@
     "gsap": "^3.14.2",
     "html-to-image": "^1.11.13",
     "imagekit": "^6.0.0",
+    "jsqr": "^1.4.0",
     "jwt-decode": "^4.0.0",
     "linkedom": "^0.18.12",
     "lucide-react": "^0.506.0",

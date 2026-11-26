@@ -56,6 +56,9 @@ export type AnalyticsEvent =
   | 'post_voted'
   | 'post_shared'
   | 'search_performed'
+  // app acquisition
+  | 'app_download_cta_viewed'
+  | 'app_download_clicked'
   // other
   | 'ai_queried'
   | 'ai_response_received'
@@ -71,9 +74,9 @@ function safe(fn: () => void): void {
   }
 }
 
-export function track(event: AnalyticsEvent, properties?: Props): void {
+export function track(event: AnalyticsEvent, properties?: Props, options?: Parameters<typeof posthog.capture>[2]): void {
   safe(() => {
-    posthog.capture(event, properties);
+    posthog.capture(event, properties, options);
   });
 }
 

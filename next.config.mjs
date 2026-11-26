@@ -127,6 +127,9 @@ const nextConfig = {
   reactStrictMode: true,
   // ESLint is configured via next lint / eslint config (not in next.config in Next 15+)
   experimental: {
+    // Keep production builds within CI and developer-machine memory limits.
+    cpus: 2,
+    webpackMemoryOptimizations: true,
     // optimizeCss requires critters package - disabled for now
     optimizeCss: false,
     externalDir: true,
@@ -287,6 +290,7 @@ const nextConfig = {
 
 };
 
+// Apply bundle analyzer and export
 const bundledConfig = withBundleAnalyzer(nextConfig);
 
 export default withSentryConfig(bundledConfig, {

@@ -11,7 +11,7 @@ import {
 
 import LandingHeader from '@/components/landingHeader';
 import Image from 'next/image';
-import { PLAY_STORE_URL, PLAY_STORE_PROMO } from '@/lib/playstore';
+import { PLAY_STORE_URL, PLAY_STORE_PROMO, discoveryStoreUrl } from '@/lib/playstore';
 import { Skiper39 } from '@/components/SkipperLanding';
 import { cn } from '@/lib/utils';
 import { CanvasText } from '@/components/ui/canvas-text';
@@ -36,48 +36,8 @@ export default function Home() {
   const heroRef = useRef(null);
   const [discoverPosts, setDiscoverPosts] =
     useState<DiscoverPostPreview[]>([]);
-  // PERFORMANCE: Store timeout IDs so we can clear on unmount and avoid leaks + setState after unmount
-  const floatingTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-
-  useEffect(() => {
-    const createFloatingElement = () => {
-      const element = document.createElement('div');
-      element.classList.add('floating-element');
-
-      element.style.left = `${Math.random() * 100}vw`;
-      element.style.top = `${Math.random() * 100}vh`;
-      element.style.width = `${Math.random() * 100 + 50}px`;
-      element.style.height = `${Math.random() * 100 + 50}px`;
-      element.style.opacity = `${Math.random() * 0.3 + 0.2}`;
-
-      const container = document.querySelector('.background-animation');
-      if (container) {
-        container.appendChild(element);
-      }
-
-      const duration = Math.random() * 50 + 30;
-      element.style.animation = `float ${duration}s infinite linear`;
-
-      const timeoutId = setTimeout(() => {
-        if (element.parentNode) {
-          element.parentNode.removeChild(element);
-        }
-      }, duration * 1000);
-      floatingTimeoutsRef.current.push(timeoutId);
-    };
-
-    for (let i = 0; i < 5; i++) {
-      createFloatingElement();
-    }
-
-    const interval = setInterval(createFloatingElement, 5000);
-
-    return () => {
-      clearInterval(interval);
-      floatingTimeoutsRef.current.forEach((id) => clearTimeout(id));
-      floatingTimeoutsRef.current = [];
-    };
-  }, []);
+  // The old floating-element timer had no mounted container (.background-animation
+  // is not in this page), so it only leaked timers. Removed.
 
   useEffect(() => {
     const loadDiscoverPosts = async () => {
@@ -365,6 +325,17 @@ export default function Home() {
         </section>
         <TopClubs />
         <Hero />
+        <section className="mx-auto my-8 max-w-5xl px-6" aria-labelledby="home-campus-discovery">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-yellow-400/30 bg-neutral-950 p-6 text-white">
+            <div>
+              <h2 id="home-campus-discovery" className="text-xl font-bold">Who on campus shares your interests?</h2>
+              <p className="mt-1 text-sm text-gray-300">Find a hackathon teammate, talk anime, or meet someone to build with.</p>
+            </div>
+            <a data-app-download="home" href={discoveryStoreUrl('home')} className="rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black hover:bg-yellow-300">
+              Get Zynvo on Google Play
+            </a>
+          </div>
+        </section>
         {/*     
         <ZynvoDashboard /> */}
         <Features discoverPosts={discoverPosts} />
@@ -408,6 +379,7 @@ export default function Home() {
 
           {/* Play Store promo */}
           <a
+            data-app-download="home_banner"
             href={PLAY_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"

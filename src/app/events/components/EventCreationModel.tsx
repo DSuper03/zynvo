@@ -22,6 +22,9 @@ import { Card } from '@/components/ui/card';
 import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/RichTextEditor';
+import TagInput from '@/components/TagInput';
+import { descriptionToPlainText } from '@/lib/richDescription';
 import {
   Select,
   SelectContent,
@@ -93,6 +96,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     paymentAmount: 0,
     maxParticipants: '',
     customQuestions: [],
+    tags: [],
   });
 
   const router = useRouter();
@@ -1074,13 +1078,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                     >
                       Description*
                     </label>
-                    <Textarea
+                    <RichTextEditor
                       id="description"
-                      name="description"
-                      rows={4}
                       value={formData.description}
-                      onChange={handleChange}
-                      className="w-full bg-gray-800 border border-gray-700 focus:border-yellow-500 text-white px-4 py-2 rounded-lg focus:outline-none"
+                      onChange={(value) =>
+                        setFormData((prev: any) => ({ ...prev, description: value }))
+                      }
+                      invalid={!!errors.description}
+                      rows={6}
                       placeholder="Describe your event"
                     />
                     {errors.description && (
@@ -1132,6 +1137,23 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                         {errors.eventType}
                       </p>
                     )}
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="event-tags"
+                      className="block text-sm font-medium text-yellow-400 mb-1"
+                    >
+                      Tags{' '}
+                      <span className="font-normal text-gray-500">(optional)</span>
+                    </label>
+                    <TagInput
+                      id="event-tags"
+                      value={formData.tags || []}
+                      onChange={(tags) =>
+                        setFormData((prev: any) => ({ ...prev, tags }))
+                      }
+                    />
                   </div>
                 </div>
               </div>
@@ -2018,7 +2040,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       )}
                       {formData.description && (
                         <p className="text-xs text-gray-400 mt-1.5 line-clamp-2">
-                          {formData.description}
+                          {descriptionToPlainText(formData.description)}
                         </p>
                       )}
                     </div>

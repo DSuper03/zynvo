@@ -1,4 +1,5 @@
 'use client';
+import DiscoverCampusPreviews from '@/components/DiscoverCampusPreviews';
 import axios from 'axios';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -372,8 +373,11 @@ export default function Feed() {
               </div>
             </div>
 
+            <DiscoverCampusPreviews />
+
             {/* Desktop top Play Store promo (prominent) */}
             <a
+              data-app-download="discover_top"
               href={PLAY_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"
@@ -439,6 +443,7 @@ export default function Feed() {
 
             {/* Mobile Play Store promo - top of feed for visibility */}
             <a
+              data-app-download="discover_feed"
               href={PLAY_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"
@@ -569,6 +574,7 @@ export default function Feed() {
               {/* Desktop Play Store promo */}
               <div className="sticky bottom-0 z-10 mt-4 pt-2 bg-gradient-to-t from-black/90 via-black/60 to-transparent pb-2">
                 <a
+                  data-app-download="discover_bottom"
                   href={PLAY_STORE_URL}
                   target="_blank"
                   rel="noopener noreferrer"

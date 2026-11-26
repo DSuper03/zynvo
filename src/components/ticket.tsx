@@ -14,6 +14,8 @@ type EventBadgeProps = {
   status?: 'upcoming' | 'active' | 'past';
   attendeeName?: string;
   attendeeCollege?: string;
+  /** Whether an organiser has scanned this pass. Omit when it isn't known. */
+  checkInState?: 'awaiting' | 'checked_in';
 };
 
 const EventBadgeCard: React.FC<EventBadgeProps> = ({
@@ -28,13 +30,18 @@ const EventBadgeCard: React.FC<EventBadgeProps> = ({
   status = 'upcoming',
   attendeeName,
   attendeeCollege,
+  checkInState,
 }) => {
   const badgeStyles: Record<NonNullable<EventBadgeProps['status']>, { label: string; color: string; bg: string }> = {
     upcoming: { label: 'Upcoming', color: 'text-yellow-300', bg: 'bg-yellow-500/10' },
     active: { label: 'Active', color: 'text-green-300', bg: 'bg-green-500/10' },
     past: { label: 'Past', color: 'text-gray-300', bg: 'bg-gray-500/10' },
   };
-  const tone = badgeStyles[status];
+  const checkedIn = checkInState === 'checked_in';
+  // Once scanned, the pass says so instead of Upcoming/Active.
+  const tone = checkedIn
+    ? { label: 'Checked in', color: 'text-emerald-300', bg: 'bg-emerald-500/10' }
+    : badgeStyles[status];
   const showQr = isQrLoading || !!qrCodeImage;
 
   return (
@@ -106,7 +113,11 @@ const EventBadgeCard: React.FC<EventBadgeProps> = ({
           <div className="grid grid-cols-2 gap-3 text-xs text-gray-300">
             <div className="bg-white/5 border border-white/10 rounded-xl p-3">
               <div className="text-yellow-200 font-semibold text-[11px]">Check-in</div>
-              <div className="text-base font-semibold mt-1 text-white">Scan QR</div>
+              <div
+                className={`text-base font-semibold mt-1 ${checkedIn ? 'text-emerald-300' : 'text-white'}`}
+              >
+                {checkedIn ? 'Done ✓' : checkInState === 'awaiting' ? 'Awaiting scan' : 'Scan QR'}
+              </div>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-xl p-3">
               <div className="text-yellow-200 font-semibold text-[11px]">Status</div>

@@ -12,7 +12,10 @@ export interface ProxyErrorPayload {
   timestamp: string;
 }
 
-function makeErrorPayload(message: string, requestId: string): ProxyErrorPayload {
+function makeErrorPayload(
+  message: string,
+  requestId: string
+): ProxyErrorPayload {
   return {
     success: false,
     message,
@@ -24,9 +27,12 @@ function makeErrorPayload(message: string, requestId: string): ProxyErrorPayload
 function errorResponse(
   message: string,
   requestId: string,
-  status: number,
+  status: number
 ): NextResponse {
-  const headers = new Headers({ 'Content-Type': 'application/json' });
+  const headers = new Headers({
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-store',
+  });
   applySecurityHeaders(headers);
 
   return NextResponse.json(makeErrorPayload(message, requestId), {
@@ -36,7 +42,11 @@ function errorResponse(
 }
 
 export function gatewayTimeout(requestId: string): NextResponse {
-  return errorResponse('The upstream service did not respond in time.', requestId, 504);
+  return errorResponse(
+    'The upstream service did not respond in time.',
+    requestId,
+    504
+  );
 }
 
 export function badGateway(requestId: string): NextResponse {
@@ -47,16 +57,28 @@ export function internalError(requestId: string): NextResponse {
   return errorResponse('An internal error occurred.', requestId, 500);
 }
 
-export function unauthorized(requestId: string, message = 'Authentication required.'): NextResponse {
+export function unauthorized(
+  requestId: string,
+  message = 'Authentication required.'
+): NextResponse {
   return errorResponse(message, requestId, 401);
 }
 
-export function forbidden(requestId: string, message = 'Access denied.'): NextResponse {
+export function forbidden(
+  requestId: string,
+  message = 'Access denied.'
+): NextResponse {
   return errorResponse(message, requestId, 403);
 }
 
 export function tooManyRequests(requestId: string): NextResponse {
-  return errorResponse('Too many requests. Please slow down and try again.', requestId, 429);
+  const response = errorResponse(
+    'Too many requests. Please slow down and try again.',
+    requestId,
+    429
+  );
+  response.headers.set('Retry-After', '60');
+  return response;
 }
 
 export function badRequest(requestId: string, message: string): NextResponse {
@@ -69,12 +91,16 @@ export function badRequest(requestId: string, message: string): NextResponse {
  */
 export async function normalizeUpstreamError(
   upstream: Response,
-  requestId: string,
+  requestId: string
 ): Promise<NextResponse> {
   const status = upstream.status;
 
   if (status >= 500) {
-    return errorResponse('The upstream service returned an error.', requestId, 502);
+    return errorResponse(
+      'The upstream service returned an error.',
+      requestId,
+      502
+    );
   }
 
   // For 4xx, attempt to surface a safe message
@@ -92,5 +118,15 @@ export async function normalizeUpstreamError(
     // Leave default message
   }
 
-  return errorResponse(message, requestId, status);
+  const response = errorResponse(message, requestId, status);
+  const retryAfter = upstream.headers.get('retry-after');
+  if (
+    status === 429 &&
+    retryAfter &&
+    retryAfter.length < 100 &&
+    (/^\d+$/.test(retryAfter) || Number.isFinite(Date.parse(retryAfter)))
+  ) {
+    response.headers.set('Retry-After', retryAfter);
+  }
+  return response;
 }

@@ -77,6 +77,7 @@ export function AudienceLanding({
         {/* Play Store promo */}
         <section className="mx-auto max-w-3xl px-4 pb-4 sm:px-6">
           <a
+            data-app-download="audience_landing"
             href={PLAY_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
