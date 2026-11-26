@@ -10,11 +10,12 @@ import {
   MapPin,
   MessageCircle,
   Download,
+  PenSquare,
   Sparkles,
   X,
 } from 'lucide-react';
 
-import DownloadAndroidButton from './components/DownloadAndroidButton';
+import CreatePostButton from './components/CreatePostButton';
 import { PostData } from '@/types/global-Interface';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -178,6 +179,8 @@ export default function Feed() {
   } | null>(null);
 
   const router = useRouter();
+  const downloadDialogRef = useRef<HTMLDialogElement>(null);
+  const openDownloadDialog = () => downloadDialogRef.current?.showModal();
 
   // Shared event pins power the desktop masonry sidebar and mobile scroller.
   const sliderEvents = discoverEventPins;
@@ -363,7 +366,7 @@ export default function Feed() {
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Responsive buttons/actions row */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              {/* Mobile View - Profile Header and Android Download */}
+              {/* Mobile View - Profile Header and Create Post */}
               <div className="flex sm:hidden items-center justify-between gap-3 w-full">
                 {/* Profile Header Compact - Left side */}
                 <div className="flex-1 min-w-0">
@@ -375,31 +378,25 @@ export default function Feed() {
                   {/* Notification Dropdown */}
                   <NotificationDropdown />
 
-                  {/* Android Download Button */}
                   <Button
-                    asChild
-                    className="h-12 px-3 rounded-full flex items-center gap-2 justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_10px_35px_rgb(0,0,0,0.18)] transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-yellow-500 via-yellow-400 to-amber-300 hover:from-yellow-500 hover:via-yellow-500 hover:to-yellow-400 border border-yellow-300/40 relative overflow-hidden"
+                    type="button"
+                    onClick={openDownloadDialog}
+                    aria-haspopup="dialog"
+                    aria-label="Create Post"
+                    className="h-12 w-12 rounded-full bg-yellow-400 text-black hover:bg-yellow-300"
                   >
-                    <a
-                      href={PLAY_STORE_URL}
-                      data-app-download="discover_header_mobile"
-                    >
-                      <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                        <span className="absolute -inset-[120%] bg-white/20 rotate-12 translate-x-[-20%] group-hover:translate-x-[60%] transition-transform duration-700 ease-out" />
-                      </span>
-                      <Download className="h-5 w-5 shrink-0 text-black" />
-                      <span className="text-xs font-semibold text-black">
-                        Download Android
-                      </span>
-                    </a>
+                    <PenSquare aria-hidden className="h-5 w-5" />
                   </Button>
                 </div>
               </div>
 
-              {/* Desktop View - Android Download and Notifications */}
+              {/* Desktop View - Create Post and Notifications */}
               <div className="hidden sm:flex items-center gap-3">
                 <NotificationDropdown />
-                <DownloadAndroidButton className="w-full sm:w-auto" />
+                <CreatePostButton
+                  onClick={openDownloadDialog}
+                  className="w-full sm:w-auto"
+                />
               </div>
             </div>
 
@@ -540,19 +537,15 @@ export default function Feed() {
                   <EmptyState
                     icon={MessageCircle}
                     title="No posts yet"
-                    description="Download the Android app to be the first to share something with your campus — updates, events, or questions."
+                    description="Be the first to share something with your campus — updates, events, or questions."
                   >
                     <Button
                       type="button"
-                      asChild
+                      onClick={openDownloadDialog}
+                      aria-haspopup="dialog"
                       className="min-h-11 bg-yellow-500 hover:bg-yellow-400 text-black px-6 font-medium"
                     >
-                      <a
-                        href={PLAY_STORE_URL}
-                        data-app-download="discover_empty"
-                      >
-                        Download Android
-                      </a>
+                      Create Post
                     </Button>
                   </EmptyState>
                 </div>
@@ -634,6 +627,63 @@ export default function Feed() {
           </aside>
         </div>
       </div>
+
+      <dialog
+        ref={downloadDialogRef}
+        aria-labelledby="download-to-post-title"
+        aria-describedby="download-to-post-description"
+        onClick={(event) => {
+          if (event.target !== event.currentTarget) return;
+          const bounds = event.currentTarget.getBoundingClientRect();
+          if (
+            event.clientX < bounds.left ||
+            event.clientX > bounds.right ||
+            event.clientY < bounds.top ||
+            event.clientY > bounds.bottom
+          ) {
+            event.currentTarget.close();
+          }
+        }}
+        className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-yellow-400/20 bg-gray-950 p-6 text-white shadow-2xl backdrop:bg-black/80"
+      >
+        <div className="mb-5 flex items-center justify-between">
+          <Download aria-hidden className="h-7 w-7 text-yellow-400" />
+          <button
+            type="button"
+            autoFocus
+            aria-label="Close"
+            onClick={() => downloadDialogRef.current?.close()}
+            className="rounded-full p-2 text-gray-400 hover:bg-white/10 hover:text-white"
+          >
+            <X aria-hidden className="h-5 w-5" />
+          </button>
+        </div>
+        <h2 id="download-to-post-title" className="text-2xl font-bold">
+          Create posts on the Zynvo app
+        </h2>
+        <p
+          id="download-to-post-description"
+          className="mt-3 text-sm leading-6 text-gray-300"
+        >
+          Download Zynvo for Android to share posts with your campus. Posting is
+          available in the app.
+        </p>
+        <a
+          href={PLAY_STORE_URL}
+          data-app-download="discover_create_post_modal"
+          className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-yellow-400 px-5 py-3 font-semibold text-black hover:bg-yellow-300"
+        >
+          <Download aria-hidden className="h-5 w-5" />
+          Download Android
+        </a>
+        <button
+          type="button"
+          onClick={() => downloadDialogRef.current?.close()}
+          className="mt-3 w-full rounded-xl border border-white/10 px-5 py-3 text-sm text-gray-300 hover:bg-white/5"
+        >
+          Maybe later
+        </button>
+      </dialog>
 
       {/* Image Modal - click backdrop to close */}
       {isImageModalOpen && selectedImage && (
