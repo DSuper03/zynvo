@@ -63,6 +63,7 @@ const PUBLIC_POST_PREFIXES = [
  * tickets/passes): the edge cache does not vary by viewer.
  */
 const EDGE_CACHE_SECONDS: [prefix: string, seconds: number][] = [
+  ['/api/v1/leaderboard', 60],
   ['/api/v1/events/all', 60],
   ['/api/v1/events/event/', 60],
   ['/api/v1/events/search', 30],

@@ -4,17 +4,28 @@ import axios from 'axios';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { CalendarDays, Flame, MapPin, MessageCircle, PenSquare, Sparkles, X } from 'lucide-react';
+import {
+  CalendarDays,
+  Flame,
+  MapPin,
+  MessageCircle,
+  Download,
+  Sparkles,
+  X,
+} from 'lucide-react';
 
-import CreatePostButton from './components/CreatePostButton';
-import CreatePostModal from './components/CreatePostModal';
+import DownloadAndroidButton from './components/DownloadAndroidButton';
 import { PostData } from '@/types/global-Interface';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { setPostCache } from '@/lib/postCache';
 import ProfileHeaderCompact from '@/components/ProfileHeaderCompact';
 import { NotificationDropdown } from '@/components/notifications';
-import { EmptyState, ErrorState, FeedPostSkeleton } from '@/components/feedback';
+import {
+  EmptyState,
+  ErrorState,
+  FeedPostSkeleton,
+} from '@/components/feedback';
 import { FeedPostCard } from '@/components/discover/FeedPostCard';
 import { PLAY_STORE_URL, PLAY_STORE_PROMO } from '@/lib/playstore';
 import { track } from '@/lib/analytics';
@@ -40,7 +51,8 @@ const discoverEventPins: DiscoverEventPin[] = [
     category: 'Cultural',
     date: 'Jun 04',
     location: 'Main Auditorium',
-    image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=900&auto=format&fit=crop',
+    image:
+      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=900&auto=format&fit=crop',
     heightClass: 'h-64',
     accent: 'from-pink-500/80 via-purple-500/40',
   },
@@ -49,7 +61,8 @@ const discoverEventPins: DiscoverEventPin[] = [
     category: 'Hackathon',
     date: 'Jun 08',
     location: 'Innovation Lab',
-    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=900&auto=format&fit=crop',
+    image:
+      'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=900&auto=format&fit=crop',
     heightClass: 'h-80',
     accent: 'from-cyan-500/80 via-blue-500/40',
   },
@@ -58,7 +71,8 @@ const discoverEventPins: DiscoverEventPin[] = [
     category: 'Meetup',
     date: 'Jun 10',
     location: 'Cafe Court',
-    image: 'https://images.unsplash.com/photo-1521334884684-d80222895322?q=80&w=900&auto=format&fit=crop',
+    image:
+      'https://images.unsplash.com/photo-1521334884684-d80222895322?q=80&w=900&auto=format&fit=crop',
     heightClass: 'h-56',
     accent: 'from-amber-500/80 via-orange-500/40',
   },
@@ -67,7 +81,8 @@ const discoverEventPins: DiscoverEventPin[] = [
     category: 'Networking',
     date: 'Jun 14',
     location: 'Incubation Cell',
-    image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=900&auto=format&fit=crop',
+    image:
+      'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=900&auto=format&fit=crop',
     heightClass: 'h-72',
     accent: 'from-emerald-500/80 via-teal-500/40',
   },
@@ -76,7 +91,8 @@ const discoverEventPins: DiscoverEventPin[] = [
     category: 'Workshop',
     date: 'Jun 16',
     location: 'Design Studio',
-    image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=900&auto=format&fit=crop',
+    image:
+      'https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=900&auto=format&fit=crop',
     heightClass: 'h-60',
     accent: 'from-violet-500/80 via-fuchsia-500/40',
   },
@@ -85,7 +101,8 @@ const discoverEventPins: DiscoverEventPin[] = [
     category: 'Photography',
     date: 'Jun 18',
     location: 'College Gate',
-    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=900&auto=format&fit=crop',
+    image:
+      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=900&auto=format&fit=crop',
     heightClass: 'h-80',
     accent: 'from-yellow-500/80 via-lime-500/40',
   },
@@ -114,7 +131,9 @@ function EventPinCard({
           sizes={sizes}
           className="object-cover transition-transform duration-500 group-hover:scale-110"
         />
-        <div className={`absolute inset-0 bg-gradient-to-t ${event.accent} to-transparent opacity-85`} />
+        <div
+          className={`absolute inset-0 bg-gradient-to-t ${event.accent} to-transparent opacity-85`}
+        />
         <div className="absolute inset-x-0 bottom-0 p-3">
           <div className="mb-2 inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/45 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-md">
             <Sparkles className="h-3 w-3 text-yellow-300" />
@@ -141,7 +160,6 @@ function EventPinCard({
 
 export default function Feed() {
   const [posts, setPost] = useState<PostData[]>([]);
-  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -154,7 +172,10 @@ export default function Feed() {
 
   // Image modal state
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string } | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{
+    src: string;
+    alt: string;
+  } | null>(null);
 
   const router = useRouter();
 
@@ -219,47 +240,50 @@ export default function Feed() {
     };
   }, [isImageModalOpen, closeImageModal]);
 
-
   // Function to handle post sharing - memoized
-  const handleSharePost = useCallback(async (postId: string, postTitle: string) => {
-    try {
-      const postUrl = `${window.location.origin}/post/${postId}`;
-
-      track('post_shared', {
-        post_id: postId,
-        method: typeof navigator.share === 'function' ? 'native' : 'clipboard',
-        source: 'discover_feed',
-      });
-      // Check if Web Share API is supported (mobile devices)
-      if (navigator.share) {
-        await navigator.share({
-          title: postTitle,
-          text: `Check out this post: ${postTitle}`,
-          url: postUrl,
-        });
-        toast('Post shared successfully!');
-      } else {
-        // Fallback to clipboard copy
-        await navigator.clipboard.writeText(postUrl);
-        toast('Post link copied to clipboard!');
-      }
-    } catch (error) {
-      // Error already surfaced via toast fallbacks
-      // Fallback method for older browsers
+  const handleSharePost = useCallback(
+    async (postId: string, postTitle: string) => {
       try {
         const postUrl = `${window.location.origin}/post/${postId}`;
-        const textArea = document.createElement('textarea');
-        textArea.value = postUrl;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        toast('Post link copied to clipboard!');
-      } catch (fallbackError) {
-        toast('Unable to copy link. Please try again.');
+
+        track('post_shared', {
+          post_id: postId,
+          method:
+            typeof navigator.share === 'function' ? 'native' : 'clipboard',
+          source: 'discover_feed',
+        });
+        // Check if Web Share API is supported (mobile devices)
+        if (navigator.share) {
+          await navigator.share({
+            title: postTitle,
+            text: `Check out this post: ${postTitle}`,
+            url: postUrl,
+          });
+          toast('Post shared successfully!');
+        } else {
+          // Fallback to clipboard copy
+          await navigator.clipboard.writeText(postUrl);
+          toast('Post link copied to clipboard!');
+        }
+      } catch (error) {
+        // Error already surfaced via toast fallbacks
+        // Fallback method for older browsers
+        try {
+          const postUrl = `${window.location.origin}/post/${postId}`;
+          const textArea = document.createElement('textarea');
+          textArea.value = postUrl;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          toast('Post link copied to clipboard!');
+        } catch (fallbackError) {
+          toast('Unable to copy link. Please try again.');
+        }
       }
-    }
-  }, []);
+    },
+    []
+  );
 
   const sliderEventsLength = sliderEvents.length;
 
@@ -308,13 +332,13 @@ export default function Feed() {
   // Infinite scroll handler with debouncing
   useEffect(() => {
     let ticking = false;
-    
+
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           if (
             window.innerHeight + window.scrollY >=
-            document.body.offsetHeight - 200 &&
+              document.body.offsetHeight - 200 &&
             hasMore &&
             !isLoading &&
             !isFetchingMore
@@ -326,7 +350,7 @@ export default function Feed() {
         ticking = true;
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMore, isLoading, isFetchingMore]);
@@ -339,38 +363,43 @@ export default function Feed() {
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Responsive buttons/actions row */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              {/* Mobile View - Profile Header and Create Post Button */}
+              {/* Mobile View - Profile Header and Android Download */}
               <div className="flex sm:hidden items-center justify-between gap-3 w-full">
                 {/* Profile Header Compact - Left side */}
                 <div className="flex-1 min-w-0">
                   <ProfileHeaderCompact />
                 </div>
-                
+
                 {/* Right side actions */}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {/* Notification Dropdown */}
                   <NotificationDropdown />
-                  
-                  {/* Circular Create Post Button */}
+
+                  {/* Android Download Button */}
                   <Button
-                    onClick={() => setIsPostModalOpen(true)}
-                    className="w-12 h-12 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_10px_35px_rgb(0,0,0,0.18)] transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-yellow-500 via-yellow-400 to-amber-300 hover:from-yellow-500 hover:via-yellow-500 hover:to-yellow-400 border border-yellow-300/40 relative overflow-hidden"
+                    asChild
+                    className="h-12 px-3 rounded-full flex items-center gap-2 justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_10px_35px_rgb(0,0,0,0.18)] transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-yellow-500 via-yellow-400 to-amber-300 hover:from-yellow-500 hover:via-yellow-500 hover:to-yellow-400 border border-yellow-300/40 relative overflow-hidden"
                   >
-                    <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                      <span className="absolute -inset-[120%] bg-white/20 rotate-12 translate-x-[-20%] group-hover:translate-x-[60%] transition-transform duration-700 ease-out" />
-                    </span>
-                    <PenSquare className="h-5 w-5 text-black" />
+                    <a
+                      href={PLAY_STORE_URL}
+                      data-app-download="discover_header_mobile"
+                    >
+                      <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <span className="absolute -inset-[120%] bg-white/20 rotate-12 translate-x-[-20%] group-hover:translate-x-[60%] transition-transform duration-700 ease-out" />
+                      </span>
+                      <Download className="h-5 w-5 shrink-0 text-black" />
+                      <span className="text-xs font-semibold text-black">
+                        Download Android
+                      </span>
+                    </a>
                   </Button>
                 </div>
               </div>
 
-              {/* Desktop View - Create Post Button and Notifications */}
+              {/* Desktop View - Android Download and Notifications */}
               <div className="hidden sm:flex items-center gap-3">
                 <NotificationDropdown />
-                <CreatePostButton
-                  onClick={() => setIsPostModalOpen(true)}
-                  className="w-full sm:w-auto"
-                />
+                <DownloadAndroidButton className="w-full sm:w-auto" />
               </div>
             </div>
 
@@ -415,7 +444,10 @@ export default function Feed() {
                   View all
                 </Button>
               </div>
-              <div className="relative w-full overflow-hidden rounded-2xl" ref={sliderRef}>
+              <div
+                className="relative w-full overflow-hidden rounded-2xl"
+                ref={sliderRef}
+              >
                 <div
                   className="flex transition-transform duration-700"
                   style={{ transform: `translateX(-${slideIdx * 100}%)` }}
@@ -508,14 +540,19 @@ export default function Feed() {
                   <EmptyState
                     icon={MessageCircle}
                     title="No posts yet"
-                    description="Be the first to share something with your campus — updates, events, or questions."
+                    description="Download the Android app to be the first to share something with your campus — updates, events, or questions."
                   >
                     <Button
                       type="button"
-                      onClick={() => setIsPostModalOpen(true)}
+                      asChild
                       className="min-h-11 bg-yellow-500 hover:bg-yellow-400 text-black px-6 font-medium"
                     >
-                      Create post
+                      <a
+                        href={PLAY_STORE_URL}
+                        data-app-download="discover_empty"
+                      >
+                        Download Android
+                      </a>
                     </Button>
                   </EmptyState>
                 </div>
@@ -547,7 +584,8 @@ export default function Feed() {
                       Pinterest-style picks for your campus week
                     </h2>
                     <p className="mt-2 text-sm leading-relaxed text-gray-400">
-                      Scroll through fresh event ideas, posters, and meetups without leaving the feed.
+                      Scroll through fresh event ideas, posters, and meetups
+                      without leaving the feed.
                     </p>
                   </div>
                   <Button
@@ -596,11 +634,6 @@ export default function Feed() {
           </aside>
         </div>
       </div>
-
-      <CreatePostModal
-        isOpen={isPostModalOpen}
-        onClose={() => setIsPostModalOpen(false)}
-      />
 
       {/* Image Modal - click backdrop to close */}
       {isImageModalOpen && selectedImage && (

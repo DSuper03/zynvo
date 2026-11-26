@@ -24,6 +24,7 @@ interface ZynvoJwt {
 /** Every custom event we send. Add new names here so typos fail at compile time. */
 export type AnalyticsEvent =
   // auth
+  | 'signup_started'
   | 'user_signed_up'
   | 'user_signed_in'
   | 'user_oauth_signup'

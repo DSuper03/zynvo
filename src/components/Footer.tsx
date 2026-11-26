@@ -41,6 +41,7 @@ const productLinks = [
 ];
 const resourceLinks = [
   { label: "FAQ", href: "/faq" },
+  { label: "Open Roles", href: "/#open-roles" },
   { label: "Founders", href: "/founders" },
   { label: "Contact", href: "/contact" },
   { label: "Campus Stories", href: "/testimonials" },

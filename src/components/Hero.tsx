@@ -38,9 +38,8 @@ const Hero = () => {
             transition={{ duration: 0.55, ease: 'easeOut', delay: 0.05 }}
             className="max-w-xl text-pretty text-sm font-medium leading-relaxed text-gray-900 sm:text-base md:text-lg"
           >
-            Thousands of students, clubs, and communities all in one place.
-            Find your people, join the movement, and make college actually worth
-            it.
+            Thousands of students, clubs, and communities all in one place. Find
+            your people, join the movement, and make college actually worth it.
           </motion.p>
 
           <motion.div
@@ -51,10 +50,10 @@ const Hero = () => {
             className="pt-1"
           >
             <Link
-              href="/discover"
+              href="/auth/signup"
               className="inline-flex items-center gap-2 rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-yellow-300 shadow-[0_10px_25px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 hover:bg-black/90 hover:shadow-[0_14px_30px_rgba(0,0,0,0.35)] sm:px-7 sm:py-3 sm:text-base"
             >
-              <span>Find Your Tribe</span>
+              <span>Join free</span>
               <span className="text-lg">→</span>
             </Link>
 
@@ -70,8 +69,13 @@ const Hero = () => {
             </a>
 
             <div className="mt-3 flex flex-wrap items-center gap-3">
-              <p className="text-xs font-medium uppercase tracking-[0.25em] text-black/60 sm:text-[0.7rem]">
-                No noise. Just your people.
+              <p className="text-xs font-medium uppercase tracking-[0.25em] text-yellow-900 sm:text-[0.7rem]">
+                <Link
+                  href="/faq"
+                  className="underline underline-offset-4 hover:text-black"
+                >
+                  Free for students
+                </Link>
               </p>
             </div>
           </motion.div>

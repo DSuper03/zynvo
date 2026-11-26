@@ -15,7 +15,7 @@ Zynvo (https://zynvosocial.com) is a campus platform for college students, club 
 - **Campus feed & news**: Announcements and community posts from clubs.
 - **Leaderboard & challenges**: Gamified participation.
 - **AI assistant**: Help navigating campus life and opportunities.
-- **PWA**: Installable on mobile from the browser.
+- **Android app**: Available on Google Play.
 - **Android app**: Live on Google Play — [play.google.com/store/apps/details?id=com.zynvosocial.app](https://play.google.com/store/apps/details?id=com.zynvosocial.app).
 
 ## Who Is It For?

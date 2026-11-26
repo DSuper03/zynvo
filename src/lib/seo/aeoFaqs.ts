@@ -28,7 +28,7 @@ export const aeoFaqs: AeoFaq[] = [
     category: 'General',
     question: 'Does Zynvo have a mobile app?',
     answer:
-      'Yes. The Zynvo Android app is live on Google Play — get it at play.google.com/store/apps/details?id=com.zynvosocial.app or browse zynvosocial.com/application for the Play Store link and a direct APK download. Zynvo also works as an installable PWA in the browser on Android and iOS.',
+      'Yes. The Zynvo Android app is live on Google Play — get it at play.google.com/store/apps/details?id=com.zynvosocial.app or browse zynvosocial.com/application for the Play Store link and a direct APK download.',
   },
   {
     category: 'General',
