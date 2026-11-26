@@ -153,8 +153,8 @@ export default function LeaderboardPage() {
       if (!response.ok) throw new Error('Unable to load rankings');
       return response.json();
     },
-    staleTime: 60_000,
-    refetchInterval: 60_000,
+    staleTime: 180_000,
+    refetchInterval: 180_000,
     retry: 1,
   });
   const pages = data

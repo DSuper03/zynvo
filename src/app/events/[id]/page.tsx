@@ -303,11 +303,16 @@ const Eventid = () => {
   useEffect(() => {
     if (activeTab !== 'attendees' || !canViewAttendees || !id) return;
     const intervalMs = Math.max(15000, Math.min(60000, syncBackoffMs || 30000));
-    const initial = setTimeout(runCsvSync, 300);
-    const poll = setInterval(runCsvSync, intervalMs);
+    const refreshVisibleAttendees = () => {
+      if (document.visibilityState === 'visible') void runCsvSync();
+    };
+    const initial = setTimeout(refreshVisibleAttendees, 300);
+    const poll = setInterval(refreshVisibleAttendees, intervalMs);
+    document.addEventListener('visibilitychange', refreshVisibleAttendees);
     return () => {
       clearTimeout(initial);
       clearInterval(poll);
+      document.removeEventListener('visibilitychange', refreshVisibleAttendees);
     };
   }, [activeTab, canViewAttendees, id, syncBackoffMs, runCsvSync]);
 

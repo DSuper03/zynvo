@@ -26,7 +26,7 @@ type ServerNotification = {
   createdAt: string;
 };
 
-const POLL_MS = 60_000;
+const POLL_MS = 180_000;
 
 const typeIcons: Record<NotificationType, React.ReactNode> = {
   upcoming: <Calendar className="w-3 h-3" />,
@@ -150,6 +150,7 @@ export default function NotificationDropdown() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const notificationRequestInFlight = useRef(false);
 
   useEffect(() => {
     setMounted(true);
@@ -157,6 +158,7 @@ export default function NotificationDropdown() {
   }, []);
 
   const loadNotifications = useCallback(async () => {
+    if (notificationRequestInFlight.current) return;
     const tok = readToken();
     setToken(tok);
     if (!tok) {
@@ -164,6 +166,7 @@ export default function NotificationDropdown() {
       setUnreadCount(0);
       return;
     }
+    notificationRequestInFlight.current = true;
     setLoading(true);
     try {
       const res = await axios.get<{ notifications: ServerNotification[]; unreadCount: number }>(
@@ -176,11 +179,12 @@ export default function NotificationDropdown() {
     } catch {
       setLoadError(true);
     } finally {
+      notificationRequestInFlight.current = false;
       setLoading(false);
     }
   }, []);
 
-  // Load on mount, refresh every minute while the tab is visible, and on focus.
+  // Load on mount, refresh every three minutes while visible, and on return.
   useEffect(() => {
     loadNotifications();
     const tick = () => {
