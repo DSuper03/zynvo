@@ -367,8 +367,8 @@ const Features = ({ discoverPosts = fallbackDiscoverPosts }: FeaturesProps) => {
     {
       title: 'Campus Pulse',
       description: (
-        <span className="text-sm text-slate-600">
-          Live stats from your campus.
+        <span className="text-sm text-slate-200">
+          Illustrative preview, not live campus data.
         </span>
       ),
       header: <StatsSkeleton />,
@@ -378,7 +378,7 @@ const Features = ({ discoverPosts = fallbackDiscoverPosts }: FeaturesProps) => {
     {
       title: 'Never Miss Events',
       description: (
-        <span className="text-sm text-slate-600">
+        <span className="text-sm text-slate-200">
           All your campus events in one place.
         </span>
       ),
@@ -389,7 +389,7 @@ const Features = ({ discoverPosts = fallbackDiscoverPosts }: FeaturesProps) => {
     {
       title: 'Find Your Tribe',
       description: (
-        <span className="text-sm text-slate-600">
+        <span className="text-sm text-slate-200">
           Connect with like-minded peers.
         </span>
       ),
@@ -400,7 +400,7 @@ const Features = ({ discoverPosts = fallbackDiscoverPosts }: FeaturesProps) => {
     {
       title: 'Club Chat & Tools',
       description: (
-        <span className="text-sm text-slate-600 ">
+        <span className="text-sm text-slate-200 ">
           Powerful tools to manage your community.
         </span>
       ),
@@ -411,7 +411,7 @@ const Features = ({ discoverPosts = fallbackDiscoverPosts }: FeaturesProps) => {
     {
       title: 'Your Campus Community',
       description: (
-        <span className="text-sm text-slate-600">
+        <span className="text-sm text-slate-200">
           Thousands of students connecting every day.
         </span>
       ),

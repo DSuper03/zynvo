@@ -3,10 +3,9 @@ import axios from 'axios';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { CalendarDays, Flame, MapPin, MessageCircle, PenSquare, Sparkles, X } from 'lucide-react';
+import { CalendarDays, Flame, MapPin, MessageCircle, Download, Sparkles, X } from 'lucide-react';
 
 import CreatePostButton from './components/CreatePostButton';
-import CreatePostModal from './components/CreatePostModal';
 import { PostData } from '@/types/global-Interface';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -140,7 +139,6 @@ function EventPinCard({
 
 export default function Feed() {
   const [posts, setPost] = useState<PostData[]>([]);
-  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -338,7 +336,7 @@ export default function Feed() {
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Responsive buttons/actions row */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              {/* Mobile View - Profile Header and Create Post Button */}
+              {/* Mobile View - Profile Header and Android Download */}
               <div className="flex sm:hidden items-center justify-between gap-3 w-full">
                 {/* Profile Header Compact - Left side */}
                 <div className="flex-1 min-w-0">
@@ -350,24 +348,25 @@ export default function Feed() {
                   {/* Notification Dropdown */}
                   <NotificationDropdown />
                   
-                  {/* Circular Create Post Button */}
+                  {/* Android Download Button */}
                   <Button
-                    onClick={() => setIsPostModalOpen(true)}
-                    className="w-12 h-12 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_10px_35px_rgb(0,0,0,0.18)] transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-yellow-500 via-yellow-400 to-amber-300 hover:from-yellow-500 hover:via-yellow-500 hover:to-yellow-400 border border-yellow-300/40 relative overflow-hidden"
+                    onClick={() => window.location.assign(PLAY_STORE_URL)}
+                    className="h-12 px-3 rounded-full flex items-center gap-2 justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_10px_35px_rgb(0,0,0,0.18)] transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-yellow-500 via-yellow-400 to-amber-300 hover:from-yellow-500 hover:via-yellow-500 hover:to-yellow-400 border border-yellow-300/40 relative overflow-hidden"
                   >
                     <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                       <span className="absolute -inset-[120%] bg-white/20 rotate-12 translate-x-[-20%] group-hover:translate-x-[60%] transition-transform duration-700 ease-out" />
                     </span>
-                    <PenSquare className="h-5 w-5 text-black" />
+                    <Download className="h-5 w-5 shrink-0 text-black" />
+                    <span className="text-xs font-semibold text-black">Download Android</span>
                   </Button>
                 </div>
               </div>
 
-              {/* Desktop View - Create Post Button and Notifications */}
+              {/* Desktop View - Android Download and Notifications */}
               <div className="hidden sm:flex items-center gap-3">
                 <NotificationDropdown />
                 <CreatePostButton
-                  onClick={() => setIsPostModalOpen(true)}
+                  onClick={() => window.location.assign(PLAY_STORE_URL)}
                   className="w-full sm:w-auto"
                 />
               </div>
@@ -503,14 +502,14 @@ export default function Feed() {
                   <EmptyState
                     icon={MessageCircle}
                     title="No posts yet"
-                    description="Be the first to share something with your campus — updates, events, or questions."
+                    description="Download the Android app to be the first to share something with your campus — updates, events, or questions."
                   >
                     <Button
                       type="button"
-                      onClick={() => setIsPostModalOpen(true)}
+                      onClick={() => window.location.assign(PLAY_STORE_URL)}
                       className="min-h-11 bg-yellow-500 hover:bg-yellow-400 text-black px-6 font-medium"
                     >
-                      Create post
+                      Download Android
                     </Button>
                   </EmptyState>
                 </div>
@@ -590,11 +589,6 @@ export default function Feed() {
           </aside>
         </div>
       </div>
-
-      <CreatePostModal
-        isOpen={isPostModalOpen}
-        onClose={() => setIsPostModalOpen(false)}
-      />
 
       {/* Image Modal - click backdrop to close */}
       {isImageModalOpen && selectedImage && (

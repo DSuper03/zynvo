@@ -35,7 +35,7 @@ const PUBLIC_GET_PREFIXES = [
 ];
 
 /** Public GETs with an id in the middle of the path: event gallery and judges. */
-const PUBLIC_GET_PATTERNS = [/^\/api\/v1\/events\/[^/]+\/(gallery|judges)$/];
+const PUBLIC_GET_PATTERNS = [/^\/api\/v1\/leaderboard\/?$/, /^\/api\/v1\/events\/[^/]+\/(gallery|judges)$/];
 
 const PUBLIC_POST_PREFIXES = [
   '/api/v1/user/signup',
@@ -62,6 +62,7 @@ const PUBLIC_POST_PREFIXES = [
  * tickets/passes): the edge cache does not vary by viewer.
  */
 const EDGE_CACHE_SECONDS: [prefix: string, seconds: number][] = [
+  ['/api/v1/leaderboard', 60],
   ['/api/v1/events/all', 60],
   ['/api/v1/events/event/', 60],
   ['/api/v1/events/search', 30],

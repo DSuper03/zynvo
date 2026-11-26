@@ -191,6 +191,7 @@ export default function SignUp() {
       return;
     }
     setPasswordError('');
+    track('signup_started', { auth_method: 'email' });
     setCurrentStep(2);
   };
 
@@ -474,6 +475,7 @@ export default function SignUp() {
       // Must match the page origin. Production Clerk rejects localhost unless
       // http://localhost:3000 is allowlisted (or use pk_test_ keys locally).
       const origin = window.location.origin;
+      track('signup_started', { auth_method: 'google' });
       setSsoIntentBeforeOAuth('signup');
       const rt = peekReturnTo();
       const callbackQs = new URLSearchParams({ intent: 'signup' });
@@ -736,6 +738,7 @@ export default function SignUp() {
                         type="text"
                         id="name"
                         name="name"
+                        autoComplete="name"
                         value={formData.name}
                         onChange={handleChange}
                         className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
@@ -745,7 +748,8 @@ export default function SignUp() {
                     </div>
                   </div>
 
-                  {/* DiceBear Avatar Component */}
+                  {/* Optional customization; a default avatar is generated automatically. */}
+                  <p className="text-sm text-gray-300">Avatar customization is optional. You can change it later.</p>
                   <DiceBearAvatar
                     name={formData.name}
                     onAvatarChange={handleAvatarChange}
@@ -764,6 +768,7 @@ export default function SignUp() {
                         type="email"
                         id="email"
                         name="email"
+                        autoComplete="email"
                         value={formData.email}
                         onChange={handleChange}
                         className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
@@ -787,6 +792,7 @@ export default function SignUp() {
                         type="tel"
                         id="phone"
                         name="phone"
+                        autoComplete="tel"
                         value={formData.phone}
                         onChange={handleChange}
                         className="bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
@@ -808,6 +814,7 @@ export default function SignUp() {
                         type={showPassword ? 'text' : 'password'}
                         id="password"
                         name="password"
+                        autoComplete="new-password"
                         value={formData.password}
                         onChange={handleChange}
                         className={`bg-gray-800 text-white w-full py-3 px-10 rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 ${

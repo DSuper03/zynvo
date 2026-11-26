@@ -463,7 +463,7 @@ function SSOCallbackContent() {
             className="space-y-5"
           >
             <div>
-              <p className="text-gray-400 text-sm mb-2">Avatar</p>
+              <p className="text-gray-400 text-sm mb-2">Avatar (optional)</p>
               <DiceBearAvatar
                 name={displayName.trim() || clerkUserInfo.name || 'User'}
                 onAvatarChange={(url: string) => setCustomAvatarUrl(url)}

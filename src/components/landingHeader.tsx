@@ -10,6 +10,7 @@ import { APP_DOWNLOAD_PATH } from '@/lib/playstore';
 const LandingHeader = () => {
   const { user, hardLogout, login, isLoggedIn } = useAuth();
 
+  const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ const LandingHeader = () => {
             opacity: isScrolled ? 0.98 : 1,
           }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="bg-transparent"
+          className="rounded-2xl bg-black/95"
         >
           <div className="flex h-16 items-center justify-between px-1 sm:px-2">
             <Link href="/" className="group inline-flex items-center gap-2.5">
@@ -40,11 +41,29 @@ const LandingHeader = () => {
                 className="h-8 w-8 rounded-lg object-cover shadow-[0_6px_20px_rgba(250,204,21,0.35)] transition-transform duration-200 group-hover:scale-105"
                 priority
               />
-              <span className="text-sm font-bold tracking-wide text-yellow-300 sm:text-base">Zynvo</span>
+              <span className="text-sm font-bold tracking-wide text-yellow-300 sm:text-base">
+                Zynvo
+              </span>
             </Link>
 
-            <div className="hidden items-center gap-2 md:flex">
-              {              isLoggedIn ? (
+            <nav
+              aria-label="Main navigation"
+              className="hidden items-center gap-2 lg:flex"
+            >
+              {[
+                ['For Students', '/for-students'],
+                ['For Clubs', '/for-clubs'],
+                ['For Colleges', '/for-colleges'],
+              ].map(([label, href]) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-200 hover:bg-white hover:text-black"
+                >
+                  {label}
+                </Link>
+              ))}
+              {isLoggedIn ? (
                 <>
                   <Link
                     href={APP_DOWNLOAD_PATH}
@@ -93,17 +112,11 @@ const LandingHeader = () => {
                   >
                     Sign Up
                   </Link>
-                  <Link
-                    href="/#open-roles"
-                    className="rounded-xl border border-yellow-300/45 bg-black px-4 py-2 text-sm font-semibold text-yellow-300 transition-colors hover:bg-black/80"
-                  >
-                    Open Roles
-                  </Link>
                 </>
               )}
-            </div>
+            </nav>
 
-            <div className="flex items-center gap-2 md:hidden">
+            <div className="flex items-center gap-2 lg:hidden">
               <Link
                 href={APP_DOWNLOAD_PATH}
                 className="rounded-xl border border-yellow-300/45 bg-yellow-400/15 px-3 py-2 text-xs font-semibold text-yellow-300 transition-colors hover:bg-yellow-400 hover:text-black"
@@ -116,14 +129,40 @@ const LandingHeader = () => {
               >
                 Sign Up
               </Link>
-              <Link
-                href="/#open-roles"
-                className="rounded-xl border border-yellow-300/45 bg-black px-3 py-2 text-xs font-semibold text-yellow-300 transition-colors hover:bg-black/80"
+              <button
+                type="button"
+                onClick={() => setMenuOpen(!menuOpen)}
+                aria-expanded={menuOpen}
+                aria-controls="audience-menu"
+                className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-white hover:text-black"
               >
-                Open Roles
-              </Link>
+                Menu
+              </button>
             </div>
           </div>
+          {menuOpen && (
+            <nav
+              id="audience-menu"
+              aria-label="Main navigation"
+              className="flex flex-col gap-1 px-4 pb-4 lg:hidden"
+            >
+              {[
+                ['For Students', '/for-students'],
+                ['For Clubs', '/for-clubs'],
+                ['For Colleges', '/for-colleges'],
+                ['Sign In', '/auth/signin'],
+              ].map(([label, href]) => (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-200 hover:bg-white hover:text-black"
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          )}
         </motion.div>
       </div>
     </header>

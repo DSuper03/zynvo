@@ -438,9 +438,10 @@ const Skiper39 = () => {
                     variant="outline"
                     className="rounded-full border-2 border-black bg-yellow-200/80 px-4 sm:px-5 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-black hover:bg-yellow-300 transition-colors w-full"
                   >
-                    Sign up
+                    Join free
                   </Button>
                 </Link>
+                <Link href="/faq" className="text-sm font-semibold text-yellow-900 underline underline-offset-4 hover:text-black">Free for students</Link>
               </>
             )}
             <a

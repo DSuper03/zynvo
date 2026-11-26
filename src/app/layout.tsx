@@ -30,7 +30,6 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://zynvosocial.com'),
-  manifest: "/manifest.json",
   title:
     'Zynvo — Campus Events, Club Management & Student Engagement',
   description:
@@ -151,6 +150,23 @@ export default function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'G-0E7B1VF3JX');
+          `}
+        </Script>
+        <Script id="retire-service-worker" strategy="afterInteractive">
+          {`
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then((registrations) =>
+                Promise.all(registrations.filter((registration) => {
+                  const worker = registration.active || registration.waiting || registration.installing;
+                  return worker && new URL(worker.scriptURL).pathname === '/sw.js';
+                }).map((registration) => registration.unregister()))
+              ).catch(() => {});
+            }
+            if ('caches' in window) {
+              caches.keys().then((names) => Promise.all(
+                names.filter((name) => name.startsWith('workbox-')).map((name) => caches.delete(name))
+              )).catch(() => {});
+            }
           `}
         </Script>
         <ClerkKeyDebug />

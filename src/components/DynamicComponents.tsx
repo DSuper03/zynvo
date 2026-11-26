@@ -25,13 +25,13 @@ export const CreateEventModal = dynamic(
   () => import('../app/events/components/EventCreationModel'),
   {
     loading: () => <ModalLoading />,
-    ssr: false
+    ssr: false,
   }
 );
 
 export const Hero = dynamic(() => import('./Hero'), {
   loading: () => <LoadingSpinner />,
-  ssr: true
+  ssr: true,
 });
 
 type FeaturesProps = {
@@ -39,46 +39,50 @@ type FeaturesProps = {
 };
 
 export const Features = dynamic<FeaturesProps>(
-  () => import('./features') as Promise<{ default: ComponentType<FeaturesProps> }>,
+  () =>
+    import('./features') as Promise<{ default: ComponentType<FeaturesProps> }>,
   {
-  loading: () => <LoadingSpinner />,
-  ssr: false
+    loading: () => <LoadingSpinner />,
+    ssr: true,
   }
 );
 
 export const Events = dynamic(() => import('./Events'), {
   loading: () => <LoadingSpinner />,
-  ssr: false
+  ssr: true,
 });
 
 export const HowItWorks = dynamic(() => import('./working'), {
   loading: () => <LoadingSpinner />,
-  ssr: false
+  ssr: false,
 });
 
 type FooterProps = {
   discoverPosts?: DiscoverPostPreview[];
 };
 
-export const Footer = dynamic<FooterProps>(() => import('./Footer') as Promise<{ default: ComponentType<FooterProps> }>, {
-  loading: () => <LoadingSpinner />,
-  ssr: true,
-});
+export const Footer = dynamic<FooterProps>(
+  () => import('./Footer') as Promise<{ default: ComponentType<FooterProps> }>,
+  {
+    loading: () => <LoadingSpinner />,
+    ssr: true,
+  }
+);
 
 // Testimonials component
 export const Testimonials = dynamic(() => import('./testimonials'), {
   loading: () => <LoadingSpinner />,
-  ssr: false
+  ssr: false,
 });
 
 // Team section
 export const TeamSection = dynamic(() => import('./TeamSection'), {
   loading: () => <LoadingSpinner />,
-  ssr: false
+  ssr: false,
 });
 
 // FAQ Section
 export const FAQSection = dynamic(() => import('./FAQSection'), {
   loading: () => <LoadingSpinner />,
-  ssr: false
+  ssr: false,
 });

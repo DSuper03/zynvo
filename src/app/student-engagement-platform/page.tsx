@@ -6,7 +6,7 @@ import { faqPageJsonLd, faqsByCategory } from '@/lib/seo/aeoFaqs';
 const faqs = faqsByCategory('Colleges');
 
 export const metadata: Metadata = {
-  title: 'Student Engagement Platform for Colleges | Zynvo',
+  title: 'Student Engagement Software & Campus Activity | Zynvo',
   description:
     'Student engagement platform for colleges: structured visibility into clubs, events, and campus involvement—without turning co-curricular life into another LMS.',
   keywords:

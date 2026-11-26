@@ -182,7 +182,7 @@ export default function Home() {
               'Leaderboard and gamified participation',
               'AI assistant for campus navigation',
               'Shared club resources',
-              'PWA — installable on mobile',
+              'Android app on Google Play',
             ],
             screenshot: 'https://zynvosocial.com/landing%20page.png',
           }),
@@ -320,7 +320,7 @@ export default function Home() {
                 name: 'Does Zynvo have a mobile app?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Yes. The Zynvo Android app is live on Google Play — download it at play.google.com/store/apps/details?id=com.zynvosocial.app, or visit zynvosocial.com/application for the Play Store link and direct APK. Zynvo also works as a Progressive Web App (PWA) installable from the browser on Android and iOS.',
+                  text: 'Yes. The Zynvo Android app is live on Google Play — download it at play.google.com/store/apps/details?id=com.zynvosocial.app, or visit zynvosocial.com/application for the Play Store link and direct APK.',
                 },
               },
               {
@@ -336,14 +336,18 @@ export default function Home() {
         }}
       />
 
+      <link rel="canonical" href="https://zynvosocial.com" />
+
       {/* LLMs.txt link — helps AI crawlers find the machine-readable product brief */}
       <link rel="llms" type="text/plain" href="/llms.txt" />
 
       {/* Content Container */}
       <div className="content-overlay relative min-h-screen">
         {/* Navigation */}
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-black focus:p-4 focus:text-white">Skip to main content</a>
         <LandingHeader />
 
+        <main id="main-content" tabIndex={-1}>
         <Skiper39 />
         <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-yellow-300 text-black">
           <ParallaxHeroImages posts={discoverPosts} />
@@ -421,6 +425,7 @@ export default function Home() {
           </a>
         </section>
 
+        </main>
         {/* Footer */}
         <Footer discoverPosts={discoverPosts} />
       </div>

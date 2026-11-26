@@ -9,10 +9,14 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
+  X,
+  UsersRound,
+  Smartphone,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { PLAY_STORE_URL } from '@/lib/playstore';
 
 // Floating particles animation component - FIXED Z-INDEX
 const FloatingParticles = () => {
@@ -187,6 +191,7 @@ export default function UserSearchPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [token, setToken] = useState('');
+  const [discoveryTitle, setDiscoveryTitle] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchPage, setSearchPage] = useState(1);
@@ -368,6 +373,22 @@ export default function UserSearchPage() {
             </p>
           </div>
 
+          <section aria-labelledby="campus-discovery" className="mb-8 text-center">
+            <h2 id="campus-discovery" className="mb-3 font-semibold">Who would you like to meet?</h2>
+            <div className="flex flex-wrap justify-center gap-2">
+              {[
+                ['Find a co-founder', 'Who would you build your first startup with?'],
+                ['Find a hackathon teammate', 'Who would you want on your team at 2 AM?'],
+                ['Meet anime fans', 'Who on campus shares your taste in anime?'],
+              ].map(([label, title]) => (
+                <button key={label} type="button" aria-haspopup="dialog" onClick={() => setDiscoveryTitle(title)}
+                  className="flex items-center gap-2 rounded-full border border-yellow-400/30 px-4 py-2 text-sm text-yellow-300 hover:bg-yellow-400/10">
+                  <UsersRound aria-hidden className="h-4 w-4" /> {label}
+                </button>
+              ))}
+            </div>
+          </section>
+
           {/* Elegant Search Bar */}
           <div className="max-w-md mx-auto relative">
             <div className="relative group">
@@ -499,6 +520,23 @@ export default function UserSearchPage() {
           )}
         </div>
       </div>
+
+      {discoveryTitle && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" onClick={() => setDiscoveryTitle('')}>
+          <section role="dialog" aria-modal="true" aria-labelledby="mobile-discovery-title" className="relative w-full max-w-md rounded-3xl border border-yellow-400/20 bg-gray-950 p-7 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <button type="button" aria-label="Close" onClick={() => setDiscoveryTitle('')} className="absolute right-4 top-4 rounded-full p-2 text-gray-400 hover:bg-white/10 hover:text-white">
+              <X className="h-5 w-5" />
+            </button>
+            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-400/10 text-yellow-300">
+              <Smartphone className="h-7 w-7" />
+            </div>
+            <h2 id="mobile-discovery-title" className="text-2xl font-bold text-white">{discoveryTitle}</h2>
+            <p className="mt-3 text-sm leading-6 text-gray-300">Start with your campus community on Zynvo for Android. Add your interests to your profile so other students can see what you?re into.</p>
+            <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="mt-6 block rounded-xl bg-yellow-400 px-5 py-3 text-center font-bold text-gray-950 transition hover:bg-yellow-300">Get it on Google Play</a>
+            <button type="button" onClick={() => setDiscoveryTitle('')} className="mt-3 w-full rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-gray-300 hover:bg-white/5">Maybe later</button>
+          </section>
+        </div>
+      )}
 
       {/* Custom CSS for animations */}
       <style jsx>{`

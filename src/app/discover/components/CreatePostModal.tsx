@@ -319,37 +319,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
             onClick: () => router.push('/discover'),
           },
         });
-        // Fire a local notification with title, college and club
-        try {
-          if (typeof window !== 'undefined' && 'Notification' in window) {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-              const titleText = title || 'New Post';
-              const detail = [selectedCollege, selectedClub]
-                .filter(Boolean)
-                .join(' • ');
-              const bodyText = detail || 'A new post was created.';
-              if (navigator.serviceWorker) {
-                const reg = await navigator.serviceWorker.getRegistration();
-                if (reg && 'showNotification' in reg) {
-                  reg.showNotification(`New post: ${titleText}`, {
-                    body: bodyText,
-                    icon: '/icons/icon-192x192.png',
-                    badge: '/icons/icon-96x96.png',
-                    data: { url: '/discover' },
-                  });
-                } else {
-                  new Notification(`New post: ${titleText}`, {
-                    body: bodyText,
-                    icon: '/icons/icon-192x192.png',
-                  });
-                }
-              }
-            }
-          }
-        } catch (err) {
-          console.warn('Notification error:', err);
-        }
         // Reset form on success
         setPostText('');
         setTitle('');
