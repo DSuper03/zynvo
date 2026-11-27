@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Download, Ticket } from 'lucide-react';
 import { toast } from 'sonner';
 import EventBadgeCard from '@/components/ticket';
+import { ticketLock } from '@/lib/ticketAccess';
 
 interface EventTicketPanelProps {
   eventName: string;
@@ -23,6 +24,10 @@ interface EventTicketPanelProps {
    * undefined = the server didn't say (show no check-in state).
    */
   checkedInAt?: string | null;
+  /** Registration approval ("pending" | "approved" | "rejected"); undefined = not sent. */
+  approvalStatus?: string | null;
+  /** Payment state of a paid event ("PENDING" | "CONFIRMED" | "REJECTED"). */
+  paymentStatus?: string | null;
 }
 
 /**
@@ -41,7 +46,12 @@ export default function EventTicketPanel({
   attendeeCollege,
   attendeeAvatar,
   checkedInAt,
+  approvalStatus,
+  paymentStatus,
 }: EventTicketPanelProps) {
+  // No QR until the club head/core team approves (and payment clears).
+  const lock = ticketLock(approvalStatus, paymentStatus);
+  const isLocked = lock !== null;
   const checkInState: 'awaiting' | 'checked_in' | undefined = checkedInAt
     ? 'checked_in'
     : checkedInAt === null
@@ -55,6 +65,11 @@ export default function EventTicketPanel({
 
   useEffect(() => {
     let cancelled = false;
+    if (isLocked) {
+      setQrCodeDataUrl(null);
+      setIsQrGenerating(false);
+      return;
+    }
     setIsQrGenerating(true);
     (async () => {
       try {
@@ -74,7 +89,7 @@ export default function EventTicketPanel({
     return () => {
       cancelled = true;
     };
-  }, [passId]);
+  }, [passId, isLocked]);
 
   const status = useMemo<'upcoming' | 'active' | 'past'>(() => {
     const now = Date.now();
@@ -112,6 +127,30 @@ export default function EventTicketPanel({
       setIsDownloading(false);
     }
   };
+
+  if (lock) {
+    return (
+      <section
+        aria-labelledby="event-ticket-title"
+        className="mt-4 rounded-xl border border-gray-800 bg-gray-900/80 p-4"
+      >
+        <h3
+          id="event-ticket-title"
+          className="mb-2 flex items-center gap-2 text-sm font-semibold text-white"
+        >
+          <Ticket className="h-4 w-4 text-yellow-400" aria-hidden />
+          Your ticket
+        </h3>
+        <p
+          aria-live="polite"
+          className={`text-sm font-semibold ${lock.tone === 'rejected' ? 'text-red-400' : 'text-yellow-300'}`}
+        >
+          {lock.title}
+        </p>
+        <p className="mt-1 text-xs text-gray-400">{lock.message}</p>
+      </section>
+    );
+  }
 
   return (
     <section

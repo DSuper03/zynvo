@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 import EventBadgeCard from '@/components/ticket';
+import { ticketLock } from '@/lib/ticketAccess';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, CheckCircle, Download, Eye, Loader2, Share2 } from 'lucide-react';
 
@@ -14,6 +15,8 @@ type EventData = {
   startDate: Date;
   profilePic: string;
   status?: 'upcoming' | 'active' | 'past';
+  approvalStatus?: string | null;
+  paymentStatus?: string | null;
 };
 
 export default function Page() {
@@ -123,7 +126,13 @@ export default function Page() {
     return matchesSearch && matchesStatus ? data : null;
   }, [data, search, statusFilter]);
 
-  const renderStatusPill = (status?: EventData['status']) => {
+  // event-details always sends approvalStatus, so a missing value stays locked.
+  const lock = data ? ticketLock(data.approvalStatus ?? null, data.paymentStatus) : null;
+  const qrCodeImage = lock
+    ? undefined
+    : `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://zynvosocial.com/verify-event/${id}`;
+
+  const renderStatusPill =(status?: EventData['status']) => {
     if (!status) return null;
     const map = {
       upcoming: 'bg-yellow-400 text-black',
@@ -230,11 +239,24 @@ export default function Page() {
                     collegeName={filteredVisible.collegeName || 'Campus'}
                     clubName={filteredVisible.clubName || 'Club'}
                     profileImage={filteredVisible.profilePic || 'https://i.pravatar.cc/300'}
-                    qrCodeImage={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://zynvosocial.com/verify-event/${id}`}
+                    qrCodeImage={qrCodeImage}
                     status={filteredVisible.status}
                     attendeeName={userData?.name || undefined}
                     attendeeCollege={userData?.collegeName || undefined}
                   />
+                </div>
+              )}
+              {!loading && !error && filteredVisible && lock && (
+                <div
+                  aria-live="polite"
+                  className={`mt-4 rounded-xl border px-4 py-3 text-center ${
+                    lock.tone === 'rejected'
+                      ? 'border-red-500/30 bg-red-500/10 text-red-300'
+                      : 'border-yellow-500/30 bg-yellow-500/10 text-yellow-200'
+                  }`}
+                >
+                  <p className="text-sm font-semibold">{lock.title}</p>
+                  <p className="mt-1 text-xs opacity-80">{lock.message}</p>
                 </div>
               )}
               {!loading && !error && !filteredVisible && (
@@ -246,7 +268,7 @@ export default function Page() {
               <Button
                 className="bg-yellow-400 text-black hover:bg-yellow-300 font-semibold flex items-center justify-center gap-2 py-3 text-sm"
                 onClick={handleDownload}
-                disabled={!filteredVisible || loading}
+                disabled={!filteredVisible || loading || !!lock}
               >
                 <Download className="h-4 w-4" />
                 One-click download
@@ -255,7 +277,7 @@ export default function Page() {
                 variant="outline"
                 className="border-yellow-400/60 text-yellow-200 hover:bg-yellow-500 hover:text-black flex items-center justify-center gap-2 py-3 text-sm"
                 onClick={handleShare}
-                disabled={!filteredVisible || loading}
+                disabled={!filteredVisible || loading || !!lock}
               >
                 <Share2 className="h-4 w-4" />
                 Share ticket
@@ -310,7 +332,7 @@ export default function Page() {
                 <button
                   className="rounded-xl border border-yellow-500/30 bg-black/40 px-4 py-3 text-yellow-200 hover:bg-yellow-500 hover:text-black transition"
                   onClick={handleDownload}
-                  disabled={!filteredVisible || loading}
+                  disabled={!filteredVisible || loading || !!lock}
                 >
                   Save to device
                 </button>
@@ -354,7 +376,7 @@ export default function Page() {
                 collegeName={filteredVisible.collegeName}
                 clubName={filteredVisible.clubName}
                 profileImage={filteredVisible.profilePic}
-                qrCodeImage={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://zynvosocial.com/verify-event/${id}`}
+                qrCodeImage={qrCodeImage}
                 status={filteredVisible.status}
                 attendeeName={userData?.name || undefined}
                 attendeeCollege={userData?.collegeName || undefined}
