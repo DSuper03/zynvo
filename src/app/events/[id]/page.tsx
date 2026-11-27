@@ -901,6 +901,14 @@ const Eventid = () => {
     );
     return mine?.uniquePassId ?? mine?.passId ?? null;
   })();
+  // Approval/payment of that pass; the QR only shows once both clear.
+  const myRegistration: { approvalStatus?: string | null; paymentStatus?: string | null } = (() => {
+    if (!id || !Array.isArray(currentUser?.eventAttended)) return {};
+    const mine = currentUser.eventAttended.find(
+      (a: any) => String(a?.event?.id ?? '') === String(id)
+    );
+    return mine ? { approvalStatus: mine.approvalStatus, paymentStatus: mine.paymentStatus } : {};
+  })();
   // null = not scanned yet; undefined = the server didn't return the field
   const myCheckedInAt: string | null | undefined = (() => {
     if (!id || !Array.isArray(currentUser?.eventAttended)) return undefined;
@@ -1475,6 +1483,8 @@ const Eventid = () => {
                   attendeeCollege={currentUser?.collegeName || undefined}
                   attendeeAvatar={currentUser?.profileAvatar || undefined}
                   checkedInAt={myCheckedInAt}
+                  approvalStatus={myRegistration.approvalStatus}
+                  paymentStatus={myRegistration.paymentStatus}
                 />
               )}
 
